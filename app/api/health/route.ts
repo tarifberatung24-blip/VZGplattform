@@ -5,6 +5,8 @@ export const dynamic = "force-dynamic"
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    build_sha: process.env.BUILD_SHA ?? "unknown",
+    revision: process.env.RENDER_GIT_COMMIT ?? "unknown",
+  }, {
+    headers: { "Cache-Control": "no-store" },
   })
 }
