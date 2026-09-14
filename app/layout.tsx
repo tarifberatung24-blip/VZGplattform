@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono, Inter } from "next/font/google"
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { Suspense } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { WorkspaceShell } from "@/components/finance/workspace-shell"
@@ -71,8 +71,10 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const cookieStore = await cookies()
+  const requestHeaders = await headers()
+  const routeLocale = requestHeaders.get("x-locale")
   const stored = cookieStore.get(LOCALE_COOKIE_KEY)?.value
-  const initialLocale: Locale = isLocale(stored) ? stored : defaultLocale
+  const initialLocale: Locale = isLocale(routeLocale) ? routeLocale : isLocale(stored) ? stored : defaultLocale
 
   return (
     <html lang={initialLocale} suppressHydrationWarning className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} bg-background`}>
