@@ -89,8 +89,8 @@ export function OpportunityDemo() {
         </div>
 
         <div className="mt-10 flex flex-col gap-4 rounded-sm border border-[#cbd5e1]/60 bg-[#ffffff]/45 p-5 text-sm leading-6 text-[#64748b] md:flex-row md:items-center md:justify-between">
-          <p>Реалните резултати изискват адрес, потребление, договорни данни и проверени партньорски оферти.</p>
-          <Button asChild variant="outline" className="shrink-0 border-[#2563eb]/50 bg-transparent text-[#f8fafc] hover:bg-[#2563eb]/15"><Link href="/auth/sign-up">Регистрирай се и направи реална проверка<ArrowRight data-icon="inline-end" /></Link></Button>
+          <p>{de ? "Echte Ergebnisse erfordern Adresse, Verbrauch, Vertragsdaten und geprüfte Partnerangebote." : "Реалните резултати изискват адрес, потребление, договорни данни и проверени партньорски оферти."}</p>
+          <Button asChild variant="outline" className="shrink-0 border-[#2563eb]/50 bg-transparent text-[#f8fafc] hover:bg-[#2563eb]/15"><Link href="/auth/sign-up">{de ? "Registrieren und echte Prüfung starten" : "Регистрирай се и направи реална проверка"}<ArrowRight data-icon="inline-end" /></Link></Button>
         </div>
         <p className="mt-5 max-w-4xl text-xs leading-5 text-[#94a3b8]">Това е илюстративно демо, а не оферта или обещание за спестяване. Реалните резултати зависят от твоите данни и проверени партньорски оферти.</p>
       </div>

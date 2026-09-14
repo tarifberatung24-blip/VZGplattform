@@ -1,5 +1,7 @@
 import { FinanceModulePage } from "@/components/finance/module-page"
+import { getDictionary } from "@/lib/i18n/dictionaries"
 
 export default function AboutPage() {
-  return <FinanceModulePage title="Über KintexBG" description="KintexBG hilft dir, deine finanzielle Situation klarer zu verstehen und gut vorbereitet zu handeln." items={["Klare Orientierung statt unübersichtlicher Informationen", "Schrittweise Prüfungen mit nachvollziehbaren Ergebnissen", "Datensparsame Bearbeitung deiner persönlichen Angaben", "Hinweise, wann fachliche Beratung sinnvoll ist"]} />
+  const text = getDictionary("de").cleanup
+  return <FinanceModulePage title={text.about.title} description={text.about.description} items={text.documents.items} />
 }

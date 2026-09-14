@@ -72,7 +72,7 @@ const products: Product[] = [
 ]
 
 export function ProductOpportunityBoard() {
-  const { locale } = useLanguage()
+  const { locale, t } = useLanguage()
   const [activeId, setActiveId] = useState("strom")
   const active = products.find((product) => product.id === activeId) ?? products[0]
   const ActiveIcon = active.icon
@@ -126,7 +126,7 @@ export function ProductOpportunityBoard() {
                 <span className={`flex size-14 items-center justify-center rounded-sm ${active.accent}`}>
                   <ActiveIcon aria-hidden="true" className="size-7" />
                 </span>
-                <Badge variant="default">2h Service-SLA</Badge>
+                <Badge variant="default">{t.cleanup.opportunity.sla}</Badge>
               </div>
               <p className="mt-10 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{active.eyebrow}</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{active.title}</h2>

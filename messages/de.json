@@ -64,14 +64,38 @@
     "documentsDesc": "Lade einen Brief hoch und verstehe, was zu tun ist."
   },
   "services": {
-    "steuer": { "title": "Steuererklärung", "desc": "Steuererklärung Schritt für Schritt erklärt." },
-    "tarife": { "title": "AI Tarifberater", "desc": "Prüfe, ob du jeden Monat zu viel zahlst." },
-    "anspruch": { "title": "Anspruchs-Check", "desc": "Prüfe, auf welche staatlichen Hilfen du Anspruch haben könntest." },
-    "kindergeld": { "title": "Kindergeld Assistent", "desc": "Kindergeld ohne Verwirrung." },
-    "jobcenter": { "title": "Jobcenter Assistent", "desc": "Verstehe, was vor dem Jobcenter zu tun ist." },
-    "documents": { "title": "Dokument Assistent", "desc": "Lade einen Brief hoch. Verstehe, was er bedeutet." },
-    "kuendigung": { "title": "Kündigungsassistent", "desc": "Kündige einen Vertrag korrekt in wenigen Minuten." },
-    "energie": { "title": "Energie sparen", "desc": "Senke deine Rechnungen und deinen Verbrauch." }
+    "steuer": {
+      "title": "Steuererklärung",
+      "desc": "Steuererklärung Schritt für Schritt erklärt."
+    },
+    "tarife": {
+      "title": "AI Tarifberater",
+      "desc": "Prüfe, ob du jeden Monat zu viel zahlst."
+    },
+    "anspruch": {
+      "title": "Anspruchs-Check",
+      "desc": "Prüfe, auf welche staatlichen Hilfen du Anspruch haben könntest."
+    },
+    "kindergeld": {
+      "title": "Kindergeld Assistent",
+      "desc": "Kindergeld ohne Verwirrung."
+    },
+    "jobcenter": {
+      "title": "Jobcenter Assistent",
+      "desc": "Verstehe, was vor dem Jobcenter zu tun ist."
+    },
+    "documents": {
+      "title": "Dokument Assistent",
+      "desc": "Lade einen Brief hoch. Verstehe, was er bedeutet."
+    },
+    "kuendigung": {
+      "title": "Kündigungsassistent",
+      "desc": "Kündige einen Vertrag korrekt in wenigen Minuten."
+    },
+    "energie": {
+      "title": "Energie sparen",
+      "desc": "Senke deine Rechnungen und deinen Verbrauch."
+    }
   },
   "auth": {
     "loginTitle": "Melde dich bei deinem FinanzberaterBG-Profil an",
@@ -203,5 +227,54 @@
     "title": "Fristen",
     "subtitle": "Alle wichtigen Termine an einem Ort.",
     "empty": "Keine anstehenden Fristen."
+  },
+  "cleanup": {
+    "documents": {
+      "title": "Dokumente",
+      "description": "Organisiere wichtige Unterlagen als Grundlage für deine Finanzthemen.",
+      "items": [
+        "Dokumente sicher speichern",
+        "Vorbereitung für manuelle Angebots- oder Vertragsprüfung",
+        "Unterlagen nach Haushalt trennen",
+        "Bereit für die nächste Prüfung bleiben"
+      ],
+      "loadError": "Dokumente konnten nicht geladen werden."
+    },
+    "providers": {
+      "title": "Anbieter und Status",
+      "description": "Überblick über verfügbare Anbieter, ihren Status und die Übermittlungshistorie."
+    },
+    "services": {
+      "title": "Unsere Leistungen",
+      "description": "Fordere ein konkretes Angebot an und erhalte eine manuell geprüfte Antwort."
+    },
+    "about": {
+      "title": "Über KintexBG",
+      "description": "KintexBG hilft dir, deine finanzielle Situation klarer zu verstehen und gut vorbereitet zu handeln."
+    },
+    "dashboard": {
+      "nextStep": "Nächste Schritte",
+      "contracts": "Verträge",
+      "documents": "Dokumente",
+      "signals": "Signale",
+      "whatNow": "Was jetzt möglich ist",
+      "reviewContracts": "Bestätigte Verträge und monatliche Kosten prüfen",
+      "analyzeDocuments": "Hochgeladene Dokumente nach deiner Bestätigung analysieren",
+      "prepareNext": "Nächsten Schritt ohne automatische Übermittlung vorbereiten"
+    },
+    "language": {
+      "label": "Sprache"
+    },
+    "opportunity": {
+      "realResults": "Echte Ergebnisse erfordern Adresse, Verbrauch, Vertragsdaten und geprüfte Partnerangebote.",
+      "register": "Registrieren und echte Prüfung starten",
+      "sla": "2h Service-SLA"
+    },
+    "document": {
+      "choose": "Datei auswählen",
+      "prepare": "Dokument vorbereiten",
+      "checking": "Prüfung läuft ...",
+      "checked": "Geprüft"
+    }
   }
 }

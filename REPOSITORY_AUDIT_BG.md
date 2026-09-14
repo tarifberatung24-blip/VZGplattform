@@ -28,7 +28,7 @@
 
 ## Критични и високоприоритетни проблеми
 
-### 1. Публичният сайт и health endpoint зависят от Supabase конфигурация — High
+### 1. Публичният сайт и health endpoint зависят от Supabase конфигурация — High — **ПРИЛОЖЕНО в текущия `main`**
 
 **Доказателства:** `lib/supabase/proxy.ts:12-17` връща HTTP 503 при липсващи env променливи. `proxy.ts:27-29` пропуска `/api` през `updateSession`, а `app/api/health/route.ts` е зад същия proxy. Реалната проверка с production server без env върна:
 
@@ -41,37 +41,37 @@ Supabase Preview configuration is missing.
 
 **Поправка:** разделете публичните маршрути от auth-зависимите маршрути. При липсващ Supabase config пропускайте публичните страници и `/api/health`, а защитените API endpoints да връщат структуриран `503` с код. Алтернативно актуализирайте README и deployment pipeline така, че Supabase env винаги да е задължителен, и добавете smoke test за това поведение.
 
-### 2. n8n webhook secret е опционален при изпращане на лични данни — High/Security
+### 2. n8n webhook secret е опционален при изпращане на лични данни — High/Security — **ПРИЛОЖЕНО в текущия `main`**
 
 **Доказателства:** `app/api/service-requests/route.ts:84-89` добавя `X-FinanzBG-Webhook-Secret` само ако `N8N_WEBHOOK_SECRET` е зададен. При конфигуриран webhook без secret се изпращат име, email, телефон, отговори, referer и user-agent без автентикация.
 
 **Поправка:** в production изисквайте и валидирайте secret заедно с webhook URL; при липса връщайте `503 N8N_WEBHOOK_NOT_CONFIGURED`. Още по-добре използвайте HMAC подпис с timestamp/request ID и защита от replay. Secret-ът не трябва да се приема от клиентската заявка.
 
-### 3. Липсва rate limiting на публичния service-request endpoint — High
+### 3. Липсва rate limiting на публичния service-request endpoint — High — **ПРИЛОЖЕНО в текущия `main`**
 
 `POST /api/service-requests` приема заявки без IP/user/email лимит, CAPTCHA/Turnstile или idempotency key. Това позволява спам към n8n workflow, разход на външни ресурси и повторно изпращане на лични данни.
 
 **Поправка:** добавете rate limit по IP и по email, минимален cooldown, idempotency key и server-side лимит на payload-а. За production използвайте edge/Redis-backed limiter, а не in-memory map в serverless среда. Логвайте correlation ID без да записвате излишни PII.
 
-### 4. Chat endpoint-ът няма quota/rate limit за AI разход — High/Cost
+### 4. Chat endpoint-ът няма quota/rate limit за AI разход — High/Cost — **ПРИЛОЖЕНО в текущия `main`**
 
 `app/api/chat/route.ts:17-44` изисква login, но няма ограничение по user/household, дневна квота или concurrency limit. Всеки authenticated user може да стартира много Groq заявки с до 12 съобщения и 500 output tokens.
 
 **Поправка:** въведете quota таблица/брояч в Supabase, rate limit, максимум заявки за период, cancellation timeout и отчетност по household/user. При надвишаване връщайте `429` с `Retry-After`.
 
-### 5. Клиентът може да подава произволен текст за AI анализ вместо извлечения текст — Medium/High
+### 5. Клиентът може да подава произволен текст за AI анализ вместо извлечения текст — Medium/High — **ПРИЛОЖЕНО в текущия `main`**
 
 `app/api/documents/analyze/route.ts:23-25` предпочита `body.text`, ако е подаден, вместо `document.extracted_text`. Това позволява на клиента да подмени съдържанието, да изпрати голям/вреден prompt и да предизвика непредвиден AI разход. Auth и household ownership са проверени, но provenance на текста не е.
 
 **Поправка:** използвайте само `document.extracted_text`, или разрешавайте client text само в demo режим с твърд лимит, отделна схема и ясно маркиране. Добавете максимален размер, content normalization и audit metadata за source.
 
-### 6. Race condition при claim на document analysis — Medium/High
+### 6. Race condition при claim на document analysis — Medium/High — **ПРИЛОЖЕНО в текущия `main`**
 
 В `app/api/documents/analyze/route.ts:18-21` конкурентният update позволява всички статуси `uploaded`, `awaiting_analysis`, `failed`, `analysis_not_configured`. Две едновременни заявки могат и двете да видят документа и да го обновят до `awaiting_analysis`, след което да стартират два AI анализа.
 
 **Поправка:** направете атомарен state transition само от текущия статус към `awaiting_analysis`, например `UPDATE ... WHERE id = ? AND processing_status IN ('uploaded','failed','analysis_not_configured')`, и приемайте успех само при точно един засегнат ред. Най-надеждният вариант е SQL RPC с row lock/idempotency key.
 
-### 7. Document extraction няма idempotency/claim защита — Medium
+### 7. Document extraction няма idempotency/claim защита — Medium — **ПРИЛОЖЕНО в текущия `main`**
 
 `app/api/documents/extract/route.ts:23-30` сваля и обработва файла без проверка на `extraction_status` или атомарно claiming състояние. Повторни/паралелни заявки могат да извършат OCR/extraction многократно и да презапишат резултата.
 
@@ -122,7 +122,7 @@ Unit тестовете проверяват домейн логика и mock-�
 
 **Поправка:** изберете един canonical product/project name и го уеднаквете в `package.json`, README, error messages, metadata, Supabase project checks и UI copy.
 
-### 12. Health endpoint разкрива конфигурационен fingerprint — Low
+### 12. Health endpoint разкрива конфигурационен fingerprint — Low — **ПРИЛОЖЕНО в текущия `main`**
 
 `app/api/health/route.ts:8-11` публично връща дали Supabase и Groq са конфигурирани. Това е полезно за диагностика, но в production разкрива deployment информация.
 
@@ -145,3 +145,8 @@ Unit тестовете проверяват домейн логика и mock-�
 Кодът в текущия snapshot компилира и минава локалните проверки, но не трябва да се приема като production-ready без горните security и concurrency поправки. Най-рисковата комбинация е липсващото rate limiting + опционалният webhook secret + неконтролираните AI операции, защото може да доведе до спам, изтичане/неправилно предаване на PII и непредвидими външни разходи.
 
 Поправките са приложени локално в работното копие. GitHub remote репозиторията не е променян автоматично.
+
+
+## Validation update — 15 септември 2026 г.
+
+Точки 1–7 и 12 от този одит са реално приложени и push-нати в текущия main чрез commit fa68775 (за точки 1–7) и commit 73c1e41/последващото health hardening (за точка 12). Те вече не се третират като отворени дефекти. Точки 8–11 остават реално отворени. PDF export-ът е отделно документиран като извън v1 scope в docs/PDF_EXPORT_SCOPE.md.

@@ -2,8 +2,10 @@ import { redirect } from "next/navigation"
 import { ProviderAuditTimeline } from "@/components/finance/provider-audit-timeline"
 import { FinanceModulePage } from "@/components/finance/module-page"
 import { createClient } from "@/lib/supabase/server"
+import { getDictionary } from "@/lib/i18n/dictionaries"
 
 export default async function Page() {
+  const text = getDictionary("bg").cleanup
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login")
@@ -27,8 +29,8 @@ export default async function Page() {
   return (
     <main className="min-h-screen bg-background">
       <FinanceModulePage
-        title="Доставчици и статус"
-        description="Преглед на наличните доставчици, техния статус и история на подаванията."
+        title={text.providers.title}
+        description={text.providers.description}
         items={[
           `${elsterIntegration?.display_name} е ${elsterIntegration?.availability === 'PRODUCTION' ? 'наличен' : 'планиран'}.`,
           "Всяко подаване се регистрира в неизменяем одит лог.",

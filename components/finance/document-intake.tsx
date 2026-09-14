@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { FileUp, LockKeyhole } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useLanguage } from "@/lib/i18n/language-context"
 import { Textarea } from "@/components/ui/textarea"
 import { validateDocument, DocumentValidationError } from "@/lib/documents/validation"
 
@@ -24,6 +25,7 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const connected = mode === "connected"
+  const { t } = useLanguage()
 
   const handleFile = async (file?: File) => {
     if (!file) return
@@ -60,8 +62,8 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
       )}
       {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>Datei auswählen</Button>
-        <Button type="button" onClick={onAnalyze} disabled={!canAnalyze || isAnalyzed || busy}>{busy ? "Pruefung laeuft ..." : isAnalyzed ? "Geprueft" : "Dokument vorbereiten"}</Button>
+        <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>{t.cleanup.document.choose}</Button>
+        <Button type="button" onClick={onAnalyze} disabled={!canAnalyze || isAnalyzed || busy}>{busy ? t.cleanup.document.checking : isAnalyzed ? t.cleanup.document.checked : t.cleanup.document.prepare}</Button>
       </div>
       <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><LockKeyhole aria-hidden="true" className="size-3.5" />{connected ? "Geschuetzte Verarbeitung · Nutzer bestaetigt Angaben vor Speicherung." : "Lokale Validierung · keine Supabase- oder externe Anfrage."}</p>
     </section>

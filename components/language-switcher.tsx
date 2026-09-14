@@ -6,7 +6,7 @@ import { routing, type Locale } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
 export function LanguageSwitcher({ className }: { className?: string }) {
-  const { locale, setLocale } = useLanguage()
+  const { locale, setLocale, t } = useLanguage()
   const pathname = usePathname() || "/"
   const router = useRouter()
 
@@ -20,7 +20,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     <div
       className={cn("inline-flex items-center rounded-full border border-border bg-card p-0.5 text-xs", className)}
       role="group"
-      aria-label="Language"
+      aria-label={t.cleanup.language.label}
     >
       {routing.locales.map((l: Locale) => (
         <button

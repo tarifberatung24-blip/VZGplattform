@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useLanguage } from "@/lib/i18n/language-context"
 import { Input } from "@/components/ui/input"
 import { AiHomeOfficeChat } from "@/components/dashboard/ai-home-office-chat"
 import { WorkplaceActionCenter } from "@/components/dashboard/workplace-action-center"
@@ -203,6 +204,7 @@ export function SmartDashboardPreview(props: Props) {
 }
 
 function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documents = [], reviewCount = 0, reminders = [], auditEvents = [] }: Props) {
+  const { t } = useLanguage()
   const [query, setQuery] = useState("")
   const [collapsed, setCollapsed] = useState<Set<GroupId>>(new Set())
   const [onlyNeedsAttention, setOnlyNeedsAttention] = useState(false)
@@ -471,21 +473,21 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
           </header>
           <div className="flex-1 space-y-5 overflow-y-auto p-5">
             <section className="rounded-xl bg-slate-950 p-5 text-white">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-300">Следваща стъпка</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-300">{t.cleanup.dashboard.nextStep}</p>
               <p className="mt-3 text-sm leading-6 text-slate-200">{nextAction.label}</p>
               <Button asChild className="mt-5 w-full rounded-lg"><Link href={nextAction.href}>Продължи<ArrowRight className="size-4" /></Link></Button>
             </section>
             <section className="grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-card text-center">
-              <div className="p-3"><p className="text-lg font-bold">{contracts.length}</p><p className="text-[11px] text-muted-foreground">Договори</p></div>
-              <div className="p-3"><p className="text-lg font-bold">{documents.length}</p><p className="text-[11px] text-muted-foreground">Документи</p></div>
-              <div className="p-3"><p className="text-lg font-bold">{problems.length}</p><p className="text-[11px] text-muted-foreground">Сигнали</p></div>
+              <div className="p-3"><p className="text-lg font-bold">{contracts.length}</p><p className="text-[11px] text-muted-foreground">{t.cleanup.dashboard.contracts}</p></div>
+              <div className="p-3"><p className="text-lg font-bold">{documents.length}</p><p className="text-[11px] text-muted-foreground">{t.cleanup.dashboard.documents}</p></div>
+              <div className="p-3"><p className="text-lg font-bold">{problems.length}</p><p className="text-[11px] text-muted-foreground">{t.cleanup.dashboard.signals}</p></div>
             </section>
             <section className="rounded-xl border border-border p-4">
-              <h3 className="text-sm font-semibold">Какво може да направи сега</h3>
+              <h3 className="text-sm font-semibold">{t.cleanup.dashboard.whatNow}</h3>
               <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <p>• Преглед на потвърдени договори и месечни разходи</p>
-                <p>• Анализ на качени документи след твое потвърждение</p>
-                <p>• Подготовка на следваща стъпка без автоматично изпращане</p>
+                <p>{`• ${t.cleanup.dashboard.reviewContracts}`}</p>
+                <p>{`• ${t.cleanup.dashboard.analyzeDocuments}`}</p>
+                <p>{`• ${t.cleanup.dashboard.prepareNext}`}</p>
               </div>
             </section>
             <section>

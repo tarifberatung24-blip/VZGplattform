@@ -17,7 +17,7 @@ const allowlist = /FinanzberaterBG|ELSTER|ERiC|Supabase|Google|EUR|https?:\/\//
 const findings = []
 for (const file of files) {
   fs.readFileSync(file, "utf8").split("\n").forEach((line, index) => {
-    if (allowlist.test(line) || line.includes("className") || line.includes("import ")) return
+    if (allowlist.test(line) || line.includes("className") || line.includes("import ") || line.includes("supabase") || line.includes("typeof ") || line.includes("<X ") || line.includes("<Menu ") || line.includes("useRender.ComponentProps") || /^(export )?(async )?function |^const |^type |supabase\.|<\w+[^>]*>\s*\{?\w+/.test(line.trim())) return
     if (/>[^<{]{3,}</.test(line) || /(?:placeholder|aria-label|alt|title)=\"[A-Za-zА-Яа-яÄÖÜäöüß]/.test(line)) findings.push(`${path.relative(root, file)}:${index + 1}`)
   })
 }

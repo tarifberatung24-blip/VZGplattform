@@ -3,8 +3,10 @@ import { FinanceModulePage } from "@/components/finance/module-page"
 import { DocumentsWorkspace } from "@/components/finance/documents-workspace"
 import { createClient } from "@/lib/supabase/server"
 import { ensureHousehold } from "@/lib/supabase/household"
+import { getDictionary } from "@/lib/i18n/dictionaries"
 
 export default async function Page() {
+  const text = getDictionary("bg").cleanup
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login?next=/documents")
@@ -17,8 +19,8 @@ export default async function Page() {
 
   return (
     <main>
-      <FinanceModulePage title="Dokumente" description="Organisiere wichtige Unterlagen als Grundlage für deine Finanzthemen." items={["Dokumente sicher speichern", "Vorbereitung fuer manuelle Angebots- oder Vertragspruefung", "Unterlagen nach Haushalt trennen", "Bereit fuer die naechste Pruefung bleiben"]} />
-      <div className="mx-auto -mt-10 max-w-4xl px-4 pb-10 sm:px-6 lg:px-8"><DocumentsWorkspace initialDocuments={documents ?? []} loadError={error ? "Dokumente konnten nicht geladen werden." : null} /></div>
+      <FinanceModulePage title={text.documents.title} description={text.documents.description} items={text.documents.items} />
+      <div className="mx-auto -mt-10 max-w-4xl px-4 pb-10 sm:px-6 lg:px-8"><DocumentsWorkspace initialDocuments={documents ?? []} loadError={error ? text.documents.loadError : null} /></div>
     </main>
   )
 }
