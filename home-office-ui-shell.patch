@@ -1,0 +1,130 @@
+From dfeddf527f30d13db1344739d19c0fee64766391 Mon Sep 17 00:00:00 2001
+From: v0 <it+v0agent@vercel.com>
+Date: Sun, 30 Aug 2026 17:43:48 +0000
+Subject: [PATCH] feat: add new protected home office page and workspace
+ components
+
+Added HomeOfficePage, HomeOfficeWorkspace, and related components for protected AI Digital Home Office workspace.
+
+Co-authored-by: GITSOV von VZG <290810251+tarifberatung24-blip@users.noreply.github.com>
+---
+ app/protected/home-office/page.tsx           | 10 ++++++++++
+ components/finance/dashboard-workspace.tsx   |  1 +
+ components/finance/document-explanation.tsx  |  1 +
+ components/finance/document-facts-review.tsx |  7 +++++++
+ components/finance/document-intake.tsx       |  8 ++++++++
+ components/finance/home-office-workspace.tsx | 16 ++++++++++++++++
+ components/finance/reminder-review.tsx       |  2 ++
+ components/finance/response-draft-review.tsx |  2 ++
+ 8 files changed, 47 insertions(+)
+ create mode 100644 app/protected/home-office/page.tsx
+ create mode 100644 components/finance/document-explanation.tsx
+ create mode 100644 components/finance/document-facts-review.tsx
+ create mode 100644 components/finance/document-intake.tsx
+ create mode 100644 components/finance/home-office-workspace.tsx
+ create mode 100644 components/finance/reminder-review.tsx
+ create mode 100644 components/finance/response-draft-review.tsx
+
+diff --git a/app/protected/home-office/page.tsx b/app/protected/home-office/page.tsx
+new file mode 100644
+index 0000000..a8e0fb7
+--- /dev/null
++++ b/app/protected/home-office/page.tsx
+@@ -0,0 +1,10 @@
++import { redirect } from "next/navigation"
++import { createClient } from "@/lib/supabase/server"
++import { HomeOfficeWorkspace } from "@/components/finance/home-office-workspace"
++
++export default async function HomeOfficePage() {
++  const supabase = await createClient()
++  const { data: { user } } = await supabase.auth.getUser()
++  if (!user) redirect("/auth/login")
++  return <HomeOfficeWorkspace />
++}
+diff --git a/components/finance/dashboard-workspace.tsx b/components/finance/dashboard-workspace.tsx
+index 9c8ff7a..4ee83ff 100644
+--- a/components/finance/dashboard-workspace.tsx
++++ b/components/finance/dashboard-workspace.tsx
+@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client"
+ type Props = { userId: string; firstName?: string | null; initialReminders: Array<{ id: string; title: string; due_at: string | null }> }
+ 
+ const modules = [
++  { href: "/protected/home-office", label: "AI Digital Home Office", description: "Dokumente prüfen und nächste Schritte vorbereiten", icon: FileText, tone: "bg-primary/10 text-primary" },
+   { href: "/steuer", label: "Steuern", description: "Steuerdaten strukturiert vorbereiten", icon: Receipt, tone: "bg-primary/10 text-primary" },
+   { href: "/anspruch", label: "Ansprüche", description: "Leistungen und Zuschüsse prüfen", icon: Landmark, tone: "bg-success/15 text-success" },
+   { href: "/kindergeld", label: "Kindergeld", description: "Formulare und Checkliste vorbereiten", icon: Landmark, tone: "bg-primary/10 text-primary" },
+diff --git a/components/finance/document-explanation.tsx b/components/finance/document-explanation.tsx
+new file mode 100644
+index 0000000..e486460
+--- /dev/null
++++ b/components/finance/document-explanation.tsx
+@@ -0,0 +1 @@
++export function DocumentExplanation() { return <section className="rounded-2xl border border-border bg-card p-6" aria-labelledby="explanation-title"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Обяснение</p><h2 id="explanation-title" className="mt-2 font-semibold text-foreground">Какво означава това?</h2><div className="mt-5 grid gap-3 md:grid-cols-2"><div className="rounded-xl bg-secondary p-4"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Български</p><p className="mt-2 text-sm leading-6 text-foreground">Обяснението ще се появи след потвърдени факти от документа.</p></div><div className="rounded-xl bg-secondary p-4"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Deutsch</p><p className="mt-2 text-sm leading-6 text-foreground">Die Erklärung wird nach bestätigten Dokumentfakten angezeigt.</p></div></div><p className="mt-4 text-xs leading-5 text-muted-foreground">Информацията е ориентировъчна и не представлява правен съвет.</p></section> }
+diff --git a/components/finance/document-facts-review.tsx b/components/finance/document-facts-review.tsx
+new file mode 100644
+index 0000000..b56aa33
+--- /dev/null
++++ b/components/finance/document-facts-review.tsx
+@@ -0,0 +1,7 @@
++import { FileText } from "lucide-react"
++import { StatusBadge } from "@/components/status-badge"
++
++export function DocumentFactsReview() {
++  return <section className="rounded-2xl border border-border bg-card p-6" aria-labelledby="facts-title"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Analyse</p><h2 id="facts-title" className="mt-2 font-semibold text-foreground">Fakten prüfen</h2></div><FileText className="size-5 text-muted-foreground" aria-hidden="true" /></div><div className="mt-5 flex flex-col gap-3"><Fact label="Absender" value="Noch kein Dokument vorhanden" /><Fact label="Dokumenttyp" value="Nicht bestimmt" /><Fact label="Betrag" value="Nicht bestimmt" /><Fact label="Explizite Frist" value="Nur anzeigen, wenn im Dokument genannt" /></div><div className="mt-5 flex flex-wrap items-center gap-2"><StatusBadge status="UNVERIFIED" /><span className="text-xs text-muted-foreground">Bestätigung durch dich erforderlich</span></div></section>
++}
++function Fact({ label, value }: { label: string; value: string }) { return <div className="flex flex-col gap-1 border-b border-border pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-baseline sm:justify-between"><span className="text-sm text-muted-foreground">{label}</span><span className="text-sm font-medium text-foreground sm:text-right">{value}</span></div> }
+diff --git a/components/finance/document-intake.tsx b/components/finance/document-intake.tsx
+new file mode 100644
+index 0000000..4151424
+--- /dev/null
++++ b/components/finance/document-intake.tsx
+@@ -0,0 +1,8 @@
++"use client"
++
++import { FileUp, LockKeyhole } from "lucide-react"
++import { Button } from "@/components/ui/button"
++
++export function DocumentIntake() {
++  return <section className="rounded-2xl border border-dashed border-primary/35 bg-primary/[0.04] p-6" aria-labelledby="intake-title"><div className="flex items-start gap-4"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><FileUp aria-hidden="true" /></span><div><h2 id="intake-title" className="font-semibold text-foreground">Dokument hinzufügen</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">Die Dokumentenverarbeitung ist in dieser Vorschau noch nicht konfiguriert.</p></div></div><div className="mt-5 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-muted-foreground">PDF, JPG oder PNG · nur zur Vorbereitung</p><Button disabled variant="outline">Upload nicht verfügbar</Button></div><p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><LockKeyhole aria-hidden="true" className="size-3.5" />Keine Datei wird gespeichert oder übertragen.</p></section>
++}
+diff --git a/components/finance/home-office-workspace.tsx b/components/finance/home-office-workspace.tsx
+new file mode 100644
+index 0000000..51484ec
+--- /dev/null
++++ b/components/finance/home-office-workspace.tsx
+@@ -0,0 +1,16 @@
++"use client"
++
++import Link from "next/link"
++import { ArrowLeft, ShieldCheck } from "lucide-react"
++import { Badge } from "@/components/ui/badge"
++import { DocumentIntake } from "./document-intake"
++import { DocumentFactsReview } from "./document-facts-review"
++import { DocumentExplanation } from "./document-explanation"
++import { ResponseDraftReview } from "./response-draft-review"
++import { ReminderReview } from "./reminder-review"
++
++const states = ["EMPTY", "NOT_CONFIGURED", "NEEDS_REVIEW", "USER_CONFIRMED", "READY_FOR_ACTION"]
++
++export function HomeOfficeWorkspace() {
++  return <main className="min-h-screen bg-background"><header className="border-b border-border bg-card/90"><div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5"><Link href="/protected" className="inline-flex items-center gap-2 text-sm font-semibold text-primary"><ArrowLeft className="size-4" aria-hidden="true" />Dashboard</Link><span className="text-sm text-muted-foreground">FinanzberaterBG</span></div></header><div className="mx-auto flex max-w-6xl flex-col gap-8 px-5 py-10"><section aria-labelledby="home-office-title"><div className="flex flex-wrap items-center gap-3"><span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><ShieldCheck aria-hidden="true" /></span><Badge variant="secondary">UI shell · keine Verarbeitung</Badge></div><h1 id="home-office-title" className="mt-5 text-balance text-4xl font-bold tracking-tight text-foreground">AI Digital Home Office</h1><p className="mt-3 max-w-2xl text-pretty leading-7 text-muted-foreground">Ein sicherer Arbeitsbereich für deutsche Dokumente — mit klarer Prüfung, verständlicher Erklärung und Kontrolle vor jeder Aktion.</p><div className="mt-5 flex flex-wrap gap-2" aria-label="Verfügbare Statuszustände">{states.map((state) => <Badge key={state} variant={state === "NEEDS_REVIEW" ? "default" : "outline"}>{state}</Badge>)}</div></section><div className="grid gap-5 lg:grid-cols-2"><DocumentIntake /><DocumentFactsReview /><DocumentExplanation /><ResponseDraftReview /><ReminderReview /></div><aside className="rounded-2xl border border-primary/20 bg-primary/[0.05] p-5 text-sm leading-6 text-muted-foreground"><strong className="text-foreground">Контролът остава при теб.</strong> Това е презентационен UI shell. Няма качване, съхранение, OCR, AI анализ, изпращане на имейли или външни действия.</aside></div></main>
++}
+diff --git a/components/finance/reminder-review.tsx b/components/finance/reminder-review.tsx
+new file mode 100644
+index 0000000..4ed38cd
+--- /dev/null
++++ b/components/finance/reminder-review.tsx
+@@ -0,0 +1,2 @@
++import { BellRing } from "lucide-react"
++export function ReminderReview() { return <section className="rounded-2xl border border-border bg-card p-6"><div className="flex items-start gap-3"><BellRing className="mt-0.5 size-5 text-primary" aria-hidden="true" /><div><h2 className="font-semibold text-foreground">Напомняне</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">След преглед може да бъде подготвено локално напомняне. Външно изпращане не е активно.</p></div></div></section> }
+diff --git a/components/finance/response-draft-review.tsx b/components/finance/response-draft-review.tsx
+new file mode 100644
+index 0000000..ca4ad8e
+--- /dev/null
++++ b/components/finance/response-draft-review.tsx
+@@ -0,0 +1,2 @@
++import { Button } from "@/components/ui/button"
++export function ResponseDraftReview() { return <section className="rounded-2xl border border-border bg-card p-6"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Entwurf</p><h2 className="mt-2 font-semibold text-foreground">Antwortentwurf</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">Ein Entwurf wird erst nach Dokumentprüfung vorbereitet. Jede Aktion bleibt bis zu deiner ausdrücklichen Freigabe deaktiviert.</p><Button className="mt-5" variant="outline" disabled>Entwurf öffnen</Button></section> }
+-- 
+2.50.1
+

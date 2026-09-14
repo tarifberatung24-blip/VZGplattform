@@ -1,0 +1,302 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* KintexBG visual system: a precise, light financial workspace. */
+@theme inline {
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-success-foreground: var(--success-foreground);
+  --color-success: var(--success);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --font-sans: var(--font-inter), Arial, "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: light;
+  --radius: 0.5rem;
+  --background: #f7f7f5;
+  --foreground: #151515;
+  --card: #ffffff;
+  --card-foreground: #151515;
+  --popover: #ffffff;
+  --popover-foreground: #151515;
+  --primary: #b4232f;
+  --primary-foreground: #ffffff;
+  --secondary: #efefec;
+  --secondary-foreground: #3c3c39;
+  --muted: #f2f2ef;
+  --muted-foreground: #60605b;
+  --accent: #191919;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --success: #2d6a4f;
+  --success-foreground: #ffffff;
+  --border: #deded9;
+  --input: #c9c9c3;
+  --ring: #b4232f;
+  --focus-ring: #b4232f;
+  --chart-1: #b4232f;
+  --chart-2: #2d6a4f;
+  --chart-3: #9a6b12;
+  --chart-4: #555555;
+  --chart-5: #60605b;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #151515;
+  --sidebar-primary: #b4232f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f9e9e9;
+  --sidebar-accent-foreground: #8f1d28;
+  --sidebar-border: #deded9;
+  --sidebar-ring: #b4232f;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+  --primary: #60a5fa;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #bfdbfe;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #bfdbfe;
+  --destructive: #f87171;
+  --success: #4ade80;
+  --success-foreground: #052e16;
+  --border: rgba(148, 163, 184, 0.28);
+  --input: rgba(148, 163, 184, 0.28);
+  --ring: #60a5fa;
+  --focus-ring: #60a5fa;
+  --chart-1: #60a5fa;
+  --chart-2: #4ade80;
+  --chart-3: #fbbf24;
+  --chart-4: #a78bfa;
+  --chart-5: #94a3b8;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #60a5fa;
+  --sidebar-primary-foreground: #020617;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #bfdbfe;
+  --sidebar-border: rgba(148, 163, 184, 0.28);
+  --sidebar-ring: #60a5fa;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { text-wrap: balance; }
+}
+
+@media (max-width: 767px) {
+  input, textarea, select {
+    min-height: 2.75rem;
+  }
+
+  button:not([data-slot="icon"]), [role="button"] {
+    min-height: 2.75rem;
+  }
+}
+
+/* KintexBG customer workspace. */
+.kintex-workspace {
+  color-scheme: light;
+  --nm-black: #151515;
+  --nm-white: #ffffff;
+  --nm-yellow: #b4232f;
+  --nm-yellow-shadow: #f9e0e2;
+  --nm-gray-100: #f2f2ef;
+  --nm-gray-300: #deded9;
+  --nm-gray-600: #60605b;
+  --nm-yellow-dark: #8f1d28;
+  --radius: 0.5rem;
+  --background: var(--nm-white);
+  --foreground: var(--nm-black);
+  --card: var(--nm-white);
+  --card-foreground: var(--nm-black);
+  --popover: var(--nm-white);
+  --popover-foreground: var(--nm-black);
+  --primary: var(--nm-yellow);
+  --primary-foreground: var(--nm-white);
+  --secondary: var(--nm-gray-100);
+  --secondary-foreground: var(--nm-black);
+  --muted: var(--nm-gray-100);
+  --muted-foreground: var(--nm-gray-600);
+  --accent: var(--nm-black);
+  --accent-foreground: var(--nm-white);
+  --border: var(--nm-gray-300);
+  --input: var(--nm-gray-300);
+  --ring: var(--nm-yellow-dark);
+  --focus-ring: var(--nm-yellow-dark);
+  --success: #287047;
+  --success-foreground: var(--nm-white);
+  font-family: var(--font-inter), Arial, "Helvetica Neue", sans-serif;
+}
+
+.kintex-workspace :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.kintex-workspace h1 { color: var(--foreground); }
+.kintex-workspace #workspace-content .min-h-screen { min-height: calc(100dvh - 5rem); }
+.kintex-skip {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 60;
+  padding: 0.75rem 1rem;
+  background: var(--foreground);
+  color: var(--background);
+  transform: translateY(-200%);
+}
+.kintex-skip:focus { transform: translateY(0); }
+
+.kintex-workspace .nm-kicker {
+  color: var(--nm-yellow-dark);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.kintex-workspace .nm-brand-highlight {
+  box-shadow: inset 0 0.42em 0 0 var(--nm-yellow-shadow);
+}
+
+/* Shared marketing composition primitives. Keep surfaces quiet and let the
+   product preview carry the visual weight. */
+.kintex-marketing-section {
+  border-color: var(--border);
+}
+
+.kintex-template-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.kintex-grid-background {
+  background-image:
+    linear-gradient(to right, rgb(21 21 21 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(21 21 21 / 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center top;
+}
+
+.kintex-template-hero::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(to bottom, rgb(247 247 245 / 0.08), var(--background) 82%);
+}
+
+.kintex-template-hero > div {
+  position: relative;
+  z-index: 1;
+}
+
+.kintex-marketing-item {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 0.5rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.kintex-marketing-item:hover {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+  box-shadow: 0 12px 28px rgb(21 21 21 / 0.07);
+  transform: translateY(-2px);
+}
+
+.kintex-preview-frame {
+  overflow: hidden;
+  border: 1px solid #cfcfc9;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgb(21 21 21 / 0.12), 0 2px 8px rgb(21 21 21 / 0.06);
+}
+
+.kintex-preview-line {
+  display: block;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: #e6e6e1;
+}
+
+.kintex-workspace .kintex-panel {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgb(21 21 21 / 0.04);
+}
+
+.kintex-workspace .kintex-panel-subtle {
+  border: 1px solid var(--border);
+  background: var(--background);
+  border-radius: 0.5rem;
+}
+
+.kintex-workspace .tabular-nums,
+.kintex-workspace [data-tabular="true"] {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kintex-marketing-item {
+    transition: none;
+  }
+}

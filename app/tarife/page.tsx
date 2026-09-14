@@ -1,0 +1,3 @@
+import { FinanceModulePage } from "@/components/finance/module-page"
+import { TariffWorkspace } from "@/components/finance/module-workspaces"
+export default function Page() { return <><FinanceModulePage title="Verträge & Tarife" description="Verstehe deine laufenden Verträge und vergleiche Optionen erst, wenn deine Angaben vollständig genug sind." items={["Haftpflicht, Teilkasko und Vollkasko einordnen", "SF-Klasse und Selbstbeteiligung verstehen", "Laufzeit und Kündigungsfristen prüfen", "Vergleich erst bei ausreichender Datenbasis starten"]} /><div className="mx-auto -mt-10 max-w-4xl px-4 pb-10 sm:px-6 lg:px-8"><TariffWorkspace /></div></> }
