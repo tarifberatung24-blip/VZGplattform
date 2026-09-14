@@ -1,6 +1,5 @@
 import {notFound} from "next/navigation"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
-import HomePage from "@/app/page"
 import CheckPage from "@/app/check/page"
 import UslugiPage from "@/app/uslugi/page"
 import AnspruchPage from "@/app/anspruch/page"
@@ -32,9 +31,10 @@ import AffiliateNoticePage from "@/app/affiliate-hinweis/page"
 import WithdrawalPage from "@/app/widerruf/page"
 import AppInstallPage from "@/app/app/page"
 import FinanzbildungPage from "@/app/finanzbildung/page"
+import { PublicSite } from "@/components/public/public-site"
 
 const pages: Record<string, React.ComponentType> = {
-  "": HomePage, check: CheckPage, uslugi: UslugiPage, anspruch: AnspruchPage, kindergeld: KindergeldPage,
+  "": () => <PublicSite page="home" />, funktionen: () => <PublicSite page="funktionen" />, kontakt: () => <PublicSite page="kontakt" />, preise: () => <PublicSite page="preise" />, registrierung: () => <PublicSite page="registrierung" />, login: () => <PublicSite page="login" />, check: CheckPage, uslugi: UslugiPage, anspruch: AnspruchPage, kindergeld: KindergeldPage,
   produkte: ProduktePage, tarife: TarifePage, vertraege: VertraegePage, documents: DocumentsPage, "za-nas": ZaNasPage,
   "auth/login": LoginPage, "auth/sign-up": SignUpPage, "auth/sign-up-success": SignUpSuccessPage, "auth/error": AuthErrorPage,
   "auth/forgot-password": ForgotPasswordPage, "auth/update-password": UpdatePasswordPage, "auth/mfa-verify": MfaVerifyPage,

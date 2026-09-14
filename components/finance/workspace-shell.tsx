@@ -53,7 +53,8 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
     ? { workspace: "Persönlicher Bereich", navigation: "Hauptnavigation", menu: "Menü", close: "Menü schließen", skip: "Zum Inhalt", planned: "In Vorbereitung", services: "Weitere Bereiche", tax: "Steuerunterlagen", benefits: "Kindergeld & Hilfen", security: "Sicherheit", logout: "Abmelden", pilot: "Pilotversion" }
     : { workspace: "Лично работно пространство", navigation: "Основна навигация", menu: "Меню", close: "Затвори менюто", skip: "Към съдържанието", planned: "В подготовка", services: "Още раздели", tax: "Данъчни документи", benefits: "Kindergeld и помощи", security: "Сигурност", logout: "Изход", pilot: "Пилотна версия" }
 
-  if (!isKintexWorkspacePath(pathname)) return <><SiteHeader />{children}</>
+  const publicFirstLayer = ["/", "/funktionen", "/kontakt", "/preise", "/registrierung", "/login"].includes(stripLocale(pathname))
+  if (!isKintexWorkspacePath(pathname)) return publicFirstLayer ? <>{children}</> : <><SiteHeader />{children}</>
 
   return (
     <div className="kintex-workspace min-h-screen bg-background text-foreground">

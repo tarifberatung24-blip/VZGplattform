@@ -4,7 +4,7 @@ import de from "@/messages/de.json"
 export type Locale = "bg" | "de"
 
 export const locales: Locale[] = ["bg", "de"]
-export const defaultLocale: Locale = "bg"
+export const defaultLocale: Locale = "de"
 
 // bg.json and de.json share the exact same shape.
 export type Dictionary = typeof bg

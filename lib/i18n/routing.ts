@@ -2,7 +2,7 @@ import type { Locale } from "./dictionaries"
 
 export const LOCALE_COOKIE_KEY = "finanzbg_locale"
 export const locales: Locale[] = ["bg", "de"]
-export const defaultLocale: Locale = "bg"
+export const defaultLocale: Locale = "de"
 
 export function isLocale(value: string | undefined | null): value is Locale {
   return value === "bg" || value === "de"
