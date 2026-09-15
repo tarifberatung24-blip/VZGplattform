@@ -1,14 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { requiresMfa, sanitizeNextPath } from '@/lib/supabase/auth-routing'
+import { requiresMfa, requestOrigin, sanitizeNextPath } from '@/lib/supabase/auth-routing'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
-  const forwardedHost = request.headers.get('x-forwarded-host')
-  const forwardedProto = request.headers.get('x-forwarded-proto')
-  const origin = forwardedHost
-    ? `${forwardedProto === 'http' ? 'http' : 'https'}://${forwardedHost}`
-    : request.nextUrl.origin
+  const origin = requestOrigin(request.headers, request.nextUrl.origin)
   const code = searchParams.get('code')
   const next = sanitizeNextPath(searchParams.get('next'), '/')
 

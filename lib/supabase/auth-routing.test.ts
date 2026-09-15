@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { isProtectedAppPath, requiresMfa, sanitizeNextPath } from "./auth-routing"
+import { isProtectedAppPath, requestOrigin, requiresMfa, sanitizeNextPath } from "./auth-routing"
 
 describe("auth routing", () => {
   it("accepts local destinations and rejects external redirects", () => {
@@ -7,6 +7,11 @@ describe("auth routing", () => {
     expect(sanitizeNextPath("//evil.example")).toBe("/dashboard")
     expect(sanitizeNextPath("/\\evil.example")).toBe("/dashboard")
     expect(sanitizeNextPath("https://evil.example")).toBe("/dashboard")
+  })
+
+  it("uses forwarded production host instead of an internal localhost origin", () => {
+    const headers = new Headers({ "x-forwarded-host": "vzgplattform.onrender.com", "x-forwarded-proto": "https", host: "localhost:10000" })
+    expect(requestOrigin(headers, "https://localhost:10000")).toBe("https://vzgplattform.onrender.com")
   })
 
   it("recognizes protected localized and unlocalized routes", () => {
