@@ -127,7 +127,11 @@ export async function POST(request: Request) {
       })
       .select("id,document_id,status,document_type,issuing_authority,bescheid_date,known_access_date,remedy_deadline,payment_deadline,summary_bg,required_action_bg,missing_information,citations,human_review_required,created_at")
       .single()
-    if (insertError) return NextResponse.json({ error: "Анализът не можа да бъде записан." }, { status: 400 })
+    if (insertError) {
+      await client.supabase.from("user_documents").update({ status: "error" }).eq("id", document.id).eq("user_id", auth.data.user.id)
+      return NextResponse.json({ error: "Анализът не можа да бъде записан." }, { status: 400 })
+    }
+    await client.supabase.from("user_documents").update({ status: "ready" }).eq("id", document.id).eq("user_id", auth.data.user.id)
     return NextResponse.json({ analysis: saved }, { status: 201 })
   } catch (error) {
     if (error instanceof SyntaxError) return NextResponse.json({ error: "AI върна невалиден JSON отговор." }, { status: 502 })

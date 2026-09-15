@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
 import type { BenefitCheckRecord, EligibleBenefit } from "@/lib/benefits/types"
+import { DocumentAnalyzer } from "@/components/documents/DocumentAnalyzer"
 
 type TaxAssessment = {
   id: string
@@ -138,6 +139,7 @@ export function WorkspaceOverview() {
         <div className="flex items-center gap-2 py-10 text-muted-foreground"><Loader2 className="animate-spin" /> Зареждаме вашия преглед...</div>
       ) : (
         <>
+          <DocumentAnalyzer />
           <div className="grid gap-4 md:grid-cols-3">
             <Card><CardContent className="p-5"><ReceiptText className="size-5 text-primary" /><p className="mt-4 text-sm text-muted-foreground">Общо заявени разходи</p><p className="mt-1 text-2xl font-semibold">{currencyFormatter.format(totalDeductions)}</p><p className="mt-1 text-xs text-muted-foreground">{tax.length ? `${tax.length} изчисления` : "Все още няма изчисление"}</p></CardContent></Card>
             <Card><CardContent className="p-5"><HeartHandshake className="size-5 text-primary" /><p className="mt-4 text-sm text-muted-foreground">Възможни помощи</p><p className="mt-1 text-2xl font-semibold">{latestBenefits.length}</p><p className="mt-1 text-xs text-muted-foreground">От последните проверки</p></CardContent></Card>
