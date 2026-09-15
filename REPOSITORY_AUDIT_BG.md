@@ -118,7 +118,7 @@ Unit тестовете проверяват домейн логика и mock-�
 
 ### 11. Конфигурационна и брандова непоследователност — Low/Medium
 
-`package.json:2` използва име `my-project`, README говори за `FinanzBG`, а част от кода/SQL съобщенията използват `KintexBG` и `VZGplattform`. Това не чупи runtime, но обърква deployment, logs, telemetry и поддръжка.
+`package.json:2` използва име `my-project`, README говори за `FinanzBG`, а част от кода/SQL съобщенията използват `VZGplattform` и `VZGplattform`. Това не чупи runtime, но обърква deployment, logs, telemetry и поддръжка.
 
 **Поправка:** изберете един canonical product/project name и го уеднаквете в `package.json`, README, error messages, metadata, Supabase project checks и UI copy.
 

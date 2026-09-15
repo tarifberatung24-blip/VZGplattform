@@ -1,4 +1,4 @@
--- KintexBG B2C V1 consolidated baseline
+-- VZGplattform B2C V1 consolidated baseline
 -- Source: read-only snapshot of production migration history on 2026-09-08.
 -- Target: a NEW, EMPTY Supabase project only.
 -- NEVER apply this file to the existing production project.
@@ -173,7 +173,7 @@ begin
   insert into public.profiles (id) values (current_user_id) on conflict (id) do nothing;
   select id into household from public.households where owner_id = current_user_id order by created_at, id limit 1;
   if household is null then
-    insert into public.households (owner_id, name, country) values (current_user_id, 'KintexBG', 'DE') returning id into household;
+    insert into public.households (owner_id, name, country) values (current_user_id, 'VZGplattform', 'DE') returning id into household;
   end if;
   return household;
 end;
@@ -237,7 +237,7 @@ using (
 );
 
 -- Applied production migration: 20260906182525_contract_document_radar_pilot
--- KintexBG Contracts PDF/Radar pilot. Additive only; no production data is removed.
+-- VZGplattform Contracts PDF/Radar pilot. Additive only; no production data is removed.
 
 alter table public.documents
   add column if not exists contract_id uuid references public.contracts(id) on delete set null,

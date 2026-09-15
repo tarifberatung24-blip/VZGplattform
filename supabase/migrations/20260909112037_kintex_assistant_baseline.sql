@@ -1,4 +1,4 @@
--- KintexBG correspondence assistant: isolated data foundation.
+-- VZGplattform correspondence assistant: isolated data foundation.
 -- Server writes derived data; clients cannot impersonate AI or approve drafts directly.
 
 create table public.profiles (

@@ -18,7 +18,7 @@ function RadarPanel({ stats, locale }: { stats: SmartDashboardStats; locale: "bg
     <section className="mt-10 border-y border-border py-8" aria-labelledby="radar-title">
       <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
         <div>
-          <p className="nm-kicker">Kintex Radar</p>
+          <p className="nm-kicker">VZG Radar</p>
           <h2 id="radar-title" className="mt-3 text-2xl font-semibold tracking-tight">{de ? "Systemstatus deines Home Office." : "Системен статус на твоя Home Office."}</h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{de ? "Radar nutzt nur gespeicherte Plattformdaten. Keine Angebote, keine Annahmen, keine automatische Entscheidung." : "Radar използва само записани данни в платформата. Без оферти, без предположения, без автоматично решение."}</p>
           <p className="mt-3 font-mono text-xs text-muted-foreground">{smartDashboardEnvironment.database} · {smartDashboardEnvironment.aiLayer} · {problems.length} open signal(s)</p>

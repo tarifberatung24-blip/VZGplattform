@@ -291,7 +291,7 @@
     "saved": "Profil gespeichert."
   },
   "contractWorkspace": {
-    "eyebrow": "Verträge · Kintex Radar",
+    "eyebrow": "Verträge · VZG Radar",
     "title": "Verträge sicher erfassen",
     "description": "PDFs werden sicher serverseitig ausgelesen. KI-Vorschläge bleiben unverifiziert, bis du sie bearbeitest und bestätigst.",
     "contracts": "Verträge",
@@ -317,7 +317,7 @@
     "noContracts": "Noch keine Verträge erfasst.",
     "confirmed": "Bestätigt",
     "reviewOpen": "Prüfung offen",
-    "radarNote": "Kintex Radar speichert deduplizierte Signale mit Regelversion. Ohne Betrag oder bestätigte Daten wird keine Ersparnis erfunden.",
+    "radarNote": "VZG Radar speichert deduplizierte Signale mit Regelversion. Ohne Betrag oder bestätigte Daten wird keine Ersparnis erfunden.",
     "missingCostNote": "Vertrag/Verträge brauchen noch monatliche Kosten, bevor Radar sie vollständig auswerten kann.",
     "household": "Haushalt",
     "rls": "Der Datenzugriff ist durch Supabase RLS begrenzt.",
@@ -332,7 +332,7 @@
     "extracted": "wurde ausgelesen. Bitte alle Fakten prüfen und bestätigen.",
     "networkError": "Netzwerkfehler bei der Dokumentverarbeitung.",
     "confirmationFailed": "Bestätigung fehlgeschlagen.",
-    "confirmedCreated": "Fakten bestätigt und Vertrag angelegt. Kintex Radar nutzt ihn ab sofort.",
+    "confirmedCreated": "Fakten bestätigt und Vertrag angelegt. VZG Radar nutzt ihn ab sofort.",
     "categories": {
       "electricity": "Strom",
       "gas": "Gas",

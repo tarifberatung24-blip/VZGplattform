@@ -451,7 +451,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
               </div>
             </section>
             <section className="rounded-2xl border border-border bg-card p-5 shadow-sm shadow-slate-200/40" aria-labelledby="radar-title">
-              <div className="flex items-center justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Kintex Radar</p><h2 id="radar-title" className="mt-1 font-semibold">Сигнали от твоите данни</h2></div><span className="text-xs text-muted-foreground">{radarSignals.length}</span></div>
+              <div className="flex items-center justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-wide text-primary">VZG Radar</p><h2 id="radar-title" className="mt-1 font-semibold">Сигнали от твоите данни</h2></div><span className="text-xs text-muted-foreground">{radarSignals.length}</span></div>
               <div className="mt-4 space-y-3">{radarSignals.length === 0 ? <p className="text-sm text-muted-foreground">Няма открити сигнали.</p> : radarSignals.slice(0, 3).map((signal) => <div key={signal.id} className="border-l-2 border-primary px-3 py-1"><p className="text-sm font-medium">{signal.title}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{signal.detail}</p></div>)}</div>
               <p className="mt-4 text-[11px] text-muted-foreground">Radar показва само записани данни. Не изчислява измислени спестявания.</p>
             </section>
@@ -493,7 +493,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
               </div>
             </section>
             <section>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Kintex Radar</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">VZG Radar</p>
               <div className="space-y-2">{radarSignals.length === 0 ? <p className="text-sm text-muted-foreground">Няма сигнали за проверка.</p> : radarSignals.slice(0, 4).map((signal) => <div key={signal.id} className="border-l-2 border-primary px-3 py-2"><p className="text-sm font-medium">{signal.title}</p><p className="mt-1 text-xs text-muted-foreground">{signal.detail}</p></div>)}</div>
             </section>
             <AiHomeOfficeChat />

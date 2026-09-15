@@ -1,4 +1,4 @@
-# KintexBG / VZGplattform
+# VZGplattform
 
 Bilingual Bulgarian/German financial and administrative assistant for people living in Germany. The application helps users understand contracts and official documents, discover relevant benefits and savings opportunities, track deadlines, and prepare next actions in a clear, user-controlled workflow.
 
@@ -156,4 +156,4 @@ This repository is proprietary and **all rights are reserved**. No permission is
 
 ## Disclaimer
 
-KintexBG / VZGplattform provides informational support and document preparation. It does not replace professional tax, legal, insurance, or government advice. Official decisions remain with the competent authorities.
+VZGplattform provides informational support and document preparation. It does not replace professional tax, legal, insurance, or government advice. Official decisions remain with the competent authorities.

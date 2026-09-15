@@ -1,4 +1,4 @@
--- KintexBG B2C tenant-isolation hardening.
+-- VZGplattform B2C tenant-isolation hardening.
 -- PREPARED ONLY: do not apply directly to production.
 -- First validate on a fresh/staging Supabase project with the baseline and
 -- supabase/tests/rls/kintex_b2c_isolation.sql.

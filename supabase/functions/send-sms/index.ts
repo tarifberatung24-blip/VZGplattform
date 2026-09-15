@@ -40,8 +40,8 @@ Deno.serve(async (request: Request) => {
 
     const body = new URLSearchParams({
       to: phone,
-      from: "KintexBG",
-      text: `KintexBG: Dein Anmeldecode ist ${otp}.`,
+      from: "VZGplattform",
+      text: `VZGplattform: Dein Anmeldecode ist ${otp}.`,
       label: "kintexbg-auth",
     })
 

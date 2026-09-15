@@ -1,4 +1,4 @@
-# KintexBG B2C database baseline
+# VZGplattform B2C database baseline
 
 `kintexbg_b2c_v1.sql` is a consolidated, recoverable snapshot for a **new and
 empty Supabase project**. It was assembled from the eight migrations recorded
