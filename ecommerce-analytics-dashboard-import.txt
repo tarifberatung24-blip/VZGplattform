@@ -1,0 +1,388 @@
+ECOMMERCE ANALYTICS DASHBOARD -> VZGPLATTFORM
+IMPORT-READY DESIGN AND IMPLEMENTATION HANDOFF
+Source: ecommerce-analytics-dashboard / Rexora dashboard
+Target: VZGplattform current dashboard
+Status: Ready for implementation import
+
+============================================================
+1. PURPOSE AND SCOPE
+============================================================
+Recreate the current Ecommerce Analytics Dashboard visual system and navigation inside VZGplattform without changing the source dashboard. Preserve the stable route identifiers listed below. Replace demo/static analytics values with VZG data sources and connect actions marked as integration work.
+
+The source is a Next.js App Router dashboard using React, Tailwind CSS, shadcn-style UI primitives, lucide-react icons, and Recharts. The current dashboard is a responsive analytics shell with a centered maximum width of 1400px, a top navigation header, page headers, metric cards, charts, tables, badges, avatars, and profile settings.
+
+============================================================
+2. VISUAL SYSTEM
+============================================================
+
+2.1 Overall shell
+- Body background: premium cream/off-white in light mode, approximately oklch(0.98 0.005 90).
+- Main foreground: near-black, approximately oklch(0.20 0 0).
+- Layout wrapper: min-height 100vh; padding 16px mobile, 24px medium, 32px large.
+- Content container: centered, max-width 1400px.
+- Header bottom spacing: 32px.
+- Page-header bottom spacing: 24px.
+- Main section spacing: generally 24px between major rows and 16px between cards.
+- Desktop grid behavior: 4-column metric grid, then 3-column chart/content grids. Wide chart spans 2 columns; companion card spans 1.
+- Mobile behavior: all grids collapse to one column. Metric cards use one column on mobile, two on small screens, four on large screens.
+- Tables remain usable through horizontal overflow scrolling.
+
+2.2 Typography
+- Primary font: Geist, loaded through next/font/google.
+- Monospace font: Geist Mono (available for technical values if needed).
+- Base body: font-sans, antialiased.
+- Page title: 24px, semibold.
+- Card title: 16px, medium.
+- Metric value: 30px approximately, semibold.
+- Body and table text: 14px.
+- Supporting text and labels: 12px to 13px.
+- Muted text: gray token equivalent to oklch(0.45 0 0).
+- Keep numeric analytics values visually prominent and use tabular numerals where available in VZG.
+
+2.3 Color tokens
+Light mode:
+- background: oklch(0.98 0.005 90)
+- foreground: oklch(0.20 0 0)
+- card/popover: white
+- muted: oklch(0.95 0.005 90)
+- muted-foreground: oklch(0.45 0 0)
+- border/input: approximately oklch(0.90 0.005 90)
+- primary: near-black
+- accent / active navigation: sage green, approximately oklch(0.85 0.08 130)
+- positive: green, approximately oklch(0.55 0.15 145)
+- negative: red, approximately oklch(0.55 0.20 25)
+- chart gray: #d4d4d4
+- chart orange: #f97316
+- radius base: 12px (0.75rem)
+
+Dark mode:
+- background/card: oklch(0.145 0 0)
+- foreground: oklch(0.985 0 0)
+- muted: oklch(0.269 0 0)
+- muted-foreground: oklch(0.708 0 0)
+- border/input: oklch(0.269 0 0)
+- preserve semantic positive/negative states with sufficient contrast.
+- Chart hard-coded white tooltip backgrounds must be replaced by theme-aware surfaces in VZG.
+
+2.4 Surface and component styling
+- Cards: white/light card surface, 1px border, rounded 12px, no heavy shadow by default.
+- Hoverable cards: subtle shadow on hover and transition-shadow.
+- Buttons: shadcn-style outline, ghost, default, and compact icon buttons.
+- Primary action: near-black background with light text; in dark mode use theme primary tokens.
+- Outline buttons: transparent background, border token, icons and labels aligned with 8px gap.
+- Active top-nav item: sage accent fill, dark text, rounded-full pill.
+- Header nav container: card surface, border, rounded-full, 8px horizontal padding and 6px vertical padding.
+- Avatar: circular, 36px header size and 96px profile size; image fallback initials.
+- Badges: compact rounded labels; semantic colors for VIP, active, new, inactive and order statuses.
+- Dividers: border token; table rows have bottom borders, last row removes border.
+- Inputs: standard shadcn input; search fields have left icon and 36px left padding.
+
+2.5 Charts and data visualization
+- Use Recharts or VZG equivalent chart system; never replace charts with static screenshots.
+- Bar chart: paired Sales and Revenue bars, rounded top corners, gray/orange series; May is emphasized in the dashboard profit chart.
+- Area chart: indigo line/fill gradient for customer orders.
+- Reports revenue chart: two area series, current year sage and previous year light gray.
+- Donut charts: inner radius 50, outer radius 70-80, 2px padding between slices.
+- Chart grid: light dashed horizontal grid, no vertical grid where possible; no visible axis lines; compact 11-12px ticks.
+- Tooltips: rounded 8px surface with border/shadow, theme-aware colors, formatted currency/counts.
+- Preserve legends, labels and accessible chart descriptions.
+- Source dashboard includes a country revenue donut rather than a geographic map; retain the card title "Sales by Countries" and the country legend.
+
+2.6 Responsive breakpoints
+- Mobile base: under 640px. Stack all grids, hide desktop-only header nav and page-header actions when space is constrained, allow horizontal scrolling for pills/tables.
+- Small: 640px and above. Two-column metric grids and visible page-header actions.
+- Large: 1024px and above. Three/four-column dashboard grids and full header navigation.
+- Extra-wide: preserve max-width 1400px and centered alignment.
+- Ensure chart heights remain usable: dashboard profit 200px, customer orders 120px, sales chart 300px, reports chart 250px, donut approximately 180-200px.
+
+============================================================
+3. SHELL, COMPONENTS AND REUSABLE MAPPING
+============================================================
+
+Source shell:
+- app/(dashboard)/layout.tsx -> VZG DashboardLayout / dashboard shell.
+- components/dashboard/header.tsx -> VZG DashboardHeader.
+- components/dashboard/page-header.tsx -> VZG PageHeader.
+- components/ui/card.tsx -> VZG Card, CardHeader, CardContent, CardTitle, CardDescription.
+- components/ui/button.tsx -> VZG Button variants.
+- components/ui/input.tsx, label.tsx, badge.tsx, avatar.tsx, dropdown-menu.tsx, separator.tsx -> same semantic primitives in VZG.
+- lucide-react -> VZG icon library equivalent; preserve familiar icon meaning.
+
+Recommended target structure:
+- app/dashboard/layout.tsx or the existing VZG dashboard layout
+- app/dashboard/page.tsx
+- app/dashboard/sales/page.tsx
+- app/dashboard/customers/page.tsx
+- app/dashboard/reports/page.tsx
+- app/dashboard/orders/page.tsx
+- app/dashboard/profile/page.tsx
+- components/dashboard/vzg-dashboard-header.tsx
+- components/dashboard/vzg-page-header.tsx
+- components/dashboard/metric-card.tsx
+- components/dashboard/profit-overview-card.tsx
+- components/dashboard/top-products-card.tsx
+- components/dashboard/customer-orders-card.tsx
+- components/dashboard/sales-by-countries-card.tsx
+- components/dashboard/sales-analytics.tsx
+- components/dashboard/customer-management.tsx
+- components/dashboard/order-management.tsx
+- components/dashboard/reports-analytics.tsx
+- components/dashboard/profile-settings.tsx
+- lib/dashboard/types.ts
+- lib/dashboard/queries.ts
+- lib/dashboard/actions.ts
+
+============================================================
+4. ROUTE INVENTORY AND RESOLUTION
+============================================================
+
+| Source route | Page | VZG target | Notes |
+|--------------|------|------------|-------|
+| / | Dashboard overview | / or /dashboard | Source route is / because `(dashboard)` is a route group. |
+| /sales | Sales Analytics | /sales | Keep stable. |
+| /customers | Customers | /customers | Keep stable. |
+| /reports | Reports | /reports | Keep stable. |
+| /orders | Orders | /orders | Keep stable. |
+| /profile | Profile | /profile | Keep stable. |
+| /dashboard | Compatibility route | /dashboard | REQUIRED because components/tax/TaxForm.tsx currently calls router.push('/dashboard'). |
+
+Route-group resolution:
+- The source folder app/(dashboard)/ does not appear in the URL. Its index page resolves to /.
+- VZG should either keep the overview at / and add a redirect/alias from /dashboard, or make /dashboard canonical and redirect / to /dashboard. For lowest-risk TaxForm compatibility, implement /dashboard as a direct alias or redirect to the current dashboard overview.
+- Do not rename /sales, /customers, /reports, /orders or /profile without updating all navigation and external links.
+
+Header navigation:
+- Dashboard -> /
+- Sales -> /sales
+- Customers -> /customers
+- Reports -> /reports
+- Orders -> /orders
+- Profile menu item -> /profile
+- Brand logo Rexora -> /
+
+============================================================
+5. PAGE-BY-PAGE DESIGN AND CONTENT
+============================================================
+
+5.1 Dashboard overview (/ and compatibility /dashboard)
+Page header:
+- Title: Welcome, Sajibur
+- Description: An overview of customer insights, sales performance, and revenue analytics.
+- Actions: This Week (calendar), Export Report (upload icon).
+
+Metric cards:
+- Total Revenue: $68,837, +2.4%, dollar icon.
+- Total Orders: 12,485, +3.1%, shopping cart icon.
+- Active Customers: 4,263, +1.8%, users icon.
+- Refund Rate: 1.5%, -0.6%, rotate/return icon; source marks this as positive outcome.
+
+Content rows:
+- Total Profit Overview: $98,643.24, +8.4%, paired Sales/Revenue bar chart, Shopify and Amazon mini channel indicators, overflow menu.
+- Top Products: Adidas Ultraboost 22, Samsung Galaxy Watch 6, Sony WH-1000XM5, Apple AirPods Pro; product image, category, price, overflow menu.
+- Customer Orders: 45,6370 source display value, +9.4%, +245, May-Dec area chart, overflow menu.
+- Sales by Countries: top country, revenue growth, total revenue, donut distribution and filters All Products / Top Countries.
+
+5.2 Sales (/sales)
+- Header: Sales Analytics; Track your sales performance and product metrics.
+- Actions: This Year; Export.
+- Stats: Total Sales $658,940 (+12.5% vs last year), Average Order Value $127.45 (+5.2%), Conversion Rate 3.24% (+0.8%).
+- Sales & Revenue Overview paired monthly bar chart from Jan-Dec.
+- Sales by Channel progress bars: Direct Website 38%, Amazon 30%, Shopify 20%, Retail Partners 12%.
+- Top Selling Products table: Product, Category, Price, Sales, Revenue.
+
+5.3 Customers (/customers)
+- Header: Customers; Manage and view your customer base.
+- Action: Add Customer.
+- Stats: Total Customers 4,263; New This Month 342; Returning Customers 68.5%; Avg. Lifetime Value $847.
+- Segment card: VIP Customers, Active Customers, New Customers, Inactive Customers with count and progress percentage.
+- Customer table: Customer, Status, Orders, Total Spent, Joined.
+- Search by customer name or email.
+- Row statuses: VIP, Active, New, Inactive.
+- Customer rows are visually hoverable/clickable; integrate detail navigation in VZG.
+
+5.4 Reports (/reports)
+- Header: Reports; Generate, view, and download detailed analytics reports.
+- Actions: Jan 2026 date filter; Generate Report.
+- Performance metrics: Conversion Rate 3.24%, Avg Order Value $127.50, Cart Abandonment 68.2%, Return Rate 4.8%.
+- Revenue Comparison area chart: 2026 vs 2025.
+- Sales by Category donut: Electronics 42%, Footwear 28%, Accessories 18%, Apparel 12%.
+- Available Reports list: Monthly Sales Report, Customer Analytics Report, Inventory Status Report, Financial Summary Q4.
+- Report actions: View All Reports, Download per report.
+
+5.5 Orders (/orders)
+- Header: Orders; Track and manage customer orders.
+- Action: Filter.
+- Stats: Total Orders 12,485; Processing 234; Shipped 1,892; Completed 10,124.
+- Filter pills: All Orders, Pending, Processing, Shipped, Completed, Cancelled.
+- Search by order ID or customer.
+- Table: Order ID, Customer, Date, Items, Payment, Status, Total.
+- Status badge colors/icons: Completed green/check, Processing blue/clock, Shipped purple/truck, Pending amber/package, Cancelled red/x.
+- Rows are visually hoverable/clickable; integrate order detail navigation in VZG.
+
+5.6 Profile (/profile)
+- Header: Profile; Manage your account settings and preferences.
+- Action: Save Changes.
+- Profile card: avatar, Oripio Sajib, email, Admin badge, phone, location, company, joined date.
+- Avatar camera button: upload/change avatar integration required.
+- Personal Information inputs: First Name, Last Name, Email Address, Phone Number, Location.
+- Security controls: Password / Change; Two-Factor Authentication / Enable.
+- Recent Activity list with security, settings, report, product and notification events.
+
+============================================================
+6. BUTTON AND CONTROL ACTION MATRIX
+============================================================
+
+Classification:
+- ROUTE: navigation is already explicit and should work in VZG.
+- UI-ONLY: source presents a control but has no business handler; keep visual behavior but add a VZG action or disabled/loading state.
+- INTEGRATE: must connect to VZG backend, files, auth, analytics or report system.
+
+| Location | Control | Class | Required VZG behavior |
+|----------|---------|-------|------------------------|
+| Header | Rexora/logo | ROUTE | Navigate to /. |
+| Header | Dashboard, Sales, Customers, Reports, Orders | ROUTE | Navigate to stable paths and expose active state. |
+| Header | Bell | INTEGRATE | Open notification center or mark as UI-only until notification service exists. |
+| Header profile | Profile | ROUTE | Navigate to /profile. |
+| Header profile | Settings | INTEGRATE | Navigate to VZG settings if available; otherwise add settings route. |
+| Header profile | Log out | INTEGRATE | Use VZG auth logout and redirect to sign-in. |
+| Overview | This Week | INTEGRATE | Date-range selector; refetch dashboard metrics/charts. |
+| Overview | Export Report | INTEGRATE | Generate/download overview report. |
+| Overview charts | MoreHorizontal on profit/orders/products | UI-ONLY | Add chart menu: date range, export, drill-down, or hide. |
+| Overview countries | All Products | INTEGRATE | Product/category filter for country revenue. |
+| Overview countries | Top Countries | INTEGRATE | Ranking/filter selector for country list. |
+| Sales | This Year | INTEGRATE | Date-range selector and query parameter state. |
+| Sales | Export | INTEGRATE | Download sales analytics CSV/PDF. |
+| Customers | Add Customer | INTEGRATE | Open validated create-customer modal/page and persist. |
+| Customers | Search customers | INTEGRATE | Debounced server/client filter by name/email. |
+| Customers | Customer row | INTEGRATE | Open customer detail/drawer; preserve row hover affordance. |
+| Reports | Jan 2026 | INTEGRATE | Month/date range selector. |
+| Reports | Generate Report | INTEGRATE | Create report job, show progress, then expose download. |
+| Reports | View All Reports | ROUTE/INTEGRATE | Navigate to report archive if available; otherwise expand list. |
+| Reports | Download | INTEGRATE | Secure report download with authorization. |
+| Orders | Filter | INTEGRATE | Open advanced filter UI. |
+| Orders | All Orders / status pills | INTEGRATE | Update status filter and query state; All clears filter. |
+| Orders | Search orders | INTEGRATE | Filter by order ID/customer with query state. |
+| Orders | Order row | INTEGRATE | Open order detail/drawer. |
+| Profile | Save Changes | INTEGRATE | Validate and persist profile fields; show success/error feedback. |
+| Profile | Camera | INTEGRATE | Upload avatar, validate file, persist asset, update avatar. |
+| Profile | Change password | INTEGRATE | Open secure password change flow. |
+| Profile | Enable 2FA | INTEGRATE | Start VZG auth 2FA enrollment. |
+
+Source behavior note: several buttons are visual-only in the template. VZG should not silently pretend an operation succeeded; show a disabled, loading, toast or real backend flow as appropriate.
+
+============================================================
+7. ASSETS
+============================================================
+
+Copy/resolve these source assets into VZG public/static assets:
+- /professional-man-avatar.png -> header/profile avatar.
+- /adidas-ultraboost-running-shoe.jpg -> Adidas product.
+- /samsung-galaxy-watch-smartwatch.jpg -> Samsung product.
+- /sony-wh1000xm5-headphones.jpg -> Sony product.
+- /apple-airpods-pro-earbuds.jpg -> Apple product.
+
+Use local VZG asset paths rather than blob URLs. Add meaningful alt text. Product images are currently presentation assets; replace with product/catalog media once VZG data is connected.
+
+============================================================
+8. DATA MODEL PLACEHOLDERS
+============================================================
+
+Implement typed repositories/services rather than hard-coded arrays. Suggested entities:
+- DashboardMetric: key, label, value, currency/unit, change, comparisonPeriod, direction, iconKey.
+- RevenuePoint: period, sales, revenue, profit.
+- ProductPerformance: productId, name, category, price, imageUrl, unitsSold, revenue.
+- ChannelPerformance: channelId, name, sales, percentage.
+- CountryPerformance: countryCode, countryName, revenue, percentage, growth.
+- Customer: id, name, email, status, orderCount, totalSpent, joinedAt, avatarUrl.
+- CustomerSegment: key, label, count, percentage, colorToken.
+- Order: id, customerId, customerName, email, itemCount, total, status, orderDate, paymentMethod.
+- Report: id, name, description, generatedAt, fileSize, downloadUrl, status.
+- UserProfile: id, firstName, lastName, email, phone, location, company, role, avatarUrl, joinedAt.
+- ActivityEvent: id, actorId, action, occurredAt, iconKey.
+
+Security requirements:
+- Scope every customer/order/report/profile query to the authenticated VZG user/tenant.
+- Recompute analytics server-side; do not trust client totals.
+- Authorize report downloads and avatar uploads.
+- Validate search, filters, date ranges and file types.
+- Keep route identifiers stable even if data services change.
+
+============================================================
+9. LOCALIZATION FOR BULGARIAN VZG USERS
+============================================================
+
+Translate visible English labels in the VZG implementation while keeping route identifiers stable for links, redirects and integrations.
+
+Suggested translations:
+- Dashboard -> Табло
+- Sales -> Продажби
+- Customers -> Клиенти
+- Reports -> Отчети
+- Orders -> Поръчки
+- Profile -> Профил
+- Settings -> Настройки
+- Log out -> Изход
+- This Week -> Тази седмица
+- This Year -> Тази година
+- Export Report / Export -> Експортирай отчет / Експорт
+- Add Customer -> Добави клиент
+- Search customers -> Търси клиенти
+- Search orders -> Търси поръчки
+- Filter -> Филтри
+- All Orders -> Всички поръчки
+- Pending -> Изчакващи
+- Processing -> Обработват се
+- Shipped -> Изпратени
+- Completed -> Завършени
+- Cancelled -> Отказани
+- Generate Report -> Генерирай отчет
+- Download -> Изтегли
+- Save Changes -> Запази промените
+- Personal Information -> Лична информация
+- Security -> Сигурност
+- Password -> Парола
+- Change -> Промени
+- Enable -> Активирай
+- Recent Activity -> Последна активност
+
+Keep URL paths such as /sales, /customers and /dashboard unchanged unless VZG introduces a documented localized routing layer with redirects.
+
+============================================================
+10. IMPORT IMPLEMENTATION ORDER
+============================================================
+
+1. Copy the shell tokens, font setup and responsive container into VZG.
+2. Implement DashboardHeader and PageHeader with stable route links and active state.
+3. Add /dashboard compatibility for TaxForm while preserving the source overview route behavior.
+4. Implement reusable cards, tables, badges, avatars and icon buttons.
+5. Implement overview page and chart cards using typed data adapters.
+6. Implement Sales, Customers, Orders, Reports and Profile routes.
+7. Wire search, status pills and date filters to URL/query state where practical.
+8. Connect export, report generation/download, customer creation, profile save, avatar upload, logout and 2FA.
+9. Add Bulgarian translations without changing route identifiers.
+10. Replace demo data with VZG query/action services and verify authorization.
+
+============================================================
+11. ACCEPTANCE CHECKLIST
+============================================================
+
+[ ] / and /dashboard both resolve to the current dashboard overview or documented redirect.
+[ ] TaxForm navigation to /dashboard works.
+[ ] Header links navigate to /sales, /customers, /reports, /orders and /profile.
+[ ] Active route styling is visible and keyboard accessible.
+[ ] Desktop layout matches the centered 1400px shell and responsive grids.
+[ ] Mobile layout stacks cards, keeps controls usable and allows table/pill scrolling.
+[ ] Light and dark themes preserve readable contrast and theme-aware chart tooltips.
+[ ] Metric cards, charts, tables, badges, avatars and profile layout match the source hierarchy.
+[ ] All listed assets are copied or mapped with alt text.
+[ ] Customer and order search/filter controls update results.
+[ ] Status badges preserve semantic colors/icons.
+[ ] Export/download controls have real VZG behavior or an explicit disabled/loading state.
+[ ] Add Customer, Save Changes, avatar, password and 2FA controls are integrated securely.
+[ ] Report generation and downloads are authorized.
+[ ] Static source demo values are replaced by VZG data adapters.
+[ ] Bulgarian labels are applied while URL paths remain stable.
+[ ] Keyboard focus, labels, table headers, button names and chart descriptions are accessible.
+[ ] No source dashboard files were modified as part of creating this handoff.
+
+END OF IMPORT HANDOFF
