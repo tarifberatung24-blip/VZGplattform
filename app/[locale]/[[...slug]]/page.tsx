@@ -1,4 +1,4 @@
-import {notFound} from "next/navigation"
+import {notFound, redirect} from "next/navigation"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
 import HomePage from "@/app/page"
 import CheckPage from "@/app/check/page"
@@ -51,6 +51,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 
 export default async function LocalizedPage({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
   const {slug = []} = await params
+  if (slug.join("/") === "protected") redirect("/dashboard")
   const Page = pages[slug.join("/")]
   if (!Page) notFound()
   return <Page />
