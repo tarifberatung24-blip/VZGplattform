@@ -21,5 +21,15 @@ comment on column public.benefit_checks.reasoning is
   'Non-binding Bulgarian explanation of the screening result and missing factors.';
 
 -- Realtime is optional and must be enabled for the project; this is idempotent.
-alter publication supabase_realtime
-  add table if not exists public.benefit_checks, public.tax_assessments, public.user_documents;
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'benefit_checks') then
+    alter publication supabase_realtime add table public.benefit_checks;
+  end;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'tax_assessments') then
+    alter publication supabase_realtime add table public.tax_assessments;
+  end;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'user_documents') then
+    alter publication supabase_realtime add table public.user_documents;
+  end;
+end $$;
