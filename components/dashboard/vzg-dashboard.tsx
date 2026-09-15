@@ -17,14 +17,17 @@ export type VzgDashboardProps = {
   documents: Array<{ id: string; original_filename: string; processing_status: string | null; created_at: string | null; size_bytes: number | null }>
   reviewCount: number
   reminders: Array<{ id: string; title: string; due_at: string | null; status: string | null }>
+  selectedModule?: string
 }
 
 function money(value: number) { return new Intl.NumberFormat("bg-BG", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value) }
 function date(value: string | null) { return value ? new Intl.DateTimeFormat("bg-BG", { day: "2-digit", month: "short" }).format(new Date(value)) : "Няма данни" }
 
-export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders }: VzgDashboardProps) {
+export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders, selectedModule }: VzgDashboardProps) {
   const { locale } = useLanguage()
   const de = locale === "de"
+  const moduleLabels: Record<string, [string, string]> = { insurance: ["Застраховки", "Versicherungen"], credits: ["Кредити", "Kredite"], deadlines: ["Срокове", "Fristen"], opportunities: ["Възможности", "Möglichkeiten"] }
+  const selectedLabel = selectedModule ? moduleLabels[selectedModule] : undefined
   const monthlyTotal = contracts.reduce((sum, item) => sum + (Number(item.monthly_amount) || 0), 0)
   const missingCosts = contracts.filter((item) => item.monthly_amount == null).length
   const nextReminder = reminders.find((item) => item.due_at) ?? null
@@ -43,6 +46,8 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
         <div className="flex items-center gap-4"><div className="grid size-11 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-sm"><LayoutDashboard className="size-5" /></div><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">VZG Dashboard</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{de ? `Willkommen${firstName ? `, ${firstName}` : ""}` : `Добре дошъл${firstName ? `, ${firstName}` : ""}`}</h1><p className="mt-1 text-sm text-muted-foreground">{de ? "Finanzielle Übersicht aus bestätigten Daten." : "Финансов преглед от потвърдени данни."}</p></div></div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row"><div className="relative w-full sm:w-72"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input className="h-11 w-full bg-card pl-9" placeholder={de ? "Verträge durchsuchen…" : "Търсене в договори…"} /></div><Button asChild className="h-11 w-full sm:w-auto"><Link href="/vertraege"><Plus className="mr-2 size-4" />{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button></div>
       </header>
+
+      {selectedLabel && <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-4" role="status"><p className="text-sm font-semibold">{de ? `${selectedLabel[1]} is in preparation` : `${selectedLabel[0]} е в подготовка`}</p><p className="mt-1 text-sm text-muted-foreground">{de ? "This section is not active yet. Your dashboard data remains unchanged." : "Тази секция още се подготвя. Данните в dashboard-а остават непроменени."}</p></section>}
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard metrics">
         {[{ icon: WalletCards, label: de ? "Monatliche Kosten" : "Месечни разходи", value: monthlyTotal ? money(monthlyTotal) : "NEEDS_DATA", note: de ? "Nur eingetragene Beträge" : "Само въведени суми" }, { icon: Receipt, label: de ? "Aktive Verträge" : "Активни договори", value: String(contracts.length), note: de ? "Alle gespeicherten Verträge" : "Всички записани договори" }, { icon: CalendarDays, label: de ? "Nächster Termin" : "Следващ срок", value: date(nextReminder?.due_at ?? null), note: nextReminder?.title ?? (de ? "Keine Frist erfasst" : "Няма записан срок") }, { icon: Bell, label: de ? "Zur Prüfung" : "За проверка", value: String(reviewCount + missingCosts), note: de ? "Dokumente und fehlende Beträge" : "Документи и липсващи суми" }].map(({ icon: Icon, label, value, note }) => <article key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="size-5" /></span><p className="text-sm font-medium text-muted-foreground">{label}</p></div><p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></article>)}
