@@ -42,7 +42,7 @@ Deno.serve(async (request: Request) => {
       to: phone,
       from: "VZGplattform",
       text: `VZGplattform: Dein Anmeldecode ist ${otp}.`,
-      label: "kintexbg-auth",
+      label: "vzg-auth",
     })
 
     const response = await fetch(SEVEN_SMS_ENDPOINT, {
