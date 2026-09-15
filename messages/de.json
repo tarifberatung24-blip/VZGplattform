@@ -343,5 +343,39 @@
       "subscription": "Abo",
       "other": "Sonstiges"
     }
+  },
+  "optimizeFlow": {
+    "optimize": "Für mich optimieren",
+    "loading": "Daten werden für dich ausgefüllt…",
+    "loadingSubtext": "Das dauert normalerweise 10–30 Sekunden",
+    "reviewTitle": "Ergebnis prüfen",
+    "oldSituation": "Bisherige Situation",
+    "currentMonthly": "Aktuelle Monatsrate",
+    "contractEnd": "Vertragsende",
+    "clauses": "Wichtige Klauseln",
+    "newOffer": "Neues Angebot",
+    "newMonthly": "Neue Monatsrate",
+    "saving": "Ersparnis",
+    "term": "Laufzeit",
+    "partner": "Partner",
+    "filledData": "Ausgefüllte Daten",
+    "sourceDocument": "Dokument",
+    "sourceProfile": "Profil",
+    "sourceAi": "KI-Annahme",
+    "confirm": "Bestätigen und fortfahren",
+    "edit": "Daten bearbeiten",
+    "cancel": "Abbrechen",
+    "missing": "Daten fehlen",
+    "missingSubtext": "Vor der Prüfung werden noch Angaben benötigt.",
+    "noSaving": "Eine Ersparnis wird nur bei einem echten Partnerangebot angezeigt.",
+    "partnerNotConfigured": "Kein freigegebener Partner ist konfiguriert. Wir zeigen kein erfundenes Angebot.",
+    "confirmed": "Fertig. Du wirst zur finalen Bestätigung zum Partner weitergeleitet.",
+    "partnerDisclosure": "Der Vertrag wird beim Partner abgeschlossen.",
+    "startFailed": "Optimize Flow konnte nicht gestartet werden.",
+    "confirmFailed": "Bestätigung fehlgeschlagen.",
+    "missingFields": {
+      "provider": "Anbieter",
+      "monthly_amount": "monatlicher Betrag"
+    }
   }
 }
