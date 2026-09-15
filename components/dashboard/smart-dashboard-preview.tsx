@@ -439,7 +439,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
                 {problems.length > 0 && <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{problems.length} сигнала изискват внимание. AI не предприема действие без потвърждение.</div>}
               </div>
               <div className="border-t border-border p-4">
-                <Button asChild variant="outline" className="h-11 w-full justify-between rounded-xl font-normal text-muted-foreground"><Link href="/protected/home-office"><span>Попитай за разходите си</span><Send className="size-4" /></Link></Button>
+                <Button asChild variant="outline" className="h-11 w-full justify-between rounded-xl font-normal text-muted-foreground"><Link href="/assistant"><span>Попитай за разходите си</span><Send className="size-4" /></Link></Button>
                 <p className="mt-3 text-center text-[11px] leading-4 text-muted-foreground">Отговорите използват само потвърдени данни.</p>
               </div>
             </section>
@@ -499,7 +499,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
             <AiHomeOfficeChat />
           </div>
           <footer className="border-t border-border p-5">
-            <Button asChild variant="outline" className="h-12 w-full justify-between rounded-xl"><Link href="/protected/home-office"><span>Отвори пълния AI Assistant</span><Send className="size-4" /></Link></Button>
+            <Button asChild variant="outline" className="h-12 w-full justify-between rounded-xl"><Link href="/assistant"><span>Отвори пълния AI Assistant</span><Send className="size-4" /></Link></Button>
             <p className="mt-3 text-center text-[11px] text-muted-foreground">Работи само с данните в твоя KintexBG профил.</p>
           </footer>
         </aside>
