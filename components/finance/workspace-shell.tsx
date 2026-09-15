@@ -60,7 +60,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
       <a href="#workspace-content" className="kintex-skip">{text.skip}</a>
       <header className="sticky top-0 z-40 flex h-[72px] items-center justify-between gap-3 border-b border-border bg-card/95 px-5 backdrop-blur lg:px-8">
         <Link href={localizedPath("/dashboard", locale)} aria-label="VZGplattform — BY VZG CONSULT" className="shrink-0">
-          <span className="block text-2xl font-semibold leading-none tracking-tight">Kintex<span className="text-primary">BG</span></span>
+          <span className="block text-2xl font-semibold leading-none tracking-tight">VZGplattform</span>
           <span className="mt-2 block text-[10px] font-semibold uppercase leading-none tracking-[0.16em] text-muted-foreground">BY VZG CONSULT</span>
         </Link>
         <span className="hidden text-sm text-muted-foreground md:block">{text.workspace}</span>
