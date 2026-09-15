@@ -25,11 +25,11 @@ do $$
 begin
   if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'benefit_checks') then
     alter publication supabase_realtime add table public.benefit_checks;
-  end;
+  end if;
   if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'tax_assessments') then
     alter publication supabase_realtime add table public.tax_assessments;
-  end;
+  end if;
   if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'user_documents') then
     alter publication supabase_realtime add table public.user_documents;
-  end;
+  end if;
 end $$;
