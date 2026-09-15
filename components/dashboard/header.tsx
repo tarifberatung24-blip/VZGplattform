@@ -15,6 +15,8 @@ import {
 
 const navItems = [
   { label: "Dashboard", href: "/" },
+  { label: "Anspruch prüfen", href: "/anspruch" },
+  { label: "Workspace", href: "/workspace" },
   { label: "Sales", href: "/sales" },
   { label: "Customers", href: "/customers" },
   { label: "Reports", href: "/reports" },
