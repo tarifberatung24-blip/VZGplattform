@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { WorkspaceShell } from "@/components/finance/workspace-shell"
 import { PwaInstallPrompt } from "@/components/pwa-install-prompt"
 import { PwaServiceWorker } from "@/components/pwa-service-worker"
+import { Toaster } from "@/components/ui/sonner"
 import { LanguageProvider } from "@/lib/i18n/language-context"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/language-context"
@@ -84,6 +85,7 @@ export default async function RootLayout({
             <Suspense fallback={null}><WorkspaceShell>{children}</WorkspaceShell></Suspense>
             <PwaInstallPrompt />
             <PwaServiceWorker />
+            <Toaster />
           </LanguageProvider>
         </ThemeProvider>
       </body>

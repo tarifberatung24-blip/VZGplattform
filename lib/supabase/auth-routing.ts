@@ -8,6 +8,7 @@ const protectedPrefixes = [
   "/profil",
   "/finanzamt",
   "/steuer",
+  "/anspruch",
   "/vertraege",
   "/documents",
   "/finanzbildung",
