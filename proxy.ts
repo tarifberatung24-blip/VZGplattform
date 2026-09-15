@@ -19,8 +19,10 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isLocale(segment)) {
-    request.headers.set("x-locale", segment)
-    const response = await updateSession(request)
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set("x-locale", segment)
+    const localizedRequest = new NextRequest(request, { headers: requestHeaders })
+    const response = await updateSession(localizedRequest)
     response.cookies.set(LOCALE_COOKIE_KEY, segment, { path: "/", maxAge: 31536000, sameSite: "lax" })
     return response
   }
