@@ -1,6 +1,0 @@
-allowBuilds:
-  '@parcel/watcher': true
-  '@swc/core': true
-  esbuild: true
-  tesseract.js: true
-  unrs-resolver: true

@@ -1,6 +1,0 @@
-import { NextResponse } from 'next/server'
-import { createCaseRepository } from '@/lib/office/repositories/cases'
-import { sanitizeCaseCreate } from '@/lib/office/cases/validation'
-
-export async function GET() { const { repository, configured, userId } = await createCaseRepository(); if (!configured) return NextResponse.json({ configured: false, cases: [] }); if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); const result = await repository.listMine(50); return NextResponse.json({ cases: result.data ?? [], error: result.error }, { status: result.error ? 500 : 200 }) }
-export async function POST(request: Request) { const { repository, configured, userId } = await createCaseRepository(); if (!configured) return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 }); if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); const body = await request.json().catch(() => null); const checked = sanitizeCaseCreate(body && typeof body === 'object' ? body as Record<string, unknown> : {}); if ('error' in checked) return NextResponse.json({ error: checked.error }, { status: 400 }); const result = await repository.create(checked.value); return NextResponse.json({ case: result.data, error: result.error }, { status: result.error ? 400 : 201 }) }
