@@ -2,14 +2,20 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 type Table<Row, Insert, Update> = { Row: Row; Insert: Insert; Update: Update; Relationships: [] }
 
+type TaxFields = {
+  id: string; user_id: string; profession: string; expenses: Json; total_amount: number; created_at: string
+  tax_year: number | null; residence_country: string | null; tax_liability: string | null; steuerklasse: number | null
+  commute_distance_km: number; office_days: number; home_office_days: number; documented_expenses: number
+  calculated_result: Json; screening_status: string
+}
+
+type TaxInsert = Partial<Omit<TaxFields, "id" | "created_at" | "user_id">> & { user_id: string; profession: string }
+type TaxUpdate = Partial<Omit<TaxFields, "id" | "created_at" | "user_id">> & { user_id?: string }
+
 export type Database = {
   public: {
     Tables: {
-      tax_assessments: Table<
-        { id: string; user_id: string; profession: string; expenses: Json; total_amount: number; created_at: string },
-        { id?: string; user_id: string; profession: string; expenses?: Json; total_amount?: number; created_at?: string },
-        { id?: string; user_id?: string; profession?: string; expenses?: Json; total_amount?: number; created_at?: string }
-      >
+      tax_assessments: Table<TaxFields, TaxInsert, TaxUpdate>
       benefit_checks: Table<
         { id: string; user_id: string; answers: Json; eligible_benefits: Json; rules_version: string; created_at: string },
         { id?: string; user_id: string; answers?: Json; eligible_benefits?: Json; rules_version?: string; created_at?: string },
