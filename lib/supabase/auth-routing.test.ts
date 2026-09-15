@@ -10,6 +10,7 @@ describe("auth routing", () => {
   })
 
   it("recognizes protected localized and unlocalized routes", () => {
+    expect(isProtectedAppPath("/protected")).toBe(false)
     expect(isProtectedAppPath("/protected/security")).toBe(true)
     expect(isProtectedAppPath("/dashboard")).toBe(true)
     expect(isProtectedAppPath("/bg/dashboard")).toBe(true)

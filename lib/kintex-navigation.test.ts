@@ -7,7 +7,7 @@ describe("KintexBG workspace navigation", () => {
     expect(kintexModules).toHaveLength(10)
     for (const item of kintexModules) {
       const path = item.href.split("?")[0]
-      expect(isProtectedAppPath(`/bg${path}`)).toBe(true)
+      expect(isProtectedAppPath(`/bg${path}`)).toBe(path !== "/protected")
       expect(isKintexWorkspacePath(`/de${path}`)).toBe(true)
     }
   })

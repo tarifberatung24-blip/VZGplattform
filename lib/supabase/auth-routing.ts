@@ -18,6 +18,7 @@ export function sanitizeNextPath(value: string | null | undefined, fallback = "/
 
 export function isProtectedAppPath(pathname: string) {
   const path = stripLocale(pathname)
+  if (path === "/protected") return false
   return protectedPrefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 
