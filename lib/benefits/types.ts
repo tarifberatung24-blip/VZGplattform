@@ -32,6 +32,8 @@ export interface BenefitCheckRecord {
   user_id: string
   answers: BenefitAnswers
   eligible_benefits: EligibleBenefit[]
+  eligible_benefit_keys: BenefitKey[]
+  reasoning: string
   rules_version: string
   created_at: string
 }

@@ -10,7 +10,9 @@ import type { BenefitCheckRecord, EligibleBenefit } from "@/lib/benefits/types"
 type TaxAssessment = {
   id: string
   profession: string
+  tax_year: number | null
   total_amount: number
+  screening_status: string
   created_at: string
 }
 
@@ -59,9 +61,9 @@ export function WorkspaceOverview() {
 
       setIsAuthenticated(true)
       const [{ data: taxData, error: taxError }, { data: checkData, error: checkError }, { data: documentData, error: documentError }] = await Promise.all([
-        supabase.from("tax_assessments").select("id,profession,total_amount,created_at").order("created_at", { ascending: false }).limit(10),
-        supabase.from("benefit_checks").select("id,user_id,answers,eligible_benefits,rules_version,created_at").order("created_at", { ascending: false }).limit(10),
-        supabase.from("user_documents").select("id,file_name,status,created_at").order("created_at", { ascending: false }).limit(10),
+        supabase.from("tax_assessments").select("id,profession,tax_year,total_amount,screening_status,created_at").eq("user_id", userData.user.id).order("created_at", { ascending: false }).limit(10),
+        supabase.from("benefit_checks").select("id,user_id,answers,eligible_benefits,eligible_benefit_keys,reasoning,rules_version,created_at").eq("user_id", userData.user.id).order("created_at", { ascending: false }).limit(10),
+        supabase.from("user_documents").select("id,file_name,status,created_at").eq("user_id", userData.user.id).order("created_at", { ascending: false }).limit(10),
       ])
 
       if (taxError) throw taxError
@@ -98,6 +100,7 @@ export function WorkspaceOverview() {
     [checks],
   )
   const latestAssessment = tax[0]
+  const latestCheck = checks[0]
 
   if (!loading && !isAuthenticated) {
     return (
@@ -137,8 +140,8 @@ export function WorkspaceOverview() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card><CardHeader><CardTitle>Последно данъчно изчисление</CardTitle></CardHeader><CardContent>{latestAssessment ? <div className="rounded-xl border p-4"><div className="flex items-start justify-between gap-4"><div><p className="font-semibold">{latestAssessment.profession || "Данъчно изчисление"}</p><p className="mt-1 text-sm text-muted-foreground">{dateFormatter.format(new Date(latestAssessment.created_at))}</p></div><WalletCards className="size-5 text-primary" /></div><p className="mt-5 text-2xl font-semibold">{currencyFormatter.format(Number(latestAssessment.total_amount || 0))}</p><p className="mt-1 text-sm text-muted-foreground">Общо въведени разходи</p></div> : <p className="text-sm text-muted-foreground">Все още няма запазено данъчно изчисление.</p>}</CardContent></Card>
-            <Card><CardHeader><CardTitle>Възможни помощи</CardTitle></CardHeader><CardContent>{latestBenefits.length ? <ul className="space-y-3">{latestBenefits.map((benefit) => <li key={benefit.key} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><p className="font-semibold">{benefit.title}</p><span className="text-xs font-medium text-primary">{benefit.confidence === "likely" ? "Вероятно" : "Възможно"}</span></div><p className="mt-1 text-sm text-muted-foreground">{benefit.explanation}</p></li>)}</ul> : <p className="text-sm text-muted-foreground">Няма запазена проверка. Направете проверка на възможните помощи, за да видите резултатите тук.</p>}</CardContent></Card>
+            <Card><CardHeader><CardTitle>Последно данъчно изчисление</CardTitle></CardHeader><CardContent>{latestAssessment ? <div className="rounded-xl border p-4"><div className="flex items-start justify-between gap-4"><div><p className="font-semibold">{latestAssessment.profession || "Данъчно изчисление"} {latestAssessment.tax_year ? `· ${latestAssessment.tax_year}` : ""}</p><p className="mt-1 text-sm text-muted-foreground">{dateFormatter.format(new Date(latestAssessment.created_at))}</p></div><WalletCards className="size-5 text-primary" /></div><p className="mt-5 text-2xl font-semibold">{currencyFormatter.format(Number(latestAssessment.total_amount || 0))}</p><p className="mt-1 text-sm text-muted-foreground">Въведени и screening разходи · {latestAssessment.screening_status === "review_possible" ? "нужна е проверка" : "предварителен резултат"}</p></div> : <p className="text-sm text-muted-foreground">Все още няма запазено данъчно изчисление.</p>}</CardContent></Card>
+            <Card><CardHeader><CardTitle>Възможни помощи</CardTitle></CardHeader><CardContent>{latestBenefits.length ? <><ul className="space-y-3">{latestBenefits.map((benefit) => <li key={benefit.key} className="rounded-xl border p-4"><div className="flex items-center justify-between gap-3"><p className="font-semibold">{benefit.title}</p><span className="text-xs font-medium text-primary">{benefit.confidence === "likely" ? "Вероятно" : "Възможно"}</span></div><p className="mt-1 text-sm text-muted-foreground">{benefit.explanation}</p></li>)}</ul>{latestCheck?.reasoning && <p className="mt-4 rounded-xl bg-muted/50 p-4 text-sm leading-6 text-muted-foreground">{latestCheck.reasoning}</p>}</> : <p className="text-sm text-muted-foreground">Няма запазена проверка. Направете проверка на възможните помощи, за да видите резултатите тук.</p>}</CardContent></Card>
           </div>
 
           <Card><CardHeader><CardTitle>Последни документи</CardTitle></CardHeader><CardContent>{documents.length ? <ul className="space-y-3">{documents.map((document) => <li key={document.id} className="flex items-center justify-between gap-3 rounded-xl border p-4"><div className="flex items-center gap-3"><FileText className="size-5 text-primary" /><div><p className="font-medium">{document.file_name}</p><p className="text-xs text-muted-foreground">{statusLabel(document.status)}</p></div></div><span className="text-xs text-muted-foreground">{dateFormatter.format(new Date(document.created_at))}</span></li>)}</ul> : <p className="text-sm text-muted-foreground">Все още няма добавени документи.</p>}</CardContent></Card>

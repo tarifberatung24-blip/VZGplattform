@@ -17,9 +17,9 @@ export type Database = {
     Tables: {
       tax_assessments: Table<TaxFields, TaxInsert, TaxUpdate>
       benefit_checks: Table<
-        { id: string; user_id: string; answers: Json; eligible_benefits: Json; rules_version: string; created_at: string },
-        { id?: string; user_id: string; answers?: Json; eligible_benefits?: Json; rules_version?: string; created_at?: string },
-        { id?: string; user_id?: string; answers?: Json; eligible_benefits?: Json; rules_version?: string; created_at?: string }
+        { id: string; user_id: string; answers: Json; eligible_benefits: Json; eligible_benefit_keys: string[]; reasoning: string; rules_version: string; created_at: string },
+        { id?: string; user_id: string; answers?: Json; eligible_benefits?: Json; eligible_benefit_keys?: string[]; reasoning?: string; rules_version?: string; created_at?: string },
+        { id?: string; user_id?: string; answers?: Json; eligible_benefits?: Json; eligible_benefit_keys?: string[]; reasoning?: string; rules_version?: string; created_at?: string }
       >
       user_documents: Table<
         { id: string; user_id: string; file_name: string; storage_path: string | null; status: string; created_at: string },

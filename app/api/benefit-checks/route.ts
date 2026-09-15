@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { calculateEligibleBenefits, BENEFIT_RULES_VERSION } from "@/lib/benefits/rules"
+import { evaluateBenefits, BENEFIT_RULES_VERSION } from "@/lib/benefits/rules"
 import { BENEFIT_ANSWER_KEYS, type BenefitAnswers } from "@/lib/benefits/types"
 
 function getServerClient(request: Request) {
@@ -30,16 +30,18 @@ export async function POST(request: Request) {
     const answers = parseAnswers(body?.answers)
     if (!answers) return NextResponse.json({ error: "All eligibility answers must be true or false." }, { status: 400 })
 
-    const eligibleBenefits = calculateEligibleBenefits(answers)
+    const decision = evaluateBenefits(answers)
     const { data, error } = await supabase
       .from("benefit_checks")
       .insert({
         user_id: userResult.data.user.id,
         answers,
-        eligible_benefits: eligibleBenefits,
+        eligible_benefits: decision.benefits,
+        eligible_benefit_keys: decision.eligibleBenefitKeys,
+        reasoning: decision.reasoning,
         rules_version: BENEFIT_RULES_VERSION,
       })
-      .select("id,user_id,answers,eligible_benefits,rules_version,created_at")
+      .select("id,user_id,answers,eligible_benefits,eligible_benefit_keys,reasoning,rules_version,created_at")
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     return NextResponse.json({ check: data }, { status: 201 })
