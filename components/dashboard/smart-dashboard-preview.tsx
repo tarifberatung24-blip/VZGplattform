@@ -12,6 +12,7 @@ import {
   CircleAlert,
   CircleCheck,
   Eye,
+  FileCheck2,
   FileText,
   Filter,
   LayoutDashboard,
@@ -204,7 +205,7 @@ export function SmartDashboardPreview(props: Props) {
 }
 
 function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documents = [], reviewCount = 0, reminders = [], auditEvents = [] }: Props) {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const [query, setQuery] = useState("")
   const [collapsed, setCollapsed] = useState<Set<GroupId>>(new Set())
   const [onlyNeedsAttention, setOnlyNeedsAttention] = useState(false)
@@ -433,7 +434,8 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
               </div>
               <div className="space-y-3 p-4">
                 <Link href={nextAction.href} className="block rounded-xl border border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]"><div className="flex items-start gap-3"><CircleAlert className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">Следваща стъпка</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{nextAction.label}</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Отвори <ArrowRight className="size-3" /></span></div></div></Link>
-                <Link href="/documents" className="block rounded-lg border border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]"><div className="flex items-start gap-3"><FileText className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">Документи за преглед</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{reviewCount > 0 ? `${reviewCount} документа чакат потвърждение.` : "Няма документи, чакащи потвърждение."}</p></div></div></Link>
+                <Link href="/documents" className="block rounded-lg border border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]"><FileText className="mt-0.5 size-5 text-primary" /><div><p className="font-semibold">Документи за преглед</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{reviewCount > 0 ? `${reviewCount} документа чакат потвърждение.` : "Няма документи, чакащи потвърждение."}</p></div></Link>
+                <Link href={`/${locale}/office`} className="block rounded-lg border border-primary/20 bg-primary/[0.04] p-4 transition-colors hover:border-primary/50 hover:bg-primary/[0.08]"><div className="flex items-start gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">KintexBG Office</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Документи, случаи и проверими чернови на едно място.</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Отвори Office <ArrowRight className="size-3" /></span></div></div></Link>
                 {problems.length > 0 && <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{problems.length} сигнала изискват внимание. AI не предприема действие без потвърждение.</div>}
               </div>
               <div className="border-t border-border p-4">
