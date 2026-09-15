@@ -32,7 +32,7 @@ const userScopedTables = [
   "contract_radar_history",
 ]
 
-describe("KintexBG recoverable database baseline", () => {
+describe("VZGplattform recoverable database baseline", () => {
   it("contains every current B2C user-data table with RLS enabled", () => {
     for (const table of userScopedTables) {
       expect(baseline).toContain(`table if not exists public.${table}`)
@@ -61,7 +61,7 @@ describe("KintexBG recoverable database baseline", () => {
   })
 })
 
-describe("KintexBG RLS hardening contract", () => {
+describe("VZGplattform RLS hardening contract", () => {
   it("removes obsolete Storage policies and anonymous table privileges", () => {
     expect(hardening).toContain('drop policy if exists "documents_storage_select_own"')
     expect(hardening).toContain('drop policy if exists "documents_storage_insert_own"')

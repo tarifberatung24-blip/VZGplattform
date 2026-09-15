@@ -150,11 +150,11 @@ function PreviewSurface() {
   ]
 
   return (
-    <div className="kintex-preview-frame" aria-label="KintexBG Produktvorschau ohne Kontodaten">
+    <div className="kintex-preview-frame" aria-label="VZGplattform Produktvorschau ohne Kontodaten">
       <div className="flex items-center justify-between border-b border-border bg-[#fbfbf9] px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5">
           <span className="grid size-7 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground">K</span>
-          <span className="text-sm font-semibold tracking-tight text-foreground">KintexBG</span>
+          <span className="text-sm font-semibold tracking-tight text-foreground">VZGplattform</span>
         </div>
         <span className="border border-border bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Preview</span>
       </div>
@@ -332,7 +332,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
             <div className="flex flex-col justify-between gap-4 border-b border-border px-5 py-4 sm:flex-row sm:items-center">
               <div>
                 <h2 id="payments-title" className="text-lg font-semibold">Месечни плащания</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Групирани от въведените договори в KintexBG</p>
+                <p className="mt-1 text-xs text-muted-foreground">Групирани от въведените договори в VZGplattform</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button type="button" variant={onlyNeedsAttention ? "secondary" : "outline"} size="sm" className="rounded-lg" onClick={() => setOnlyNeedsAttention((value) => !value)}><Filter className="size-4" />За внимание</Button>
@@ -500,7 +500,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
           </div>
           <footer className="border-t border-border p-5">
             <Button asChild variant="outline" className="h-12 w-full justify-between rounded-xl"><Link href="/assistant"><span>Отвори пълния AI Assistant</span><Send className="size-4" /></Link></Button>
-            <p className="mt-3 text-center text-[11px] text-muted-foreground">Работи само с данните в твоя KintexBG профил.</p>
+            <p className="mt-3 text-center text-[11px] text-muted-foreground">Работи само с данните в твоя VZGplattform профил.</p>
           </footer>
         </aside>
       </div>}

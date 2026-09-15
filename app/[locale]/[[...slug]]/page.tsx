@@ -45,7 +45,7 @@ const pages: Record<string, React.ComponentType> = {
 export async function generateMetadata({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
   const {slug = []} = await params
   return isKintexWorkspacePath(`/${slug.join("/")}`)
-    ? { title: { absolute: "KintexBG — BY VZG CONSULT" }, description: "KintexBG — Digital Financial Home Office" }
+    ? { title: { absolute: "VZGplattform — BY VZG CONSULT" }, description: "VZGplattform — Digital Financial Home Office" }
     : {}
 }
 

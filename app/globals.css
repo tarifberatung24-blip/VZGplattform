@@ -4,7 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* KintexBG visual system: a precise, light financial workspace. */
+/* VZGplattform visual system: a precise, light financial workspace. */
 @theme inline {
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -164,7 +164,7 @@
   }
 }
 
-/* KintexBG customer workspace. */
+/* VZGplattform customer workspace. */
 .kintex-workspace {
   color-scheme: light;
   --nm-black: #151515;

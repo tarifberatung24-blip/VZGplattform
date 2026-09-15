@@ -10,7 +10,7 @@ export type SmartDashboardStats = {
 }
 
 export const smartDashboardEnvironment = {
-  appName: "KintexBG",
+  appName: "VZGplattform",
   brandLine: "BY VZG CONSULT",
   primaryLocale: "bg",
   secondaryLocale: "de",

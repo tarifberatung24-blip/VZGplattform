@@ -59,7 +59,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
     <div className="kintex-workspace min-h-screen bg-background text-foreground">
       <a href="#workspace-content" className="kintex-skip">{text.skip}</a>
       <header className="sticky top-0 z-40 flex h-[72px] items-center justify-between gap-3 border-b border-border bg-card/95 px-5 backdrop-blur lg:px-8">
-        <Link href={localizedPath("/dashboard", locale)} aria-label="KintexBG — BY VZG CONSULT" className="shrink-0">
+        <Link href={localizedPath("/dashboard", locale)} aria-label="VZGplattform — BY VZG CONSULT" className="shrink-0">
           <span className="block text-2xl font-semibold leading-none tracking-tight">Kintex<span className="text-primary">BG</span></span>
           <span className="mt-2 block text-[10px] font-semibold uppercase leading-none tracking-[0.16em] text-muted-foreground">BY VZG CONSULT</span>
         </Link>
@@ -94,7 +94,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             <div className="mt-auto px-4 pt-8">
               <Link href={localizedPath("/security", locale)} aria-current={stripLocale(pathname) === "/security" || stripLocale(pathname) === "/protected/security" ? "page" : undefined} className="flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">{text.security}</Link>
               <form action="/auth/logout" method="post" className="lg:hidden"><Button variant="ghost" type="submit" className="px-0">{text.logout}</Button></form>
-              <p className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">KintexBG <span className="mx-1" aria-hidden="true">/</span> {text.pilot}</p>
+              <p className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">VZGplattform <span className="mx-1" aria-hidden="true">/</span> {text.pilot}</p>
             </div>
           </div>
         </aside>

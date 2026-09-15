@@ -39,7 +39,7 @@ export function FinancialEducationPage({ lessons, locale, profileCompleteness, c
         <header className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">KintexBG · Finanzbildung</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">VZGplattform · Finanzbildung</p>
               <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">{de ? "Verstehen, bevor du entscheidest" : "Разбери финансите си, преди да решаваш"}</h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{de ? "Kurze, quellengebundene Lernschritte direkt aus deinem Finanz-Workflow. Keine Produktwerbung und keine automatische Empfehlung." : "Кратки, проверими уроци, свързани с реалния ти финансов workflow. Без продуктова реклама и без автоматични препоръки."}</p>
             </div>

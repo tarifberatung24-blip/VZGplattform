@@ -17,7 +17,7 @@ export default function LoginPage() {
   const copy = de
     ? {
         title: "Anmelden",
-        intro: "Oeffne deinen KintexBG Kundenbereich.",
+        intro: "Oeffne deinen VZGplattform Kundenbereich.",
         email: "E-Mail",
         password: "Passwort",
         login: "Mit E-Mail anmelden",
@@ -44,7 +44,7 @@ export default function LoginPage() {
       }
     : {
         title: "Вход",
-        intro: "Отвори клиентската зона на KintexBG.",
+        intro: "Отвори клиентската зона на VZGplattform.",
         email: "Имейл",
         password: "Парола",
         login: "Вход",
@@ -139,7 +139,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
         <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">
-          KintexBG
+          VZGplattform
           <span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span>
         </Link>
         <h1 className="mt-8 text-3xl font-bold tracking-tight text-foreground">{copy.title}</h1>

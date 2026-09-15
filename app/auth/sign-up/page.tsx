@@ -16,7 +16,7 @@ export default function SignUpPage() {
   const copy = de
     ? {
         title: "Konto erstellen",
-        intro: "Starte deinen KintexBG Kundenbereich.",
+        intro: "Starte deinen VZGplattform Kundenbereich.",
         firstName: "Vorname",
         email: "E-Mail",
         password: "Passwort",
@@ -42,7 +42,7 @@ export default function SignUpPage() {
       }
     : {
         title: "Създай акаунт",
-        intro: "Стартирай клиентската си зона в KintexBG.",
+        intro: "Стартирай клиентската си зона в VZGplattform.",
         firstName: "Име",
         email: "Имейл",
         password: "Парола",
@@ -139,7 +139,7 @@ export default function SignUpPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
         <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">
-          KintexBG
+          VZGplattform
           <span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span>
         </Link>
         <h1 className="mt-8 text-3xl font-bold tracking-tight text-foreground">{copy.title}</h1>

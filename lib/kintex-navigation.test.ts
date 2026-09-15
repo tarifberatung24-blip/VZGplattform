@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { activeKintexModule, isKintexWorkspacePath, kintexModules } from "./kintex-navigation"
 import { isProtectedAppPath } from "./supabase/auth-routing"
 
-describe("KintexBG workspace navigation", () => {
+describe("VZGplattform workspace navigation", () => {
   it("keeps all ten modules under the existing authentication boundary", () => {
     expect(kintexModules).toHaveLength(10)
     for (const item of kintexModules) {
