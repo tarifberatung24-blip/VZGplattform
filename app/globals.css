@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Premium cream/off-white background for Rexora dashboard */
+  /* Premium cream/off-white background for the VZGplattform interface */
   --background: oklch(0.98 0.005 90);
   --foreground: oklch(0.2 0 0);
   --card: oklch(1 0 0);
@@ -32,7 +32,7 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.75rem;
 
-  /* Custom color tokens for dashboard */
+  /* Shared color tokens for the interface */
   --color-accent: oklch(0.85 0.1 130);
   --color-positive: oklch(0.55 0.15 145);
   --color-negative: oklch(0.55 0.2 25);

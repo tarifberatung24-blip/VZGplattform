@@ -120,11 +120,7 @@ export function TaxForm() {
         .single()
 
       if (insertError) {
-        setError(
-          insertError.message.includes("tax_assessments")
-            ? "Speichern nicht möglich. Die Tabelle tax_assessments ist möglicherweise noch nicht angelegt."
-            : "Speichern fehlgeschlagen. Bitte versuche es erneut."
-        )
+        setError("Speichern nicht möglich. Bitte versuche es erneut.")
         return
       }
 

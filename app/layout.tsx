@@ -8,9 +8,8 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Rexora Dashboard",
-  description: "Premium e-commerce analytics dashboard",
-  generator: "v0.app",
+  title: "VZGplattform",
+  description: "Вашият личен преглед на данъчни изчисления, помощи и документи.",
   icons: {
     icon: [
       {
@@ -36,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="bg">
       <body className={`font-sans antialiased`}>
         {children}
         <Analytics />

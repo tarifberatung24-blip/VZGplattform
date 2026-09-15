@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Bell, ChevronDown } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,75 +14,50 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const navItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Anspruch prüfen", href: "/anspruch" },
-  { label: "Workspace", href: "/workspace" },
-  { label: "Sales", href: "/sales" },
-  { label: "Customers", href: "/customers" },
-  { label: "Reports", href: "/reports" },
-  { label: "Orders", href: "/orders" },
+  { label: "Преглед", href: "/" },
+  { label: "Помощи", href: "/anspruch" },
+  { label: "Документи", href: "/workspace" },
+  { label: "Профил", href: "/profile" },
 ]
 
 export function Header() {
   const pathname = usePathname()
 
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/"
-    return pathname.startsWith(href)
-  }
+  const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href)
 
   return (
-    <header className="flex items-center justify-between mb-8">
+    <header className="mb-8 flex items-center justify-between">
       <Link href="/" className="flex items-center gap-2">
-        <div className="flex flex-col gap-1">
-          <div className="w-5 h-0.5 bg-foreground" />
-          <div className="w-5 h-0.5 bg-foreground" />
-          <div className="w-3 h-0.5 bg-foreground" />
+        <div className="flex flex-col gap-1" aria-hidden="true">
+          <div className="h-0.5 w-5 bg-foreground" />
+          <div className="h-0.5 w-5 bg-foreground" />
+          <div className="h-0.5 w-3 bg-foreground" />
         </div>
-        <span className="text-xl font-semibold">Rexora</span>
+        <span className="text-xl font-semibold">VZGplattform</span>
       </Link>
 
-      <nav className="hidden md:flex items-center bg-card rounded-full px-2 py-1.5 border border-border">
+      <nav aria-label="Основна навигация" className="hidden items-center rounded-full border border-border bg-card px-2 py-1.5 md:flex">
         {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              isActive(item.href)
-                ? "bg-[var(--color-accent)] text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
+          <Link key={item.href} href={item.href} className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${isActive(item.href) ? "bg-[var(--color-accent)] text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
             {item.label}
           </Link>
         ))}
       </nav>
 
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell className="w-5 h-5" />
-        </Button>
+        <Button variant="ghost" size="icon" className="rounded-full" aria-label="Известия"><Bell className="size-5" /></Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 cursor-pointer">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src="/professional-man-avatar.png" />
-                <AvatarFallback>OS</AvatarFallback>
-              </Avatar>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium">Oripio Sajib</p>
-                <p className="text-xs text-muted-foreground">Admin</p>
-              </div>
-              <ChevronDown className="w-4 h-4 text-muted-foreground hidden sm:block" />
+            <button className="flex cursor-pointer items-center gap-2" aria-label="Отвори меню на профила">
+              <Avatar className="size-9"><AvatarFallback>ВЗ</AvatarFallback></Avatar>
+              <div className="hidden text-left sm:block"><p className="text-sm font-medium">Моят профил</p><p className="text-xs text-muted-foreground">Лични данни</p></div>
+              <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link href="/profile">Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/profile">Профил</Link></DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/workspace">Моят преглед</Link></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
