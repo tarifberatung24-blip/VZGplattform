@@ -1,4 +1,4 @@
-# KintexBG coding-agent entry point
+# VZGplattform coding-agent entry point
 
 Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, and `docs/TERRA_START.md` before work.
 
