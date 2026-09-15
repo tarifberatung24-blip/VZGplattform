@@ -1,5 +1,5 @@
 export type SmartDashboardModuleStatus = "active" | "next" | "planned"
-export type SmartDashboardDataSource = "profiles" | "contracts" | "documents" | "reminders" | "audit_events" | "storage.objects"
+export type SmartDashboardDataSource = "profiles" | "contracts" | "documents" | "deadlines" | "audit_events" | "storage.objects"
 
 export type SmartDashboardStats = {
   contracts: number
@@ -37,12 +37,12 @@ export const smartDashboardRules = {
 } as const
 
 export const smartDashboardModules = [
-  { id: "overview", labelBg: "Преглед", labelDe: "Übersicht", status: "active", dataSources: ["profiles", "contracts", "documents", "reminders"] },
+  { id: "overview", labelBg: "Преглед", labelDe: "Übersicht", status: "active", dataSources: ["profiles", "contracts", "documents", "deadlines"] },
   { id: "contracts", labelBg: "Договори", labelDe: "Verträge", status: "active", dataSources: ["contracts", "documents"] },
   { id: "documents", labelBg: "Документи", labelDe: "Dokumente", status: "active", dataSources: ["documents", "storage.objects", "audit_events"] },
-  { id: "kintex-radar", labelBg: "Kintex Radar", labelDe: "Kintex Radar", status: "next", dataSources: ["profiles", "contracts", "documents", "reminders", "audit_events"] },
+  { id: "kintex-radar", labelBg: "Kintex Radar", labelDe: "Kintex Radar", status: "next", dataSources: ["profiles", "contracts", "documents", "deadlines", "audit_events"] },
   { id: "offer-desk", labelBg: "Офертен desk", labelDe: "Angebotsdesk", status: "active", dataSources: ["documents", "contracts", "audit_events"] },
-  { id: "deadlines", labelBg: "Срокове", labelDe: "Fristen", status: "planned", dataSources: ["reminders", "contracts", "documents"] },
+  { id: "deadlines", labelBg: "Срокове", labelDe: "Fristen", status: "planned", dataSources: ["deadlines", "contracts", "documents"] },
   { id: "opportunities", labelBg: "Възможности", labelDe: "Möglichkeiten", status: "planned", dataSources: ["contracts", "profiles"] },
 ] as const satisfies ReadonlyArray<{
   id: string

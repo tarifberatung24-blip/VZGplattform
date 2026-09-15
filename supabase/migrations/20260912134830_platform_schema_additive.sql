@@ -392,4 +392,4 @@ grant select, insert, update, delete on table
   public.platform_correspondence_drafts,
   public.platform_approvals,
   public.platform_audit_events
-to authenticated;
+to authenticated

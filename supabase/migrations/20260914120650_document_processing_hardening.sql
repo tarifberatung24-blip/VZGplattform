@@ -1,6 +1,3 @@
--- Harden document processing state transitions used by the API.
--- This migration is additive and safe for the Frankfurt project.
-
 create index if not exists documents_processing_status_idx
   on public.documents(processing_status, updated_at desc);
 
@@ -24,4 +21,4 @@ begin
         'failed'
       ));
   end if;
-end $$;
+end $$

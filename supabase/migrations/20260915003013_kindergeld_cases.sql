@@ -23,4 +23,4 @@ create trigger kindergeld_cases_updated_at before update on public.kindergeld_ca
 
 revoke all on public.kindergeld_cases from anon;
 grant select, insert, update, delete on public.kindergeld_cases to authenticated;
-COMMENT ON TABLE public.kindergeld_cases IS 'User-owned Kindergeld wizard drafts; answers are untrusted until reviewed.';
+comment on table public.kindergeld_cases is 'User-owned Kindergeld wizard drafts; answers are untrusted until reviewed.'
