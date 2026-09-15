@@ -18,15 +18,15 @@ const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" }
 export const metadata: Metadata = {
   metadataBase: new URL("https://finanzberaterbg.de"),
   title: {
-    default: "KintexBG — BY VZG CONSULT",
-    template: "%s · KintexBG",
+    default: "VZGplattform — BY VZG CONSULT",
+    template: "%s · VZGplattform",
   },
   description:
-    "KintexBG организира договори, документи, срокове и финансови задачи за живота ти в Германия.",
+    "VZGplattform организира договори, документи, срокове и финансови задачи за живота ти в Германия.",
   generator: "v0.app",
-  applicationName: "KintexBG",
+  applicationName: "VZGplattform",
   keywords: [
-    "KintexBG",
+    "VZGplattform",
     "данъци Германия",
     "Steuererklärung",
     "Kindergeld",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   openGraph: {
     type: "website",
-    siteName: "KintexBG",
-    title: "KintexBG — BY VZG CONSULT",
+    siteName: "VZGplattform",
+    title: "VZGplattform — BY VZG CONSULT",
     description: "Договори, документи, срокове и финансови задачи за живота ти в Германия.",
   },
   icons: {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "KintexBG",
+    title: "VZGplattform",
     statusBarStyle: "black-translucent",
   },
 }
