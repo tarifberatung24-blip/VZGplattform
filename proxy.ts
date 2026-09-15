@@ -18,6 +18,13 @@ export async function proxy(request: NextRequest) {
     return await updateSession(request)
   }
 
+  if (authPath === "/protected") {
+    const url = request.nextUrl.clone()
+    url.pathname = isLocale(segment) ? `/${segment}/dashboard` : "/dashboard"
+    url.search = ""
+    return NextResponse.redirect(url, 308)
+  }
+
   if (isLocale(segment)) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set("x-locale", segment)
