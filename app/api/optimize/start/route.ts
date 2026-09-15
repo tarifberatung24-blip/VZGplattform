@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       ai_explanation: partner.configured ? "Partner quote is required before a new monthly amount or savings can be shown." : "No approved partner quote is configured. No new price or saving is shown.",
     }).select("id,status,category,filled_data,comparison,partner_id,affiliate_url,ai_explanation,created_at,updated_at").single()
     if (error || !session) return NextResponse.json({ code: "OPTIMIZE_SESSION_CREATE_FAILED" }, { status: 502 })
-    await supabase.from("audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "optimize_session", entity_id: session.id, event_type: "optimize.started", event_summary: "Optimize flow started", metadata: { category, contract_id: contractId, missing_critical: missingCritical, partner_configured: partner.configured } })
+    await supabase.from("platform_audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "optimize_session", entity_id: session.id, event_type: "optimize.started", event_summary: "Optimize flow started", metadata: { category, contract_id: contractId, missing_critical: missingCritical, partner_configured: partner.configured } })
     return NextResponse.json({ session, missing_critical: missingCritical, ready_for_review: status === "ready_for_review", partner_configured: partner.configured })
   } catch (error) {
     const code = error instanceof Error ? error.message : "OPTIMIZE_START_FAILED"

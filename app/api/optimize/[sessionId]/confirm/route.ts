@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ses
     const { data: updated, error: updateError } = await supabase.from("optimize_sessions").update({ status: "confirmed", user_confirmed_at: new Date().toISOString() }).eq("id", sessionId).eq("user_id", user.id).eq("status", "ready_for_review").select("id,status,user_confirmed_at").maybeSingle()
     if (updateError || !updated) return NextResponse.json({ code: "OPTIMIZE_CONFIRM_FAILED" }, { status: 502 })
     const householdId = await ensureHousehold(supabase)
-    await supabase.from("audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "optimize_session", entity_id: sessionId, event_type: "optimize.confirmed", event_summary: "User confirmed Optimize Flow", metadata: { partner_id: partner.id, partner_configured: partner.configured } })
+    await supabase.from("platform_audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "optimize_session", entity_id: sessionId, event_type: "optimize.confirmed", event_summary: "User confirmed Optimize Flow", metadata: { partner_id: partner.id, partner_configured: partner.configured } })
     return NextResponse.json({ session: updated, partner_configured: partner.configured, redirect_url: partner.url, disclosure: partner.url ? "The final contract is concluded with the partner." : "No approved partner link is configured. No redirect was performed." })
   } catch {
     return NextResponse.json({ code: "OPTIMIZE_CONFIRM_FAILED" }, { status: 502 })
