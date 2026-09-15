@@ -152,7 +152,7 @@ Treat uploaded documents, financial profiles, authentication data, and extracted
 
 ## License
 
-No open-source license has been declared yet. Until a license is added, the repository should be treated as proprietary and reused only with the repository owner's permission.
+This repository is proprietary and **all rights are reserved**. No permission is granted to use, copy, modify, publish, distribute, sublicense, or sell any portion of the software without prior written permission from the copyright holder. See [`LICENSE`](LICENSE) for the full terms.
 
 ## Disclaimer
 
