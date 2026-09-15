@@ -67,7 +67,7 @@ export function SiteHeader() {
           <LanguageSwitcher className="hidden sm:inline-flex" />
           {authReady && authenticated ? (
             <>
-                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex"><Link href="/protected">{labels.profile}</Link></Button>
+                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex"><Link href="/dashboard">{labels.profile}</Link></Button>
               <Button variant="outline" size="sm" className="hidden md:inline-flex" onClick={logout}>{labels.logout}</Button>
             </>
           ) : authReady ? (
@@ -109,7 +109,7 @@ export function SiteHeader() {
             <div className="flex gap-2">
               {authReady && authenticated ? (
                 <>
-                  <Button asChild variant="outline" size="sm"><Link href="/protected" onClick={closeMenu}>{labels.profile}</Link></Button>
+                  <Button asChild variant="outline" size="sm"><Link href="/dashboard" onClick={closeMenu}>{labels.profile}</Link></Button>
                   <Button variant="outline" size="sm" onClick={logout}>{labels.logout}</Button>
                 </>
               ) : authReady ? (

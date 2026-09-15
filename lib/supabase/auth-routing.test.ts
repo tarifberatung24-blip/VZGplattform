@@ -4,9 +4,9 @@ import { isProtectedAppPath, requiresMfa, sanitizeNextPath } from "./auth-routin
 describe("auth routing", () => {
   it("accepts local destinations and rejects external redirects", () => {
     expect(sanitizeNextPath("/protected/home-office")).toBe("/protected/home-office")
-    expect(sanitizeNextPath("//evil.example")).toBe("/protected")
-    expect(sanitizeNextPath("/\\evil.example")).toBe("/protected")
-    expect(sanitizeNextPath("https://evil.example")).toBe("/protected")
+    expect(sanitizeNextPath("//evil.example")).toBe("/dashboard")
+    expect(sanitizeNextPath("/\\evil.example")).toBe("/dashboard")
+    expect(sanitizeNextPath("https://evil.example")).toBe("/dashboard")
   })
 
   it("recognizes protected localized and unlocalized routes", () => {

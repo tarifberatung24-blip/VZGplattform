@@ -1,7 +1,7 @@
 import { stripLocale } from "./i18n/routing"
 
 export const kintexModules = [
-  { id: "overview", href: "/protected", bg: "Преглед", de: "Übersicht" },
+  { id: "overview", href: "/dashboard", bg: "Преглед", de: "Übersicht" },
   { id: "contracts", href: "/vertraege", bg: "Договори", de: "Verträge" },
   { id: "insurance", href: "/protected?module=insurance", bg: "Застраховки", de: "Versicherungen", planned: true },
   { id: "credits", href: "/protected?module=credits", bg: "Кредити", de: "Kredite", planned: true },

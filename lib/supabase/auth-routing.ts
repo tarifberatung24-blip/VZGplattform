@@ -12,7 +12,7 @@ const protectedPrefixes = [
   "/auth/update-password",
 ]
 
-export function sanitizeNextPath(value: string | null | undefined, fallback = "/protected") {
+export function sanitizeNextPath(value: string | null | undefined, fallback = "/dashboard") {
   return value?.startsWith("/") && !value.startsWith("//") && !value.includes("\\") ? value : fallback
 }
 

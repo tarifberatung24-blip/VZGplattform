@@ -91,14 +91,14 @@ export default function SignUpPage() {
       },
     })
     if (error) setEmailError(error.message.toLowerCase().includes("password") ? copy.passwordError : copy.genericError)
-    else router.push(data.session ? `/${locale}/protected` : `/${locale}/auth/sign-up-success`)
+    else router.push(data.session ? `/${locale}/dashboard` : `/${locale}/auth/sign-up-success`)
     setLoading(false)
   }
 
   async function signUpWithGoogle() {
     setLoading(true)
     setEmailError(null)
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/${locale}/protected`)}`
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/${locale}/dashboard`)}`
     const { error } = await createClient().auth.signInWithOAuth({ provider: "google", options: { redirectTo } })
     if (error) {
       setEmailError(copy.authError)
@@ -128,7 +128,7 @@ export default function SignUpPage() {
       const { error } = await createClient().auth.verifyOtp({ phone: normalizedPhone, token: otp, type: "sms" })
       if (error) setEmailError(de ? phoneAuthMessage(error.message) : copy.authError)
       else {
-        router.replace(`/${locale}/protected`)
+        router.replace(`/${locale}/dashboard`)
         router.refresh()
       }
     }
