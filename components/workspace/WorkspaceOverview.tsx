@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { FileText, HeartHandshake, Loader2, ReceiptText, RefreshCw, ShieldCheck, WalletCards } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -109,6 +110,10 @@ export function WorkspaceOverview() {
           <ShieldCheck className="mx-auto size-10 text-primary" />
           <h1 className="mt-4 text-2xl font-semibold">Влезте, за да видите данните си</h1>
           <p className="mt-2 text-muted-foreground">Вашият личен преглед се показва само след вход в профила.</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link href="/auth/login?next=/workspace" className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90">Вход в профила</Link>
+            <Link href="/anspruch" className="inline-flex items-center justify-center rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition hover:bg-muted">Проверка на помощи</Link>
+          </div>
         </CardContent>
       </Card>
     )
