@@ -52,5 +52,5 @@ export async function validateDocument(file: File) {
 }
 
 export function isCanonicalSupabase(url = process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  return url?.replace(/\/$/, "") === "https://sophzmteuemggqlstebw.supabase.co"
+  return url?.replace(/\/$/, "") === "https://mteguzgbiuexmdcrqajj.supabase.co"
 }

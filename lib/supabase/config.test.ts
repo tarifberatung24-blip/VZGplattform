@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it } from "vitest"
 import { getSupabaseConfig } from "./config"
 
 const originalEnv = { ...process.env }
-const projectUrl = "https://wrong-project-ref.supabase.co"
+const projectUrl = "https://mteguzgbiuexmdcrqajj.supabase.co"
 
-function legacyAnonKey(ref = "wrong-project-ref") {
+function legacyAnonKey(ref = "mteguzgbiuexmdcrqajj") {
   const payload = Buffer.from(JSON.stringify({ role: "anon", ref }), "utf8").toString("base64url")
   return `header.${payload}.signature`
 }
