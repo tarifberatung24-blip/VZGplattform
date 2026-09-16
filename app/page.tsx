@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { FinancialOsOverview } from "@/components/marketing/financial-os-overview"
 import { Hero } from "@/components/marketing/hero"
 import { OpportunityCheck } from "@/components/marketing/opportunity-check"
-import { SiteFooter } from "@/components/marketing/site-footer"
 import { useLanguage } from "@/lib/i18n/language-context"
 
 export default function HomePage() {
@@ -104,7 +103,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </div>
   )
 }

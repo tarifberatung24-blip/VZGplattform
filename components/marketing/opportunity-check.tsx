@@ -14,7 +14,7 @@ export function OpportunityCheck() {
       title: t.opportunityCards.taxTitle,
       desc: t.opportunityCards.taxDesc,
       accent: "text-primary",
-      bg: "bg-primary/10",
+      bg: "bg-primary/5",
     },
     {
       href: "/anspruch",
@@ -38,7 +38,7 @@ export function OpportunityCheck() {
       title: t.opportunityCards.documentsTitle,
       desc: t.opportunityCards.documentsDesc,
       accent: "text-primary",
-      bg: "bg-primary/10",
+      bg: "bg-primary/5",
     },
   ]
 
@@ -58,9 +58,9 @@ export function OpportunityCheck() {
             <Link
               key={c.href}
               href={c.href}
-              className="group flex flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group flex flex-col rounded-md border border-border bg-card p-6 transition-all  hover:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${c.bg}`}>
+              <span className={`inline-flex h-12 w-12 items-center justify-center rounded-md ${c.bg}`}>
                 <Icon className={`h-6 w-6 ${c.accent}`} />
               </span>
               <h3 className="mt-4 text-lg font-semibold text-foreground">{c.title}</h3>

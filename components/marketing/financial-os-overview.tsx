@@ -5,7 +5,7 @@ import { ArrowRight, CalendarClock, FileCheck2, PiggyBank, Sparkles } from "luci
 import { useLanguage } from "@/lib/i18n/language-context"
 
 const overview = [
-  { key: "save", icon: PiggyBank, href: "/zayavka?service=energy", label: "Пари за спестяване", description: "Заявка за по-добра тарифа с ръчна проверка до 2 часа.", tone: "bg-primary/10 text-primary" },
+  { key: "save", icon: PiggyBank, href: "/zayavka?service=energy", label: "Пари за спестяване", description: "Заявка за по-добра тарифа с ръчна проверка до 2 часа.", tone: "bg-primary/5 text-primary" },
   { key: "claim", icon: Sparkles, href: "/anspruch", label: "Пари за получаване", description: "Провери данъчни връщания и възможни помощи.", tone: "bg-success/10 text-success" },
   { key: "deadlines", icon: CalendarClock, href: "/vertraege", label: "Срокове за действие", description: "Не изпускай Kündigung, заявления и важни дати.", tone: "bg-accent text-accent-foreground" },
   { key: "documents", icon: FileCheck2, href: "/documents", label: "Документи за подготовка", description: "Знай какво ти трябва преди всяко заявление.", tone: "bg-secondary text-secondary-foreground" },
@@ -24,7 +24,7 @@ export function FinancialOsOverview() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {overview.map(({ icon: Icon, href, label, description, tone }) => (
             <Link key={href} href={localizedHref(href)} className="kintex-marketing-item group p-5">
-              <span className={`inline-flex size-11 items-center justify-center rounded-xl ${tone}`}><Icon aria-hidden="true" /></span>
+              <span className={`inline-flex size-11 items-center justify-center rounded-md ${tone}`}><Icon aria-hidden="true" /></span>
               <h3 className="mt-5 font-semibold text-foreground">{label}</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
               <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary">Разгледай <ArrowRight data-icon="inline-end" className="transition-transform group-hover:translate-x-1" /></span>

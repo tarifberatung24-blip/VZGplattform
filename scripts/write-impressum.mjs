@@ -1,4 +1,12 @@
-import { Mail, Phone } from "lucide-react"
+import { writeFileSync, mkdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const target = "C:/Users/ASUS/VZGplattform-1/app/impressum/page.tsx";
+mkdirSync("C:/Users/ASUS/VZGplattform-1/app/impressum", { recursive: true });
+
+writeFileSync(
+  target,
+  `import { Mail, Phone } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { legalAddress, legalProfile } from "@/lib/legal-profile"
@@ -12,13 +20,13 @@ export default function ImpressumPage() {
     <main className="min-h-screen bg-background px-4 py-16 text-foreground">
       <div className="mx-auto flex max-w-3xl flex-col gap-8">
         <Link
-          href={`/${locale}`}
+          href={\`\${locale}\`}
           className="text-sm text-muted-foreground hover:text-foreground"
         >
           {isBg ? "Към началото" : "Zur Startseite"}
         </Link>
 
-        <article className="flex flex-col gap-8 rounded-md border border-border px-6 py-8">
+        <article className="flex flex-col gap-8 rounded-2xl border border-border/60 bg-card/40 bg-slate-950/40 backdrop-blur px-6 py-8 shadow-sm">
           <header className="flex flex-col gap-3">
             <p className="text-sm font-medium text-primary">
               {isBg ? "Правна информация" : "Rechtliche Informationen"}
@@ -38,7 +46,7 @@ export default function ImpressumPage() {
               {isBg ? "Данни за доставчика" : "Angaben zum Anbieter"}
             </h2>
 
-            <div className="flex flex-col gap-4 rounded-md border border-border bg-muted p-5">
+            <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-muted/20 p-5">
               {address.length > 0 && (
                 <address className="not-italic leading-relaxed text-muted-foreground">
                   {address.map((line) => (
@@ -53,7 +61,7 @@ export default function ImpressumPage() {
                 {legalProfile.email && (
                   <a
                     className="flex items-center gap-2 text-primary hover:underline"
-                    href={`mailto:${legalProfile.email}`}
+                    href={\`mailto:\${legalProfile.email}\`}
                   >
                     <Mail className="size-4" />
                     {legalProfile.email}
@@ -62,7 +70,7 @@ export default function ImpressumPage() {
                 {legalProfile.phone && (
                   <a
                     className="flex items-center gap-2 text-primary hover:underline"
-                    href={`tel:${legalProfile.phone}`}
+                    href={\`tel:\${legalProfile.phone}\`}
                   >
                     <Phone className="size-4" />
                     {legalProfile.phone}
@@ -105,7 +113,7 @@ export default function ImpressumPage() {
             </p>
             <p className="text-sm text-muted-foreground">
               {isBg ? "Свържете се с нас:" : "Erreichbar unter:"} {legalProfile.email ? (
-                <a className="text-primary hover:underline" href={`mailto:${legalProfile.email}`}>
+                <a className="text-primary hover:underline" href={\`mailto:\${legalProfile.email}\`}>
                   {legalProfile.email}
                 </a>
               ) : (
@@ -118,3 +126,8 @@ export default function ImpressumPage() {
     </main>
   )
 }
+`,
+  "utf8",
+);
+
+console.log("wrote", target);
