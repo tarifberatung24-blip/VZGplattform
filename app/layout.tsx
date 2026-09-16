@@ -17,17 +17,17 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://finanzbg.de"),
+  metadataBase: new URL("https://vzgplattform.onrender.com"),
   title: {
-    default: "KintexBG — BY VZG",
-    template: "%s · KintexBG",
+    default: "VZGplattform — Данъци и помощи в Германия",
+    template: "%s · VZGplattform",
   },
   description:
-    "KintexBG организира договори, документи, срокове и финансови задачи за живота ти в Германия.",
+    "Предварителен screening за данъци, помощи и Bescheid документи за българи в Германия.",
   generator: "v0.app",
-  applicationName: "KintexBG",
+  applicationName: "VZGplattform",
   keywords: [
-    "KintexBG",
+    "VZGplattform",
     "данъци Германия",
     "Steuererklärung",
     "Kindergeld",
@@ -35,13 +35,15 @@ export const metadata: Metadata = {
     "Bürgergeld",
     "договори Германия",
     "българи в Германия",
+    "Bescheid анализ",
   ],
   manifest: "/manifest.json",
   openGraph: {
     type: "website",
-    siteName: "KintexBG",
-    title: "KintexBG — BY VZG",
-    description: "Договори, документи, срокове и финансови задачи за живота ти в Германия.",
+    siteName: "VZGplattform",
+    title: "VZGplattform — Данъци и помощи в Германия",
+    description: "Предварителен screening за данъци, помощи и Bescheid документи за българи в Германия.",
+    images: [{ url: "/icons/finanzbg-512.png", width: 512, height: 512, alt: "VZGplattform" }],
   },
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "KintexBG",
+    title: "VZGplattform",
     statusBarStyle: "black-translucent",
   },
 }

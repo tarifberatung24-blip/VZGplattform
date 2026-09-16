@@ -19,6 +19,9 @@ export type DemoAnalysis = {
   issueDate: string
   receivedDate: string
   deadline: string
+  deadlineConfidence: number
+  requiredAction: string
+  amountInvolved: string
   amounts: string[]
   currency: string
   summaryBg: string
@@ -32,18 +35,5 @@ export type DemoAnalysis = {
 }
 
 export type DemoReview = { analysis: DemoAnalysis; reviewedAt: string }
-
-export type DemoStore = {
-  documents: DemoDocument[]
-  analyses: Record<string, DemoAnalysis>
-  reviews: Record<string, DemoReview>
-}
-
-export type DocumentRepository = {
-  list(): DemoDocument[]
-  add(document: DemoDocument): void
-  remove(id: string): void
-  saveAnalysis(id: string, analysis: DemoAnalysis): void
-  saveReview(id: string, review: DemoReview): void
-  reset(): void
-}
+export type DemoStore = { documents: DemoDocument[]; analyses: Record<string, DemoAnalysis>; reviews: Record<string, DemoReview> }
+export type DocumentRepository = { list(): DemoDocument[]; add(document: DemoDocument): void; remove(id: string): void; saveAnalysis(id: string, analysis: DemoAnalysis): void; saveReview(id: string, review: DemoReview): void; reset(): void }

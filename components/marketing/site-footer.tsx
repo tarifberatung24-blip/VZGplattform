@@ -41,6 +41,9 @@ export function SiteFooter() {
             <Link href={`/${locale}/agb`} className="text-muted-foreground hover:text-foreground">
               {locale === "bg" ? "Общи условия" : "AGB"}
             </Link>
+            <Link href="/impressum" className="text-muted-foreground hover:text-foreground">
+              Impressum
+            </Link>
           </nav>
         </div>
 

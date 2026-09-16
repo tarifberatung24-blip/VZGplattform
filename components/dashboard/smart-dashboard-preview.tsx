@@ -224,6 +224,9 @@ export function SmartDashboardPreview({ firstName, profile, contracts, documents
             <Button type="button" variant="outline" className="h-11 rounded-xl px-5" onClick={() => setAssistantOpen(true)}>
               <Bot className="size-4" aria-hidden="true" />AI Assistant
             </Button>
+            <Button asChild type="button" variant="secondary" className="h-11 rounded-xl px-5">
+              <Link href="/contact-expert">Свържи се с експерт</Link>
+            </Button>
           </div>
         </header>
 
