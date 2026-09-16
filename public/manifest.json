@@ -1,0 +1,15 @@
+{
+  "name": "KintexBG",
+  "short_name": "FinanzBG",
+  "description": "BG/DE financial and administrative assistant for Bulgarians in Germany",
+  "start_url": "/bg",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1526",
+  "theme_color": "#69d8c0",
+  "icons": [
+    { "src": "/icons/finanzbg-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/finanzbg-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

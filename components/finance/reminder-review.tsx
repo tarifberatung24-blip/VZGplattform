@@ -1,0 +1,2 @@
+import { BellRing } from "lucide-react"
+export function ReminderReview() { return <section className="rounded-2xl border border-border bg-card p-6"><div className="flex items-start gap-3"><BellRing className="mt-0.5 size-5 text-primary" aria-hidden="true" /><div><h2 className="font-semibold text-foreground">Напомняне</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">След преглед може да бъде подготвено локално напомняне. Външно изпращане не е активно.</p></div></div></section> }
