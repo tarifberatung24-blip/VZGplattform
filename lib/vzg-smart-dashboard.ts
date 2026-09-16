@@ -8,7 +8,7 @@ export type SmartDashboardStats = {
 }
 
 export const smartDashboardEnvironment = {
-  appName: "KintexBG",
+  appName: "VZGplattform",
   brandLine: "BY VZG CONSULT",
   primaryLocale: "bg",
   secondaryLocale: "de",
@@ -37,7 +37,7 @@ export const smartDashboardModules = [
   { id: "overview", labelBg: "Преглед", labelDe: "Übersicht", status: "active", dataSources: ["profiles", "contracts", "documents", "reminders"] },
   { id: "contracts", labelBg: "Договори", labelDe: "Verträge", status: "active", dataSources: ["contracts", "documents"] },
   { id: "documents", labelBg: "Документи", labelDe: "Dokumente", status: "active", dataSources: ["documents", "storage.objects", "audit_events"] },
-  { id: "kintex-radar", labelBg: "Kintex Radar", labelDe: "Kintex Radar", status: "next", dataSources: ["profiles", "contracts", "documents", "reminders", "audit_events"] },
+  { id: "vzg-radar", labelBg: "VZG Radar", labelDe: "VZG Radar", status: "next", dataSources: ["profiles", "contracts", "documents", "reminders", "audit_events"] },
   { id: "ai-home-office", labelBg: "AI Home Office Assistant", labelDe: "AI Home Office Assistant", status: "active", dataSources: ["documents", "contracts", "audit_events"] },
   { id: "deadlines", labelBg: "Срокове", labelDe: "Fristen", status: "planned", dataSources: ["reminders", "contracts", "documents"] },
   { id: "opportunities", labelBg: "Възможности", labelDe: "Möglichkeiten", status: "planned", dataSources: ["contracts", "profiles"] },

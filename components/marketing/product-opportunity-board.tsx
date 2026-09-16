@@ -83,7 +83,7 @@ export function ProductOpportunityBoard() {
             Finde die Hebel, die <span className="text-primary">wirklich zählen.</span>
           </h1>
           <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
-            KintexBG verbindet deine persönlichen Daten mit konkreten nächsten Schritten. Nicht alles ist sofort verfügbar — aber alles bleibt nachvollziehbar.
+            VZGplattform verbindet deine persönlichen Daten mit konkreten nächsten Schritten. Nicht alles ist sofort verfügbar — aber alles bleibt nachvollziehbar.
           </p>
         </div>
 
@@ -151,7 +151,7 @@ export function ProductOpportunityBoard() {
                   <Gauge aria-hidden="true" className="size-4" />
                 </Link>
               </div>
-              {active.href && <p className="mt-4 text-xs leading-5 text-muted-foreground">Anzeige / Partnerlink. KintexBG erhält möglicherweise eine Vergütung. Die Konditionen werden beim Partner angezeigt.</p>}
+              {active.href && <p className="mt-4 text-xs leading-5 text-muted-foreground">Anzeige / Partnerlink. VZGplattform erhält möglicherweise eine Vergütung. Die Konditionen werden beim Partner angezeigt.</p>}
             </div>
           </div>
         </div>

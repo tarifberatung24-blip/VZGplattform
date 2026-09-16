@@ -14,7 +14,7 @@ export function Hero() {
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-muted-foreground shadow-sm">
             <CheckCircle2 className="size-3.5 text-success" />
-            KintexBG work management
+            VZGplattform work management
           </span>
           <h1 className="mt-6 max-w-4xl text-balance text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl md:text-6xl">
             {t.home.heroTitle}

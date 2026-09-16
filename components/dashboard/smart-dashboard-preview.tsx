@@ -24,12 +24,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AiHomeOfficeChat } from "@/components/dashboard/ai-home-office-chat"
-import { getKintexRadarSignals } from "@/lib/kintex-radar"
+import { getVzgRadarSignals } from "@/lib/vzg-radar"
 import {
   getSmartDashboardNextAction,
   getSmartDashboardProblems,
   type SmartDashboardStats,
-} from "@/lib/kintex-smart-dashboard"
+} from "@/lib/vzg-smart-dashboard"
 
 type Profile = {
   completeness: number | null
@@ -168,7 +168,7 @@ export function SmartDashboardPreview({ firstName, profile, contracts, documents
   const monthlyTotal = contracts.reduce((sum, contract) => sum + (Number(contract.monthly_amount) || 0), 0)
   const missingCosts = contracts.filter((contract) => contract.monthly_amount == null).length
   const nextReminder = reminders.find((reminder) => reminder.due_at) ?? null
-  const radarSignals = getKintexRadarSignals(contracts)
+  const radarSignals = getVzgRadarSignals(contracts)
 
   const filteredContracts = useMemo(() => {
     const normalized = query.trim().toLowerCase()
@@ -242,7 +242,7 @@ export function SmartDashboardPreview({ firstName, profile, contracts, documents
             <div className="flex flex-col justify-between gap-4 border-b border-border px-5 py-4 sm:flex-row sm:items-center">
               <div>
                 <h2 id="payments-title" className="text-lg font-semibold">Месечни плащания</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Групирани от въведените договори в KintexBG</p>
+                <p className="mt-1 text-xs text-muted-foreground">Групирани от въведените договори в VZGplattform</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button type="button" variant={onlyNeedsAttention ? "secondary" : "outline"} size="sm" className="rounded-lg" onClick={() => setOnlyNeedsAttention((value) => !value)}><Filter className="size-4" />За внимание</Button>
@@ -360,7 +360,7 @@ export function SmartDashboardPreview({ firstName, profile, contracts, documents
               </div>
             </section>
             <section className="rounded-2xl border border-border bg-card p-5 shadow-sm shadow-slate-200/40" aria-labelledby="radar-title">
-              <div className="flex items-center justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Kintex Radar</p><h2 id="radar-title" className="mt-1 font-semibold">Сигнали от твоите данни</h2></div><span className="text-xs text-muted-foreground">{radarSignals.length}</span></div>
+              <div className="flex items-center justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-wide text-primary">VZG Radar</p><h2 id="radar-title" className="mt-1 font-semibold">Сигнали от твоите данни</h2></div><span className="text-xs text-muted-foreground">{radarSignals.length}</span></div>
               <div className="mt-4 space-y-3">{radarSignals.length === 0 ? <p className="text-sm text-muted-foreground">Няма открити сигнали.</p> : radarSignals.slice(0, 3).map((signal) => <div key={signal.id} className="border-l-2 border-primary px-3 py-1"><p className="text-sm font-medium">{signal.title}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{signal.detail}</p></div>)}</div>
               <p className="mt-4 text-[11px] text-muted-foreground">Radar показва само записани данни. Не изчислява измислени спестявания.</p>
             </section>
@@ -378,7 +378,7 @@ export function SmartDashboardPreview({ firstName, profile, contracts, documents
           <header className="flex items-center justify-between border-b border-border px-5 py-4">
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><Bot className="size-5" /></span>
-              <div><h2 id="assistant-drawer-title" className="font-semibold">AI Home Office Assistant</h2><p className="text-xs text-muted-foreground">KintexBG работно пространство</p></div>
+              <div><h2 id="assistant-drawer-title" className="font-semibold">AI Home Office Assistant</h2><p className="text-xs text-muted-foreground">VZGplattform работно пространство</p></div>
             </div>
             <Button ref={assistantCloseButton} type="button" variant="ghost" size="icon" className="rounded-lg" onClick={() => setAssistantOpen(false)} aria-label="Затвори"><X className="size-5" /></Button>
           </header>
@@ -402,14 +402,14 @@ export function SmartDashboardPreview({ firstName, profile, contracts, documents
               </div>
             </section>
             <section>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Kintex Radar</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">VZG Radar</p>
               <div className="space-y-2">{radarSignals.length === 0 ? <p className="text-sm text-muted-foreground">Няма сигнали за проверка.</p> : radarSignals.slice(0, 4).map((signal) => <div key={signal.id} className="border-l-2 border-primary px-3 py-2"><p className="text-sm font-medium">{signal.title}</p><p className="mt-1 text-xs text-muted-foreground">{signal.detail}</p></div>)}</div>
             </section>
             <AiHomeOfficeChat />
           </div>
           <footer className="border-t border-border p-5">
             <Button asChild variant="outline" className="h-12 w-full justify-between rounded-xl"><Link href="/protected/home-office"><span>Отвори пълния AI Assistant</span><Send className="size-4" /></Link></Button>
-            <p className="mt-3 text-center text-[11px] text-muted-foreground">Работи само с данните в твоя KintexBG профил.</p>
+            <p className="mt-3 text-center text-[11px] text-muted-foreground">Работи само с данните в твоя VZGplattform профил.</p>
           </footer>
         </aside>
       </div>}

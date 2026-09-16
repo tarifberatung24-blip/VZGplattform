@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   const context = JSON.stringify({ contracts: contracts ?? [], documents: documents ?? [] })
   const result = streamText({
     model: groq("openai/gpt-oss-20b"),
-    system: `Ти си KintexBG AI Home Office Assistant. Отговаряй кратко и ясно на български, когато потребителят пише на български, иначе на езика на въпроса. Използвай само данните в CONTEXT. Ако данните липсват, кажи "Няма въведени данни". Не измисляй цени, доставчици, спестявания или срокове. Не давай правни, данъчни или застрахователни заключения. Предлагай следваща стъпка, но не предприемай действие без потвърждение. CONTEXT: ${context}`,
+    system: `Ти си VZGplattform AI Home Office Assistant. Отговаряй кратко и ясно на български, когато потребителят пише на български, иначе на езика на въпроса. Използвай само данните в CONTEXT. Ако данните липсват, кажи "Няма въведени данни". Не измисляй цени, доставчици, спестявания или срокове. Не давай правни, данъчни или застрахователни заключения. Предлагай следваща стъпка, но не предприемай действие без потвърждение. CONTEXT: ${context}`,
     messages: parsed.data.messages,
     maxOutputTokens: 500,
     temperature: 0.2,

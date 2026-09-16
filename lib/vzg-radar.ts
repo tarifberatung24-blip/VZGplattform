@@ -9,7 +9,7 @@ export type RadarContract = {
 
 export type RadarSignal = { id: string; title: string; detail: string; tone: "attention" | "info" }
 
-export function getKintexRadarSignals(contracts: RadarContract[], now = new Date()): RadarSignal[] {
+export function getVzgRadarSignals(contracts: RadarContract[], now = new Date()): RadarSignal[] {
   const signals: RadarSignal[] = []
   const soon = new Date(now)
   soon.setDate(soon.getDate() + 90)

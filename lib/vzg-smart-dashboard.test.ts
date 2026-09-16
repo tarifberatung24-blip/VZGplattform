@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { getSmartDashboardNextAction, getSmartDashboardProblems, smartDashboardAgents, smartDashboardRules } from "./kintex-smart-dashboard"
+import { getSmartDashboardNextAction, getSmartDashboardProblems, smartDashboardAgents, smartDashboardRules } from "./vzg-smart-dashboard"
 
-describe("Kintex Smart Dashboard", () => {
+describe("VZG Smart Dashboard", () => {
   it("requires profile completion first", () => {
     expect(getSmartDashboardNextAction({ profileCompleteness: 20, contracts: 3, documents: 2 }, "bg")).toMatchObject({ id: "profile", reason: "PROFILE_INCOMPLETE" })
   })

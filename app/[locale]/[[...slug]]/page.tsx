@@ -1,5 +1,5 @@
 import {notFound} from "next/navigation"
-import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
+import { isVzgWorkspacePath } from "@/lib/vzg-navigation"
 import HomePage from "@/app/page"
 import CheckPage from "@/app/check/page"
 import UslugiPage from "@/app/uslugi/page"
@@ -40,8 +40,8 @@ const pages: Record<string, React.ComponentType> = {
 
 export async function generateMetadata({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
   const {slug = []} = await params
-  return isKintexWorkspacePath(`/${slug.join("/")}`)
-    ? { title: { absolute: "KintexBG — BY VZG CONSULT" }, description: "KintexBG — Digital Financial Home Office" }
+  return isVzgWorkspacePath(`/${slug.join("/")}`)
+    ? { title: { absolute: "VZGplattform — BY VZG CONSULT" }, description: "VZGplattform — Digital Financial Home Office" }
     : {}
 }
 

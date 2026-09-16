@@ -14,7 +14,7 @@ export function getSupabaseConfig() {
   }
 
   if (url.replace(/\/$/, "") !== `https://${project.projectRef}.supabase.co`) {
-    throw new Error(`Wrong Supabase project. KintexBG uses ${project.projectName}. Run pnpm supabase:check before continuing.`)
+    throw new Error(`Wrong Supabase project. VZGplattform uses ${project.projectName}. Run pnpm supabase:check before continuing.`)
   }
   if (key.startsWith("sb_secret_")) {
     throw new Error("A server-only Supabase secret cannot be used in the public client.")

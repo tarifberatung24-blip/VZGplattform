@@ -56,13 +56,13 @@ export function PwaInstallPrompt() {
   if (isStandalone || !visible) return null
 
   const copy = de ? {
-    title: "KintexBG installieren",
+    title: "VZGplattform installieren",
     android: "Installiere die App über den Installieren-Button oder das Browser-Menü.",
     ios: "Tippe in Safari auf Teilen und dann auf Zum Home-Bildschirm.",
     browser: "Öffne die Browser-Menüoption Installieren oder Zum Startbildschirm hinzufügen.",
     action: "Installieren", later: "Später", help: "Installationshilfe",
   } : {
-    title: "Инсталирай KintexBG",
+    title: "Инсталирай VZGplattform",
     android: "Използвай бутона за инсталиране или менюто на браузъра.",
     ios: "В Safari натисни Споделяне и после Добави към началния екран.",
     browser: "Отвори менюто на браузъра и избери Инсталиране или Добави към началния екран.",
