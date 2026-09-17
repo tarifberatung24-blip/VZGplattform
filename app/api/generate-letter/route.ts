@@ -1,22 +1,41 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
-import { generateText } from "ai"
 
-const cerebrasModel =
-  (() => {
-    try {
-      const { createOpenAI } = require("@ai-sdk/openai")
-      return createOpenAI({
-        apiKey: process.env.CEREBRAS_API_KEY ?? "",
-        baseURL: "https://api.cerebras.ai/v1",
-      })
-    } catch {
-      return null
-    }
-  })()
+const CEREBRAS_ENDPOINT = "https://api.cerebras.ai/v1/chat/completions"
 
-const modelName = process.env.CEREBRAS_MODEL ?? "llama3.1-70b"
+// Models currently served on Cerebras public endpoints (gpt-oss-120b, qwen-3.8-27b).
+const modelName = process.env.CEREBRAS_MODEL ?? "qwen-3.8-27b"
+
+/**
+ * Calls the OpenAI-compatible Cerebras endpoint directly instead of importing a provider
+ * SDK. The previous implementation required "@ai-sdk/openai", which was never declared as
+ * a dependency, so the require always threw and the route reported the provider as
+ * unconfigured even when CEREBRAS_API_KEY was present.
+ */
+async function generateCerebrasText(system: string, prompt: string): Promise<string> {
+  const apiKey = process.env.CEREBRAS_API_KEY
+  if (!apiKey) throw new Error("AI_PROVIDER_NOT_CONFIGURED")
+  const response = await fetch(CEREBRAS_ENDPOINT, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: modelName,
+      temperature: 0.2,
+      max_tokens: 2000,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: prompt },
+      ],
+    }),
+    signal: AbortSignal.timeout(45_000),
+  })
+  if (!response.ok) throw new Error(`CEREBRAS_HTTP_${response.status}`)
+  const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+  const content = payload.choices?.[0]?.message?.content
+  if (!content) throw new Error("CEREBRAS_EMPTY_RESPONSE")
+  return content
+}
 
 const requestSchema = z.object({
   description: z
@@ -44,7 +63,7 @@ function missingProviderError() {
 }
 
 export async function POST(request: Request) {
-  if (!cerebrasModel) {
+  if (!process.env.CEREBRAS_API_KEY) {
     return missingProviderError()
   }
 
@@ -94,14 +113,9 @@ export async function POST(request: Request) {
     `User request in Bulgarian:\n${description}\n\n` +
     `Use ${locale === "bg" ? "Bulgarian" : "German"} for the translation part.`
 
-  let result
+  let result: string
   try {
-    result = await generateText({
-      model: cerebrasModel(modelName),
-      system: systemPrompt,
-      prompt: userPrompt,
-      temperature: 0.2,
-    })
+    result = await generateCerebrasText(systemPrompt, userPrompt)
   } catch (error) {
     console.error("[generate-letter] AI failed", error)
     const message =
@@ -123,7 +137,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const raw = result.text.trim()
+  const raw = result.trim()
 
   let json:
     | { german?: string; bulgarian?: string }
