@@ -1,6 +1,4 @@
 import { writeFileSync, mkdirSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-
 const target = "C:/Users/ASUS/VZGplattform-1/app/impressum/page.tsx";
 mkdirSync("C:/Users/ASUS/VZGplattform-1/app/impressum", { recursive: true });
 

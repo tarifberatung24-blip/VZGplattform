@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { WorkplaceActionCenter } from "@/components/dashboard/workplace-action-center"
 import { MissingInformationInterviewer } from "@/components/dashboard/missing-information-interviewer"
+import { DocumentAnalyzer, type DashboardDocument } from "@/components/dashboard/document-analyzer"
 import { getSmartDashboardNextAction } from "@/lib/kintex-smart-dashboard"
 
 export type VzgDashboardProps = {
   firstName?: string | null
   profile?: { completeness: number | null } | null
   contracts: Array<{ id: string; title: string; category: string; provider_name: string | null; monthly_amount: number | null; status: string | null; end_date: string | null; review_status?: string | null }>
-  documents: Array<{ id: string; original_filename: string; processing_status: string | null; created_at: string | null; size_bytes: number | null }>
+  documents: DashboardDocument[]
   reviewCount: number
   reminders: Array<{ id: string; title: string; due_at: string | null; status: string | null }>
 }
@@ -50,6 +51,7 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
 
       <WorkplaceActionCenter firstName={firstName} nextAction={nextAction} reviewCount={reviewCount} documentCount={documents.length} contractCount={contracts.length} reminderCount={reminders.length} />
       <MissingInformationInterviewer questions={questions} />
+      <DocumentAnalyzer initialDocuments={documents} />
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,0.8fr)]">
         <article className="min-w-0 overflow-hidden rounded-md border border-border bg-card p-4 shadow-none sm:p-5"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{de ? "Cost overview" : "Разходен преглед"}</p><h2 className="mt-1 text-lg font-semibold">{de ? "Monthly costs by contract" : "Месечни разходи по договори"}</h2></div><Button variant="ghost" size="icon" className="shrink-0" asChild><Link href="/vertraege" aria-label="Open contracts"><ChevronRight className="size-4" /></Link></Button></div><div className="mt-6 flex h-44 min-w-0 items-end gap-2 sm:gap-4">{(groups.length ? groups : [["NEEDS_DATA", 0]]).map(([category, amount], index) => <div key={category} className="flex min-w-0 flex-1 flex-col items-center gap-2"><span className="max-w-full truncate text-[10px] text-muted-foreground">{amount ? money(amount as number) : "—"}</span><div className="flex h-32 w-full items-end rounded-t-lg bg-muted"><div className="w-full rounded-t-lg bg-primary transition-all" style={{ height: `${amount ? Math.max(12, ((amount as number) / maxGroup) * 100) : 12}%`, opacity: 1 - index * 0.12 }} /></div><span className="max-w-full truncate text-[11px] text-muted-foreground">{String(category)}</span></div>)}</div><p className="mt-4 text-xs text-muted-foreground">{de ? "No savings or new offers are estimated without verified partner data." : "Без потвърдени партньорски данни не се изчисляват спестявания или нови оферти."}</p></article>

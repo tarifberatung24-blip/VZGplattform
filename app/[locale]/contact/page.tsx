@@ -1,10 +1,9 @@
 "use client"
 
-import { Mail, Phone, MapPin, Send } from "lucide-react"
+import { Mail, Phone, MapPin } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { legalAddress, legalProfile } from "@/lib/legal-profile"
-import { submitLead, type LeadSubmitResult } from "./lead-submit"
 import ContactForm from "./contact-form"
 
 export default function ContactPage() {

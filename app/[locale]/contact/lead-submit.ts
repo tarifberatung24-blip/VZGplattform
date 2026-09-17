@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-
 export type LeadSubmitResult = { ok: boolean } | { error: true } | null
 
 export async function submitLead(
