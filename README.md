@@ -1,4 +1,4 @@
-# FinanzBG
+# HAMMEL by VZG
 
 FinanzBG is a bilingual Bulgarian/German financial and administrative assistant for people living in Germany. This repository contains the currently available v0 snapshot from the linked project, including the shared design system, i18n foundation, Supabase clients, deterministic opportunity engine, partner adapter guardrails, and the public marketing homepage.
 
