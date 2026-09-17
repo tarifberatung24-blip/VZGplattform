@@ -70,15 +70,15 @@ export function GlobalHeader() {
   ]
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background">
-      <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-none">
+      <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-6 px-5 lg:px-8">
         <Link
           href={localizedPath("/", locale)}
-          className="flex items-center gap-2 text-xl font-black tracking-tight text-foreground"
+          className="flex items-baseline gap-3 text-2xl font-black tracking-[-0.04em] text-foreground"
         >
-          HAMMAL
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            by VZG
+          KintexBG
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            by VZG Consult
           </span>
         </Link>
 
@@ -86,7 +86,7 @@ export function GlobalHeader() {
           <Link
             href={localizedPath("/", locale)}
             className={cn(
-              "px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+              "px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
               isActivePath("/") ? "text-foreground" : ""
             )}
           >
@@ -97,7 +97,7 @@ export function GlobalHeader() {
               key={link.href}
               href={localizedPath(link.href, locale)}
               className={cn(
-                "px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+                "px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
                 isActivePath(link.href) ? "text-foreground" : ""
               )}
             >
@@ -147,7 +147,7 @@ export function GlobalHeader() {
             type="button"
             variant="ghost"
             size="icon"
-            className="rounded-md md:hidden"
+            className="rounded-sm md:hidden"
             aria-label={mobileOpen ? labels.close : labels.menu}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
@@ -164,7 +164,7 @@ export function GlobalHeader() {
               href={localizedPath("/", locale)}
               onClick={closeMobile}
               className={cn(
-                "rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+                "rounded-sm px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
                 isActivePath("/") ? "text-foreground" : ""
               )}
             >
@@ -175,7 +175,7 @@ export function GlobalHeader() {
                 key={link.href}
                 href={localizedPath(link.href, locale)}
                 onClick={closeMobile}
-                className="rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="rounded-sm px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground"
               >
                 {labels[link.labelKey]}
               </Link>

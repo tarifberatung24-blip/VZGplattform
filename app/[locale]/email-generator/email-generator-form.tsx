@@ -36,7 +36,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
   const letter = isLetterResult ? output : null
 
   return (
-    <section className="flex flex-col gap-8 rounded-2xl border border-border/60 bg-card/40 bg-slate-950/40 backdrop-blur p-6 shadow-sm">
+    <section className="flex flex-col gap-10 rounded-sm border border-border bg-card p-8 shadow-none md:p-10">
       <form
         className="flex flex-col gap-6"
         onSubmit={(event) => {
@@ -53,7 +53,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
             onChange={(event) => setDescription(event.target.value)}
             required
             rows={8}
-            className="h-32 resize-y rounded-xl border border-border bg-muted/20 px-4 py-3 text-sm placeholder:text-muted-foreground focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            className="h-40 resize-y rounded-sm border border-border bg-background px-4 py-3 text-sm leading-7 placeholder:text-muted-foreground focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
             placeholder={
               isBg
                 ? "Опишете пократко ситуацията и какво искате да поискате или да попитате от администрацията..."
@@ -69,7 +69,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
           <select
             value={recipient}
             onChange={(event) => setRecipient(event.target.value as Recipient)}
-            className="h-11 rounded-xl border border-border bg-muted/20 px-4 text-sm focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            className="h-11 rounded-sm border border-border bg-background px-4 text-sm focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
           >
             <option value="Finanzamt">Finanzamt</option>
             <option value="Jobcenter">Jobcenter</option>
@@ -99,7 +99,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
           <button
             type="submit"
             disabled={!!letter}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-none transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
           >
             {output && "german" in output ? (
               <>
@@ -119,7 +119,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
 
       {output && "german" in output && (
         <div className="flex flex-col gap-6">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-px border border-border bg-border md:grid-cols-2">
             <LetterCard
               label={isBg ? "Немски版本" : "Deutsche Version"}
               content={output.german}
@@ -133,7 +133,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
             />
           </div>
 
-          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
+          <div className="flex flex-col gap-2 rounded-sm border border-border bg-background p-5 text-sm text-muted-foreground">
             <span className="font-medium text-foreground">
               {isBg ? "Използвани заместители:" : "Verwendete Platzhalter:"}
             </span>
@@ -176,21 +176,21 @@ function LetterCard({
   const displayContent = isEmpty && placeholder ? placeholder : content
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 p-4">
+    <div className="flex flex-col gap-4 bg-card p-5">
       <div className="flex items-center justify-between text-sm font-medium">
         <span className="text-foreground">{label}</span>
         {onCopy && (
           <button
             type="button"
             onClick={onCopy}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/40 px-3 py-1 text-xs text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-background px-3 py-1 text-xs font-bold text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <Copy className="size-3.5" />
             Kopieren
           </button>
         )}
       </div>
-      <div className="max-h-96 overflow-auto rounded-lg bg-card/40 p-4 text-sm leading-relaxed whitespace-pre-wrap break-words">
+      <div className="max-h-96 overflow-auto rounded-sm border border-border bg-background p-5 text-sm leading-7 whitespace-pre-wrap break-words">
         {displayContent}
       </div>
     </div>

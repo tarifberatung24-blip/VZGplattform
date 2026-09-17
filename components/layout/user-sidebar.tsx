@@ -60,8 +60,12 @@ export function UserSidebar() {
   const active = stripLocale(pathname)
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-px overflow-y-auto rounded-md border border-border bg-background p-2 lg:flex">
-      <nav className="flex flex-col gap-px" aria-label={locale === "de" ? "Hauptnavigation" : "Основна навигация"}>
+    <aside className="hidden w-64 shrink-0 flex-col gap-4 overflow-y-auto border-r border-border bg-background pr-6 lg:flex">
+      <div className="border-b border-border pb-5">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">KintexBG</p>
+        <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Private Office</p>
+      </div>
+      <nav className="flex flex-col gap-1" aria-label={locale === "de" ? "Hauptnavigation" : "Основна навигация"}>
         {navItems.map((item) => {
           const isActive =
             active === item.href || active.startsWith(item.href + "/")
@@ -71,10 +75,10 @@ export function UserSidebar() {
               href={localizedPath(item.href, locale)}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 border-l-2 px-3 py-3 text-sm font-bold transition-colors",
                 isActive
-                  ? "bg-primary/5 text-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "border-primary bg-secondary text-foreground"
+                  : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
               )}
             >
               <item.icon className="h-4 w-4 shrink-0" />
@@ -85,11 +89,11 @@ export function UserSidebar() {
           )
         })}
       </nav>
-      <div className="mt-auto border-t border-border pt-2">
+      <div className="mt-auto border-t border-border pt-4">
         <form action="/auth/logout" method="post">
           <button
             type="submit"
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="flex w-full items-center gap-3 border-l-2 border-transparent px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:border-border hover:text-foreground"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             <span>{locale === "de" ? "Abmelden" : "Изход"}</span>
