@@ -14,7 +14,7 @@ Master планът остава roadmap, не една огромна зада�
 - Node: 24.19.0; pnpm: 11.19.0 в текущата среда. CI използва Node 20/pnpm 10. Не променяй версиите без отделна оценка за съвместимост.
 - Vitest, ESLint, TypeScript и Next: използвай локалните инсталирани зависимости с pnpm; preflight проверява наличие.
 - GitHub connector: достъпът до `tarifberatung24-blip/VZGplattform` е потвърден чрез get_repo. Това не е разрешение за push/merge.
-- Supabase connector: get_project за `numyqalfphyrnedlfzfs` върна `ACTIVE_HEALTHY`. Това е проверка на проекта, НЕ на RLS, миграции, ключове или upload.
+- Supabase connector: get_project за `numyqalfphyrnedlfzfs` върна `ACTIVE_HEALTHY`. Това е проверка на проекта, НЕ на RLS, миграции, ключове или upload. `numyqalfphyrnedlfzfs` (`ai-home-office-v1-eu`) е **legacy / reference-only** и НЕ е каноничният проект. Каноничният Supabase проект е `mteguzgbiuexmdcrqajj` (`vzg-plattform-deutschland`, `eu-central-1`), както е записано в `supabase/project.json` и в `SUPABASE_CONSOLIDATION_PLAN.md`. Не използвай legacy ref-а за нова конфигурация.
 - Vercel connector: list_teams работи. Project-specific deployments/env/logs още трябва да се проверят.
 - Browser: използвай наличното browser умение за UI проверки. Не инсталирай втори браузърен framework за P0.
 - n8n/Eve/Slack: не са необходими за локалния P0. Не изпращай пробни заявки или кампании към живи workflows при подготовката.
@@ -55,7 +55,7 @@ Preflight е локален, само за четене, не зарежда `.e
 
 ## T2 — read-only проверка на средата
 
-След T0: провери Supabase migrations/tables/advisors и Vercel deployments/logs само за правилните проекти. Не чети customer rows. Не изтегляй всички secret env values. Отчети отделно: connector достъп, приложени миграции, RLS metadata, private bucket, Auth настройки, runtime keys и реален smoke.
+След T0: провери Supabase migrations/tables/advisors и Vercel deployments/logs само за каноничния проект `mteguzgbiuexmdcrqajj`. Legacy ref-овете `numyqalfphyrnedlfzfs` и `ambhlmdrfsgdbbljjsic` не са цел на нови проверки или промени. Не чети customer rows. Не изтегляй всички secret env values. Отчети отделно: connector достъп, приложени миграции, RLS metadata, private bucket, Auth настройки, runtime keys и реален smoke.
 
 Не създавай baseline schema по предположение и не прилагай историческите миграции на сляпо. Първо сравни deployed schema и history; после предложи възстановима миграция и план за staging/backup.
 

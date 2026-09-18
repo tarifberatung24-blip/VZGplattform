@@ -1,15 +1,33 @@
 # Supabase Consolidation Plan
 
-## Decision
+## Canonical project (ratified)
 
-Use `ambhlmdrfsgdbbljjsic` (`kintex-assistant-eu`, `eu-central-1`) as the **single canonical Supabase project** for VZGplattform and the VZGoffice module. Keep the Frankfurt project as the destination because it is healthy, currently empty of user data, and already contains the assistant domain schema. Do not delete or modify the US project until the application is cut over and the exported backups are verified.
+The **single canonical Supabase project** for VZGplattform is:
 
-## Read-only audit result
+| Field | Value |
+|---|---|
+| Project ref | `mteguzgbiuexmdcrqajj` |
+| Project name | `vzg-plattform-deutschland` |
+| Region | `eu-central-1` |
+| Runtime URL | `https://mteguzgbiuexmdcrqajj.supabase.co` |
 
-| Project | Region | Auth users | Relevant data | Current role |
-|---|---:|---:|---|---|
-| `ambhlmdrfsgdbbljjsic` | `eu-central-1` | 0 | 0 assistant rows; assistant schema exists | Destination |
-| `sophzmteuemggqlstebw` | `us-east-1` | 6 | 6 profiles, 6 households, 9 tax form registry rows; other business tables currently 0 | Source |
+This reflects the project the application already uses at runtime: `supabase/project.json` declares it, `lib/documents/validation.ts` enforces it in the upload guard, `scripts/supabase-check.mjs` validates it, and the deployed production bundle inlines `https://mteguzgbiuexmdcrqajj.supabase.co`. No runtime, environment, schema, database, migration, RLS, or deployment change is implied by this ratification.
+
+`ambhlmdrfsgdbbljjsic` (`kintex-assistant-eu`) and `numyqalfphyrnedlfzfs` (`ai-home-office-v1-eu`) are **legacy / superseded** references retained only for migration history below. They are not canonical and must not be used for new configuration.
+
+## Decision history — superseded target proposal (historical)
+
+> **Superseded.** The following original decision proposed `ambhlmdrfsgdbbljjsic` as the target. It was never applied to `supabase/project.json` and is retained only as migration history.
+
+> Use `ambhlmdrfsgdbbljjsic` (`kintex-assistant-eu`, `eu-central-1`) as the **single canonical Supabase project** for VZGplattform and the VZGoffice module. Keep the Frankfurt project as the destination because it is healthy, currently empty of user data, and already contains the assistant domain schema. Do not delete or modify the US project until the application is cut over and the exported backups are verified.
+
+## Read-only audit result (historical)
+
+| Project | Region | Auth users | Relevant data | Role at audit time | Current role |
+|---|---:|---:|---|---|---|
+| `mteguzgbiuexmdcrqajj` | `eu-central-1` | not audited | not audited | not yet designated | **Canonical runtime** |
+| `ambhlmdrfsgdbbljjsic` | `eu-central-1` | 0 | 0 assistant rows; assistant schema exists | Destination (proposed) | **Legacy / superseded** |
+| `sophzmteuemggqlstebw` | `us-east-1` | 6 | 6 profiles, 6 households, 9 tax form registry rows; other business tables currently 0 | Source | **Legacy / superseded** |
 
 The target already contains the VZGoffice tables `profiles`, `cases`, `source_documents`, `document_pages`, `case_messages`, `extracted_facts`, `correspondence_drafts`, `approvals`, `tasks`, `audit_events`, and `usage_counters`. The source contains the VZGplattform tables including `households`, `contracts`, `documents`, `deadlines`, `financial_profiles`, tax and benefit tables, and an additive compatibility layer.
 
@@ -24,7 +42,9 @@ The target already contains the VZGoffice tables `profiles`, `cases`, `source_do
 | `audit_events` | Case/actor fields | Household/document/entity fields | Keep one append-only audit table only after a column-level superset migration is reviewed; otherwise use `office_audit_events` temporarily. |
 | `approvals` and drafts | Hash-bound immutable assistant drafts | Household approval workflow | Preserve assistant hash model; add nullable household/case linkage only after the canonical case model is chosen. |
 
-## Recommended architecture
+## Recommended architecture (historical — describes the superseded legacy target)
+
+> **Historical.** This architecture assumed the legacy target `ambhlmdrfsgdbbljjsic` (referred to below as "Frankfurt"). It is retained for migration history and is **not** a description of the canonical project.
 
 Use **one Supabase project, one Auth, one Storage, one Postgres database**, but retain explicit domain boundaries during the first cutover:
 
@@ -35,7 +55,9 @@ Use **one Supabase project, one Auth, one Storage, one Postgres database**, but 
 
 This is safer than forcing two incompatible `cases`, `tasks`, `audit_events`, and `profiles` models into one destructive rename. Namespacing is reversible and keeps the first launch small.
 
-## Migration phases
+## Migration phases (historical — describe the superseded legacy target)
+
+> **Historical.** These phases planned a cutover to the legacy target `ambhlmdrfsgdbbljjsic` ("Frankfurt"). They were not executed against the canonical project. Retained for migration history.
 
 ### Phase 0 — Freeze and backup
 
@@ -64,7 +86,7 @@ Assistant data is currently zero rows in Frankfurt and no assistant user data ne
 
 ### Phase 4 — Cutover
 
-- Change only the canonical Supabase URL/project references in the deployment environment to Frankfurt.
+- Change only the canonical Supabase URL/project references in the deployment environment to the legacy target `ambhlmdrfsgdbbljjsic` (historical plan; the canonical project is now `mteguzgbiuexmdcrqajj`).
 - Run health checks: Auth, profile read, household creation, document upload, contract CRUD, RLS isolation, assistant case creation, extraction, quota RPC, draft approval hash, and no-send-without-approval.
 - Keep source read-only for the observation window.
 - Roll back by restoring the previous environment variables if any critical test fails; do not reverse-migrate user data live.
@@ -84,4 +106,8 @@ Only after the observation window, verified backups, and explicit owner approval
 
 ## Current status
 
-**Audit complete. No production schema or data was changed.** The six source Auth users are disposable test accounts and are excluded from migration; Auth migration is no longer a blocker. The target is the correct long-term location, but a direct table merge is unsafe because the two repositories define incompatible domain models under the same table names. The next implementation step is the additive Frankfurt migration plus VZGoffice table namespacing, followed by a clean-account staging test.
+**Audit complete. No production schema or data was changed.** The six source Auth users are disposable test accounts and are excluded from migration; Auth migration is no longer a blocker. A direct table merge between the legacy schemas is unsafe because the two repositories define incompatible domain models under the same table names.
+
+**Canonical project ratified:** `mteguzgbiuexmdcrqajj` (`vzg-plattform-deutschland`, `eu-central-1`) is the single canonical Supabase project. This matches the current runtime configuration in `supabase/project.json`, the upload guard in `lib/documents/validation.ts`, the `scripts/supabase-check.mjs` validation, and the deployed production bundle. The previously proposed target `ambhlmdrfsgdbbljjsic` is legacy / superseded and is not canonical.
+
+No schema, migration, RLS, environment, or deployment change is authorized by this document. Any future database work must target the canonical project and remains blocked until the owner explicitly authorizes it.
