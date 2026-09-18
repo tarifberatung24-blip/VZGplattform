@@ -2,7 +2,9 @@
 
 Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, and `docs/TERRA_START.md` before work.
 
-The current user-approved product direction is **KintexBG von vzg consult — ВСИЧКО НА ЕДНА РЪКА**, V1 for private customers: contract management, private documents, translation/explanation, deadlines, and user-approved actions. B2B remains a separate draft. This narrows the older broad product roadmap; it does not relax its safety rules.
+Canonical identity: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HAMMAL by VZG`, CODEBASE `VZGplattform`. Keep these four names distinct; do not use them interchangeably.
+
+The current user-approved product direction is **HAMMAL by VZG — ВСИЧКО НА ЕДНА РЪКА**, V1 for private customers: contract management, private documents, translation/explanation, deadlines, and user-approved actions. B2B remains a separate draft. This narrows the older broad product roadmap; it does not relax its safety rules.
 
 The current task is preparation for Terra, not permission to execute the entire roadmap. Start implementation only when assigned a specific work package. Do not change production settings, deploy, apply migrations, send campaigns, or provision paid resources without explicit authorization. Read-only connector checks are allowed within the assigned task.
 

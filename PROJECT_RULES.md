@@ -1,8 +1,17 @@
-# FinanzBG Project Rules
+# VZGplattform Project Rules
+
+## Canonical Identity
+
+These four names are distinct and must not be used interchangeably:
+
+- **LEGAL ENTITY:** `Tarifberater24` — the contracting party and data controller.
+- **EXPERT BRAND:** `VZG CONSULT` — the consulting brand.
+- **PRODUCT:** `HAMMAL by VZG` — the customer-facing product.
+- **CODEBASE:** `VZGplattform` — the repository and internal project identity.
 
 ## Strategic Direction
 
-FinanzBG is the primary strategic product: a unified financial and administrative operating center for people in Germany. The architecture includes:
+`HAMMAL by VZG` is the customer-facing product of the legal entity `Tarifberater24` (expert brand `VZG CONSULT`); the codebase is `VZGplattform`. It is a unified financial and administrative operating center for people in Germany. The architecture includes:
 
 - Financial Profile
 - Financial Data Graph
@@ -34,7 +43,7 @@ User actions must follow:
 
 ## Source, Framework, and Infrastructure
 
-- GitHub `main` in `finanzbg-original` is the single source of truth.
+- GitHub `main` in `tarifberatung24-blip/VZGplattform` is the single source of truth.
 - The application framework is Next.js.
 - pnpm is the package manager; preserve the repository's lockfile and package-manager policy.
 - The Vercel Framework Preset must remain Next.js.

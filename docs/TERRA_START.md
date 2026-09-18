@@ -1,5 +1,7 @@
 # Terra — начално задание и инструменти
 
+Канонична идентичност: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HAMMAL by VZG`, CODEBASE `VZGplattform`. Не използвай тези четири имена взаимозаменяемо; виж `PROJECT_RULES.md`.
+
 ## Решение след анализ на плана
 
 Master планът остава roadmap, не една огромна задача. Първо стабилизираме upload и проверките. После завършваме един договор от начало до край. Не изграждаме едновременно всички категории, OCR, платени услуги и маркетинг.
@@ -11,7 +13,7 @@ Master планът остава roadmap, не една огромна зада�
 - Local shell, Git, rg и apply_patch: налични.
 - Node: 24.19.0; pnpm: 11.19.0 в текущата среда. CI използва Node 20/pnpm 10. Не променяй версиите без отделна оценка за съвместимост.
 - Vitest, ESLint, TypeScript и Next: използвай локалните инсталирани зависимости с pnpm; preflight проверява наличие.
-- GitHub connector: достъпът до `tarifberatung24-blip/finanzbg-original` е потвърден чрез get_repo. Това не е разрешение за push/merge.
+- GitHub connector: достъпът до `tarifberatung24-blip/VZGplattform` е потвърден чрез get_repo. Това не е разрешение за push/merge.
 - Supabase connector: get_project за `numyqalfphyrnedlfzfs` върна `ACTIVE_HEALTHY`. Това е проверка на проекта, НЕ на RLS, миграции, ключове или upload.
 - Vercel connector: list_teams работи. Project-specific deployments/env/logs още трябва да се проверят.
 - Browser: използвай наличното browser умение за UI проверки. Не инсталирай втори браузърен framework за P0.
@@ -21,7 +23,7 @@ Master планът остава roadmap, не една огромна зада�
 
 ## Първа команда
 
-От root на `finanzbg-original`:
+От root на `VZGplattform`:
 
 ```bash
 node scripts/terra-preflight.mjs

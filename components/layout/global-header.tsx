@@ -76,9 +76,9 @@ export function GlobalHeader() {
           href={localizedPath("/", locale)}
           className="flex items-baseline gap-3 text-2xl font-black tracking-[-0.04em] text-foreground"
         >
-          KintexBG
+          HAMMAL by VZG
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            by VZG Consult
+            by VZG CONSULT
           </span>
         </Link>
 
