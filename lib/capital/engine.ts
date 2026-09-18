@@ -107,9 +107,11 @@ function missingReasonFor(fact: FinancialFact): CapitalMissingInput["reason"] {
 /**
  * Confirmed-fact input gate.
  *
- * A fact is consumable only when it validates, is CONFIRMED, is monetary in the
- * scenario currency, and belongs to the requested household. Everything else
- * becomes an explicit unusable input.
+ * A fact is consumable only when it validates, is CONFIRMED, belongs to the
+ * requested household, and has a supported shape: either a monetary fact in the
+ * scenario currency, or a plain numeric fact (currency must be null). Semantic
+ * expectations per key — e.g. "this key must be money" or "this key must be a
+ * positive integer duration" — are enforced by the typed readers, not here.
  */
 export function gateConfirmedFacts(
   facts: readonly FinancialFact[],
@@ -135,15 +137,22 @@ export function gateConfirmedFacts(
       missingInputs.push({ key: fact.key, reason: missingReasonFor(fact), requiredBy: "confirmed_fact" })
       continue
     }
-    if (fact.type !== "money" || fact.currency !== currency) {
+    if (acceptedShape(fact, currency) === null) {
       rejected.push({ factId: fact.id, key: fact.key, reason: "absent" })
-      missingInputs.push({ key: fact.key, reason: "absent", requiredBy: "monetary_fact_in_scenario_currency" })
+      missingInputs.push({ key: fact.key, reason: "absent", requiredBy: "monetary_or_numeric_fact" })
       continue
     }
     consumed.push(fact)
   }
 
   return { consumed, rejected, missingInputs }
+}
+
+/** Monetary facts must be money in the scenario currency; duration facts must be plain numbers. */
+function acceptedShape(fact: FinancialFact, currency: string): "money" | "number" | null {
+  if (fact.type === "money" && fact.currency === currency) return "money"
+  if (fact.type === "number" && fact.currency === null) return "number"
+  return null
 }
 
 /** Latest consumed version per key wins; earlier versions are not used. */
@@ -156,9 +165,33 @@ function latestByKey(facts: readonly FinancialFact[]): Map<string, FinancialFact
   return map
 }
 
-function moneyValue(fact: FinancialFact | undefined): number | null {
-  if (!fact) return null
-  return typeof fact.value === "number" && Number.isInteger(fact.value) ? fact.value : null
+/**
+ * Reads a monetary fact: integer minor units, money type, in the scenario
+ * currency. Returns null when the fact is absent or semantically wrong, so the
+ * caller records an explicit missing input instead of a value.
+ */
+export function readMoneyFact(byKey: ReadonlyMap<string, FinancialFact>, key: string): number | null {
+  const fact = byKey.get(key)
+  if (!fact || fact.type !== "money") return null
+  if (typeof fact.value !== "number" || !Number.isInteger(fact.value)) return null
+  return fact.value
+}
+
+/**
+ * Reads a positive integer duration fact: `number` type, integer, > 0, no
+ * currency, and either no unit or the expected unit. Months are never money, so
+ * a money-typed value is rejected rather than coerced.
+ */
+export function readPositiveIntegerFact(
+  byKey: ReadonlyMap<string, FinancialFact>,
+  key: string,
+  expectedUnit: string,
+): number | null {
+  const fact = byKey.get(key)
+  if (!fact || fact.type !== "number" || fact.currency !== null) return null
+  if (fact.unit !== null && fact.unit !== expectedUnit) return null
+  if (typeof fact.value !== "number" || !Number.isInteger(fact.value) || fact.value <= 0) return null
+  return fact.value
 }
 
 export function runCapitalEngine(input: CapitalEngineInput): CapitalEngineResult {
@@ -166,16 +199,13 @@ export function runCapitalEngine(input: CapitalEngineInput): CapitalEngineResult
   const { consumed, rejected, missingInputs } = gateConfirmedFacts(input.facts, context.householdId, context.currency)
 
   const byKey = latestByKey(consumed)
-  for (const key of REQUIRED_SURPLUS_KEYS) {
-    if (!byKey.has(key)) missingInputs.push({ key, reason: "absent", requiredBy: "surplus_calculation" })
-  }
 
-  const income = moneyValue(byKey.get(CAPITAL_FACT_KEYS.income))
-  const essentialExpenses = moneyValue(byKey.get(CAPITAL_FACT_KEYS.essentialExpenses))
-  const debtPayments = moneyValue(byKey.get(CAPITAL_FACT_KEYS.debtPayments))
-  const insuranceCosts = moneyValue(byKey.get(CAPITAL_FACT_KEYS.insuranceCosts))
-  const existingSavings = moneyValue(byKey.get(CAPITAL_FACT_KEYS.existingSavings))
-  const liquidReserve = moneyValue(byKey.get(CAPITAL_FACT_KEYS.liquidReserve))
+  const income = readMoneyFact(byKey, CAPITAL_FACT_KEYS.income)
+  const essentialExpenses = readMoneyFact(byKey, CAPITAL_FACT_KEYS.essentialExpenses)
+  const debtPayments = readMoneyFact(byKey, CAPITAL_FACT_KEYS.debtPayments)
+  const insuranceCosts = readMoneyFact(byKey, CAPITAL_FACT_KEYS.insuranceCosts)
+  const existingSavings = readMoneyFact(byKey, CAPITAL_FACT_KEYS.existingSavings)
+  const liquidReserve = readMoneyFact(byKey, CAPITAL_FACT_KEYS.liquidReserve)
 
   const assumptions: CapitalAssumption[] = [
     { key: "reserveMonths", value: context.reserveMonths, unit: "months", sourceReference: "scenario_assumption" },
@@ -183,13 +213,40 @@ export function runCapitalEngine(input: CapitalEngineInput): CapitalEngineResult
   ]
 
   const goals = context.goals ?? []
+  const goalInputs: { goal: CapitalGoalInput; targetAmount: number | null; fundedAmount: number | null; remainingMonths: number | null }[] = []
   for (const goal of goals) {
-    for (const key of [goal.targetAmountKey, goal.fundedAmountKey, goal.remainingMonthsKey]) {
-      if (!byKey.has(key)) missingInputs.push({ key, reason: "absent", requiredBy: `goal:${goal.id}` })
-    }
+    const targetAmount = readMoneyFact(byKey, goal.targetAmountKey)
+    const fundedAmount = readMoneyFact(byKey, goal.fundedAmountKey)
+    const remainingMonths = readPositiveIntegerFact(byKey, goal.remainingMonthsKey, "months")
+    // A key that is absent, mistyped (e.g. months as money), or out of range is
+    // an explicit unusable input rather than a silent skip.
+    if (targetAmount === null) missingInputs.push({ key: goal.targetAmountKey, reason: "absent", requiredBy: `goal:${goal.id}` })
+    if (fundedAmount === null) missingInputs.push({ key: goal.fundedAmountKey, reason: "absent", requiredBy: `goal:${goal.id}` })
+    if (remainingMonths === null) missingInputs.push({ key: goal.remainingMonthsKey, reason: "absent", requiredBy: `goal:${goal.id}` })
+    goalInputs.push({ goal, targetAmount, fundedAmount, remainingMonths })
   }
 
-  const surplusReady = REQUIRED_SURPLUS_KEYS.every((key) => byKey.has(key))
+  // Readiness is based on successfully read monetary values, not key presence:
+  // a surplus key present as a plain number must not be silently treated as zero.
+  const surplusReady =
+    income !== null &&
+    essentialExpenses !== null &&
+    debtPayments !== null &&
+    insuranceCosts !== null &&
+    existingSavings !== null
+
+  if (!surplusReady) {
+    const surplusValues: readonly [CapitalFactKey, number | null][] = [
+      [CAPITAL_FACT_KEYS.income, income],
+      [CAPITAL_FACT_KEYS.essentialExpenses, essentialExpenses],
+      [CAPITAL_FACT_KEYS.debtPayments, debtPayments],
+      [CAPITAL_FACT_KEYS.insuranceCosts, insuranceCosts],
+      [CAPITAL_FACT_KEYS.existingSavings, existingSavings],
+    ]
+    for (const [key, value] of surplusValues) {
+      if (value === null) missingInputs.push({ key, reason: "absent", requiredBy: "surplus_calculation" })
+    }
+  }
   const surplus = surplusReady
     ? calculateMonthlySurplus({ income, essentialExpenses, debtPayments, insuranceCosts, existingSavings, currency: context.currency })
     : null
@@ -207,10 +264,7 @@ export function runCapitalEngine(input: CapitalEngineInput): CapitalEngineResult
 
   const availableSurplus = surplus?.availableSurplus ?? null
   const goalOutputs: CapitalEngineGoalOutput[] = []
-  for (const goal of goals) {
-    const targetAmount = moneyValue(byKey.get(goal.targetAmountKey))
-    const fundedAmount = moneyValue(byKey.get(goal.fundedAmountKey))
-    const remainingMonths = moneyValue(byKey.get(goal.remainingMonthsKey))
+  for (const { goal, targetAmount, fundedAmount, remainingMonths } of goalInputs) {
     if (targetAmount === null || fundedAmount === null || remainingMonths === null) continue
     goalOutputs.push({
       id: goal.id,

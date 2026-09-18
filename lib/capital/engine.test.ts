@@ -31,6 +31,24 @@ function fact(overrides: Partial<FinancialFactInput> = {}): FinancialFact {
   })
 }
 
+/** A plain numeric fact, used for durations such as remaining months. */
+function numberFact(key: string, value: number, overrides: Partial<FinancialFactInput> = {}): FinancialFact {
+  return createFinancialFact({
+    id: `fact-${key}-${value}`,
+    householdId: HOUSEHOLD,
+    key,
+    value,
+    type: "number",
+    currency: null,
+    unit: "months",
+    status: "CONFIRMED",
+    confirmedBy: "user-1",
+    confirmedAt: "2025-02-01T10:00:00.000Z",
+    provenance: createProvenance({ source: "USER" }),
+    ...overrides,
+  })
+}
+
 /** A complete, valid set of confirmed facts for the baseline scenario. */
 function baselineFacts(): FinancialFact[] {
   return [
@@ -99,8 +117,25 @@ describe("confirmed-fact input gate", () => {
     expect(consumed).toHaveLength(0)
   })
 
-  it("rejects non-money facts", () => {
-    const { consumed } = gateConfirmedFacts([fact({ type: "number", value: 12, currency: null })], HOUSEHOLD, "EUR")
+  it("accepts plain numeric facts so durations can pass the gate", () => {
+    const { consumed, rejected } = gateConfirmedFacts([numberFact("goal.g1.months", 24)], HOUSEHOLD, "EUR")
+    expect(consumed).toHaveLength(1)
+    expect(consumed[0].type).toBe("number")
+    expect(consumed[0].currency).toBeNull()
+    expect(rejected).toHaveLength(0)
+  })
+
+  it("rejects numeric facts that carry a currency", () => {
+    const { consumed } = gateConfirmedFacts([numberFact("goal.g1.months", 24, { currency: "EUR" })], HOUSEHOLD, "EUR")
+    expect(consumed).toHaveLength(0)
+  })
+
+  it("rejects unsupported fact types such as text", () => {
+    const { consumed } = gateConfirmedFacts(
+      [fact({ type: "text", value: "24", currency: null, unit: null })],
+      HOUSEHOLD,
+      "EUR",
+    )
     expect(consumed).toHaveLength(0)
   })
 })
@@ -198,7 +233,7 @@ describe("capital engine goal feasibility", () => {
       ...baselineFacts(),
       fact({ key: "goal.g1.target", value: target }),
       fact({ key: "goal.g1.funded", value: funded }),
-      fact({ key: "goal.g1.months", value: months }),
+      numberFact("goal.g1.months", months),
     ]
   }
 
@@ -268,7 +303,7 @@ describe("capital engine feasibility states", () => {
       ...baselineFacts(),
       fact({ key: "goal.g1.target", value: 9_000_000 }),
       fact({ key: "goal.g1.funded", value: 0 }),
-      fact({ key: "goal.g1.months", value: 12 }),
+      numberFact("goal.g1.months", 12),
     ]
     expect(runCapitalEngine({ facts, context: context({ goals }) }).scenario.feasibility).toBe("not_feasible")
   })
@@ -367,5 +402,141 @@ describe("capital engine explainability", () => {
     const { trace, scenario } = runCapitalEngine({ facts: baselineFacts(), context: context() })
     const equals = trace.find((entry) => entry.operation === "equals" && entry.label.includes("surplus"))
     expect(equals?.result).toBe(scenario.outputs.monthly_available_surplus)
+  })
+})
+
+describe("capital engine semantic goal input types", () => {
+  const goals: CapitalGoalInput[] = [
+    {
+      id: "g1",
+      label: "reserve build-up",
+      targetAmountKey: "goal.g1.target",
+      fundedAmountKey: "goal.g1.funded",
+      remainingMonthsKey: "goal.g1.months",
+    },
+  ]
+
+  /** Goal with an explicitly typed months fact, so mistyping can be exercised. */
+  function goalWithMonths(monthsFact: FinancialFact) {
+    return [
+      ...baselineFacts(),
+      fact({ key: "goal.g1.target", value: 1_200_000 }),
+      fact({ key: "goal.g1.funded", value: 200_000 }),
+      monthsFact,
+    ]
+  }
+
+  it("accepts remainingMonths as a positive integer number fact", () => {
+    const { goals: output, scenario } = runCapitalEngine({
+      facts: goalWithMonths(numberFact("goal.g1.months", 24)),
+      context: context({ goals }),
+    })
+    expect(output).toHaveLength(1)
+    expect(output[0].remainingMonths).toBe(24)
+    expect(output[0].requiredMonthlyContribution).toBe(41_667)
+    expect(scenario.missingInputs).toHaveLength(0)
+  })
+
+  it("accepts remainingMonths with a null unit", () => {
+    const { goals: output } = runCapitalEngine({
+      facts: goalWithMonths(numberFact("goal.g1.months", 24, { unit: null })),
+      context: context({ goals }),
+    })
+    expect(output[0].remainingMonths).toBe(24)
+  })
+
+  it("rejects remainingMonths typed as money and reports needs_data", () => {
+    const asMoney = fact({ key: "goal.g1.months", value: 24, type: "money", currency: "EUR", unit: null })
+    const { goals: output, scenario } = runCapitalEngine({ facts: goalWithMonths(asMoney), context: context({ goals }) })
+    expect(output).toHaveLength(0)
+    expect(scenario.feasibility).toBe("needs_data")
+    expect(scenario.missingInputs.some((missing) => missing.key === "goal.g1.months")).toBe(true)
+    expect(scenario.outputs["goal.g1.required_monthly_contribution"]).toBeUndefined()
+  })
+
+  it("rejects remainingMonths = 0", () => {
+    const { goals: output, scenario } = runCapitalEngine({
+      facts: goalWithMonths(numberFact("goal.g1.months", 0)),
+      context: context({ goals }),
+    })
+    expect(output).toHaveLength(0)
+    expect(scenario.feasibility).toBe("needs_data")
+    expect(scenario.missingInputs.some((missing) => missing.key === "goal.g1.months")).toBe(true)
+  })
+
+  it("rejects a negative remainingMonths", () => {
+    const { goals: output, scenario } = runCapitalEngine({
+      facts: goalWithMonths(numberFact("goal.g1.months", -6)),
+      context: context({ goals }),
+    })
+    expect(output).toHaveLength(0)
+    expect(scenario.feasibility).toBe("needs_data")
+  })
+
+  it("rejects a fractional remainingMonths", () => {
+    const { goals: output, scenario } = runCapitalEngine({
+      facts: goalWithMonths(numberFact("goal.g1.months", 24.5)),
+      context: context({ goals }),
+    })
+    expect(output).toHaveLength(0)
+    expect(scenario.feasibility).toBe("needs_data")
+  })
+
+  it("rejects a months fact carrying an unexpected unit", () => {
+    const { goals: output, scenario } = runCapitalEngine({
+      facts: goalWithMonths(numberFact("goal.g1.months", 24, { unit: "weeks" })),
+      context: context({ goals }),
+    })
+    expect(output).toHaveLength(0)
+    expect(scenario.feasibility).toBe("needs_data")
+  })
+
+  it("rejects a goal target amount typed as number instead of money", () => {
+    const facts = [
+      ...baselineFacts(),
+      fact({ key: "goal.g1.target", value: 1_200_000, type: "number", currency: null, unit: null }),
+      fact({ key: "goal.g1.funded", value: 200_000 }),
+      numberFact("goal.g1.months", 24),
+    ]
+    const { goals: output, scenario } = runCapitalEngine({ facts, context: context({ goals }) })
+    expect(output).toHaveLength(0)
+    expect(scenario.feasibility).toBe("needs_data")
+    expect(scenario.missingInputs.some((missing) => missing.key === "goal.g1.target")).toBe(true)
+  })
+
+  it("rejects a goal funded amount typed as number instead of money", () => {
+    const facts = [
+      ...baselineFacts(),
+      fact({ key: "goal.g1.target", value: 1_200_000 }),
+      fact({ key: "goal.g1.funded", value: 200_000, type: "number", currency: null, unit: null }),
+      numberFact("goal.g1.months", 24),
+    ]
+    const { goals: output, scenario } = runCapitalEngine({ facts, context: context({ goals }) })
+    expect(output).toHaveLength(0)
+    expect(scenario.feasibility).toBe("needs_data")
+    expect(scenario.missingInputs.some((missing) => missing.key === "goal.g1.funded")).toBe(true)
+  })
+
+  it("rejects a surplus key typed as number rather than silently using zero", () => {
+    const facts = baselineFacts().map((entry) =>
+      entry.key === CAPITAL_FACT_KEYS.income
+        ? fact({ key: CAPITAL_FACT_KEYS.income, value: 320_000, type: "number", currency: null, unit: null })
+        : entry,
+    )
+    const { scenario, surplus } = runCapitalEngine({ facts, context: context() })
+    expect(surplus).toBeNull()
+    expect(scenario.feasibility).toBe("needs_data")
+    expect(scenario.outputs.monthly_available_surplus).toBeNull()
+    expect(scenario.missingInputs.some((missing) => missing.key === CAPITAL_FACT_KEYS.income)).toBe(true)
+  })
+
+  it("keeps months out of the monetary arithmetic and reserves", () => {
+    const { scenario } = runCapitalEngine({
+      facts: goalWithMonths(numberFact("goal.g1.months", 24)),
+      context: context({ goals, reserveMonths: 6 }),
+    })
+    // Months must not appear as a monetary output or inflate the reserve target.
+    expect(scenario.outputs.reserve_target).toBe(1_140_000)
+    expect(scenario.assumptions.find((assumption) => assumption.key === "reserveMonths")?.unit).toBe("months")
   })
 })
