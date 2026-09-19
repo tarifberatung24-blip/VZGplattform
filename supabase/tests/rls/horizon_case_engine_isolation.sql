@@ -300,9 +300,16 @@ insert into public.case_messages (owner_id, case_id, role, locale, content)
 values ('a0000000-0000-4000-8000-00000000000a',
         'a0000000-0000-4000-8000-0000000000c1', 'user', 'bg', 'own message');
 
-update public.extracted_facts set confirmed_at = now()
-where id = 'a0000000-0000-4000-8000-0000000000f1';
-if not found then raise exception 'RLS_TEST_FAILED: A could not confirm own fact'; end if;
+-- FOUND is only valid inside PL/pgSQL, so the positive control is wrapped.
+do $$
+begin
+  update public.extracted_facts set confirmed_at = now()
+  where id = 'a0000000-0000-4000-8000-0000000000f1';
+  if not found then
+    raise exception 'RLS_TEST_FAILED: A could not confirm own fact';
+  end if;
+end;
+$$;
 
 insert into public.audit_events (actor_id, case_id, action)
 values ('a0000000-0000-4000-8000-00000000000a',
@@ -312,6 +319,12 @@ do $$
 declare
   n integer;
 begin
+  select count(*) into n from public.audit_events
+  where id = 'a0000000-0000-4000-8000-000000000061';
+  if n <> 1 then
+    raise exception 'RLS_TEST_FAILED: audit_events SELECT not permitted for own row';
+  end if;
+
   select count(*) into n from public.cases;
   if n <> 2 then raise exception 'RLS_TEST_FAILED: A sees % cases after own write, expected 2', n; end if;
 end;
