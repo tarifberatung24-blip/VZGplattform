@@ -46,6 +46,9 @@ User actions must follow:
 - `docs/HORIZON_MASTER_MAP.md` is the canonical TARGET build map. It fixes the phase order and the
   shared-engine architecture; it does not authorize implementation.
 - `docs/HORIZON_BUILD_LEDGER.md` tracks implementation status for every phase.
+- `docs/HORIZON_EXECUTION_CHECKLIST.md` is the plain working list. A `✅` there means the item is
+  actually done and verified; an unchecked item still needs work or confirmation. The checklist
+  does not override the Master Map, the Build Ledger, or these rules.
 - Work proceeds sequentially by approved phase. Only one implementation phase may be active at a
   time unless the owner explicitly authorizes otherwise.
 - A later phase must not be started merely because its files already exist.
@@ -54,6 +57,17 @@ User actions must follow:
   `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE`.
 - Existing Capital work is preserved untouched and is **outside** the current active build
   sequence. It may only be resumed by explicit owner instruction.
+
+## Canonical Case Model
+
+- `public.cases` is the canonical HORIZON case model. Tenancy is **owner-scoped via `auth.uid()`**.
+- The `platform_cases`, `platform_tasks`, `platform_correspondence_drafts`, `platform_approvals`,
+  and `platform_audit_events` family is a **preserved legacy / compatibility surface**. It must not
+  be deleted, destructively migrated, or used as the canonical model for new HORIZON workflows.
+- New P3–P17 functionality uses the canonical `cases` family. Where existing code still depends on
+  `platform_*`, use thin compatibility adapters only.
+- Database evolution for the canonical family is **additive**. Destructive schema changes, table
+  drops, destructive renames, and user-data deletion require explicit owner authorization.
 
 ## Lifecycle: DONE and FROZEN
 

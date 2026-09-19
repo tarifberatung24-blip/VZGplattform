@@ -86,11 +86,25 @@ export async function updateSession(request: NextRequest) {
   // failure must never lock a user out. The onboarding routes and every
   // authenticated page re-apply the same rule server-side.
   if (user && !isOnboardingPath(request.nextUrl.pathname) && !isAuthFlowPath(request.nextUrl.pathname)) {
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('onboarding_step')
       .eq('id', user.id)
       .maybeSingle()
+
+    // Record an unreadable state without the user id, the row, or any profile
+    // content. Only a coarse reason and the DB error code are kept, and the
+    // request is allowed through so the session cannot be trapped here.
+    if (error) {
+      console.warn('[onboarding-gate] step unreadable; allowing request', {
+        reason: 'query_failed',
+        code: error.code ?? 'unknown',
+      })
+    } else if (!profile) {
+      console.warn('[onboarding-gate] no profile row; allowing request', { reason: 'no_profile' })
+    } else if (!isKnownOnboardingStep(profile.onboarding_step)) {
+      console.warn('[onboarding-gate] unrecognised step; allowing request', { reason: 'malformed_step' })
+    }
 
     if (profile && isKnownOnboardingStep(profile.onboarding_step) && !isOnboardingComplete(profile.onboarding_step)) {
       const url = request.nextUrl.clone()

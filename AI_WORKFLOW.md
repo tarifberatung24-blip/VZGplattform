@@ -30,7 +30,8 @@ Never allow two agents to modify the same module at the same time. Do not invent
 ## Canonical Build Map and Sequencing
 
 `docs/HORIZON_MASTER_MAP.md` is the canonical target build map;
-`docs/HORIZON_BUILD_LEDGER.md` tracks implementation status.
+`docs/HORIZON_BUILD_LEDGER.md` tracks implementation status;
+`docs/HORIZON_EXECUTION_CHECKLIST.md` is the plain working list (`✅` = done and verified).
 
 - Phases run in the order fixed by the Master Map. Only one implementation phase is active at a
   time unless the owner explicitly authorizes otherwise.
@@ -41,6 +42,9 @@ Never allow two agents to modify the same module at the same time. Do not invent
   reopening, and must never be modified as collateral work for another task.
 - Unrelated refactoring of previous phases is prohibited.
 - Capital is preserved but outside the current active build sequence.
+- `public.cases` is the canonical owner-scoped case model. `platform_*` is a preserved legacy /
+  compatibility surface: not deleted, not destructively migrated, and not the base for new
+  HORIZON workflows. New P3–P17 work uses `cases`; `platform_*` consumers get thin adapters only.
 
 Step 2 (DEFINE SCOPE) must explicitly declare: `ACTIVE_PHASE`, `ALLOWED_FILES`,
 `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE`.

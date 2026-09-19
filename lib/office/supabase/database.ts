@@ -4,7 +4,7 @@ export type CaseStatus = 'NEW' | 'UPLOADED' | 'EXTRACTING' | 'NEEDS_INFO' | 'DRA
 type Row<T> = { Row: T; Insert: Partial<T>; Update: Partial<T>; Relationships: [] }
 export type Database = { public: { Tables: {
   profiles: Row<{ id: string; locale: Locale; conversation_locale: Locale; output_locale: Locale; display_name: string; created_at: string }>
-  cases: Row<{ id: string; owner_id: string; title: string; intent: CaseIntent; ui_locale: Locale; conversation_locale: Locale; status: CaseStatus; institution: string | null; deadline: string | null; created_at: string }>
+  cases: Row<{ id: string; owner_id: string; title: string; intent: CaseIntent; ui_locale: Locale; conversation_locale: Locale; status: CaseStatus; horizon_status: string | null; horizon_module: string | null; institution: string | null; deadline: string | null; created_at: string }>
   source_documents: Row<{ id: string; owner_id: string; case_id: string; path: string; mime: 'application/pdf' | 'image/jpeg' | 'image/png'; size_bytes: number; sha256: string; status: 'UPLOADED' | 'EXTRACTING' | 'READY' | 'NEEDS_CONFIRMATION' | 'FAILED'; created_at: string }>
   document_pages: Row<{ id: string; owner_id: string; case_id: string; document_id: string; page_no: number; text_content: string; confidence: number | null; created_at: string }>
   case_messages: Row<{ id: string; owner_id: string; case_id: string; role: 'user' | 'assistant'; locale: Locale; content: string; created_at: string }>

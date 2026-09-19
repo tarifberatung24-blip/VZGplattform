@@ -41,10 +41,10 @@ after a module meets the full DONE definition.
 | --- | --- | --- | --- | --- |
 | P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
 | P1 | PUBLIC LAYER 0 | IMPLEMENTATION VERIFIED — OWNER/LEGAL REVIEW PENDING | NO | YES |
-| P2 | AUTH + FIRST LOGIN + ONBOARDING | AUDITED | NO | YES |
+| P2 | AUTH + FIRST LOGIN + ONBOARDING | IMPLEMENTATION VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P3 | HORIZON GUIDE | NOT_STARTED | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | AUDITED | NO | YES |
-| P5 | SHARED CASE ENGINE | AUDITED | NO | YES |
+| P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | AUDITED | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | AUDITED | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | AUDITED | NO | YES |
@@ -233,7 +233,13 @@ after a module meets the full DONE definition.
   → drafts → approvals → tasks → audit)
 - **TARGET ROUTES:** no new public routes; consumed by all modules. Existing consumer surfaces:
   `/{locale}/office`, `/{locale}/office/cases/{id}`, `/{locale}/dashboard`.
-- **CURRENT STATUS:** AUDITED — DECISION GATE OPEN (no implementation started)
+- **CURRENT STATUS:** MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING (not DONE, not FROZEN)
+- **CANONICAL MODEL (owner decision, on record):** `public.cases` is the canonical case model,
+  and tenancy is **owner-scoped via `auth.uid()`**. The `platform_cases`, `platform_tasks`,
+  `platform_correspondence_drafts`, `platform_approvals`, and `platform_audit_events` family is
+  **PRESERVED LEGACY / COMPATIBILITY SURFACE**: not deleted, not destructively migrated, and not
+  the canonical model for new HORIZON workflows. New P3–P17 work uses the canonical `cases`
+  family; existing `platform_*` consumers may be bridged by thin compatibility adapters only.
 - **CURRENT IMPLEMENTATION:** owner-scoped case repository (`lib/office/repositories/cases.ts`)
   with create/list/get/update/archive and audit-on-archive; case detail repository;
   case messages with AI language/intent routing (`lib/office/ai/routing.ts`,
@@ -243,26 +249,47 @@ after a module meets the full DONE definition.
   `/api/office/cases/*`.
 - **REUSE:** all of the above, plus `cases`, `case_messages`, `extracted_facts`, `tasks`,
   `audit_events` tables and the `platform_cases` / `platform_tasks` / `platform_audit_events` family.
-- **MISSING:** a single canonical case model. Two overlapping families exist
-  (assistant `cases` owner-scoped vs `platform_cases` household-scoped) with no repository
-  record designating the canonical one. Also missing: module-to-case typing for the five
-  HORIZON modules, one unified status vocabulary (`CaseStatus` vs `workplaceStatuses` vs
-  platform case status), one canonical audit table, and case-level missing-information persistence
-  (`platform_cases.missing_information` is described in `DOCUMENT_FEASIBILITY_AUDIT.md` as still needing wiring).
+- **MISSING:** the canonical case model was designated by the owner and implemented; what remains
+  is runtime verification against a migrated database, plus module-facing UI wiring (P4/P12–P17)
+  and the document-intake, AI-assistant, and PDF/send engines (P6–P11).
 
-  Sprint 1 note: P5 implementation was authorized by the owner, but this phase's own blocker
-  makes the first and gating deliverable a **decision**, not code. The canonical case model
-  must be designated on record before any module is wired to it, because the choice determines
-  the tenancy model (owner-scoped vs household-scoped), the status vocabulary, and the table
-  grants for every later phase. Selecting one silently would be an architecture + schema
-  decision of exactly the class the governance rules reserve to the owner. No P5 code was
-  written in Sprint 1 pending that designation.
-- **DEPENDENCIES:** P0.
-- **BLOCKERS:** the canonical case-model decision is an architecture + schema decision that
-  requires explicit owner authorization. No DB/schema/RLS change may be made before that.
-  Decision required: adopt the owner-scoped `cases` family as canonical, or adopt the
-  household-scoped `platform_cases` family, or designate one as canonical and the other as a
-  preserved legacy surface.
+  Sprint 2 delivery (owner-authorized for P5, canonical model confirmed):
+  - `lib/horizon/case/contract.ts` — one canonical contract: `Case`, `CaseModule`, the ten-value
+    `HorizonCaseStatus`, `HorizonCaseAction`, `CaseSourceDocument`, `ExtractedFact`, `CaseMessage`,
+    `CaseDraft`, `CaseApproval`, `CaseTask`, `CaseAuditEvent`, `MissingInformation`, and the seven
+    module ids (`agentur_fuer_arbeit`, `jobcenter`, `kuendigung`, `steuererklaerung`,
+    `unterlagen_erklaeren`, `contract_management`, `general`).
+  - `lib/horizon/case/lifecycle.ts` — the HORIZON lifecycle (`draft`, `collecting_data`,
+    `waiting_for_user`, `processing`, `draft_ready`, `review`, `approved`, `action_ready`,
+    `completed`, `cancelled`) with one transition table, plus bidirectional mapping to the legacy
+    `cases.status` vocabulary. Mapping is adapter-only; no historic row is rewritten.
+  - `lib/horizon/case/repository.ts` — `CaseEngineRepository` implementing create case, load own
+    case, list own cases, allowed state transition, module assignment, attach source document,
+    add/list facts, confirm fact, add/list message, save/list draft, draft review status, record
+    approval, approval-state check, create/update/list task, append/list audit event, and
+    missing-information derivation. Every operation filters on the authenticated owner.
+  - `lib/horizon/case/approval.ts` — content-hash approval binding, so a changed approved body
+    invalidates its approval without modifying or deleting any historic approval row.
+  - `lib/horizon/case/module.ts` — compatibility adapter mapping legacy `cases.intent` to a module.
+  - `lib/horizon/case/missing-info.ts` — derived missing/unconfirmed-critical fact state per module.
+  - `lib/horizon/case/index.ts` — `createCaseEngine()`, bound to the session client (RLS enforced);
+    never a service-role client.
+  - Additive migration `supabase/migrations/20260919150000_horizon_case_engine.sql`: adds nullable
+    `cases.horizon_status` and `cases.horizon_module` with CHECK constraints on the canonical
+    vocabularies, one index, and **column-scoped only** grants. No table-wide grant, no policy
+    dropped or weakened, no destructive statement, and the `platform_*` family is untouched.
+  - Isolation tests: `supabase/tests/rls/horizon_case_engine_isolation.sql` (two users; per-table
+    read isolation, blocked cross-case writes, blocked ownership reassignment, blocked approval of
+    another user's draft, blocked anon access, and a positive control that the owner's own writes
+    still succeed; rolls back its fixtures). Static coherence is asserted by
+    `lib/horizon/case/migration-contract.test.ts`, and the contract/lifecycle/approval logic by
+    `lib/horizon/case/case-engine.test.ts`.
+- **DEPENDENCIES:** P0, P2 (authenticated context).
+- **BLOCKERS:** runtime verification only. `20260919150000_horizon_case_engine.sql` is not yet
+  applied to the production project, and the RLS isolation test cannot run here (no authorized DB
+  channel), so no cross-user isolation assertion has been observed against a live database. Those
+  checks are written and passing as static/unit assertions, not as runtime proof. P5 is therefore
+  not DONE and not FROZEN.
 - **DONE CRITERIA:** one documented canonical case model; every module creates cases through it;
   RLS and repository enforce ownership; cross-tenant isolation tested; every state transition
   audited; case messages, facts, drafts, approvals, tasks all hang off the same case;

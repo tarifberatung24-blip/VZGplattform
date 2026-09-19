@@ -21,6 +21,7 @@ The current user-approved product direction is **HORIZON by VZG**, V1 for privat
 
 - `docs/HORIZON_MASTER_MAP.md` is the canonical target build map.
 - `docs/HORIZON_BUILD_LEDGER.md` tracks implementation status per phase.
+- `docs/HORIZON_EXECUTION_CHECKLIST.md` is the plain working list; a `✅` means done and verified.
 - Work proceeds sequentially by approved phase; only one implementation phase is active at a time
   unless the owner explicitly authorizes otherwise.
 - A later phase must not be started merely because its files already exist.
@@ -28,6 +29,9 @@ The current user-approved product direction is **HORIZON by VZG**, V1 for privat
 - FROZEN modules cannot be changed without explicit owner reopening.
 - Unrelated refactoring of previous phases is prohibited.
 - Existing Capital work is preserved but is outside the current active build sequence.
+- `public.cases` is the canonical owner-scoped case model. The `platform_*` family is a preserved
+  legacy / compatibility surface: do not delete, destructively migrate, or build new workflows on
+  it. New P3–P17 work uses `cases`; bridge `platform_*` consumers with thin adapters only.
 - Render remains the current production deployment authority, from GitHub `main`.
 
 Before every task, state: `ACTIVE_PHASE`, `ALLOWED_FILES`, `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE`.
