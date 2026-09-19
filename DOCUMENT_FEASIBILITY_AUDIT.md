@@ -65,4 +65,52 @@ The document is **technically coherent as a long-term product direction**, but i
 
 **The first layer in the document is executable and aligns with the current build.** The Capital extension is a valid future module inside the same account, but should begin with financial facts, goals, education, deterministic calculations, and neutral scenarios. The connector and investment-advice sections are not launchable in the current MVP and must not be implemented as automatic AI features.
 
-The Frankfurt schema migration already created the foundation without copying old test data. The next safe implementation is persistent `platform_cases.missing_information` plus a provenance-backed financial profile—not investment connectors.
+The Frankfurt schema migration already created the foundation without copying old test data.
+
+## Capital implementation status (current)
+
+This section records factual status only; it does not expand the audit's scope or authorize new work.
+
+Implemented in `lib/capital/` on `main`:
+
+| Capability | Status |
+|---|---|
+| FinancialFact domain model | **Implemented** — household-scoped, typed, versioned, with `DRAFT`/`CONFIRMED`/`REJECTED`/`SUPERSEDED` lifecycle. |
+| Provenance model | **Implemented** — explicit `USER`, `DOCUMENT`, `PROVIDER`, `SYSTEM`, `AI_EXTRACTED` sources with source/evidence references and observed/retrieved timestamps. |
+| Confirmation lifecycle | **Implemented** — confirmed facts require reviewer and timestamp; AI-derived facts can never auto-confirm and need an evidence reference. |
+| Deterministic Capital Engine Slice 1 | **Implemented** — versioned (`capital-core-1.0.0`), deterministic, no clock or randomness. |
+| Monthly surplus calculations | **Implemented** — income, essential expenses, debt payments, insurance costs, existing savings, available surplus in integer minor units. |
+| Reserve scenario | **Implemented** — `reserveTarget = monthlyEssentialOutflow × reserveMonths`, `reserveGap = max(0, target − confirmedLiquidReserve)`; `reserveMonths` is an explicit assumption the engine never chooses. |
+| Neutral goal feasibility | **Implemented** — remaining amount, required monthly contribution, surplus after contribution, feasible/not_feasible. No returns, inflation, market prices, or allocation. |
+| Explicit missing-data states | **Implemented** — `needs_data`, `not_feasible`, `feasible`, `review_required`; unusable facts become named missing inputs, never invented values. |
+| Deterministic snapshot hash | **Implemented** — canonical serialization with SHA-256 `inputSnapshotHash`, stable across object and property ordering. |
+| AdvisorReview and PublishBoundary domain contracts | **Implemented as contracts only** — publication requires approval, authorization, payload hash, and idempotency key. |
+
+### Next safe Capital step
+
+The next safe Capital step is application-level integration, in this order:
+
+`existing VZG data` → `FinancialFact mapping` → `CapitalAnalysisInput` → `Capital Engine` → `AdvisorReview` → `server-side PublishBoundary preparation`
+
+This is mapping and wiring work, not new financial capability.
+
+### Explicitly NOT completed
+
+- **Persistence and runtime integration are NOT completed.** Capital exists as domain logic only; no facts are stored or read at runtime.
+- **Capital UI is NOT completed.** There is no dashboard, route, or user-facing surface for Capital.
+- **Production database/schema work is NOT authorized by this documentation task.** No migration, schema, RLS, or Supabase change is implied or permitted here.
+
+### Restricted areas (unchanged)
+
+The following remain blocked or prohibited, and nothing in this status section relaxes them:
+
+- personalized investment advice or suitability handling;
+- trading or executing purchases/submissions;
+- bank, broker, or credit-card integrations;
+- official Schufa integration;
+- fake prices, offers, or savings figures;
+- AI performing financial arithmetic or setting assumptions;
+- DIN ingestion, DIN compliance claims, or reproduction of DIN normative content;
+- execution through external providers.
+
+The next safe implementation is persistent `platform_cases.missing_information` plus a provenance-backed financial profile — not investment connectors.

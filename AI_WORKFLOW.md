@@ -4,7 +4,7 @@
 
 - **LEGAL ENTITY:** `Tarifberater24`
 - **EXPERT BRAND:** `VZG CONSULT`
-- **PRODUCT:** `HAMMAL by VZG`
+- **PRODUCT:** `HORIZON by VZG`
 - **CODEBASE:** `VZGplattform`
 
 Do not use these four names interchangeably. Details are in `PROJECT_RULES.md`.
@@ -13,29 +13,35 @@ Do not use these four names interchangeably. Details are in `PROJECT_RULES.md`.
 
 1. READ
 2. DEFINE SCOPE
-3. INSPECT EXISTING IMPLEMENTATION
-4. IMPLEMENT IN SMALL PASSES
-5. DO NOT INVENT MISSING DATA
-6. VALIDATE LOCALLY
-7. COMMIT
-8. DEPLOY
-9. VERIFY REAL ROUTES
-10. HANDOFF
+3. INSPECT LATEST MAIN
+4. CREATE FOCUSED BRANCH
+5. IMPLEMENT SMALL CHANGE
+6. VALIDATE
+7. OPEN PR
+8. REVIEW
+9. OWNER APPROVES
+10. MERGE
+11. DEPLOY IF AUTHORIZED
+12. VERIFY
+13. HANDOFF
 
-Never allow two agents to modify the same module at the same time.
+Never allow two agents to modify the same module at the same time. Do not invent missing data. Deployment and merge require explicit owner approval.
 
 ## Roles
 
 - **CHATGPT:** architecture, orchestration, planning, prompt design, review
-- **v0:** Next.js product implementation, UI, application flows
-- **MANUS:** research, complex engineering, backend/integration work
-- **GITHUB COPILOT:** repository-level fixes, debugging, code review
+- **AIONUI:** local multi-agent workspace / control interface
+- **OPENHANDS:** focused repository implementation, testing, branches, PRs
+- **OPENCLAW:** reusable local AI agent, usable through AionUi when available
+- **MANUS:** research, source gathering, setup work
+- **GORDON:** Docker diagnostics and environment optimization
+- **v0:** optional approved UI/design implementation source
 - **GITHUB MAIN:** source of truth — `tarifberatung24-blip/VZGplattform` (`main`)
-- **VERCEL:** production deployment
+- **RENDER:** current production deployment, from GitHub `main`
 
 ## Product Principle
 
-`HAMMAL by VZG` follows:
+`HORIZON by VZG` follows:
 
 `DATA → UNDERSTANDING → RISK / OPPORTUNITY ANALYSIS → DECISION SUPPORT → ACTION → MONITORING`
 

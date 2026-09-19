@@ -6,12 +6,12 @@ These four names are distinct and must not be used interchangeably:
 
 - **LEGAL ENTITY:** `Tarifberater24` — the contracting party and data controller.
 - **EXPERT BRAND:** `VZG CONSULT` — the consulting brand.
-- **PRODUCT:** `HAMMAL by VZG` — the customer-facing product.
+- **PRODUCT:** `HORIZON by VZG` — the customer-facing product.
 - **CODEBASE:** `VZGplattform` — the repository and internal project identity.
 
 ## Strategic Direction
 
-`HAMMAL by VZG` is the customer-facing product of the legal entity `Tarifberater24` (expert brand `VZG CONSULT`); the codebase is `VZGplattform`. It is a unified financial and administrative operating center for people in Germany. The architecture includes:
+`HORIZON by VZG` is the customer-facing product of the legal entity `Tarifberater24` (expert brand `VZG CONSULT`); the codebase is `VZGplattform`. It is a unified financial and administrative operating center for people in Germany. The architecture includes:
 
 - Financial Profile
 - Financial Data Graph
@@ -46,8 +46,9 @@ User actions must follow:
 - GitHub `main` in `tarifberatung24-blip/VZGplattform` is the single source of truth.
 - The application framework is Next.js.
 - pnpm is the package manager; preserve the repository's lockfile and package-manager policy.
-- The Vercel Framework Preset must remain Next.js.
-- Protected infrastructure settings include Vercel, Supabase, deployment configuration, environment variables, auth configuration, redirects, and production routing. Do not change them without explicit approval.
+- The current production deployment is **Render**, deploying from GitHub `main`.
+- Vercel and v0 are **not** the current production authority. They may be used later for approved UI/template work only, after explicit owner approval.
+- Protected infrastructure settings include Render, Supabase, deployment configuration, environment variables, auth configuration, redirects, and production routing. Do not change them without explicit approval.
 
 ## Change Scope
 
