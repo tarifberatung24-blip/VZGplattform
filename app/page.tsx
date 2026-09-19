@@ -7,6 +7,7 @@ import { FinancialOsOverview } from "@/components/marketing/financial-os-overvie
 import { Hero } from "@/components/marketing/hero"
 import { OpportunityCheck } from "@/components/marketing/opportunity-check"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { localizedPath } from "@/lib/i18n/routing"
 
 export default function HomePage() {
   const { t, locale } = useLanguage()
@@ -39,7 +40,7 @@ export default function HomePage() {
               {services.map(({ href, icon: Icon, key }) => (
                 <Link
                   key={href}
-                  href={href}
+                  href={localizedPath(href, locale)}
                   className="group bg-card p-8 transition-colors hover:bg-secondary"
                 >
                   <span className="inline-flex h-10 w-10 items-center justify-center border border-border text-primary">
@@ -95,7 +96,7 @@ export default function HomePage() {
               <p className="mt-4 leading-8 text-background/75">{t.home.finalCtaDesc}</p>
             </div>
             <Button asChild size="lg" variant="default" className="shrink-0 bg-primary text-primary-foreground">
-              <Link href="/auth/sign-up">
+              <Link href={localizedPath("/auth/sign-up", locale)}>
                 {t.nav.register}
                 <CheckCircle2 className="ml-1 h-4 w-4" />
               </Link>

@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <span className={cn("grid size-8 place-items-center rounded-md bg-primary text-sm font-black text-primary-foreground", className)} aria-label="HAMMAL by VZG">
+    <span className={cn("grid size-8 place-items-center rounded-md bg-primary text-sm font-black text-primary-foreground", className)} aria-label="HORIZON by VZG">
       V
     </span>
   )
@@ -22,7 +22,7 @@ export function Logo({
       <LogoMark />
       {showText ? (
         <span className={cn("font-sans text-lg font-bold leading-none tracking-tight text-foreground", textClassName)}>
-          HAMMAL by VZG <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">BY VZG CONSULT</span>
+          HORIZON by VZG <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">VZG CONSULT</span>
         </span>
       ) : null}
     </span>

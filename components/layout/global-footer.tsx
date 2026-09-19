@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
+import { usePathname } from "next/navigation"
 
 export function GlobalFooter() {
-  const { locale } = useLanguage()
+  const pathname = usePathname() ?? "/"
+  const locale = pathname.startsWith("/de") ? "de" : "bg"
   const isDe = locale === "de"
 
   const links = [
@@ -15,6 +16,8 @@ export function GlobalFooter() {
       label: isDe ? "Datenschutz" : "Поверителност",
     },
     { href: "/contact", label: isDe ? "Kontakt" : "Контакт" },
+    { href: "/agb", label: isDe ? "AGB" : "ОУ" },
+    { href: "/widerruf", label: isDe ? "Widerruf" : "Отказ" },
   ]
 
   return (
@@ -33,7 +36,7 @@ export function GlobalFooter() {
             ))}
           </nav>
           <p className="text-xs text-muted-foreground">
-            © 2024-2025 HAMMAL by VZG. All rights reserved.
+            © 2024-2026 HORIZON by VZG · Tarifberater24
           </p>
         </div>
       </div>

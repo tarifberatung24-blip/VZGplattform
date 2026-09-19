@@ -10,12 +10,12 @@ export function generateStaticParams() {
 
 const localeMetadata: Record<Locale, {title: string; description: string; keywords: string[]}> = {
   bg: {
-    title: "VZGplattform — BY VZG CONSULT",
+    title: "HORIZON by VZG — VZG CONSULT",
     description: "Финансовият и административен помощник за живота ти в Германия.",
     keywords: ["данъци Германия", "Kindergeld", "договори Германия", "българи в Германия"],
   },
   de: {
-    title: "VZGplattform — BY VZG CONSULT",
+    title: "HORIZON by VZG — VZG CONSULT",
     description: "Dein Finanz- und Verwaltungsassistent für das Leben in Deutschland.",
     keywords: ["Steuererklärung Deutschland", "Kindergeld", "Verträge Deutschland", "Finanzassistent"],
   },

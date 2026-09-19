@@ -40,7 +40,7 @@ after a module meets the full DONE definition.
 | ID | SYSTEM | CURRENT STATUS | FROZEN | OWNER APPROVAL REQUIRED |
 | --- | --- | --- | --- | --- |
 | P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
-| P1 | PUBLIC LAYER 0 | AUDITED | NO | YES |
+| P1 | PUBLIC LAYER 0 | IMPLEMENTATION VERIFIED — OWNER/LEGAL REVIEW PENDING | NO | YES |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | AUDITED | NO | YES |
 | P3 | HORIZON GUIDE | NOT_STARTED | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | AUDITED | NO | YES |
@@ -92,9 +92,10 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Public Layer 0
 - **TARGET ROUTES:** `/{locale}` → `/`, `/how-it-works`, `/functions`, `/security`, `/contact`,
   `/auth/login`, `/auth/sign-up`, legal pages.
-- **CURRENT STATUS:** AUDITED
-- **CURRENT IMPLEMENTATION:** public marketing and legal surfaces exist but under different names
-  and with three competing brand names (`KintexBG`, `HAMMAL`, `VZGplattform`).
+- **CURRENT STATUS:** IMPLEMENTATION VERIFIED — OWNER/LEGAL REVIEW PENDING
+- **CURRENT IMPLEMENTATION:** public marketing and legal surfaces are available in BG/DE with
+  HORIZON by VZG customer-facing branding. Public `/security` is a trust page; account/MFA
+  security remains protected at `/protected/security`.
   Existing: `/{locale}` home, `/{locale}/how-it-works`, `/{locale}/contact`,
   `/{locale}/auth/login`, `/{locale}/auth/sign-up`, `/{locale}/impressum`,
   `/{locale}/datenschutz`, `/{locale}/agb`, `/{locale}/widerruf`, `/{locale}/affiliate-hinweis`.
@@ -102,8 +103,7 @@ after a module meets the full DONE definition.
   `/zayavka`, `/anfrage`, `/angebote/{offer}`, `/email-generator`.
 - **REUSE:** `GlobalHeader`, `GlobalFooter`, `legal-page`, `hero`, `site-header`, `site-footer`,
   `LanguageSwitcher`, `legal-profile.ts`, `/api/leads`, `lead-submit.ts`, PWA install pages.
-- **MISSING:** `/{locale}/functions`; public `/{locale}/security` trust page; single consistent
-  HORIZON branding; a decision on the fate of the legacy marketing routes (no redirects yet);
+- **MISSING:** a decision on the fate of the legacy marketing routes (no redirects yet);
   legal review of final Impressum/AGB/Datenschutz against HORIZON wording.
 - **DEPENDENCIES:** P0.
 - **BLOCKERS:** legal review by the owner/legal reviewer is required before public launch;

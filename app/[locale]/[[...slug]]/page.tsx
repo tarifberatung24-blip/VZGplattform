@@ -35,25 +35,28 @@ import AppInstallPage from "@/app/app/page"
 import FinanzbildungPage from "@/app/finanzbildung/page"
 import EmailGeneratorPage from "@/app/[locale]/email-generator/page"
 import HowItWorksPage from "@/app/[locale]/how-it-works/page"
+import { FunctionsPage } from "@/components/marketing/public-layer-page"
+import type { Locale } from "@/lib/i18n/dictionaries"
 
 const pages: Record<string, React.ComponentType> = {
   "": HomePage, check: CheckPage, uslugi: UslugiPage, anspruch: AnspruchPage, kindergeld: KindergeldPage,
   produkte: ProduktePage, tarife: TarifePage, vertraege: VertraegePage, documents: DocumentsPage, "za-nas": ZaNasPage,
   "auth/login": LoginPage, "auth/sign-up": SignUpPage, "auth/sign-up-success": SignUpSuccessPage, "auth/error": AuthErrorPage,
   "auth/forgot-password": ForgotPasswordPage, "auth/update-password": UpdatePasswordPage, "auth/mfa-verify": MfaVerifyPage,
-  finanzamt: FinanzamtPage, profil: ProfilPage, dashboard: ProtectedPage, protected: ProtectedPage, assistant: HomeOfficePage, "protected/home-office": HomeOfficePage, security: SecurityPage, "protected/security": SecurityPage,
+  finanzamt: FinanzamtPage, profil: ProfilPage, dashboard: ProtectedPage, protected: ProtectedPage, assistant: HomeOfficePage, "protected/home-office": HomeOfficePage, "protected/security": SecurityPage,
   steuer: SteuerPage, "steuer/providers": ProvidersPage, "steuer/review": ReviewPage, finanzbildung: FinanzbildungPage, datenschutz: DatenschutzPage, agb: AgbPage, impressum: ImpressumPage, contact: ContactPage, emailGenerator: EmailGeneratorPage, "how-it-works": HowItWorksPage, "affiliate-hinweis": AffiliateNoticePage, widerruf: WithdrawalPage, app: AppInstallPage,
 }
 
 export async function generateMetadata({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
   const {slug = []} = await params
   return isKintexWorkspacePath(`/${slug.join("/")}`)
-    ? { title: { absolute: "KintexBG — BY VZG CONSULT" }, description: "KintexBG — Digital Financial Home Office" }
+    ? { title: { absolute: "HORIZON by VZG — VZG CONSULT" }, description: "HORIZON by VZG — administrative support for life in Germany" }
     : {}
 }
 
 export default async function LocalizedPage({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
-  const {slug = []} = await params
+  const {locale, slug = []} = await params
+  if (slug.join("/") === "functions") return <FunctionsPage locale={locale as Locale} />
   if (slug.join("/") === "protected") redirect("/dashboard")
   const Page = pages[slug.join("/")]
   if (!Page) notFound()

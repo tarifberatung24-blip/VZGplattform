@@ -17,7 +17,7 @@ export default function HowItWorksPage() {
   const labels = isBg
     ? {
         back: "← Към началото",
-        eyebrow: "KintexBG · BY VZG CONSULT",
+        eyebrow: "HORIZON by VZG · VZG CONSULT",
         title: "Как работи",
         intro: "Три стъпки от първия въпрос до готов план за действие — без документи и без обвързване.",
         stepsTitle: "Твоят път",
@@ -25,11 +25,11 @@ export default function HowItWorksPage() {
         start: "Започни проверката",
         contact: "Свържи се с нас",
         notice: "Това е структурирана предварителна проверка.",
-        disclaimer: "KintexBG не заменя данъчна, правна или социална консултация.",
+        disclaimer: "HORIZON не заменя данъчна, правна или социална консултация.",
       }
     : {
         back: "← Zur Startseite",
-        eyebrow: "KintexBG · BY VZG CONSULT",
+        eyebrow: "HORIZON by VZG · VZG CONSULT",
         title: "So funktioniert's",
         intro: "Drei Schritte von der ersten Frage bis zum fertigen Aktionsplan — ohne Dokumente und ohne Verpflichtung.",
         stepsTitle: "Dein Weg",
@@ -37,7 +37,7 @@ export default function HowItWorksPage() {
         start: "Prüfung starten",
         contact: "Kontakt aufnehmen",
         notice: "Dies ist eine strukturierte Vorprüfung.",
-        disclaimer: "KintexBG ersetzt keine Steuer-, Rechts- oder Sozialberatung.",
+        disclaimer: "HORIZON ersetzt keine Steuer-, Rechts- oder Sozialberatung.",
       }
 
   const steps: [string, string][] = [
@@ -124,7 +124,7 @@ export default function HowItWorksPage() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" variant="default">
-              <Link href={localizedPath("/check", locale)}>
+              <Link href={localizedPath("/auth/sign-up", locale)}>
                 {labels.start}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>

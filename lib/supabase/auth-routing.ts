@@ -3,7 +3,6 @@ import { stripLocale } from "../i18n/routing"
 const protectedPrefixes = [
   "/dashboard",
   "/assistant",
-  "/security",
   "/protected",
   "/profil",
   "/finanzamt",

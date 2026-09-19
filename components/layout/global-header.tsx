@@ -5,22 +5,26 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { LanguageSwitcher } from "@/components/language-switcher"
-import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 
 export function GlobalHeader() {
-  const { locale } = useLanguage()
   const pathname = usePathname() ?? "/"
+  const locale = pathname.startsWith("/de") ? "de" : "bg"
   const [mobileOpen, setMobileOpen] = useState(false)
   const [sessionActive, setSessionActive] = useState(false)
   const [sessionReady, setSessionReady] = useState(false)
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const supabase = createClient()
+    let supabase: ReturnType<typeof createClient>
+    try {
+      supabase = createClient()
+    } catch {
+      setSessionReady(true)
+      return
+    }
     void supabase.auth.getSession().then(({ data }) => {
       setSessionActive(Boolean(data.session))
       setSessionReady(true)
@@ -39,6 +43,8 @@ export function GlobalHeader() {
       ? {
           home: "Startseite",
           howItWorks: "So funktioniert's",
+          functions: "Funktionen",
+          security: "Sicherheit",
           contact: "Kontakt",
           login: "Anmelden",
           register: "Registrieren",
@@ -49,6 +55,8 @@ export function GlobalHeader() {
       : {
           home: "Начало",
           howItWorks: "Как работи",
+          functions: "Функции",
+          security: "Сигурност",
           contact: "Контакт",
           login: "Вход",
           register: "Регистрация",
@@ -66,6 +74,8 @@ export function GlobalHeader() {
 
   const navLinks: { href: string; labelKey: keyof typeof labels }[] = [
     { href: "/how-it-works", labelKey: "howItWorks" },
+    { href: "/functions", labelKey: "functions" },
+    { href: "/security", labelKey: "security" },
     { href: "/contact", labelKey: "contact" },
   ]
 
@@ -76,7 +86,7 @@ export function GlobalHeader() {
           href={localizedPath("/", locale)}
           className="flex items-baseline gap-3 text-2xl font-black tracking-[-0.04em] text-foreground"
         >
-          HAMMAL by VZG
+          HORIZON by VZG
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             by VZG CONSULT
           </span>
@@ -107,7 +117,6 @@ export function GlobalHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <LanguageSwitcher className="hidden sm:inline-flex" />
           {sessionReady && sessionActive ? (
             <Button
               asChild

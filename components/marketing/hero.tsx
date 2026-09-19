@@ -3,15 +3,16 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { localizedPath } from "@/lib/i18n/routing"
 
 export function Hero() {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
 
   return (
     <section className="border-b border-border bg-background py-28 sm:py-40">
       <div className="mx-auto max-w-[1440px] px-5 lg:px-8">
         <div className="max-w-5xl">
-          <p className="mb-8 text-xs font-bold uppercase tracking-[0.22em] text-primary">KintexBG · Institutional Private Finance</p>
+          <p className="mb-8 text-xs font-bold uppercase tracking-[0.22em] text-primary">HORIZON by VZG · VZG CONSULT</p>
           <h1 className="text-balance text-5xl font-black leading-[0.88] tracking-[-0.06em] text-foreground sm:text-7xl md:text-8xl lg:text-[6.5rem]">
             {t.home.heroTitle}
           </h1>
@@ -24,9 +25,12 @@ export function Hero() {
               size="lg"
               className="rounded-sm bg-primary px-10 py-4 text-base font-black text-primary-foreground shadow-none hover:bg-primary/90"
             >
-              <Link href="/check">
-                {t.home.ctaPrimary}
+              <Link href={localizedPath("/auth/sign-up", locale)}>
+                {t.nav.register}
               </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="ml-3 rounded-sm px-10 py-4 text-base font-black shadow-none">
+              <Link href={localizedPath("/auth/login", locale)}>{t.nav.login}</Link>
             </Button>
             <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
               {t.common.noCardNoCommitment}

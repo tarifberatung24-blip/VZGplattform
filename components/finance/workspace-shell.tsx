@@ -3,7 +3,6 @@
 import { type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 import { UserSidebar } from "@/components/layout/user-sidebar"
-import { useLanguage } from "@/lib/i18n/language-context"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
 
 /**
@@ -17,8 +16,7 @@ import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
  */
 export function WorkspaceShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
-  const { locale } = useLanguage()
-  const de = locale === "de"
+  const de = pathname?.startsWith("/de/") || pathname === "/de"
 
   if (!isKintexWorkspacePath(pathname)) {
     return <>{children}</>

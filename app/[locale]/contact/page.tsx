@@ -27,8 +27,8 @@ export default function ContactPage() {
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">
             {isBg
-              ? "Свържете се с Tarifberater24. Използвайте формата по-долу или директно телефон и email."
-              : "Treten Sie mit Tarifberater24 in Kontakt. Nutzen Sie das Formular unten oder telefonisch bzw. per E-Mail."}
+              ? "Свържете се с HORIZON by VZG. Използвайте формата по-долу или директно телефон и email."
+              : "Treten Sie mit HORIZON by VZG in Kontakt. Nutzen Sie das Formular unten oder telefonisch bzw. per E-Mail."}
           </p>
         </div>
 

@@ -4,7 +4,6 @@ import { cookies, headers } from "next/headers"
 import { Suspense } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { WorkspaceShell } from "@/components/finance/workspace-shell"
-import { PwaInstallPrompt } from "@/components/pwa-install-prompt"
 import { PwaServiceWorker } from "@/components/pwa-service-worker"
 import { GlobalHeader } from "@/components/layout/global-header"
 import { GlobalFooter } from "@/components/layout/global-footer"
@@ -20,15 +19,15 @@ const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" }
 export const metadata: Metadata = {
   metadataBase: new URL("https://finanzberaterbg.de"),
   title: {
-    default: "VZGplattform — BY VZG CONSULT",
-    template: "%s · VZGplattform",
+    default: "HORIZON by VZG — VZG CONSULT",
+    template: "%s · HORIZON by VZG",
   },
   description:
     "VZGplattform организира договори, документи, срокове и финансови задачи за живота ти в Германия.",
   generator: "v0.app",
-  applicationName: "VZGplattform",
+  applicationName: "HORIZON by VZG",
   keywords: [
-    "VZGplattform",
+    "HORIZON by VZG",
     "данъци Германия",
     "Steuererklärung",
     "Kindergeld",
@@ -40,8 +39,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   openGraph: {
     type: "website",
-    siteName: "VZGplattform",
-    title: "VZGplattform — BY VZG CONSULT",
+    siteName: "HORIZON by VZG",
+    title: "HORIZON by VZG — VZG CONSULT",
     description: "Договори, документи, срокове и финансови задачи за живота ти в Германия.",
   },
   icons: {
@@ -50,7 +49,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "VZGplattform",
+    title: "HORIZON by VZG",
     statusBarStyle: "black-translucent",
   },
 }
@@ -85,7 +84,6 @@ export default async function RootLayout({
           <LanguageProvider initialLocale={initialLocale}>
             <GlobalHeader />
             <Suspense fallback={null}><WorkspaceShell>{children}</WorkspaceShell></Suspense>
-            <PwaInstallPrompt />
             <PwaServiceWorker />
             <GlobalFooter />
           </LanguageProvider>
