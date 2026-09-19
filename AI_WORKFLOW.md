@@ -45,6 +45,26 @@ Never allow two agents to modify the same module at the same time. Do not invent
 Step 2 (DEFINE SCOPE) must explicitly declare: `ACTIVE_PHASE`, `ALLOWED_FILES`,
 `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE`.
 
+### Phase-scoped context loading
+
+For a normal phase task, do not read the whole Master Map and Build Ledger. Load the phase context
+with:
+
+```bash
+node scripts/horizon-context.mjs <ACTIVE_PHASE>   # e.g. P1, P5, P9, P12
+```
+
+The loader prints only the requested phase context (identity, governance, Master Map section,
+ledger record, dependencies, frozen systems, owner approval, out-of-scope, source files) and exits
+non-zero on an invalid phase or a missing heading. `docs/HORIZON_CONTEXT_INDEX.json` contains only
+phase → heading mappings and never duplicates phase requirements.
+
+Load the complete `docs/HORIZON_MASTER_MAP.md` or `docs/HORIZON_BUILD_LEDGER.md` only when:
+
+- architecture or governance is being changed;
+- the loader cannot resolve the required context;
+- the owner requests a cross-phase audit.
+
 ## Roles
 
 - **CHATGPT:** architecture, orchestration, planning, prompt design, review

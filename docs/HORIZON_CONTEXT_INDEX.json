@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "description": "Phase to heading mapping only. Contains no phase requirements or governance text: requirements live in docs/HORIZON_MASTER_MAP.md and docs/HORIZON_BUILD_LEDGER.md.",
+  "sources": {
+    "masterMap": "docs/HORIZON_MASTER_MAP.md",
+    "buildLedger": "docs/HORIZON_BUILD_LEDGER.md",
+    "projectRules": "PROJECT_RULES.md",
+    "agents": "AGENTS.md",
+    "aiWorkflow": "AI_WORKFLOW.md"
+  },
+  "identitySource": "PROJECT_RULES.md",
+  "identityPattern": "^- \\*\\*(LEGAL ENTITY|EXPERT BRAND|PRODUCT|CODEBASE):\\*\\*.*$",
+  "ledgerPhasePattern": "^## PHASE ([0-9]+) — (.+)$",
+  "ledgerFrozenPattern": "^- \\*\\*FROZEN:\\*\\* (YES|NO)$",
+  "ledgerFieldPattern": "^- \\*\\*(DEPENDENCIES|OWNER APPROVAL REQUIRED):\\*\\* (.+)$",
+  "ledgerOutOfScopeHeading": "CAPITAL",
+  "engineHeadings": {
+    "E1": "E1 — Case Engine",
+    "E2": "E2 — Document Intake / OCR",
+    "E3": "E3 — Translation Layer",
+    "E4": "E4 — Risk / Urgency Engine",
+    "E5": "E5 — Context AI Assistant",
+    "E6": "E6 — Draft → Review → Approval",
+    "E7": "E7 — Official PDF Form Engine",
+    "E8": "E8 — Signature Engine",
+    "E9": "E9 — Email Connection & Send",
+    "E10": "E10 — Audit / Tasks / Deadlines"
+  },
+  "engineDependencies": {
+    "E1": [],
+    "E2": ["E1"],
+    "E3": ["E1"],
+    "E4": [],
+    "E5": ["E1", "E2", "E3"],
+    "E6": ["E1", "E3"],
+    "E7": ["E1", "E6"],
+    "E8": ["E6", "E7"],
+    "E9": ["E6"],
+    "E10": []
+  },
+  "phases": {
+    "P0": {
+      "masterMapHeadings": ["0. First principle", "10. Governance summary"],
+      "engines": []
+    },
+    "P1": {
+      "masterMapHeadings": ["3.1 LAYER 0"],
+      "engines": []
+    },
+    "P2": {
+      "masterMapHeadings": ["3.2 LAYER 1"],
+      "engines": []
+    },
+    "P3": {
+      "masterMapHeadings": ["3.3 PERSISTENT HORIZON GUIDE"],
+      "engines": []
+    },
+    "P4": {
+      "masterMapHeadings": ["3.4 HORIZON HOME"],
+      "engines": []
+    },
+    "P5": {
+      "masterMapHeadings": ["4.1 HORIZON CASE ENGINE"],
+      "engines": []
+    },
+    "P6": {
+      "masterMapHeadings": ["4.2 Shared engines"],
+      "engines": ["E2", "E3", "E10"]
+    },
+    "P7": {
+      "masterMapHeadings": [],
+      "engines": ["E5", "E3", "E10"]
+    },
+    "P8": {
+      "masterMapHeadings": [],
+      "engines": ["E6", "E3", "E10"]
+    },
+    "P9": {
+      "masterMapHeadings": [],
+      "engines": ["E7", "E10"]
+    },
+    "P10": {
+      "masterMapHeadings": [],
+      "engines": ["E8", "E10"]
+    },
+    "P11": {
+      "masterMapHeadings": [],
+      "engines": ["E9", "E10"]
+    },
+    "P12": {
+      "masterMapHeadings": ["7.1 AGENTUR FÜR ARBEIT"],
+      "engines": []
+    },
+    "P13": {
+      "masterMapHeadings": ["7.2 JOBCENTER"],
+      "engines": []
+    },
+    "P14": {
+      "masterMapHeadings": ["7.3 KÜNDIGUNG"],
+      "engines": []
+    },
+    "P15": {
+      "masterMapHeadings": ["7.4 STEUERERKLÄRUNG"],
+      "engines": []
+    },
+    "P16": {
+      "masterMapHeadings": ["7.5 UNTERLAGEN ERKLÄREN"],
+      "engines": []
+    },
+    "P17": {
+      "masterMapHeadings": ["7.6 CONTRACT MANAGEMENT"],
+      "engines": []
+    }
+  }
+}

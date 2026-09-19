@@ -32,6 +32,25 @@ The current user-approved product direction is **HORIZON by VZG**, V1 for privat
 
 Before every task, state: `ACTIVE_PHASE`, `ALLOWED_FILES`, `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE`.
 
+## Phase-scoped context loading
+
+For a normal phase task, load context with the phase-scoped loader instead of reading the whole
+Master Map and Build Ledger:
+
+```bash
+node scripts/horizon-context.mjs <ACTIVE_PHASE>   # e.g. P1, P5, P9, P12
+```
+
+It prints only that phase's context, and it fails non-zero on an invalid phase or a missing heading.
+`docs/HORIZON_CONTEXT_INDEX.json` holds phase → heading mappings only; it never restates phase
+requirements.
+
+Do not load the complete `docs/HORIZON_MASTER_MAP.md` or `docs/HORIZON_BUILD_LEDGER.md` unless:
+
+- architecture or governance is being changed;
+- the loader cannot resolve required context;
+- the owner requests a cross-phase audit.
+
 ## Rules
 
 - AionUi does **not** replace GitHub. GitHub `main` remains the source of truth.
