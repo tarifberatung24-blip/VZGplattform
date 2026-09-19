@@ -105,3 +105,12 @@ BLOCKERS:
 NOT IMPLEMENTED:
 NEXT RECOMMENDED STEP:
 ```
+
+
+## Execution checklist
+
+`docs/HORIZON_EXECUTION_CHECKLIST.md` is the live operational board for progress and agent assignment. The Master Map remains architecture authority and the Build Ledger remains status authority.
+
+Workers normally return a `CHECKLIST_DELTA` rather than editing the board. Only the explicitly assigned checklist/control-plane writer reconciles those deltas. This prevents concurrent agents from creating checklist merge conflicts.
+
+Read-only audits and external research may run in parallel with the active implementation phase when they do not modify that phase or implement a future phase early.
