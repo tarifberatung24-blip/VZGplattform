@@ -41,6 +41,42 @@ User actions must follow:
 
 `ANALYZE → EXPLAIN → REVIEW → USER APPROVES → EXECUTE`
 
+## Canonical Build Map and Sequencing
+
+- `docs/HORIZON_MASTER_MAP.md` is the canonical TARGET build map. It fixes the phase order and the
+  shared-engine architecture; it does not authorize implementation.
+- `docs/HORIZON_BUILD_LEDGER.md` tracks implementation status for every phase.
+- Work proceeds sequentially by approved phase. Only one implementation phase may be active at a
+  time unless the owner explicitly authorizes otherwise.
+- A later phase must not be started merely because its files already exist.
+- Unrelated refactoring of earlier phases is prohibited.
+- Before every task, the agent must state: `ACTIVE_PHASE`, `ALLOWED_FILES`,
+  `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE`.
+- Existing Capital work is preserved untouched and is **outside** the current active build
+  sequence. It may only be resumed by explicit owner instruction.
+
+## Lifecycle: DONE and FROZEN
+
+A system moves through:
+
+```text
+NOT_STARTED → AUDITED → PLANNED → IN_PROGRESS → TESTING → DONE → FROZEN
+```
+
+`BLOCKED` may be used when an external dependency prevents completion.
+
+**DONE** requires all applicable items: user journey complete; correct routes complete; frontend
+complete enough to use; backend complete; persistence where required; authorization/RLS where
+required; integrations where required; loading/error/empty states; user approval boundaries;
+applicable legal/safety boundaries; tests pass; build passes; real functional verification passes;
+no known critical blocker remains. A module is **not** DONE merely because code exists, and a flow
+not verified end-to-end is not DONE.
+
+**FROZEN** applies only after a module is DONE and explicitly accepted by the owner. A FROZEN
+module must not be modified, renamed, refactored, redesigned, extended, migrated, or replaced
+unless the owner explicitly reopens it. Never modify a FROZEN module as collateral work for
+another task.
+
 ## Source, Framework, and Infrastructure
 
 - GitHub `main` in `tarifberatung24-blip/VZGplattform` is the single source of truth.

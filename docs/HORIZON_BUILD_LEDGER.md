@@ -1,0 +1,607 @@
+# HORIZON by VZG — Build Ledger
+
+Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
+Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
+Base: `main` @ `f6a8eb777e630106c934856a74de3796c1ad506c`
+
+This ledger tracks implementation status per phase. It is evidence-based only.
+Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
+it is not DONE.
+
+## Status vocabulary
+
+```text
+NOT_STARTED → AUDITED → PLANNED → IN_PROGRESS → TESTING → DONE → FROZEN
+BLOCKED (external dependency prevents completion)
+```
+
+Legend for the columns used in every phase record:
+
+- **ID** — phase identifier
+- **SYSTEM** — phase name
+- **TARGET ROUTES** — target route surface (from the Master Map)
+- **CURRENT STATUS** — status vocabulary value, evidence-based
+- **CURRENT IMPLEMENTATION** — what exists on `main` today
+- **REUSE** — reusable assets
+- **MISSING** — what is absent
+- **DEPENDENCIES** — prerequisite phases/systems
+- **BLOCKERS** — known blockers
+- **DONE CRITERIA** — acceptance criteria
+- **FROZEN** — freeze state
+- **OWNER APPROVAL REQUIRED** — whether the owner must approve to proceed/publish
+
+**No module is FROZEN.** No module is DONE. Freeze is granted only by explicit owner acceptance
+after a module meets the full DONE definition.
+
+---
+
+## Ledger index
+
+| ID | SYSTEM | CURRENT STATUS | FROZEN | OWNER APPROVAL REQUIRED |
+| --- | --- | --- | --- | --- |
+| P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
+| P1 | PUBLIC LAYER 0 | AUDITED | NO | YES |
+| P2 | AUTH + FIRST LOGIN + ONBOARDING | AUDITED | NO | YES |
+| P3 | HORIZON GUIDE | NOT_STARTED | NO | YES |
+| P4 | HORIZON HOME + FIVE ENTRY MODULES | AUDITED | NO | YES |
+| P5 | SHARED CASE ENGINE | AUDITED | NO | YES |
+| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | AUDITED | NO | YES |
+| P7 | CONTEXT AI ASSISTANT | AUDITED | NO | YES |
+| P8 | DRAFT / REVIEW / USER APPROVAL | AUDITED | NO | YES |
+| P9 | OFFICIAL PDF FORM ENGINE | NOT_STARTED | NO | YES |
+| P10 | SIGNATURE ENGINE | NOT_STARTED | NO | YES |
+| P11 | EMAIL CONNECTION + SEND ENGINE | NOT_STARTED | NO | YES |
+| P12 | AGENTUR FÜR ARBEIT | NOT_STARTED | NO | YES |
+| P13 | JOBCENTER | NOT_STARTED | NO | YES |
+| P14 | KÜNDIGUNG | NOT_STARTED | NO | YES |
+| P15 | STEUERERKLÄRUNG | AUDITED | NO | YES |
+| P16 | UNTERLAGEN ERKLÄREN | AUDITED | NO | YES |
+| P17 | CONTRACT MANAGEMENT | AUDITED | NO | YES |
+| — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
+
+---
+
+## PHASE 0 — MASTER MAP + GOVERNANCE
+
+- **ID:** P0
+- **SYSTEM:** Master map and development governance
+- **TARGET ROUTES:** none (governance only)
+- **CURRENT STATUS:** IN_PROGRESS
+- **CURRENT IMPLEMENTATION:** `PROJECT_RULES.md`, `AGENTS.md`, `AI_WORKFLOW.md`,
+  `DOCUMENT_FEASIBILITY_AUDIT.md`, `docs/TERRA_START.md`, `README.md`,
+  `SUPABASE_CONSOLIDATION_PLAN.md`, `REPOSITORY_AUDIT_BG.md`.
+  This task adds `docs/HORIZON_MASTER_MAP.md` and `docs/HORIZON_BUILD_LEDGER.md` and the
+  DONE → FROZEN governance rules.
+- **REUSE:** existing governance documents; canonical identity rules.
+- **MISSING:** no prior canonical target map; no implementation ledger; no DONE → FROZEN model;
+  no ACTIVE_PHASE / ALLOWED_FILES / FROZEN_FILES / OUT_OF_SCOPE declaration requirement.
+- **DEPENDENCIES:** none.
+- **BLOCKERS:** none.
+- **DONE CRITERIA:** Master Map and Ledger exist; `PROJECT_RULES.md`, `AGENTS.md`, `AI_WORKFLOW.md`
+  carry the governance rules; the canonical phase sequence is fixed; Capital is classified
+  outside the active sequence; validation (`git diff --check`) passes; no application code,
+  Supabase, package, lockfile, env, or deployment file changed.
+- **FROZEN:** NO
+- **OWNER APPROVAL REQUIRED:** YES — the owner accepts Phase 0 before Phase 1 starts.
+
+---
+
+## PHASE 1 — PUBLIC LAYER 0
+
+- **ID:** P1
+- **SYSTEM:** Public Layer 0
+- **TARGET ROUTES:** `/{locale}` → `/`, `/how-it-works`, `/functions`, `/security`, `/contact`,
+  `/auth/login`, `/auth/sign-up`, legal pages.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** public marketing and legal surfaces exist but under different names
+  and with three competing brand names (`KintexBG`, `HAMMAL`, `VZGplattform`).
+  Existing: `/{locale}` home, `/{locale}/how-it-works`, `/{locale}/contact`,
+  `/{locale}/auth/login`, `/{locale}/auth/sign-up`, `/{locale}/impressum`,
+  `/{locale}/datenschutz`, `/{locale}/agb`, `/{locale}/widerruf`, `/{locale}/affiliate-hinweis`.
+  Additional legacy marketing routes: `/check`, `/uslugi`, `/produkte`, `/za-nas`, `/tarife`,
+  `/zayavka`, `/anfrage`, `/angebote/{offer}`, `/email-generator`.
+- **REUSE:** `GlobalHeader`, `GlobalFooter`, `legal-page`, `hero`, `site-header`, `site-footer`,
+  `LanguageSwitcher`, `legal-profile.ts`, `/api/leads`, `lead-submit.ts`, PWA install pages.
+- **MISSING:** `/{locale}/functions`; public `/{locale}/security` trust page; single consistent
+  HORIZON branding; a decision on the fate of the legacy marketing routes (no redirects yet);
+  legal review of final Impressum/AGB/Datenschutz against HORIZON wording.
+- **DEPENDENCIES:** P0.
+- **BLOCKERS:** legal review by the owner/legal reviewer is required before public launch;
+  `DOCUMENT_FEASIBILITY_AUDIT.md` records that a public launch with unfinished legal pages is blocked.
+- **DONE CRITERIA:** every Layer 0 target route exists and is usable in each supported UI locale;
+  branding is consistent with HORIZON by VZG; legal pages complete and reviewed; loading, error,
+  and empty states present; real HTTP checks pass against production; no legacy route broken silently.
+- **FROZEN:** NO
+
+---
+
+## PHASE 2 — AUTH + FIRST LOGIN + ONBOARDING
+
+- **ID:** P2
+- **SYSTEM:** Authentication, first login, onboarding
+- **TARGET ROUTES:** `/{locale}/auth/login`, `/{locale}/auth/sign-up`,
+  `/{locale}/onboarding/language`, `/{locale}/onboarding/profile`,
+  `/{locale}/onboarding/tour`, `/{locale}/onboarding/finish`.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** Supabase Auth with e-mail/password, Google OAuth, MFA.
+  Handlers: `app/auth/callback/route.ts` (code exchange, MFA routing via `requiresMfa`,
+  `sanitizeNextPath`), `app/auth/logout/route.ts`. Pages: login, sign-up, sign-up-success,
+  error, forgot-password, update-password, mfa-verify. Session refresh in
+  `lib/supabase/proxy.ts`; protected prefixes in `lib/supabase/auth-routing.ts`.
+  Account security: `/{locale}/security` with `MfaSettings`.
+  Profile: `/{locale}/profil` writes `profiles`; `ensureHousehold` creates the household.
+- **REUSE:** all auth pages and handlers, `auth-routing.ts`, `mfa-challenge`, `mfa-settings`,
+  `profile-form`, `ensure_kintex_household` RPC, `profiles.locale` /
+  `conversation_locale` / `output_locale`.
+- **MISSING:** the entire onboarding flow — no `/{locale}/onboarding/*` route exists;
+  no first-login check; no persisted first-login/onboarding completion flag; no language
+  selection step separate from the cookie; no minimal-profile step; no click guide;
+  no post-onboarding redirect to dashboard.
+- **DEPENDENCIES:** P0; consumes P1 public entry points.
+- **BLOCKERS:** none technical. A schema addition for onboarding completion state is required
+  and needs explicit owner authorization before any DB change.
+- **DONE CRITERIA:** sign up → e-mail confirmation → login → first-login check → language →
+  minimal profile → short click guide → dashboard works end-to-end; the tour runs once and is
+  resumable; onboarding completion is persisted; all steps localized; tests and build pass;
+  real verification performed.
+- **FROZEN:** NO
+
+---
+
+## PHASE 3 — HORIZON GUIDE
+
+- **ID:** P3
+- **SYSTEM:** Persistent HORIZON Guide
+- **TARGET ROUTES:** `/{locale}/guide` with task tree: understand a document, reply to an
+  authority, fill an official form, cancel a contract, I do not know what to do.
+- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT IMPLEMENTATION:** none. A repository-wide search found no `/{locale}/guide` route
+  and no guide component. Closest neighbours are `/{locale}/how-it-works` (marketing explainer)
+  and `/{locale}/office` (KintexBG prototype), neither of which is the guide.
+- **REUSE:** `how-it-works` layout patterns, `module-page`, `guided-wizard` component,
+  case intent vocabulary in `lib/office/supabase/database.ts`
+  (`explanation`, `reply`, `complaint`, `application`, `objection`, `cancellation`,
+  `document_request`, `reminder`, `free_email`).
+- **MISSING:** the entire guide route, task tree, entry points from header/dashboard,
+  and routing from a guide task into a case.
+- **DEPENDENCIES:** P1 (entry points), P2 (authenticated context), P5 (case creation).
+- **BLOCKERS:** depends on the P5 case model decision.
+- **DONE CRITERIA:** guide is permanently accessible after onboarding; all five task entries
+  work; each entry routes into the shared case engine; localized; loading/error/empty states;
+  tests, build, and real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 4 — HORIZON HOME + FIVE ENTRY MODULES
+
+- **ID:** P4
+- **SYSTEM:** HORIZON Home and the five entry modules
+- **TARGET ROUTES:** `/{locale}/dashboard` with modules Agentur für Arbeit, Jobcenter,
+  Kündigung, Steuererklärung, Unterlagen erklären, plus My Cases, Profile, Settings/Security.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** `/{locale}/dashboard` renders `VzgDashboard` and reads
+  `profiles`, `contracts`, `documents`, `deadlines` via `ensureHousehold`.
+  Supporting components: `workplace-action-center`, `missing-information-interviewer`,
+  `smart-dashboard-preview`, `personal-dashboard`, `dashboard-workspace`.
+  Module navigation is defined in `lib/kintex-navigation.ts` (10 modules, several flagged
+  `planned`: insurance, credits, deadlines, opportunities).
+- **REUSE:** `VzgDashboard`, `workplace-action-center`, `missing-information-interviewer`,
+  `dashboard-layout`, `user-sidebar`, `module-page`, `module-workspaces`,
+  `smartDashboardRules`.
+- **MISSING:** none of the five HORIZON modules (Agentur für Arbeit, Jobcenter, Kündigung,
+  Steuererklärung, Unterlagen erklären) exists as a dashboard entry;
+  no My Cases surface; no consolidated Settings/Security entry from the dashboard;
+  dashboard still uses KintexBG-era navigation labels.
+- **DEPENDENCIES:** P0, P2 (onboarding), P5 (case engine).
+- **BLOCKERS:** module entry points cannot be finalized before the P5 case model is fixed.
+- **DONE CRITERIA:** dashboard presents exactly the five user modules plus My Cases, Profile,
+  and Settings/Security; each entry is functional and routes into a real flow; loading, error,
+  and empty states complete; localized; tests, build, and real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 5 — SHARED CASE ENGINE
+
+- **ID:** P5
+- **SYSTEM:** Shared case engine (spine: case → source documents → extracted facts → messages
+  → drafts → approvals → tasks → audit)
+- **TARGET ROUTES:** no new public routes; consumed by all modules. Existing consumer surfaces:
+  `/{locale}/office`, `/{locale}/office/cases/{id}`, `/{locale}/dashboard`.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** owner-scoped case repository (`lib/office/repositories/cases.ts`)
+  with create/list/get/update/archive and audit-on-archive; case detail repository;
+  case messages with AI language/intent routing (`lib/office/ai/routing.ts`,
+  `routeCaseMessage`); a 14-state workplace state machine
+  (`lib/workplace/state-machine.ts`); audit helper (`lib/office/supabase/audit.ts`);
+  ownership guard (`lib/office/supabase/ownership.ts`); route handlers under
+  `/api/office/cases/*`.
+- **REUSE:** all of the above, plus `cases`, `case_messages`, `extracted_facts`, `tasks`,
+  `audit_events` tables and the `platform_cases` / `platform_tasks` / `platform_audit_events` family.
+- **MISSING:** a single canonical case model. Two overlapping families exist
+  (assistant `cases` owner-scoped vs `platform_cases` household-scoped) with no repository
+  record designating the canonical one. Also missing: module-to-case typing for the five
+  HORIZON modules, one unified status vocabulary (`CaseStatus` vs `workplaceStatuses` vs
+  platform case status), one canonical audit table, and case-level missing-information persistence
+  (`platform_cases.missing_information` is described in `DOCUMENT_FEASIBILITY_AUDIT.md` as still needing wiring).
+- **DEPENDENCIES:** P0.
+- **BLOCKERS:** the canonical case-model decision is an architecture + schema decision that
+  requires explicit owner authorization. No DB/schema/RLS change may be made before that.
+- **DONE CRITERIA:** one documented canonical case model; every module creates cases through it;
+  RLS and repository enforce ownership; cross-tenant isolation tested; every state transition
+  audited; case messages, facts, drafts, approvals, tasks all hang off the same case;
+  tests, build, and real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 6 — DOCUMENT INTAKE / OCR / EXPLANATION
+
+- **ID:** P6
+- **SYSTEM:** Document intake, OCR, explanation
+- **TARGET ROUTES:** no new public route required; enhances `/{locale}/documents` and
+  `/{locale}/office/cases/{id}`.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** validated upload with canonical-project guard
+  (`lib/documents/validation.ts` + `app/api/documents/upload/route.ts`);
+  text extraction (`lib/documents/extraction.ts`); contract extraction
+  (`lib/contracts/extraction.ts`); PDF extraction and Tesseract OCR
+  (`lib/office/workflow/pdf-extraction.ts`, `pdf-ocr.ts`, `ocr-provider.ts` with `deu+eng`);
+  AI analysis via Groq and Cerebras (`/api/documents/analyze`); fact confirmation
+  (`/api/documents/review`); signed private URLs with a 300-second expiry;
+  document UI: `document-intake`, `documents-workspace`, `document-facts-review`,
+  `document-analyzer`, `document-explanation`.
+- **REUSE:** everything listed above, plus tables `documents`, `source_documents`,
+  `document_pages`, `document_analysis_results`, `document_reviews`, and the private Storage
+  buckets `documents` and `source-documents`.
+- **MISSING:** two of the five target input types (pasted text, email content);
+  page-level evidence linkage on every extracted fact; one extraction contract shared by the
+  two parallel document stacks; explicit error states for OCR/extraction failure.
+- **DEPENDENCIES:** P5 (case model), P7 (assistant context).
+- **BLOCKERS:** OCR provider and budget approval (`docs/TERRA_START.md` T5 notes OCR requires an
+  approved provider and budget). Two competing document stacks must be reconciled first.
+- **DONE CRITERIA:** screenshot, photo, PDF, pasted text, and email content are all accepted;
+  OCR/extraction results stored per page; every extracted fact carries page evidence;
+  explanation is localized; failures surface explicit errors; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 7 — CONTEXT AI ASSISTANT
+
+- **ID:** P7
+- **SYSTEM:** Context AI assistant
+- **TARGET ROUTES:** enhances `/{locale}/assistant` and the case workspace.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** `/{locale}/assistant` renders `home-office-workspace`;
+  `app/api/chat/route.ts` streams via `@ai-sdk/groq` with rate limiting;
+  case-message routing (`lib/office/ai/routing.ts`, prompt version `language-router-intent-v1`);
+  missing-information interviewer (max 3 questions, prompt version `missing-info-interviewer-v1`);
+  quota and circuit breaker (`lib/office/ai/guards.ts`, `consume_ai_quota`, 3-failure / 60 s breaker);
+  deterministic draft generation (`lib/office/ai/groq-draft-generator.ts`);
+  providers `lib/home-office/groq-provider.ts` and `lib/home-office/cerebras-provider.ts`;
+  demo fallback `lib/home-office/provider.ts` (`AI_PROVIDER_NOT_CONFIGURED`).
+- **REUSE:** all of the above plus `usage_counters`, `document_analysis_results`,
+  `case_messages`, `extracted_facts`.
+- **MISSING:** persistent case context for the assistant (assistant does not currently carry
+  full case state across turns); a model/prompt version registry; per-module guard rails;
+  OpenRouter credentials are declared in `.env.example` but no OpenRouter client code exists.
+- **DEPENDENCIES:** P5 (case context), P6 (documents).
+- **BLOCKERS:** an AI provider key must be configured for any end-to-end AI verification;
+  `docs/TERRA_START.md` states a missing cloud key must block end-to-end success claims.
+- **DONE CRITERIA:** assistant answers inside the active case context; AI performs only
+  explanation, translation, extraction assistance, missing-question generation, drafting,
+  and summarization; AI never decides authorization, final approval, send execution,
+  deterministic arithmetic, or tenant access; outputs carry provenance and version;
+  quota and breaker behavior tested; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 8 — DRAFT / REVIEW / USER APPROVAL
+
+- **ID:** P8
+- **SYSTEM:** Draft → review → user approval
+- **TARGET ROUTES:** enhances `/{locale}/office/cases/{id}`; API
+  `/api/office/cases/{id}/workflow`, `/api/office/drafts/{id}/approve`,
+  `/api/office/drafts/{id}/export`.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** deterministic draft generator and safety reviewer
+  (`lib/office/workflow/deterministic.ts`) with required fact keys `recipient`, `subject`,
+  `request`; SHA-256 `content_hash` and `input_facts_hash`;
+  hash-bound approval (`lib/office/workflow/approval.ts` `approvalMatches`,
+  `/api/office/drafts/{id}/approve` rejects anything other than a valid 64-hex hash);
+  state machine path `DRAFT_READY → USER_REVIEW → APPROVED`;
+  14-state workplace state machine with blockers `UNCONFIRMED_FACTS`, `MISSING_DOCUMENT`,
+  `MISSING_INFO`, `NO_APPROVAL`; review components `response-draft-review`,
+  `document-facts-review`, `reminder-review`; tables `correspondence_drafts`,
+  `platform_correspondence_drafts`, `approvals`, `platform_approvals`.
+- **REUSE:** all of the above.
+- **MISSING:** the review UI is not verified end-to-end; no required acknowledgement step;
+  no enforced blocking of unapproved sends at the UI level; the deterministic translator does
+  not produce a real translation for non-`de` locales; two overlapping draft/approval families
+  exist with no canonical choice.
+- **DEPENDENCIES:** P5, P7.
+- **BLOCKERS:** canonical draft/approval model depends on the P5 case-model decision.
+- **DONE CRITERIA:** user sees the exact German draft and its translation; facts must be
+  confirmed; explicit user approval is required and hash-bound; any content change invalidates
+  approval; unapproved content cannot be exported or sent; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 9 — OFFICIAL PDF FORM ENGINE
+
+- **ID:** P9
+- **SYSTEM:** Official PDF form engine
+- **TARGET ROUTES:** consumed by P12, P13, P15; existing readiness endpoint `/api/steuer/pdf`.
+- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT IMPLEMENTATION:** readiness metadata only. `lib/fms-2025-registry.ts` holds an
+  official FMS form manifest with `verificationStatus` and official source references;
+  `lib/canonical-tax-model.ts`, `lib/tax-pipeline.ts`, `lib/tax-questionnaire-schema.ts`
+  model the return; `tax_form_registry` carries `mapping_status` and `technical_pdf_status`;
+  `/api/steuer/pdf` returns `getPdfReadiness`, not a document.
+- **REUSE:** the FMS registry, canonical tax model, tax pipeline, questionnaire schema,
+  tax form registry UI, and the `tax_form_registry` table.
+- **MISSING:** an actual PDF writer. **No PDF generation library exists in `package.json`**
+  (no pdfkit, pdf-lib, jspdf, puppeteer, pdfmake). Also missing: field mapping for Agentur für
+  Arbeit and Jobcenter forms, and template provenance storage.
+- **DEPENDENCIES:** P8 (approval), P6 (facts).
+- **BLOCKERS:** adding a PDF dependency is forbidden without explicit owner approval
+  (`AGENTS.md`: do not install new dependencies). Official template acquisition and licensing
+  must be approved.
+- **DONE CRITERIA:** the original official German template is filled unmodified using only
+  confirmed facts; unknown fields stay empty; output is previewable, reviewable, approvable,
+  downloadable; template provenance recorded; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 10 — SIGNATURE ENGINE
+
+- **ID:** P10
+- **SYSTEM:** Signature engine
+- **TARGET ROUTES:** consumed by P14 and P15.
+- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT IMPLEMENTATION:** none. A search for signature capabilities found only Storage
+  signed URLs (`createSignedUrl`, 300 s) and file-signature validation
+  (`FILE_INVALID_SIGNATURE`, magic-byte checks) — neither is document signing.
+- **REUSE:** the approval/hash model from P8 for binding decisions, and the audit spine.
+- **MISSING:** provider selection, applicable-form verification, signature record,
+  signature audit trail.
+- **DEPENDENCIES:** P8 (approval), P9 (document to sign).
+- **BLOCKERS:** no signature provider is selected or approved.
+  `docs/TERRA_START.md` states signing requires a separate provider choice and verification of
+  the applicable form, and that an "I accept" button must not be presented as a signature.
+- **DONE CRITERIA:** provider explicitly approved; signature applies only to approved documents;
+  signature events are recorded and auditable; an acceptance button is never presented as a
+  signature; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 11 — EMAIL CONNECTION + SEND ENGINE
+
+- **ID:** P11
+- **SYSTEM:** Email connection and send engine
+- **TARGET ROUTES:** consumed by P12–P17.
+- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT IMPLEMENTATION:** download only (`/api/office/drafts/{id}/export` returns
+  `text/plain` attachment). An outbound webhook with a shared secret exists in
+  `/api/service-requests`. There is no inbound mailbox connection and no send engine.
+- **REUSE:** draft/approval model (P8), audit spine, `correspondence_drafts.attachments`,
+  `approvals`, and the n8n webhook pattern (`N8N_WEBHOOK_SECRET`).
+- **MISSING:** mailbox connection (Gmail/IMAP/SMTP), send engine, delivery-status handling,
+  retry with idempotency, send audit. **No mail dependency exists in `package.json`.**
+- **DEPENDENCIES:** P8, P1 (privacy/legal wording), P4 (settings surface).
+- **BLOCKERS:** adding a mail dependency requires explicit owner approval; mailbox provider and
+  consent model must be approved; `DOCUMENT_FEASIBILITY_AUDIT.md` states notification/connector
+  work requires a configured connector, consent model, retry/idempotency, audit logs, and a
+  deployment environment.
+- **DONE CRITERIA:** an approved mail channel is connected; sending requires a current approval
+  hash; every send is idempotent and audited; delivery status is tracked; failures are surfaced
+  and never silently retried; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 12 — AGENTUR FÜR ARBEIT
+
+- **ID:** P12
+- **SYSTEM:** Agentur für Arbeit module
+- **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, running on the shared
+  case engine.
+- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT IMPLEMENTATION:** none. No Agentur für Arbeit route, component, form registry, or
+  recipient rule set exists. Related general surfaces exist only as generic modules:
+  `/{locale}/anspruch` (entitlement navigator), `/{locale}/finanzamt` (Finanzamt requests).
+- **REUSE:** shared engines E1–E10 only; no module-specific code to reuse.
+- **MISSING:** information pages, process/form selection, module form registry, required fields,
+  recipient rules, guided questions, official template mapping, cover text, approval flow.
+- **DEPENDENCIES:** P5, P6, P7, P8, P9 (and P10/P11 for sign/send).
+- **BLOCKERS:** depends on P9 PDF writer and official template verification; adding PDF
+  dependencies needs owner approval.
+- **DONE CRITERIA:** information → choose process/form → AI-guided questions → confirmed facts →
+  fill the original official German template → German cover text → preview → user review →
+  required acknowledgement → explicit approval → PDF download or approved send;
+  missing terms remain missing; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 13 — JOBCENTER
+
+- **ID:** P13
+- **SYSTEM:** Jobcenter module
+- **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
+- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT IMPLEMENTATION:** none for Jobcenter specifically. `/{locale}/anspruch` and
+  `benefit_cases` are the only adjacent benefit surfaces.
+- **REUSE:** shared engines E1–E10; `benefit_cases`, `anspruch` navigator, `module-workspaces`.
+- **MISSING:** Jobcenter information, knowledge, form registry, required fields, recipient rules,
+  guided questions, official template mapping, approval flow. No duplicated engine may be built.
+- **DEPENDENCIES:** P5, P6, P7, P8, P9, and P12 (Agentur für Arbeit pattern).
+- **BLOCKERS:** depends on P12 establishing the reusable module pattern and P9 PDF writer.
+- **DONE CRITERIA:** the Agentur für Arbeit workflow is reproduced using the same shared engines,
+  with Jobcenter-specific form registry, required fields, and recipient rules;
+  no duplicated backend; tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 14 — KÜNDIGUNG
+
+- **ID:** P14
+- **SYSTEM:** Kündigung module
+- **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
+- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT IMPLEMENTATION:** none as a module. Adjacent reusable material:
+  `/{locale}/vertraege` contracts workspace, `lib/contracts/extraction.ts`,
+  `lib/kintex-radar.ts` (deterministic cancellation-deadline signals), and the
+  `cancellation` case intent in `lib/office/supabase/database.ts`.
+- **REUSE:** contracts workspace, contract extraction, radar date logic, `contracts` table
+  (`end_date`, `cancellation_deadline`), `case_messages`, `correspondence_drafts`.
+- **MISSING:** contract upload/select into a Kündigung case, termination-fact extraction with
+  evidence, Kündigungsschreiben generation, preview, approval, optional signature,
+  download/send.
+- **DEPENDENCIES:** P5, P6, P7, P8, P9 (optional P10/P11).
+- **BLOCKERS:** `DOCUMENT_FEASIBILITY_AUDIT.md` states that preparing a cancellation draft and
+  checklist is acceptable, but sending requires explicit user approval and a configured lawful
+  channel — so P11 is a hard dependency for any send.
+- **DONE CRITERIA:** contract upload/select → extract provider/customer/contract facts →
+  identify termination data only when evidenced → explain → generate Kündigungsschreiben →
+  preview → approval → optional signature → download/send.
+  **Missing terms must remain missing; Kündigungsfristen must never be invented.**
+  Tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 15 — STEUERERKLÄRUNG
+
+- **ID:** P15
+- **SYSTEM:** Steuererklärung module
+- **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
+  `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`,
+  `/{locale}/finanzamt`.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** tax questionnaire (`tax-questionnaire`, `tax-questionnaire-schema`),
+  official form registry UI and data (`tax-form-registry`, `tax_form_registry`),
+  canonical tax model (`lib/canonical-tax-model.ts`), tax pipeline and PDF readiness
+  (`lib/tax-pipeline.ts`, `/api/steuer/pdf`), ELSTER contract only
+  (`lib/elster-provider.ts`: `ElsterProvider`, `UnconfiguredElsterProvider`,
+  `SUBMISSION_NOT_CONFIGURED`, `elsterCredentialPolicy`), Finanzamt requests
+  (`lib/finanzamt-requests.ts`, `finanzamt_requests`), provider audit timeline
+  (`provider_integrations`, `provider_submission_attempts`, `provider_submission_events`,
+  `provider_receipts`), education table `financial_education_lessons`.
+- **REUSE:** all of the above.
+- **MISSING:** actual PDF package generation (no PDF library — see P9); deterministic
+  calculation verification end-to-end; guided collection wired to the shared case engine;
+  review and manual-submission packaging; ELSTER integration (intentionally absent).
+- **DEPENDENCIES:** P5, P6, P7, P8, P9.
+- **BLOCKERS:** no approved ELSTER integration exists, so automatic submission stays out of scope.
+  `/api/steuer/pdf` returns readiness only. Adding a PDF dependency requires owner approval.
+- **DONE CRITERIA:** information → official forms → guided collection → deterministic
+  calculations where approved → AI explanation/drafting → review → PDF package → manual
+  submission. **No automatic ELSTER submission.** Submission is manual to the competent
+  Finanzamt. No ELSTER credentials, certificate passwords, `.pfx` files, or private keys are
+  collected or stored. Tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 16 — UNTERLAGEN ERKLÄREN
+
+- **ID:** P16
+- **SYSTEM:** Unterlagen erklären module
+- **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
+  `/{locale}/documents` and `/{locale}/office/cases/{id}`.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** document upload with validation, extraction, Tesseract OCR,
+  Groq/Cerebras analysis, fact confirmation, signed URLs, and explanation components
+  (`document-intake`, `document-explanation`, `document-facts-review`, `documents-workspace`).
+  Deterministic deadline/urgency signals exist in `lib/kintex-radar.ts`.
+- **REUSE:** the whole document stack (see P6) plus `documents`, `source_documents`,
+  `document_pages`, `document_analysis_results`, `document_reviews`, `deadlines`.
+- **MISSING:** pasted-text and email-content intake; classify step; per-page evidence on facts;
+  deadline extraction from arbitrary documents; the uncertainty-aware fraud/scam states
+  (`risk signals detected` / `no obvious risk signals` / `cannot determine`);
+  next-action surfacing; optional reply, review, approval, optional sign, optional send.
+- **DEPENDENCIES:** P5, P6, P7, P8, P9, P10, P11.
+- **BLOCKERS:** depends on P6 (intake) and P11 (send) for the full chain; OCR provider budget
+  approval required for end-to-end verification.
+- **DONE CRITERIA:** UPLOAD → OCR/PARSE → EXTRACT → CLASSIFY → TRANSLATE → EXPLAIN → DEADLINE →
+  RISK/URGENCY → NEXT ACTION → OPTIONAL REPLY → REVIEW → APPROVAL → OPTIONAL SIGN →
+  OPTIONAL SEND. Fraud/scam handling must use uncertainty-aware states and must never make an
+  unsupported accusation. Tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## PHASE 17 — CONTRACT MANAGEMENT
+
+- **ID:** P17
+- **SYSTEM:** Contract management module
+- **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
+  `/{locale}/vertraege`, `/{locale}/tarife`, `/{locale}/angebote/{offer}`, `/go/{offer}`,
+  `/api/contracts`, `/api/contracts/{id}`, `/api/radar`, `/api/optimize/*`.
+- **CURRENT STATUS:** AUDITED
+- **CURRENT IMPLEMENTATION:** contracts workspace and contract-center workspace;
+  contract CRUD APIs; deterministic contract Radar (`lib/kintex-radar.ts` with
+  `contract_radar_history` and `radar_events`); optimize sessions
+  (`lib/optimize/flow.ts`, `optimize_sessions`, provenance-tracked filled data);
+  affiliate offers (`lib/affiliate-offers.ts`, `/go/{offer}` with exact deeplink, no guessed
+  tracking parameters); manual offer intake via n8n (`/api/service-requests`);
+  contracts table with `end_date`, `cancellation_deadline`, `review_status`,
+  `extraction_confidence`.
+- **REUSE:** all of the above.
+- **MISSING:** module entry from the HORIZON dashboard; contract-to-case linkage; unified
+  contract review flow on the shared case engine; migration of KintexBG-era contract UI naming.
+- **DEPENDENCIES:** P5, P6, P8.
+- **BLOCKERS:** none technical; affiliate and offer-request surfaces are parked until the manual
+  n8n workflow and first paid service are live (`docs/AFFILIATE_LAUNCH_PLAN.md`).
+- **DONE CRITERIA:** contract archive, provider/cost visibility, cancellation deadlines,
+  deterministic source-backed signals, and user-approved next steps all operate on the shared
+  case engine; no invented savings or prices; loading, error, and empty states complete;
+  tests, build, real verification pass.
+- **FROZEN:** NO
+
+---
+
+## CAPITAL — PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE
+
+- **ID:** not part of P0–P17
+- **SYSTEM:** Capital layer
+- **TARGET ROUTES:** none in the active sequence
+- **CURRENT STATUS:** PRESERVED — NOT IN ACTIVE SEQUENCE
+- **CURRENT IMPLEMENTATION:** `lib/capital/**` on `main`: `FinancialFact` domain model
+  (household-scoped, typed, versioned, `DRAFT`/`CONFIRMED`/`REJECTED`/`SUPERSEDED`),
+  provenance model (`USER`, `DOCUMENT`, `PROVIDER`, `SYSTEM`, `AI_EXTRACTED`),
+  confirmation lifecycle, deterministic `capital-core-1.0.0` engine, monthly surplus and
+  reserve scenario, neutral goal feasibility, deterministic snapshot hash,
+  `AdvisorReview` and `PublishBoundary` contracts, P0 runtime orchestrator and source adapters,
+  plus unit tests. Research material under `docs/research/capital/**`.
+- **REUSE:** none permitted until explicit owner instruction to resume.
+- **MISSING:** persistence and runtime data integration; a user-facing surface.
+  `DOCUMENT_FEASIBILITY_AUDIT.md` records both as NOT completed.
+- **DEPENDENCIES:** explicit owner instruction.
+- **BLOCKERS:** Capital is outside the active sequence. `DOCUMENT_FEASIBILITY_AUDIT.md` keeps
+  blocked: personalized investment advice or suitability handling, trading or executing
+  purchases/submissions, bank/broker/credit-card integrations, official Schufa integration,
+  fake prices/offers/savings, AI performing financial arithmetic or setting assumptions,
+  DIN ingestion or DIN compliance claims, and execution through external providers.
+- **DONE CRITERIA:** not applicable while Capital is outside the active sequence.
+- **FROZEN:** NO
+- **OWNER APPROVAL REQUIRED:** YES — to resume at all.
+
+---
+
+## Standing rules for this ledger
+
+1. Update the ledger in the same change that advances a phase's real status.
+2. Never mark DONE unless every DONE criterion is met and verified.
+3. Never mark FROZEN without explicit owner acceptance.
+4. A FROZEN entry must not be edited except to record an owner reopening.
+5. Newly discovered work becomes a new row or a new phase — never silent scope creep.
+6. If evidence is unavailable, record `BLOCKED` or leave the status unchanged; do not guess.

@@ -17,6 +17,21 @@ The current user-approved product direction is **HORIZON by VZG**, V1 for privat
 - **v0** — optional approved UI/design implementation source
 - **GitHub `main`** — single source of truth: `tarifberatung24-blip/VZGplattform`
 
+## Canonical build map and phase governance
+
+- `docs/HORIZON_MASTER_MAP.md` is the canonical target build map.
+- `docs/HORIZON_BUILD_LEDGER.md` tracks implementation status per phase.
+- Work proceeds sequentially by approved phase; only one implementation phase is active at a time
+  unless the owner explicitly authorizes otherwise.
+- A later phase must not be started merely because its files already exist.
+- DONE requires the full definition in `PROJECT_RULES.md`; accepted DONE modules become FROZEN.
+- FROZEN modules cannot be changed without explicit owner reopening.
+- Unrelated refactoring of previous phases is prohibited.
+- Existing Capital work is preserved but is outside the current active build sequence.
+- Render remains the current production deployment authority, from GitHub `main`.
+
+Before every task, state: `ACTIVE_PHASE`, `ALLOWED_FILES`, `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE`.
+
 ## Rules
 
 - AionUi does **not** replace GitHub. GitHub `main` remains the source of truth.
