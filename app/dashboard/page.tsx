@@ -1,12 +1,25 @@
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import { VzgDashboard } from "@/components/dashboard/vzg-dashboard"
 import { createClient } from "@/lib/supabase/server"
 import { ensureHousehold } from "@/lib/supabase/household"
+import { readOnboardingStep } from "@/lib/onboarding/profile"
+import { onboardingPath } from "@/lib/onboarding/state"
+import { LOCALE_COOKIE_KEY } from "@/lib/i18n/language-context"
+import { isLocale, defaultLocale } from "@/lib/i18n/dictionaries"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login?next=/dashboard")
+
+  // Re-applied here, not only in the proxy: a user who has not finished
+  // first-login onboarding must not reach the dashboard.
+  const cookieStore = await cookies()
+  const storedLocale = cookieStore.get(LOCALE_COOKIE_KEY)?.value
+  const locale = isLocale(storedLocale) ? storedLocale : defaultLocale
+  const onboardingTarget = onboardingPath((await readOnboardingStep()).step, locale)
+  if (onboardingTarget) redirect(onboardingTarget)
 
   const householdId = await ensureHousehold(supabase)
   const [profileResult, contractsResult, documentsResult, reviewDocumentsResult, deadlinesResult] = await Promise.all([

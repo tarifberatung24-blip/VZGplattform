@@ -122,7 +122,7 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** `/{locale}/auth/login`, `/{locale}/auth/sign-up`,
   `/{locale}/onboarding/language`, `/{locale}/onboarding/profile`,
   `/{locale}/onboarding/tour`, `/{locale}/onboarding/finish`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IMPLEMENTATION VERIFIED — END-TO-END RUNTIME VERIFICATION PENDING (not DONE, not FROZEN)
 - **CURRENT IMPLEMENTATION:** Supabase Auth with e-mail/password, Google OAuth, MFA.
   Handlers: `app/auth/callback/route.ts` (code exchange, MFA routing via `requiresMfa`,
   `sanitizeNextPath`), `app/auth/logout/route.ts`. Pages: login, sign-up, sign-up-success,
@@ -130,20 +130,44 @@ after a module meets the full DONE definition.
   `lib/supabase/proxy.ts`; protected prefixes in `lib/supabase/auth-routing.ts`.
   Account security: `/{locale}/security` with `MfaSettings`.
   Profile: `/{locale}/profil` writes `profiles`; `ensureHousehold` creates the household.
+
+  Sprint 1 additions (owner-authorized for P2):
+  - Routes `/{locale}/onboarding/{language,profile,tour,finish}` with one renderer per step
+    (`app/[locale]/onboarding/*/page.tsx`, `components/onboarding/steps.tsx`).
+  - Deterministic pure state resolver `lib/onboarding/state.ts` (ordered
+    `language → profile → tour → finish → completed`; NULL/unknown resolves to the first step).
+  - Server guard `lib/onboarding/guard.ts` + reader `lib/onboarding/profile.ts`; proxy
+    first-login gate and dashboard re-check; `/onboarding` added to the protected prefixes.
+  - Additive migration `supabase/migrations/20260919120000_profiles_onboarding_step.sql`:
+    adds `profiles.onboarding_step` (default `language`, CHECK on the five steps), backfills
+    existing rows to `completed`, and adds column-level grants for `onboarding_step`,
+    `first_name`, `last_name`, `preferred_language`, and the columns `profile-form` already
+    writes (`employment_status`, `household_size`, `monthly_income`, `monthly_fixed_costs`,
+    `completeness`, `updated_at`). No table-wide grant; no policy dropped or weakened.
+
+  Defensive behaviour: an unreadable step is treated as the first step server-side, while the
+  proxy gate is best-effort so a read failure can never lock a user out; the step is used to
+  build a redirect only when it is a known value; auth-flow routes (account recovery, MFA) are
+  excluded from the gate.
 - **REUSE:** all auth pages and handlers, `auth-routing.ts`, `mfa-challenge`, `mfa-settings`,
   `profile-form`, `ensure_kintex_household` RPC, `profiles.locale` /
   `conversation_locale` / `output_locale`.
-- **MISSING:** the entire onboarding flow — no `/{locale}/onboarding/*` route exists;
-  no first-login check; no persisted first-login/onboarding completion flag; no language
-  selection step separate from the cookie; no minimal-profile step; no click guide;
-  no post-onboarding redirect to dashboard.
+- **MISSING:** applied migration. The repository file exists but the change has NOT been applied
+  to project `mteguzgbiuexmdcrqajj`; production `profiles` has no `onboarding_step` column
+  (read-only PostgREST metadata check, 2026-09-19). Until it is applied, the onboarding upsert
+  fails and Step 1 of DONE CRITERIA cannot be reached. Also missing: end-to-end runtime
+  verification, which is blocked because no `.env` and no anon key are available in this
+  environment.
 - **DEPENDENCIES:** P0; consumes P1 public entry points.
-- **BLOCKERS:** none technical. A schema addition for onboarding completion state is required
-  and needs explicit owner authorization before any DB change.
+- **BLOCKERS:** (1) applying the additive migration requires an authorized DB channel — the
+  Management API PAT, DB connection string, and Supabase CLI are all absent here, and the
+  available token is a service_role JWT that must not be used for DDL; (2) end-to-end
+  verification needs Supabase URL + anon key.
 - **DONE CRITERIA:** sign up → e-mail confirmation → login → first-login check → language →
   minimal profile → short click guide → dashboard works end-to-end; the tour runs once and is
   resumable; onboarding completion is persisted; all steps localized; tests and build pass;
-  real verification performed.
+  real verification performed. **Status: partially satisfied** — tests, typecheck, lint, i18n,
+  and build pass; the end-to-end journey has not been run against a live Supabase.
 - **FROZEN:** NO
 
 ---
@@ -209,7 +233,7 @@ after a module meets the full DONE definition.
   → drafts → approvals → tasks → audit)
 - **TARGET ROUTES:** no new public routes; consumed by all modules. Existing consumer surfaces:
   `/{locale}/office`, `/{locale}/office/cases/{id}`, `/{locale}/dashboard`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** AUDITED — DECISION GATE OPEN (no implementation started)
 - **CURRENT IMPLEMENTATION:** owner-scoped case repository (`lib/office/repositories/cases.ts`)
   with create/list/get/update/archive and audit-on-archive; case detail repository;
   case messages with AI language/intent routing (`lib/office/ai/routing.ts`,
@@ -225,9 +249,20 @@ after a module meets the full DONE definition.
   HORIZON modules, one unified status vocabulary (`CaseStatus` vs `workplaceStatuses` vs
   platform case status), one canonical audit table, and case-level missing-information persistence
   (`platform_cases.missing_information` is described in `DOCUMENT_FEASIBILITY_AUDIT.md` as still needing wiring).
+
+  Sprint 1 note: P5 implementation was authorized by the owner, but this phase's own blocker
+  makes the first and gating deliverable a **decision**, not code. The canonical case model
+  must be designated on record before any module is wired to it, because the choice determines
+  the tenancy model (owner-scoped vs household-scoped), the status vocabulary, and the table
+  grants for every later phase. Selecting one silently would be an architecture + schema
+  decision of exactly the class the governance rules reserve to the owner. No P5 code was
+  written in Sprint 1 pending that designation.
 - **DEPENDENCIES:** P0.
 - **BLOCKERS:** the canonical case-model decision is an architecture + schema decision that
   requires explicit owner authorization. No DB/schema/RLS change may be made before that.
+  Decision required: adopt the owner-scoped `cases` family as canonical, or adopt the
+  household-scoped `platform_cases` family, or designate one as canonical and the other as a
+  preserved legacy surface.
 - **DONE CRITERIA:** one documented canonical case model; every module creates cases through it;
   RLS and repository enforce ownership; cross-tenant isolation tested; every state transition
   audited; case messages, facts, drafts, approvals, tasks all hang off the same case;

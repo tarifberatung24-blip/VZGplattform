@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseConfig, hasSupabaseConfig, missingConfigurationMessage } from './config'
-import { isProtectedAppPath, requiresMfa } from './auth-routing'
+import { isProtectedAppPath, isOnboardingComplete, isKnownOnboardingStep, isOnboardingPath, isAuthFlowPath, pathLocale, requiresMfa } from './auth-routing'
 import { stripLocale } from '../i18n/routing'
 
 export async function updateSession(request: NextRequest) {
@@ -73,6 +73,29 @@ export async function updateSession(request: NextRequest) {
       url.pathname = '/auth/mfa-verify'
       url.search = ''
       url.searchParams.set('next', `${stripLocale(request.nextUrl.pathname)}${request.nextUrl.search}`)
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // First-login gate. A user who has not finished onboarding is held in the
+  // onboarding flow; a user who has finished never sees it again.
+  //
+  // Skipped for auth-flow routes (account recovery, MFA) so those stay reachable,
+  // and best-effort only: the step is used to build the redirect only when it is a
+  // known step, and an unreadable step leaves the request untouched. A transient
+  // failure must never lock a user out. The onboarding routes and every
+  // authenticated page re-apply the same rule server-side.
+  if (user && !isOnboardingPath(request.nextUrl.pathname) && !isAuthFlowPath(request.nextUrl.pathname)) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_step')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (profile && isKnownOnboardingStep(profile.onboarding_step) && !isOnboardingComplete(profile.onboarding_step)) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/${pathLocale(request.nextUrl.pathname)}/onboarding/${profile.onboarding_step}`
+      url.search = ''
       return NextResponse.redirect(url)
     }
   }

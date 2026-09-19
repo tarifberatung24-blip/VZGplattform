@@ -38,6 +38,18 @@ import HowItWorksPage from "@/app/[locale]/how-it-works/page"
 import { FunctionsPage } from "@/components/marketing/public-layer-page"
 import type { Locale } from "@/lib/i18n/dictionaries"
 
+/**
+ * Onboarding outlet for the localized catch-all. The four real step pages live
+ * at /{locale}/onboarding/{step} and take precedence, so this only sees the bare
+ * /onboarding path or an unknown step. It resolves the user's actual step and
+ * redirects there rather than rendering a duplicate step with no session user,
+ * so every onboarding step has exactly one renderer.
+ */
+async function OnboardingOutlet({ locale }: { locale: string; step?: string }): Promise<never> {
+  const { onboardingStepDestination } = await import("@/lib/onboarding/guard")
+  return redirect(await onboardingStepDestination(locale))
+}
+
 const pages: Record<string, React.ComponentType> = {
   "": HomePage, check: CheckPage, uslugi: UslugiPage, anspruch: AnspruchPage, kindergeld: KindergeldPage,
   produkte: ProduktePage, tarife: TarifePage, vertraege: VertraegePage, documents: DocumentsPage, "za-nas": ZaNasPage,
@@ -58,6 +70,7 @@ export default async function LocalizedPage({params}: {params: Promise<{locale: 
   const {locale, slug = []} = await params
   if (slug.join("/") === "functions") return <FunctionsPage locale={locale as Locale} />
   if (slug.join("/") === "protected") redirect("/dashboard")
+  if (slug[0] === "onboarding") return <OnboardingOutlet locale={locale} step={slug[1]} />
   const Page = pages[slug.join("/")]
   if (!Page) notFound()
   return <Page />
