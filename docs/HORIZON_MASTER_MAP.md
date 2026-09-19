@@ -219,7 +219,8 @@ Distinct page URL patterns: **43** (28 public, 15 authenticated).
 | `/auth/logout` | PUBLIC | sign out | Supabase Auth | ACTIVE | Phase 2 |
 | `/go/{offer}` | PUBLIC | affiliate redirect | `lib/affiliate-offers` | ACTIVE | Phase 17 |
 
-Route handler files: **33** (31 under `/api/*`, 2 auth handlers) plus the public `/go/{offer}` redirect.
+Route handler files: **33** — 30 under `/api/*`, 2 auth handlers (`/auth/callback`, `/auth/logout`),
+and 1 public redirect (`/go/{offer}`).
 
 ### 2.4 Legacy inventory (report only — do not delete yet)
 
