@@ -66,3 +66,21 @@ First run `node scripts/terra-preflight.mjs`. Its output distinguishes tool read
 Use the existing pnpm lockfile. Run TypeScript explicitly with `pnpm exec tsc --noEmit`; the existing CI optional typecheck can otherwise skip it. Do not install new dependencies, rewrite the lockfile, or upgrade tools merely because a different version is available.
 
 Never print environment values, credentials, full customer files, or authenticated URLs.
+
+
+## Execution checklist control
+
+`docs/HORIZON_EXECUTION_CHECKLIST.md` is the operational progress board. It summarizes verified completion, active blockers, safe next work, and the current agent queue. It does not override the Master Map or Build Ledger.
+
+To avoid merge conflicts, worker agents must not edit the checklist unless the task explicitly assigns them as the checklist/control-plane writer. Instead, every worker handoff must include:
+
+```text
+CHECKLIST_DELTA:
+- completed:
+- still_active:
+- blocked:
+- newly_discovered:
+- recommended_next_safe_task:
+```
+
+Only verified remote/CI/deployment facts may be promoted to completed status. A future phase may be audited or researched read-only while another implementation phase is active, but it must not be implemented early.
