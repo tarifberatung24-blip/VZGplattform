@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { CAPITAL_ENGINE_VERSION, CAPITAL_FACT_KEYS } from "../engine"
+import { CAPITAL_INTAKE_ITEMS } from "../intake/categories"
 import { runCapitalRuntime } from "./orchestrator"
 import { buildCapitalP0ReadinessReport } from "./p0-status"
 import { CALCULATED_AT, completeBundle, unconfirmedBundle } from "../integration/p0-fixtures"
@@ -137,7 +138,13 @@ describe("capital P0 readiness report", () => {
   })
 
   it("references only canonical engine keys in the intake model", () => {
-    const canonical = new Set(Object.values(CAPITAL_FACT_KEYS))
-    for (const key of Object.values(CAPITAL_FACT_KEYS)) expect(canonical.has(key)).toBe(true)
+    const canonical = new Set<string>(Object.values(CAPITAL_FACT_KEYS))
+    const offenders = CAPITAL_INTAKE_ITEMS.filter((item) => item.key !== null && !canonical.has(item.key))
+    expect(offenders.map((item) => item.key)).toEqual([])
+  })
+
+  it("marks intake items as required only when they map to an engine key", () => {
+    const offenders = CAPITAL_INTAKE_ITEMS.filter((item) => item.required && item.key === null)
+    expect(offenders).toEqual([])
   })
 })
