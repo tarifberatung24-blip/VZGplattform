@@ -11,6 +11,7 @@ const draft = (overrides: Partial<CaseDraft> = {}): CaseDraft => ({
   recipient: "Firma",
   contentHash: "a".repeat(64),
   reviewStatus: "pending",
+  model: "test-model",
   createdAt: "2026-01-01T00:00:00.000Z",
   ...overrides,
 })

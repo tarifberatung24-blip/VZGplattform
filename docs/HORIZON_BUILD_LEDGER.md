@@ -50,7 +50,7 @@ after a module meets the full DONE definition.
 | P8 | DRAFT / REVIEW / USER APPROVAL | PARTIAL — REVIEW+APPROVAL SURFACE IMPLEMENTED, RUNTIME VERIFICATION PENDING | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
 | P10 | SIGNATURE ENGINE | IN_PROGRESS — VISUAL SIGNATURE VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
-| P11 | EMAIL CONNECTION + SEND ENGINE | NOT_STARTED | NO | YES |
+| P11 | EMAIL CONNECTION + SEND ENGINE | IN_PROGRESS — SEND ENGINE IMPLEMENTED, NO TRANSPORT CONFIGURED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | NOT_STARTED | NO | YES |
 | P13 | JOBCENTER | NOT_STARTED | NO | YES |
 | P14 | KÜNDIGUNG | NOT_STARTED | NO | YES |
@@ -580,22 +580,46 @@ after a module meets the full DONE definition.
 - **ID:** P11
 - **SYSTEM:** Email connection and send engine
 - **TARGET ROUTES:** consumed by P12–P17.
-- **CURRENT STATUS:** NOT_STARTED
+- **CURRENT STATUS:** IN_PROGRESS — send engine implemented and unit-verified; no transport is
+  configured, so no real message has been sent. NOT DONE.
 - **CURRENT IMPLEMENTATION:** download only (`/api/office/drafts/{id}/export` returns
   `text/plain` attachment). An outbound webhook with a shared secret exists in
-  `/api/service-requests`. There is no inbound mailbox connection and no send engine.
+  `/api/service-requests`. There is no inbound mailbox connection. The **send engine** now exists
+  under `lib/horizon/send/`: a provider abstraction (`provider.ts`), a registry whose default
+  provider truthfully reports unavailability (`registry.ts`), recipient validation that never
+  derives an address (`recipient.ts`), pure send policy (`send-plan.ts`), outcome recording
+  (`record.ts`), and orchestration (`actions.ts`) with a form entry point (`submitSend`). A
+  `SendPanel` is wired into the case workspace after the signature panel.
 - **REUSE:** draft/approval model (P8), audit spine, `correspondence_drafts.attachments`,
   `approvals`, and the n8n webhook pattern (`N8N_WEBHOOK_SECRET`).
-- **MISSING:** mailbox connection (Gmail/IMAP/SMTP), send engine, delivery-status handling,
-  retry with idempotency, send audit. **No mail dependency exists in `package.json`.**
+- **DESIGN DECISION:** an outbound send is recorded as a normal artifact — a new draft carrying
+  the outcome, plus an `email_send_attempted` audit event — rather than a new table. The case
+  engine already provides owner-scoped RLS and column grants for both, and the approval engine
+  already binds a draft to a content hash. A parallel `sends` table would duplicate all three and
+  need its own migration and RLS review. Delivery state lives in the audit metadata, not in the
+  draft's content hash, so recording a failure cannot invalidate the approval of the message.
+- **SEND RECORD GUARD:** because a send record is itself a draft, `correspondence_drafts.model` is
+  set to `horizon-send-record` and the policy refuses to send any draft carrying that marker
+  (`IS_SEND_RECORD`). Without it, the record of a delivery could itself be offered for sending.
+- **MISSING:** an actual transport. **No mail dependency exists in `package.json`.** Mailbox
+  connection (Gmail/IMAP/SMTP), delivery-status handling from a real provider, and end-to-end
+  runtime verification against a configured transport.
 - **DEPENDENCIES:** P8, P1 (privacy/legal wording), P4 (settings surface).
 - **BLOCKERS:** adding a mail dependency requires explicit owner approval; mailbox provider and
   consent model must be approved; `DOCUMENT_FEASIBILITY_AUDIT.md` states notification/connector
   work requires a configured connector, consent model, retry/idempotency, audit logs, and a
-  deployment environment.
-- **DONE CRITERIA:** an approved mail channel is connected; sending requires a current approval
-  hash; every send is idempotent and audited; delivery status is tracked; failures are surfaced
-  and never silently retried; tests, build, real verification pass.
+  deployment environment. **Until a provider is registered, every send ends as
+  `PROVIDER_UNAVAILABLE` with nothing transmitted — this is the verified current behaviour, not a
+  defect.**
+- **DONE CRITERIA:** an approved mail channel is connected; sending requires a current approval;
+  the recipient is recorded data confirmed per send and never derived; attachments the user sees
+  are bound by SHA-256 to the bytes actually sent; every send is idempotent and audited; a
+  duplicate is refused without an explicit resend; delivery status is tracked; failures are
+  surfaced and never silently retried; **no path reports success without a provider message id**;
+  tests, build, real verification pass. Implemented and unit-verified now: approval gating,
+  recipient validation, attachment hashing/selection/limits, idempotency, duplicate protection,
+  send-record guard, truthful unavailable/blocked/failed/sent outcomes, and outcome recording.
+  Outstanding: a configured transport and end-to-end runtime verification.
 - **FROZEN:** NO
 
 ---

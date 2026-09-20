@@ -112,6 +112,7 @@ function mapDraft(row: DraftRow): CaseDraft {
     recipient: row.recipient,
     contentHash: row.content_hash,
     reviewStatus: row.review_status,
+    model: row.model,
     createdAt: row.created_at,
   }
 }
@@ -585,6 +586,29 @@ export class CaseEngineRepository {
    * produces a different hash, so the stored approval stops matching and no
    * historic approval row is modified or deleted.
    */
+  /**
+   * The attachment rows recorded on one draft, owner-scoped.
+   *
+   * A narrow read rather than widening `CaseDraft`, because only the send engine
+   * needs attachment provenance and widening the shared draft shape would ripple
+   * into every existing consumer of the P5 model.
+   */
+  async getDraftAttachments(
+    caseId: string,
+    draftId: string,
+  ): Promise<RepoResult<unknown>> {
+    const { data, error } = await this.client
+      .from("correspondence_drafts")
+      .select("attachments")
+      .eq("id", draftId)
+      .eq("case_id", caseId)
+      .eq("owner_id", this.userId)
+      .maybeSingle()
+    if (error) return fail(error.message)
+    if (!data) return fail("Draft not found")
+    return ok(data.attachments)
+  }
+
   async getApprovalState(draftId: string): Promise<RepoResult<{ approved: boolean }>> {
     const draft = await this.client
       .from("correspondence_drafts")

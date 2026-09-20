@@ -258,15 +258,18 @@ the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
 
 - ✅ Draft download exists
 - Composition adapter
-- Send engine
+- ✅ Send engine (`lib/horizon/send/`: provider abstraction, registry, recipient, policy, record, actions)
+- ⬜ A real transport (none configured; default provider reports unavailability)
 - Gmail OAuth adapter
 - Microsoft OAuth adapter
 - Generic SMTP path if approved
-- Attachment handling
-- Recipient preview
-- Explicit user approval before send
-- Send result + audit
-- FROZEN
+- ✅ Attachment handling (selected-only; SHA-256 bound to sent bytes; total-size limit refuses rather than truncates)
+- ✅ Recipient preview (recorded address only, never derived; explicit per-send confirmation)
+- ✅ Explicit user approval before send (current approval required; per-send confirmation separate from content approval)
+- ✅ Send result + audit (blocked / unavailable / failed / sent; no success without a provider message id)
+- ✅ Duplicate protection (explicit resend required) and send-record guard (`IS_SEND_RECORD`)
+- ⬜ End-to-end runtime verification against a configured transport
+- ⬜ FROZEN
 
 ## P12 — Agentur für Arbeit
 

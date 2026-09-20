@@ -103,6 +103,12 @@ export type CaseDraft = {
   recipient: string | null
   contentHash: string
   reviewStatus: DraftReviewStatus
+  /**
+   * The model that generated this draft, or `horizon-send-record` for a record of
+   * a send. Exposed because a send record is stored as a draft and must be
+   * distinguishable from a message the user might send.
+   */
+  model: string | null
   createdAt: string
 }
 

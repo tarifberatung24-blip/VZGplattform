@@ -5,6 +5,7 @@ import { DocumentIntakeForm } from "@/components/guide/document-intake-form"
 import { CaseAssistantPanel } from "@/components/guide/case-assistant-panel"
 import { DraftReviewPanel } from "@/components/guide/draft-review-panel"
 import { OfficialFormPanel } from "@/components/guide/official-form-panel"
+import { SendPanel } from "@/components/guide/send-panel"
 import { SignaturePanel } from "@/components/guide/signature-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
@@ -91,6 +92,7 @@ export function CaseWorkspace({
         draftReview: "Entwurf prüfen und freigeben",
         officialForm: "Amtliches Formular",
         signature: "Sichtbare Signatur",
+        send: "Versand",
         tasks: "Aufgaben",
         missing: "Fehlende Angaben",
         audit: "Verlauf",
@@ -114,6 +116,7 @@ export function CaseWorkspace({
         draftReview: "Преглед и одобрение на чернова",
         officialForm: "Официален формуляр",
         signature: "Видима сигнатура",
+        send: "Изпращане",
         tasks: "Задачи",
         missing: "Липсващи данни",
         audit: "История",
@@ -218,6 +221,10 @@ export function CaseWorkspace({
 
       <Panel title={copy.signature} empty={copy.none}>
         <SignaturePanel caseId={caseId} locale={locale} />
+      </Panel>
+
+      <Panel title={copy.send} empty={copy.none}>
+        <SendPanel caseId={caseId} locale={locale} draftId={latestDraft?.id ?? null} />
       </Panel>
 
       <Panel title={copy.tasks} empty={copy.none}>
