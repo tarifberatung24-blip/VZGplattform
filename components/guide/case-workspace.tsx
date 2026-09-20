@@ -1,7 +1,9 @@
 "use client"
 
 import { TextIntakeForm } from "@/components/guide/text-intake-form"
+import { DocumentIntakeForm } from "@/components/guide/document-intake-form"
 import { CaseAssistantPanel } from "@/components/guide/case-assistant-panel"
+import { documentDisplayName } from "@/lib/horizon/intake/document"
 import type {
   CaseAuditEvent,
   CaseDraft,
@@ -75,6 +77,7 @@ export function CaseWorkspace({
   const copy = de
     ? {
         intake: "Text aufnehmen",
+        fileIntake: "Datei anhängen",
         documents: "Dokumente",
         facts: "Fakten",
         drafts: "Entwürfe",
@@ -94,6 +97,7 @@ export function CaseWorkspace({
       }
     : {
         intake: "Въвеждане на текст",
+        fileIntake: "Прикачване на файл",
         documents: "Документи",
         facts: "Факти",
         drafts: "Чернови",
@@ -119,6 +123,10 @@ export function CaseWorkspace({
       <div className="grid gap-4 lg:grid-cols-2">
       <Panel title={copy.intake} empty={copy.none}>
         <TextIntakeForm caseId={caseId} locale={locale} />
+      </Panel>
+
+      <Panel title={copy.fileIntake} empty={copy.none}>
+        <DocumentIntakeForm caseId={caseId} locale={locale} />
       </Panel>
 
       <Panel title={copy.missing} empty={copy.missingNone}>
@@ -158,7 +166,7 @@ export function CaseWorkspace({
       <Panel title={copy.documents} empty={copy.none}>
         {documents.map((doc) => (
           <div key={doc.id} className="border-b border-border/70 pb-2 last:border-0">
-            <p className="truncate text-sm font-medium">{doc.path}</p>
+            <p className="truncate text-sm font-medium">{documentDisplayName(doc.path)}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {doc.mime} · {Math.round(doc.sizeBytes / 1024)} KB · {doc.status}
             </p>
