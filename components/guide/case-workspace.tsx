@@ -3,8 +3,11 @@
 import { TextIntakeForm } from "@/components/guide/text-intake-form"
 import { DocumentIntakeForm } from "@/components/guide/document-intake-form"
 import { CaseAssistantPanel } from "@/components/guide/case-assistant-panel"
+import { DraftReviewPanel } from "@/components/guide/draft-review-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
+import { assessDraftRelease } from "@/lib/horizon/case/release"
 import type {
+  CaseApproval,
   CaseAuditEvent,
   CaseDraft,
   CaseSourceDocument,
@@ -22,6 +25,7 @@ export type CaseWorkspaceProps = {
   drafts: readonly CaseDraft[]
   tasks: readonly CaseTask[]
   missing: MissingInformation | null
+  approvals: readonly CaseApproval[]
   audit: readonly CaseAuditEvent[]
 }
 
@@ -70,6 +74,7 @@ export function CaseWorkspace({
   drafts,
   tasks,
   missing,
+  approvals,
   audit,
 }: CaseWorkspaceProps) {
   const de = locale === "de"
@@ -81,6 +86,7 @@ export function CaseWorkspace({
         documents: "Dokumente",
         facts: "Fakten",
         drafts: "Entwürfe",
+        draftReview: "Entwurf prüfen und freigeben",
         tasks: "Aufgaben",
         missing: "Fehlende Angaben",
         audit: "Verlauf",
@@ -101,6 +107,7 @@ export function CaseWorkspace({
         documents: "Документи",
         facts: "Факти",
         drafts: "Чернови",
+        draftReview: "Преглед и одобрение на чернова",
         tasks: "Задачи",
         missing: "Липсващи данни",
         audit: "История",
@@ -115,6 +122,11 @@ export function CaseWorkspace({
         fromUser: "от потребител",
         noEvidence: "Няма текст-основание",
       }
+
+  // Release is assessed for the newest draft version, which is the one the user
+  // is being asked to approve.
+  const latestDraft = drafts[0] ?? null
+  const release = assessDraftRelease({ draft: latestDraft, missing, approvals })
 
   return (
     <div className="mt-6 space-y-4">
@@ -183,6 +195,15 @@ export function CaseWorkspace({
             </p>
           </div>
         ))}
+      </Panel>
+
+      <Panel title={copy.draftReview} empty={copy.none}>
+        <DraftReviewPanel
+          caseId={caseId}
+          locale={locale}
+          draft={latestDraft}
+          release={release}
+        />
       </Panel>
 
       <Panel title={copy.tasks} empty={copy.none}>

@@ -21,12 +21,13 @@ export default async function GuideCasePage({
   // which keeps case existence from leaking across accounts.
   if (loaded.error || !loaded.data) notFound()
 
-  const [documents, facts, drafts, tasks, missing, audit] = await Promise.all([
+  const [documents, facts, drafts, tasks, missing, approvals, audit] = await Promise.all([
     engine.repository!.listDocuments(caseId),
     engine.repository!.listFacts(caseId),
     engine.repository!.listDrafts(caseId),
     engine.repository!.listTasks(caseId),
     engine.repository!.getMissingInformation(caseId),
+    engine.repository!.listApprovals(caseId),
     engine.repository!.listAudit(caseId),
   ])
 
@@ -62,6 +63,7 @@ export default async function GuideCasePage({
           drafts={drafts.data ?? []}
           tasks={tasks.data ?? []}
           missing={missing.data ?? null}
+          approvals={approvals.data ?? []}
           audit={audit.data ?? []}
         />
       </div>
