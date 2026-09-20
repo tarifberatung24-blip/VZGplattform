@@ -45,7 +45,7 @@ after a module meets the full DONE definition.
 | P3 | HORIZON GUIDE | NOT_STARTED | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | AUDITED | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
-| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — TEXT INTAKE IMPLEMENTED, RUNTIME VERIFICATION PENDING | NO | YES |
+| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES ACCEPTED, RUNTIME VERIFICATION PENDING | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | AUDITED | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | NOT_STARTED | NO | YES |
@@ -304,8 +304,8 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Document intake, OCR, explanation
 - **TARGET ROUTES:** no new public route required; enhances `/{locale}/documents` and
   `/{locale}/office/cases/{id}`.
-- **CURRENT STATUS:** PARTIAL — text intake implemented and unit-tested; runtime verification pending
-  (commit `b708697`).
+- **CURRENT STATUS:** PARTIAL — all five input types accepted and unit-tested; runtime verification
+  pending (commits `b708697`, `3bff5c0`).
 - **CURRENT IMPLEMENTATION:** validated upload with canonical-project guard
   (`lib/documents/validation.ts` + `app/api/documents/upload/route.ts`);
   text extraction (`lib/documents/extraction.ts`); contract extraction
@@ -320,12 +320,27 @@ after a module meets the full DONE definition.
   `components/guide/text-intake-form.tsx`), persisted verbatim on the owner-scoped
   `case_messages` spine with audit provenance (input kind, length, SHA-256), wired into
   `components/guide/case-workspace.tsx`. The intake derives nothing from the prose.
+  **Added in this phase (`3bff5c0`):** PDF, photo and screenshot intake
+  (`lib/horizon/intake/document.ts`, `lib/horizon/intake/document-actions.ts`,
+  `components/guide/document-intake-form.tsx`), written to the canonical `source_documents`
+  spine and the private `source-documents` bucket at the CHECK- and policy-required
+  `{ownerId}/{caseId}/{documentId}-{name}` path, with audit provenance (input kind, MIME,
+  size, SHA-256). No schema change was required: `image/jpeg` and `image/png` were already
+  admitted by both the mime CHECK and the bucket allowlist, so screenshot/photo intake needed
+  wiring, not a migration. MIME is established by magic bytes, not the client-declared type.
+  Object writes go through the service-role client because the bucket grants authenticated
+  users read-only object access; ownership is proven by an owner-scoped case read first, and a
+  partial failure removes the object and the row so the bucket and table cannot diverge.
+  Every rejection maps to a specific localized code, so no raw storage or Postgres message is
+  shown. Also fixed a provenance leak: the documents panel rendered the raw storage path,
+  exposing the owner id and internal case id; it now shows only the file name.
 - **REUSE:** everything listed above, plus tables `documents`, `source_documents`,
   `document_pages`, `document_analysis_results`, `document_reviews`, and the private Storage
   buckets `documents` and `source-documents`.
-- **MISSING:** screenshot and photo intake; page-level evidence linkage on every extracted
-  fact; one extraction contract shared by the two parallel document stacks; explicit error
-  states for OCR/extraction failure.
+- **MISSING:** page-level evidence linkage on every extracted fact; one extraction contract
+  shared by the two parallel document stacks; explicit error states for OCR/extraction failure.
+  Runtime verification of file intake requires an authenticated session and a configured
+  Supabase instance.
   **Note on text intake and `source_documents`:** the `source_documents.mime` CHECK and the
   `source-documents` bucket MIME allowlist both admit only PDF/JPEG/PNG. Admitting text there
   would require dropping a constraint, which is a destructive schema change and is not
@@ -336,7 +351,7 @@ after a module meets the full DONE definition.
 - **DEPENDENCIES:** P5 (case model), P7 (assistant context).
 - **BLOCKERS:** OCR provider and budget approval (`docs/TERRA_START.md` T5 notes OCR requires an
   approved provider and budget). Two competing document stacks must be reconciled first.
-  Runtime verification of text intake requires an authenticated session and a configured
+  Runtime verification of intake requires an authenticated session and a configured
   Supabase instance.
 - **DONE CRITERIA:** screenshot, photo, PDF, pasted text, and email content are all accepted;
   OCR/extraction results stored per page; every extracted fact carries page evidence;
