@@ -467,25 +467,49 @@ after a module meets the full DONE definition.
 
 - **ID:** P9
 - **SYSTEM:** Official PDF form engine
-- **TARGET ROUTES:** consumed by P12, P13, P15; existing readiness endpoint `/api/steuer/pdf`.
-- **CURRENT STATUS:** NOT_STARTED
-- **CURRENT IMPLEMENTATION:** readiness metadata only. `lib/fms-2025-registry.ts` holds an
-  official FMS form manifest with `verificationStatus` and official source references;
-  `lib/canonical-tax-model.ts`, `lib/tax-pipeline.ts`, `lib/tax-questionnaire-schema.ts`
-  model the return; `tax_form_registry` carries `mapping_status` and `technical_pdf_status`;
-  `/api/steuer/pdf` returns `getPdfReadiness`, not a document.
-- **REUSE:** the FMS registry, canonical tax model, tax pipeline, questionnaire schema,
-  tax form registry UI, and the `tax_form_registry` table.
-- **MISSING:** an actual PDF writer. **No PDF generation library exists in `package.json`**
-  (no pdfkit, pdf-lib, jspdf, puppeteer, pdfmake). Also missing: field mapping for Agentur für
-  Arbeit and Jobcenter forms, and template provenance storage.
-- **DEPENDENCIES:** P8 (approval), P6 (facts).
-- **BLOCKERS:** adding a PDF dependency is forbidden without explicit owner approval
-  (`AGENTS.md`: do not install new dependencies). Official template acquisition and licensing
-  must be approved.
+- **TARGET ROUTES:** consumed by P12, P13, P15; existing readiness endpoint `/api/steuer/pdf`;
+  preparation surface inside the case workspace (`components/guide/official-form-panel.tsx`).
+- **CURRENT STATUS:** PARTIAL — engine implemented and tested (commit `256b83c`); cannot emit a
+  filled PDF because no PDF writer is installed (owner decision required) and the shipped
+  official templates are static, non-fillable forms.
+- **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
+  `registry.ts` holds the 9 official FMS 2025 templates present in `public/forms/` with
+  authority, official source, form name, Form-ID, version, tax year, retrieval date and
+  source SHA-256, plus the instruction booklet as reference-only, keyed by tax year with no
+  cross-year fallback. `source.ts` recomputes the template SHA-256 (`verifyTemplateSource`,
+  `inspectTemplate`) and detects the real format from the bytes (AcroForm / XFA / static).
+  `fill.ts` (`planPdfFill`) assigns only confirmed facts, leaves absent/unconfirmed/empty
+  values blank with distinct reasons, refuses a mapping whose field is not present in the
+  template, and refuses XFA and static templates rather than approximating them.
+  `manifest.ts` builds and deterministically renders the provenance record (template identity,
+  source, source hash, mapping version, case id, generation timestamp, filled and blank fields).
+  `mappings.ts` is intentionally empty (see MISSING). `writer.ts` reports
+  `writer_unavailable`. `actions.ts` (`prepareOfficialForm`) plans, refuses explicitly, and
+  saves the manifest through the existing P8 draft path, binding approval to these exact
+  template/mapping/fact inputs without a second approval system.
+  Pre-existing: `lib/fms-2025-registry.ts`, `lib/canonical-tax-model.ts`,
+  `lib/tax-pipeline.ts`, `lib/tax-questionnaire-schema.ts`, `tax_form_registry`,
+  `/api/steuer/pdf` (still returns readiness, not a document).
+- **REUSE:** the P8 draft/approval/hash-binding engine (`saveDraft`, `recordApproval`,
+  `assessDraftRelease`) — no second approval system was created; the FMS registry, canonical
+  tax model, tax pipeline, questionnaire schema and `tax_form_registry`.
+- **MISSING:** (1) a PDF **writer** — only `pdfjs-dist` (a reader) is installed, so no values
+  can be written; (2) verified field mappings — **the 9 FMS 2025 templates in `public/forms/`
+  are static printable forms**: they contain no `/AcroForm`, no `/Widget` annotations and no XFA
+  packet, and a field lookup returns no fields, so no field name exists to map onto (this is
+  why the mapping registry is empty rather than populated with unverified names);
+  (3) Agentur fuer Arbeit and Jobcenter official templates; (4) durable provenance storage
+  beyond the draft body (no schema change was made).
+- **DEPENDENCIES:** P8 (approval — satisfied, reused), P6 (facts).
+- **BLOCKERS:** a PDF writer must be added (`AGENTS.md` forbids adding dependencies without
+  explicit owner approval); a fillable official template must be obtained, or an approved
+  mapping/overlay approach verified against the official layout, before any field mapping can
+  be written. Both are owner-action blockers.
 - **DONE CRITERIA:** the original official German template is filled unmodified using only
   confirmed facts; unknown fields stay empty; output is previewable, reviewable, approvable,
-  downloadable; template provenance recorded; tests, build, real verification pass.
+  downloadable; template provenance recorded; approval bound to the exact current
+  content/input hash (satisfied via P8); tests, build, real verification pass.
+  **Not yet met:** the fill itself.
 - **FROZEN:** NO
 
 ---

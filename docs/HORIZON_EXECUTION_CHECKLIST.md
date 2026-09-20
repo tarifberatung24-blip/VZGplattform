@@ -171,16 +171,45 @@ Canonical phase status: `docs/HORIZON_BUILD_LEDGER.md`
 
 ## P9 — Official PDF Form Engine
 
-- ✅ FMS/tax registry groundwork exists
-- Verified official template registry
-- Reverify selected PDF writer at implementation time
-- Field mapping engine
-- Unknown fields remain empty
-- Immutable original template → working copy
-- Preview / review / approval / download
-- Template provenance / version / hash
-- Owner approval for new dependency if required
-- FROZEN
+Status: PARTIAL — engine implemented and tested (commit `256b83c`).
+A filled PDF cannot yet be produced. Two owner-action blockers are recorded below.
+
+- ✅ Source-integrity verification: the template SHA-256 is recomputed from the
+  file bytes and a mismatch refuses generation (`verifyTemplateSource`, `inspectTemplate`)
+- ✅ Real format detection from the bytes (AcroForm / XFA / static), measured rather
+  than assumed; a reader field list can override the static default
+- ✅ Official template registry with authority, official source, form name, Form-ID,
+  version, tax year, retrieval date and source SHA-256
+- ✅ Tax-year isolation: `templatesForTaxYear(2026)` returns empty, never the 2025 set
+- ✅ Mapping version recorded on every manifest (`horizon-pdf-mapping-v1`)
+- ✅ Generation provenance record: template identity, source, source hash, mapping
+  version, case id, generation timestamp, filled count, blank count, blank reasons
+- ✅ Immutable original template: the source file is read and hashed, never rewritten
+- ✅ Unknown values remain empty, with distinct reasons for absent / unconfirmed / empty
+- ✅ No inference: nothing is derived for names, dates, amounts, addresses, IDs,
+  eligibility, deadlines or tax values
+- ✅ Refusal instead of false success for XFA, for static templates, and for a
+  mapping whose field is not present in the template
+- ✅ Safe manual path offered (link to the official source) whenever generation is refused
+- ✅ Approval reuses the P8 hash-bound engine; the manifest is the draft body, so
+  approval covers the exact template/mapping/fact inputs. No second approval system
+- ✅ Deterministic manifest rendering — same inputs produce a byte-identical body,
+  so a reordering cannot silently invalidate an approval
+- ✅ 43 engine tests; TSC, lint and build pass
+- ✅ Generation refused when nothing confirmed could be filled (no unchanged copy
+  presented as generated output)
+- ⬜ PDF writer — **OWNER ACTION REQUIRED.** Only `pdfjs-dist` (a reader) is installed.
+  Writing AcroForm values needs a writer; `AGENTS.md` forbids adding a dependency
+  without explicit owner approval. `writer.ts` reports `writer_unavailable`.
+- ⬜ Field mappings — **BLOCKED on a fillable template.** The 9 FMS 2025 templates in
+  `public/forms/` are static printable forms: no `/AcroForm`, no `/Widget`, no XFA
+  packet, and a field lookup returns no fields. No field name can be verified, so
+  `mappings.ts` is deliberately empty. Populating it now would mean inventing
+  official field names.
+- ⬜ Agentur fuer Arbeit and Jobcenter official templates
+- ⬜ Flattening (depends on the writer)
+- ⬜ Runtime/E2E verification of the preparation surface (needs an authenticated session)
+- ⬜ FROZEN
 
 ## P10 — Signature Engine
 
