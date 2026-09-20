@@ -3,47 +3,49 @@
  *
  * The engine needs two capabilities from outside itself: reading a template's
  * interactive fields, and writing values into a copy of it. Both are behind this
- * boundary so the engine stays pure and testable, and so the absence of a writer
- * is an explicit, reportable state rather than a crash at generation time.
+ * boundary so the engine stays pure and testable.
  *
- * **No writer is currently installed.** The repository ships a PDF *reader*
- * (`pdfjs-dist`) but no PDF *writer* — filling an AcroForm requires one, and
- * adding a dependency is not something this codebase does without the owner's
- * decision. The consequence is deliberate and reported, not hidden: the engine
- * can verify a template, detect its real format, map confirmed facts and produce
- * a reviewable provenance manifest, but it cannot emit a filled PDF yet. Every
- * path that would need a writer returns `writer_unavailable` and routes the user
- * to the official form.
- *
- * This is the one honest blocker in P9. When the owner approves a writer, only
- * this file changes: `planPdfFill` already produces the assignments a writer
- * needs, and `generateFilledPdf` below is the single call site to implement.
+ * Reading uses `pdfjs-dist`; writing uses `pdf-lib`, added with the owner's
+ * explicit approval. Two template shapes are supported, and the engine keeps both
+ * paths: an official template that exposes real AcroForm fields is filled by field
+ * name (`fill.ts`), while the currently verified FMS templates are static
+ * printable forms and are filled by hash-bound overlay (`overlay-map.ts`,
+ * `overlay-fill.ts`).
  */
 
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
+import { PDFDocument, StandardFonts } from "pdf-lib"
 import type { PdfFieldAssignment } from "./fill"
-
-export const PDF_WRITER_STATUS = "unavailable" as const
-
-export type PdfWriterAvailability =
-  | { available: true }
-  | { available: false; code: "writer_unavailable"; detail: string }
+import type { OverlayPlan } from "./overlay-fill"
+import type { StaticTemplateMapping } from "./overlay-map"
+import { writeOverlay, type OverlayWriteResult } from "./overlay-writer"
+import { isWinAnsiRepresentable } from "./encoding"
 
 /**
- * Reports whether filled output can be produced.
- *
- * Returns unavailable rather than throwing so a caller can present the manual
- * path. This must not be replaced with a stub that writes an unfilled copy: that
- * would present an unchanged official form as generated output.
+ * A writer is now installed: `pdf-lib`, approved by the owner for the Official
+ * PDF Form Engine. It is the only PDF writer in the project by design — a second
+ * one would fragment how official forms are produced.
  */
+export const PDF_WRITER_STATUS = "pdf-lib" as const
+
+export type PdfWriterAvailability = { available: true; engine: "pdf-lib" }
+
 export function writerAvailability(): PdfWriterAvailability {
-  return {
-    available: false,
-    code: "writer_unavailable",
-    detail:
-      "Es ist kein PDF-Schreibmodul installiert. Das amtliche Formular kann derzeit nicht automatisch ausgefüllt werden; bitte das amtliche Formular manuell ausfüllen.",
-  }
+  return { available: true, engine: "pdf-lib" }
+}
+
+/**
+ * Measures drawn text with the same face the writer uses.
+ *
+ * The planner needs real widths to refuse overflow, so this embeds Helvetica in a
+ * throwaway document and asks pdf-lib. Using the writer's own metrics means the
+ * overflow check cannot disagree with what is actually drawn.
+ */
+export async function createTextMeasurer(): Promise<(text: string, size: number) => number> {
+  const probe = await PDFDocument.create()
+  const font = await probe.embedFont(StandardFonts.Helvetica)
+  return (text, size) => font.widthOfTextAtSize(text, size)
 }
 
 export type TemplateBytes = { ok: true; bytes: Uint8Array } | { ok: false; detail: string }
@@ -90,26 +92,83 @@ export async function readAcroFormFieldNames(bytes: Uint8Array): Promise<readonl
 }
 
 export type GeneratedPdf =
-  | { ok: true; bytes: Uint8Array }
-  | { ok: false; code: "writer_unavailable" | "write_failed"; detail: string }
+  | { ok: true; bytes: Uint8Array; filledCount: number }
+  | { ok: false; code: "write_failed" | "winansi_unsupported"; detail: string }
 
 /**
- * Produces the filled PDF. Single call site for a future writer.
+ * Produces the filled PDF from a planned overlay.
  *
- * The signature takes the template bytes and the planned assignments, so a
- * writer implementation only has to apply them; it must not decide which values
- * belong in the document, because that decision is the engine's and is already
- * covered by tests.
+ * This is the single call site that writes a document. It delegates to the
+ * overlay writer, which reads only the template bytes and the plan — so the
+ * decision about *which* values belong on the form stays in `planOverlayFill`,
+ * where it is covered by tests, and never moves into the writer.
  */
-export async function generateFilledPdf(input: {
+export async function generateOverlayPdf(input: {
+  templateBytes: Uint8Array
+  mapping: StaticTemplateMapping
+  plan: Extract<OverlayPlan, { ok: true }>
+  shade?: boolean
+}): Promise<GeneratedPdf> {
+  const written: OverlayWriteResult = await writeOverlay({
+    templateBytes: input.templateBytes,
+    mapping: input.mapping,
+    plan: input.plan,
+    shade: input.shade,
+  })
+  if (!written.ok) return written
+  return { ok: true, bytes: written.bytes, filledCount: written.filledCount }
+}
+
+/**
+ * Path A — fills real AcroForm fields by name and optionally flattens.
+ *
+ * Used only when a template genuinely exposes an interactive form. `flatten`
+ * makes the values part of the page content so the document cannot be edited back
+ * to an empty form after approval, which matters because approval is bound to the
+ * generated bytes.
+ */
+export async function generateAcroFormPdf(input: {
   templateBytes: Uint8Array
   assignments: readonly PdfFieldAssignment[]
   flatten: boolean
 }): Promise<GeneratedPdf> {
-  const availability = writerAvailability()
-  if (!availability.available) {
-    return { ok: false, code: "writer_unavailable", detail: availability.detail }
+  try {
+    const document = await PDFDocument.load(input.templateBytes)
+    const form = document.getForm()
+    let applied = 0
+
+    for (const assignment of input.assignments) {
+      const text = String(assignment.value)
+      if (!isWinAnsiRepresentable(text)) {
+        return { ok: false, code: "winansi_unsupported", detail: assignment.fieldName }
+      }
+      if (assignment.kind === "text") {
+        const field = form.getTextField(assignment.fieldName)
+        field.setText(text)
+        applied += 1
+        continue
+      }
+      // Underlying form primitives are untyped in pdf-lib; the assignment's kind
+      // was decided by `planPdfFill`, which only emits these shapes for a field it
+      // verified exists.
+      const field = document.getForm().getField(assignment.fieldName)
+      const mutable = field as unknown as { check?: () => void; select?: (value: string) => void }
+      if (assignment.kind === "checkbox") {
+        mutable.check?.()
+      } else {
+        mutable.select?.(text)
+      }
+      applied += 1
+    }
+
+    if (input.flatten) form.flatten()
+    const bytes = await document.save()
+    return { ok: true, bytes, filledCount: applied }
+  } catch (error) {
+    return {
+      ok: false,
+      code: "write_failed",
+      detail: error instanceof Error ? error.message : "write_failed",
+    }
   }
-  void input
-  return { ok: false, code: "write_failed", detail: "writer_not_implemented" }
 }

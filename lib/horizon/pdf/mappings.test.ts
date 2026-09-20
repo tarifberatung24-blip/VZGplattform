@@ -47,14 +47,11 @@ describe("mappings registry is honestly empty", () => {
   })
 })
 
-describe("writer boundary reports unavailability instead of faking output", () => {
-  it("reports no writer available with an actionable detail", () => {
+describe("writer boundary", () => {
+  it("uses exactly one writer engine, pdf-lib", () => {
     const availability = writerAvailability()
-    expect(availability.available).toBe(false)
-    if (!availability.available) {
-      expect(availability.code).toBe("writer_unavailable")
-      expect(availability.detail).toMatch(/manuell/)
-    }
+    expect(availability.available).toBe(true)
+    expect(availability.engine).toBe("pdf-lib")
   })
 
   it("reads a registered template's bytes", async () => {

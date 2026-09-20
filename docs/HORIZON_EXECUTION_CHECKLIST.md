@@ -171,43 +171,47 @@ Canonical phase status: `docs/HORIZON_BUILD_LEDGER.md`
 
 ## P9 — Official PDF Form Engine
 
-Status: PARTIAL — engine implemented and tested (commit `256b83c`).
-A filled PDF cannot yet be produced. Two owner-action blockers are recorded below.
+Status: IN_PROGRESS — end-to-end generation works for one verified reference form
+(Hauptvordruck ESt 1 A 2025, page 1). Breadth remains; mechanism is proven.
 
 - ✅ Source-integrity verification: the template SHA-256 is recomputed from the
-  file bytes and a mismatch refuses generation (`verifyTemplateSource`, `inspectTemplate`)
-- ✅ Real format detection from the bytes (AcroForm / XFA / static), measured rather
-  than assumed; a reader field list can override the static default
-- ✅ Official template registry with authority, official source, form name, Form-ID,
-  version, tax year, retrieval date and source SHA-256
-- ✅ Tax-year isolation: `templatesForTaxYear(2026)` returns empty, never the 2025 set
-- ✅ Mapping version recorded on every manifest (`horizon-pdf-mapping-v1`)
-- ✅ Generation provenance record: template identity, source, source hash, mapping
-  version, case id, generation timestamp, filled count, blank count, blank reasons
-- ✅ Immutable original template: the source file is read and hashed, never rewritten
-- ✅ Unknown values remain empty, with distinct reasons for absent / unconfirmed / empty
-- ✅ No inference: nothing is derived for names, dates, amounts, addresses, IDs,
-  eligibility, deadlines or tax values
-- ✅ Refusal instead of false success for XFA, for static templates, and for a
-  mapping whose field is not present in the template
-- ✅ Safe manual path offered (link to the official source) whenever generation is refused
-- ✅ Approval reuses the P8 hash-bound engine; the manifest is the draft body, so
-  approval covers the exact template/mapping/fact inputs. No second approval system
-- ✅ Deterministic manifest rendering — same inputs produce a byte-identical body,
-  so a reordering cannot silently invalidate an approval
-- ✅ 43 engine tests; TSC, lint and build pass
-- ✅ Generation refused when nothing confirmed could be filled (no unchanged copy
-  presented as generated output)
-- ⬜ PDF writer — **OWNER ACTION REQUIRED.** Only `pdfjs-dist` (a reader) is installed.
-  Writing AcroForm values needs a writer; `AGENTS.md` forbids adding a dependency
-  without explicit owner approval. `writer.ts` reports `writer_unavailable`.
-- ⬜ Field mappings — **BLOCKED on a fillable template.** The 9 FMS 2025 templates in
-  `public/forms/` are static printable forms: no `/AcroForm`, no `/Widget`, no XFA
-  packet, and a field lookup returns no fields. No field name can be verified, so
-  `mappings.ts` is deliberately empty. Populating it now would mean inventing
-  official field names.
+  file bytes and a mismatch refuses generation
+- ✅ Real format detection from the bytes (AcroForm / XFA / static)
+- ✅ Two engine paths kept: AcroForm templates fill real field names; static
+  templates use hash-bound measured overlays
+- ✅ `pdf-lib` 1.17.1 added as the single approved writer; no second writer
+- ✅ Overlay mapping schema: fact key, page, x, yBottom, maxWidth, maxHeight,
+  font size, field type (text/checkbox/radio/date/numeric), optional format rule
+- ✅ **Coordinates bound to template SHA-256 + tax year + mapping version.** A
+  mapping measured for another revision or year is refused, never reused
+- ✅ Coordinates measured from the real PDF, not guessed — each field records the
+  printed label box and input box it was derived from, and a test re-derives the
+  stored values from that evidence
+- ✅ **Real functional verification:** a filled PDF was generated and read back;
+  all 7 values land inside their printed boxes
+- ✅ **German characters render correctly:** `Müller-Öztürk` and `Straße 5` (ß)
+  round-trip intact through a reader — verified, not assumed
+- ✅ Non-CP1252 values (e.g. Polish/Cyrillic names) are refused before measurement,
+  because pdf-lib throws on them; nothing is transliterated
+- ✅ Unknown/unconfirmed facts remain blank, with distinct reasons
+- ✅ Values too wide for their box are refused, never clipped or shrunk
+- ✅ Declared formats applied deterministically (`date_de` only on exact ISO input)
+- ✅ **Official template bytes never modified** — verified by hash before/after
+- ✅ **Output is a separate artifact** with its own SHA-256, recorded in the manifest
+- ✅ **Full provenance:** authority, official source, form name, Form-ID, tax year,
+  template SHA-256, mapping version, confirmed inputs, output SHA-256, case id,
+  timestamp
+- ✅ Approval reuses the P8 hash-bound engine; the manifest is the draft body. No
+  second approval mechanism
+- ✅ **Private owner-scoped storage:** the artifact is written to the
+  `source-documents` bucket under `{ownerId}/{caseId}/...`, and is removed again if
+  the draft or audit write fails, so storage and records never disagree
+- ✅ 70 PDF tests (27 new overlay tests); full suite 560 pass; TSC, lint, build pass
+- ⬜ Verified overlay mappings for the other 8 FMS templates — each needs its own
+  measurement against its own hash. Populating them by guessing is prohibited
 - ⬜ Agentur fuer Arbeit and Jobcenter official templates
-- ⬜ Flattening (depends on the writer)
+- ⬜ Preview/download surface wiring for the stored artifact (engine writes and
+  audits it; the UI currently reports generation status)
 - ⬜ Runtime/E2E verification of the preparation surface (needs an authenticated session)
 - ⬜ FROZEN
 

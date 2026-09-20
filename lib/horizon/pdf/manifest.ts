@@ -51,6 +51,8 @@ export function buildManifest(input: {
   generatedAt: string
   assignments: readonly PdfFieldAssignment[]
   blanks: readonly PdfBlankField[]
+  /** SHA-256 of the generated artifact, once the writer has produced it. */
+  outputSha256?: string | null
 }): PdfGenerationManifest {
   const { template } = input
   return {
@@ -64,7 +66,7 @@ export function buildManifest(input: {
     retrievalDate: template.retrievalDate,
     sourceSha256: template.sourceSha256,
     mappingVersion: input.mappingVersion,
-    outputSha256: null,
+    outputSha256: input.outputSha256 ?? null,
     caseId: input.caseId,
     generatedAt: input.generatedAt,
     filledCount: input.assignments.length,
@@ -102,6 +104,9 @@ export function renderManifestBody(manifest: PdfGenerationManifest): string {
     `Vorlagen-Version: ${manifest.formVersion}`,
     `Vorlagen-SHA-256: ${manifest.sourceSha256}`,
     `Mapping-Version: ${manifest.mappingVersion}`,
+    manifest.outputSha256
+      ? `Ausgabe-SHA-256: ${manifest.outputSha256}`
+      : "Ausgabe-SHA-256: (keine Ausgabe erzeugt)",
     `Vorgang: ${manifest.caseId}`,
     `Erstellt am: ${manifest.generatedAt}`,
     "",

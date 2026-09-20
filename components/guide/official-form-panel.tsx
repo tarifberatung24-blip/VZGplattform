@@ -52,6 +52,13 @@ export function OfficialFormPanel({
           "Diese amtliche Vorlage enthält keine ausfüllbaren Felder.",
         unknown_field:
           "Ein Feld der Zuordnung existiert in dieser Vorlage nicht.",
+        no_verified_mapping:
+          "Für diese amtliche Vorlage sind noch keine geprüften Koordinaten hinterlegt. Es wird nichts geschätzt.",
+        value_too_wide:
+          "Ein bestätigter Wert passt nicht in das vorgesehene Feld. Der Wert wird nicht gekürzt.",
+        unsupported_format_value:
+          "Ein bestätigter Wert entspricht nicht dem erwarteten Format. Er wird nicht umgedeutet.",
+        storage_unavailable: "Der private Speicher ist nicht verfügbar. Es wurde nichts gespeichert.",
         nothing_to_fill:
           "Es sind noch keine bestätigten Angaben vorhanden, die eingesetzt werden könnten.",
         case_not_found: "Vorgang nicht gefunden.",
@@ -75,6 +82,13 @@ export function OfficialFormPanel({
         unsupported_xfa: "Този формуляр е XFA и не се поддържа.",
         not_fillable: "Този официален образец няма попълваеми полета.",
         unknown_field: "Поле от съответствието не съществува в този образец.",
+        no_verified_mapping:
+          "За този официален образец още няма проверени координати. Нищо не се нагажда приблизително.",
+        value_too_wide:
+          "Потвърдена стойност не се побира в предвиденото поле. Стойността не се съкращава.",
+        unsupported_format_value:
+          "Потвърдена стойност не отговаря на очаквания формат. Не се претълкува.",
+        storage_unavailable: "Частното хранилище не е достъпно. Нищо не е запазено.",
         nothing_to_fill: "Още няма потвърдени данни, които да бъдат въведени.",
         case_not_found: "Случаят не е намерен.",
         failed: "Подготовката не успя.",

@@ -469,47 +469,44 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Official PDF form engine
 - **TARGET ROUTES:** consumed by P12, P13, P15; existing readiness endpoint `/api/steuer/pdf`;
   preparation surface inside the case workspace (`components/guide/official-form-panel.tsx`).
-- **CURRENT STATUS:** PARTIAL — engine implemented and tested (commit `256b83c`); cannot emit a
-  filled PDF because no PDF writer is installed (owner decision required) and the shipped
-  official templates are static, non-fillable forms.
+- **CURRENT STATUS:** IN_PROGRESS — end-to-end generation works for one verified reference form
+  (Hauptvordruck ESt 1 A 2025, page 1). A filled artifact is produced, stored privately and
+  queued for review with full provenance. Remaining work is breadth (further verified mappings),
+  not mechanism.
 - **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
-  `registry.ts` holds the 9 official FMS 2025 templates present in `public/forms/` with
-  authority, official source, form name, Form-ID, version, tax year, retrieval date and
-  source SHA-256, plus the instruction booklet as reference-only, keyed by tax year with no
-  cross-year fallback. `source.ts` recomputes the template SHA-256 (`verifyTemplateSource`,
-  `inspectTemplate`) and detects the real format from the bytes (AcroForm / XFA / static).
-  `fill.ts` (`planPdfFill`) assigns only confirmed facts, leaves absent/unconfirmed/empty
-  values blank with distinct reasons, refuses a mapping whose field is not present in the
-  template, and refuses XFA and static templates rather than approximating them.
-  `manifest.ts` builds and deterministically renders the provenance record (template identity,
-  source, source hash, mapping version, case id, generation timestamp, filled and blank fields).
-  `mappings.ts` is intentionally empty (see MISSING). `writer.ts` reports
-  `writer_unavailable`. `actions.ts` (`prepareOfficialForm`) plans, refuses explicitly, and
-  saves the manifest through the existing P8 draft path, binding approval to these exact
-  template/mapping/fact inputs without a second approval system.
-  Pre-existing: `lib/fms-2025-registry.ts`, `lib/canonical-tax-model.ts`,
-  `lib/tax-pipeline.ts`, `lib/tax-questionnaire-schema.ts`, `tax_form_registry`,
-  `/api/steuer/pdf` (still returns readiness, not a document).
-- **REUSE:** the P8 draft/approval/hash-binding engine (`saveDraft`, `recordApproval`,
-  `assessDraftRelease`) — no second approval system was created; the FMS registry, canonical
-  tax model, tax pipeline, questionnaire schema and `tax_form_registry`.
-- **MISSING:** (1) a PDF **writer** — only `pdfjs-dist` (a reader) is installed, so no values
-  can be written; (2) verified field mappings — **the 9 FMS 2025 templates in `public/forms/`
-  are static printable forms**: they contain no `/AcroForm`, no `/Widget` annotations and no XFA
-  packet, and a field lookup returns no fields, so no field name exists to map onto (this is
-  why the mapping registry is empty rather than populated with unverified names);
-  (3) Agentur fuer Arbeit and Jobcenter official templates; (4) durable provenance storage
-  beyond the draft body (no schema change was made).
-- **DEPENDENCIES:** P8 (approval — satisfied, reused), P6 (facts).
-- **BLOCKERS:** a PDF writer must be added (`AGENTS.md` forbids adding dependencies without
-  explicit owner approval); a fillable official template must be obtained, or an approved
-  mapping/overlay approach verified against the official layout, before any field mapping can
-  be written. Both are owner-action blockers.
+  `registry.ts` holds the 9 official FMS 2025 templates with authority, official source, form
+  name, Form-ID, version, tax year, retrieval date and source SHA-256, keyed by tax year with no
+  cross-year fallback. `source.ts` recomputes the template SHA-256 and detects the real format
+  from the bytes (AcroForm / XFA / static). `encoding.ts` holds the WinAnsi guard. `fill.ts`
+  covers the AcroForm path (Path A) and refuses a field the template does not contain.
+  `overlay-map.ts` holds the static overlay mapping schema plus the measured reference mapping;
+  `overlay-fill.ts` plans overlay placements; `overlay-writer.ts` draws them with `pdf-lib`
+  (Path B). `writer.ts` binds both paths and exposes `createTextMeasurer` (real Helvetica
+  metrics), `generateOverlayPdf`, `generateAcroFormPdf`. `manifest.ts` records provenance and
+  now carries the output SHA-256. `actions.ts` runs the full flow and stores the artifact.
+  `mappings.ts` remains empty for the AcroForm path only — no field names are inventable.
+- **REUSE:** P8 draft/approval/hash-binding engine (`saveDraft`, `recordApproval`,
+  `assessDraftRelease`) — the manifest *is* the draft body, so approving it approves these exact
+  template/mapping/fact inputs; no second approval system. The P6 intake storage convention
+  (`source-documents` bucket, `{ownerId}/{caseId}/{docId}-{name}` keys) is reused for the
+  generated artifact. Also reuses the FMS registry, canonical tax model and `tax_form_registry`.
+- **MISSING:** (1) verified overlay mappings for the other 8 FMS templates — deliberately not
+  populated, because coordinates must be measured per template (see DECISION below);
+  (2) Agentur fuer Arbeit and Jobcenter official templates; (3) an approved approach for
+  non-CP1252 values (e.g. Polish/Cyrillic names) — currently refused rather than transliterated.
+- **DEPENDENCIES:** P8 (satisfied, reused), P6 (facts), `pdf-lib` 1.17.1 (owner-approved).
+- **BLOCKERS:** none technical. Remaining work is per-template measurement, which is bounded and
+  mechanical, not blocked.
 - **DONE CRITERIA:** the original official German template is filled unmodified using only
-  confirmed facts; unknown fields stay empty; output is previewable, reviewable, approvable,
+  confirmed facts; unknown fields stay empty; output previewable, reviewable, approvable,
   downloadable; template provenance recorded; approval bound to the exact current
-  content/input hash (satisfied via P8); tests, build, real verification pass.
-  **Not yet met:** the fill itself.
+  content/input hash; tests, build, real verification pass.
+  **Met for the reference form. Not yet met across all target forms.**
+- **OWNER DECISION RECORDED:** the 9 FMS 2025 templates are static printable PDFs (no
+  `/AcroForm`, no `/Widget`, no XFA packet; a field lookup returns no fields). The owner
+  authorised an overlay approach, one reference form first, with coordinates verified against
+  the exact template SHA-256. `pdf-lib` was approved as the writer. Both engine paths are kept:
+  AcroForm templates fill real field names; static templates use hash-bound measured overlays.
 - **FROZEN:** NO
 
 ---
