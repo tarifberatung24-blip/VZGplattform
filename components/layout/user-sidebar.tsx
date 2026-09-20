@@ -13,6 +13,7 @@ import {
   FileText,
   Settings,
   LogOut,
+  Compass,
 } from "lucide-react"
 
 const navItems = [
@@ -21,6 +22,12 @@ const navItems = [
     labelBg: "Преглед",
     labelDe: "Übersicht",
     icon: LayoutDashboard,
+  },
+  {
+    href: "/guide",
+    labelBg: "Водач",
+    labelDe: "Wegweiser",
+    icon: Compass,
   },
   {
     href: "/steuer",
@@ -62,8 +69,10 @@ export function UserSidebar() {
   return (
     <aside className="hidden w-64 shrink-0 flex-col gap-4 overflow-y-auto border-r border-border bg-background pr-6 lg:flex">
       <div className="border-b border-border pb-5">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">KintexBG</p>
-        <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Private Office</p>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground">HORIZON</p>
+        <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          by VZG
+        </p>
       </div>
       <nav className="flex flex-col gap-1" aria-label={locale === "de" ? "Hauptnavigation" : "Основна навигация"}>
         {navItems.map((item) => {

@@ -16,7 +16,7 @@ export const kintexModules = [
 // Presentation only. Access control remains in the existing Supabase proxy/pages.
 export function isKintexWorkspacePath(pathname: string) {
   const path = stripLocale(pathname)
-  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/profil", "/assistant", "/steuer", "/finanzamt", "/anspruch", "/email-generator"]
+  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/profil", "/assistant", "/steuer", "/finanzamt", "/anspruch", "/email-generator", "/guide"]
     .some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 
