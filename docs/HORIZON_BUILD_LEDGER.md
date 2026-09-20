@@ -47,7 +47,7 @@ after a module meets the full DONE definition.
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES ACCEPTED, RUNTIME VERIFICATION PENDING | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
-| P8 | DRAFT / REVIEW / USER APPROVAL | AUDITED | NO | YES |
+| P8 | DRAFT / REVIEW / USER APPROVAL | PARTIAL — REVIEW+APPROVAL SURFACE IMPLEMENTED, RUNTIME VERIFICATION PENDING | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | NOT_STARTED | NO | YES |
 | P10 | SIGNATURE ENGINE | NOT_STARTED | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | NOT_STARTED | NO | YES |
@@ -420,11 +420,22 @@ after a module meets the full DONE definition.
   `MISSING_INFO`, `NO_APPROVAL`; review components `response-draft-review`,
   `document-facts-review`, `reminder-review`; tables `correspondence_drafts`,
   `platform_correspondence_drafts`, `approvals`, `platform_approvals`.
+  **Added in this phase (`e28fc8b`):** the user-facing review and approval surface. The page now
+  reads `listApprovals`, which it previously did not — without it the workspace could not know a
+  draft was approved, so the hash-binding guarantee was unreachable from the interface.
+  `lib/horizon/case/release.ts` assesses releasability as an ordered list of reasons
+  (`NO_DRAFT`, `UNCONFIRMED_FACTS`, `MISSING_INFORMATION`, `REVIEW_BLOCKED`, `NOT_APPROVED`,
+  `CONTENT_CHANGED_SINCE_APPROVAL`) so a refusal states what is missing; `NOT_APPROVED` and
+  `CONTENT_CHANGED_SINCE_APPROVAL` stay distinct because an edit that invalidated an approval
+  must not read as "never approved". `lib/horizon/case/review-actions.ts` and
+  `components/guide/draft-review-panel.tsx` provide review status, a required acknowledgement,
+  and approval; approval is refused server-side while critical facts are unconfirmed, and the
+  acknowledgement is verified in the action, not only in the form. The draft body is shown
+  verbatim and is not editable on this surface.
 - **REUSE:** all of the above.
-- **MISSING:** the review UI is not verified end-to-end; no required acknowledgement step;
-  no enforced blocking of unapproved sends at the UI level; the deterministic translator does
-  not produce a real translation for non-`de` locales; two overlapping draft/approval families
-  exist with no canonical choice.
+- **MISSING:** no enforced blocking of unapproved *send* at the UI level (the send engine is P11);
+  the deterministic translator does not produce a real translation for non-`de` locales; two
+  overlapping draft/approval families exist with no canonical choice.
 - **DEPENDENCIES:** P5, P7.
 - **BLOCKERS:** canonical draft/approval model depends on the P5 case-model decision.
 - **DONE CRITERIA:** user sees the exact German draft and its translation; facts must be
