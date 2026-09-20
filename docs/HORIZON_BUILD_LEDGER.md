@@ -45,8 +45,8 @@ after a module meets the full DONE definition.
 | P3 | HORIZON GUIDE | NOT_STARTED | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | AUDITED | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
-| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | AUDITED | NO | YES |
-| P7 | CONTEXT AI ASSISTANT | AUDITED | NO | YES |
+| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — TEXT INTAKE IMPLEMENTED, RUNTIME VERIFICATION PENDING | NO | YES |
+| P7 | CONTEXT AI ASSISTANT | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | AUDITED | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | NOT_STARTED | NO | YES |
 | P10 | SIGNATURE ENGINE | NOT_STARTED | NO | YES |
@@ -304,7 +304,8 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Document intake, OCR, explanation
 - **TARGET ROUTES:** no new public route required; enhances `/{locale}/documents` and
   `/{locale}/office/cases/{id}`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** PARTIAL — text intake implemented and unit-tested; runtime verification pending
+  (commit `b708697`).
 - **CURRENT IMPLEMENTATION:** validated upload with canonical-project guard
   (`lib/documents/validation.ts` + `app/api/documents/upload/route.ts`);
   text extraction (`lib/documents/extraction.ts`); contract extraction
@@ -314,15 +315,29 @@ after a module meets the full DONE definition.
   (`/api/documents/review`); signed private URLs with a 300-second expiry;
   document UI: `document-intake`, `documents-workspace`, `document-facts-review`,
   `document-analyzer`, `document-explanation`.
+  **Added in this phase:** pasted-text and email-content intake
+  (`lib/horizon/intake/text.ts`, `lib/horizon/intake/actions.ts`,
+  `components/guide/text-intake-form.tsx`), persisted verbatim on the owner-scoped
+  `case_messages` spine with audit provenance (input kind, length, SHA-256), wired into
+  `components/guide/case-workspace.tsx`. The intake derives nothing from the prose.
 - **REUSE:** everything listed above, plus tables `documents`, `source_documents`,
   `document_pages`, `document_analysis_results`, `document_reviews`, and the private Storage
   buckets `documents` and `source-documents`.
-- **MISSING:** two of the five target input types (pasted text, email content);
-  page-level evidence linkage on every extracted fact; one extraction contract shared by the
-  two parallel document stacks; explicit error states for OCR/extraction failure.
+- **MISSING:** screenshot and photo intake; page-level evidence linkage on every extracted
+  fact; one extraction contract shared by the two parallel document stacks; explicit error
+  states for OCR/extraction failure.
+  **Note on text intake and `source_documents`:** the `source_documents.mime` CHECK and the
+  `source-documents` bucket MIME allowlist both admit only PDF/JPEG/PNG. Admitting text there
+  would require dropping a constraint, which is a destructive schema change and is not
+  authorized. Text is therefore stored on `case_messages` instead. A migration-contract test
+  (`lib/horizon/case/migration-contract.test.ts`) asserts that no HORIZON migration drops a
+  constraint, so this cannot be undone silently by a later feature commit. Reconciling the two
+  document stacks remains open.
 - **DEPENDENCIES:** P5 (case model), P7 (assistant context).
 - **BLOCKERS:** OCR provider and budget approval (`docs/TERRA_START.md` T5 notes OCR requires an
   approved provider and budget). Two competing document stacks must be reconciled first.
+  Runtime verification of text intake requires an authenticated session and a configured
+  Supabase instance.
 - **DONE CRITERIA:** screenshot, photo, PDF, pasted text, and email content are all accepted;
   OCR/extraction results stored per page; every extracted fact carries page evidence;
   explanation is localized; failures surface explicit errors; tests, build, real verification pass.
@@ -335,7 +350,7 @@ after a module meets the full DONE definition.
 - **ID:** P7
 - **SYSTEM:** Context AI assistant
 - **TARGET ROUTES:** enhances `/{locale}/assistant` and the case workspace.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IMPLEMENTATION ADDED — runtime verification pending (commit `f6ec2d6`).
 - **CURRENT IMPLEMENTATION:** `/{locale}/assistant` renders `home-office-workspace`;
   `app/api/chat/route.ts` streams via `@ai-sdk/groq` with rate limiting;
   case-message routing (`lib/office/ai/routing.ts`, prompt version `language-router-intent-v1`);
@@ -344,11 +359,22 @@ after a module meets the full DONE definition.
   deterministic draft generation (`lib/office/ai/groq-draft-generator.ts`);
   providers `lib/home-office/groq-provider.ts` and `lib/home-office/cerebras-provider.ts`;
   demo fallback `lib/home-office/provider.ts` (`AI_PROVIDER_NOT_CONFIGURED`).
+  **Added in this phase:** persistent case context
+  (`lib/horizon/ai/context.ts` — separates confirmed from unconfirmed facts, passes missing
+  required keys through, reads approval state from stored hashes); model/prompt version registry
+  (`lib/horizon/ai/registry.ts`); structural guard rails and per-module rails
+  (`lib/horizon/ai/guard.ts`, `lib/horizon/ai/module-rails.ts`); case assistant prompt
+  (`lib/horizon/ai/prompt.ts`); case-scoped streaming route
+  (`app/api/horizon/cases/[id]/assistant/route.ts`, case id taken from the path only); panel
+  wired into `components/guide/case-workspace.tsx`
+  (`components/guide/case-assistant-panel.tsx`).
 - **REUSE:** all of the above plus `usage_counters`, `document_analysis_results`,
   `case_messages`, `extracted_facts`.
-- **MISSING:** persistent case context for the assistant (assistant does not currently carry
-  full case state across turns); a model/prompt version registry; per-module guard rails;
-  OpenRouter credentials are declared in `.env.example` but no OpenRouter client code exists.
+- **MISSING:** runtime verification of the case-scoped assistant; the older household chat route
+  (`app/api/chat/route.ts`) still answers from the `contracts`/`documents` household stack rather
+  than the case spine and is deliberately left untouched here — replacing a live surface belongs
+  to a reconciliation phase; OpenRouter credentials are declared in `.env.example` but no
+  OpenRouter client code exists.
 - **DEPENDENCIES:** P5 (case context), P6 (documents).
 - **BLOCKERS:** an AI provider key must be configured for any end-to-end AI verification;
   `docs/TERRA_START.md` states a missing cloud key must block end-to-end success claims.
