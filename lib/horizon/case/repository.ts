@@ -28,6 +28,7 @@ import {
   textIntakeAuditMetadata,
   type TextIntakeKind,
 } from "../intake/text"
+import { buildCaseContext, type CaseContext } from "../ai/context"
 
 type Db = Database["public"]
 type CaseRow = Db["Tables"]["cases"]["Row"]
@@ -687,5 +688,48 @@ export class CaseEngineRepository {
     const facts = await this.listFacts(caseId)
     if (facts.error) return fail(facts.error)
     return ok(deriveMissingInformation(facts.data ?? [], owned.data.module))
+  }
+
+  /**
+   * P7 persistent case context: everything the assistant is allowed to see,
+   * assembled from the owner-scoped spine.
+   *
+   * Approval state is read from the stored hashes, so a draft whose content
+   * changed after approval is reported as not approved rather than carrying a
+   * stale approval forward.
+   */
+  async loadCaseContext(caseId: string): Promise<RepoResult<CaseContext>> {
+    const owned = await this.getMine(caseId)
+    if (owned.error || !owned.data) return fail(owned.error ?? "Case not found")
+
+    const [facts, drafts, documents, missing] = await Promise.all([
+      this.listFacts(caseId),
+      this.listDrafts(caseId),
+      this.listDocuments(caseId),
+      this.getMissingInformation(caseId),
+    ])
+    if (facts.error) return fail(facts.error)
+    if (drafts.error) return fail(drafts.error)
+    if (documents.error) return fail(documents.error)
+    if (missing.error) return fail(missing.error)
+
+    const draftList = drafts.data ?? []
+    const approvalChecks = await Promise.all(
+      draftList.map(async (draft) => {
+        const state = await this.getApprovalState(draft.id)
+        return state.data?.approved ? draft.id : null
+      }),
+    )
+
+    return ok(
+      buildCaseContext({
+        case: owned.data,
+        facts: facts.data ?? [],
+        drafts: draftList,
+        missing: missing.data ?? null,
+        approvedDraftIds: approvalChecks.filter((id): id is string => id !== null),
+        documentCount: (documents.data ?? []).length,
+      }),
+    )
   }
 }

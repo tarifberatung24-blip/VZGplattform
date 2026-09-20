@@ -1,6 +1,7 @@
 "use client"
 
 import { TextIntakeForm } from "@/components/guide/text-intake-form"
+import { CaseAssistantPanel } from "@/components/guide/case-assistant-panel"
 import type {
   CaseAuditEvent,
   CaseDraft,
@@ -13,6 +14,7 @@ import type {
 export type CaseWorkspaceProps = {
   caseId: string
   locale: string
+  module: string
   documents: readonly CaseSourceDocument[]
   facts: readonly ExtractedFact[]
   drafts: readonly CaseDraft[]
@@ -60,6 +62,7 @@ function Panel({
 export function CaseWorkspace({
   caseId,
   locale,
+  module,
   documents,
   facts,
   drafts,
@@ -110,7 +113,10 @@ export function CaseWorkspace({
       }
 
   return (
-    <div className="mt-6 grid gap-4 lg:grid-cols-2">
+    <div className="mt-6 space-y-4">
+      <CaseAssistantPanel caseId={caseId} module={module} locale={locale} />
+
+      <div className="grid gap-4 lg:grid-cols-2">
       <Panel title={copy.intake} empty={copy.none}>
         <TextIntakeForm caseId={caseId} locale={locale} />
       </Panel>
@@ -191,6 +197,7 @@ export function CaseWorkspace({
           </div>
         ))}
       </Panel>
+      </div>
     </div>
   )
 }

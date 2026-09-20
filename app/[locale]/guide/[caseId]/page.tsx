@@ -56,6 +56,7 @@ export default async function GuideCasePage({
         <CaseWorkspace
           caseId={caseId}
           locale={locale}
+          module={loaded.data.module}
           documents={documents.data ?? []}
           facts={facts.data ?? []}
           drafts={drafts.data ?? []}
