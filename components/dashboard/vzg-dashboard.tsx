@@ -10,6 +10,7 @@ import { WorkplaceActionCenter } from "@/components/dashboard/workplace-action-c
 import { MissingInformationInterviewer } from "@/components/dashboard/missing-information-interviewer"
 import { DocumentAnalyzer, type DashboardDocument } from "@/components/dashboard/document-analyzer"
 import { getSmartDashboardNextAction } from "@/lib/kintex-smart-dashboard"
+import { HorizonHome } from "@/components/horizon/horizon-home"
 
 export type VzgDashboardProps = {
   firstName?: string | null
@@ -18,12 +19,14 @@ export type VzgDashboardProps = {
   documents: DashboardDocument[]
   reviewCount: number
   reminders: Array<{ id: string; title: string; due_at: string | null; status: string | null }>
+  caseCounts?: Record<string, number>
+  moduleError?: string | null
 }
 
 function money(value: number) { return new Intl.NumberFormat("bg-BG", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value) }
 function date(value: string | null) { return value ? new Intl.DateTimeFormat("bg-BG", { day: "2-digit", month: "short" }).format(new Date(value)) : "Няма данни" }
 
-export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders }: VzgDashboardProps) {
+export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders, caseCounts, moduleError }: VzgDashboardProps) {
   const { locale } = useLanguage()
   const de = locale === "de"
   const monthlyTotal = contracts.reduce((sum, item) => sum + (Number(item.monthly_amount) || 0), 0)
@@ -49,6 +52,7 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
         {[{ icon: WalletCards, label: de ? "Monatliche Kosten" : "Месечни разходи", value: monthlyTotal ? money(monthlyTotal) : "NEEDS_DATA", note: de ? "Nur eingetragene Beträge" : "Само въведени суми" }, { icon: Receipt, label: de ? "Aktive Verträge" : "Активни договори", value: String(contracts.length), note: de ? "Alle gespeicherten Verträge" : "Всички записани договори" }, { icon: CalendarDays, label: de ? "Nächster Termin" : "Следващ срок", value: date(nextReminder?.due_at ?? null), note: nextReminder?.title ?? (de ? "Keine Frist erfasst" : "Няма записан срок") }, { icon: Bell, label: de ? "Zur Prüfung" : "За проверка", value: String(reviewCount + missingCosts), note: de ? "Dokumente und fehlende Beträge" : "Документи и липсващи суми" }].map(({ icon: Icon, label, value, note }) => <article key={label} className="rounded-md border border-border bg-card p-4 shadow-none"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-md bg-primary/5 text-primary"><Icon className="size-5" /></span><p className="text-sm font-medium text-muted-foreground">{label}</p></div><p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></article>)}
       </section>
 
+      <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} />
       <WorkplaceActionCenter firstName={firstName} nextAction={nextAction} reviewCount={reviewCount} documentCount={documents.length} contractCount={contracts.length} reminderCount={reminders.length} />
       <MissingInformationInterviewer questions={questions} />
       <DocumentAnalyzer initialDocuments={documents} />

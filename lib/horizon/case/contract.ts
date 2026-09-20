@@ -137,3 +137,29 @@ export type MissingInformation = {
   unconfirmedCriticalFactKeys: string[]
   complete: boolean
 }
+
+/**
+ * The `cases.intent` CHECK vocabulary, mirroring the baseline migration.
+ *
+ * `cases.intent` is pre-existing and column-level granted, so every module that
+ * writes it must use one of these literals. Declared here next to the module
+ * vocabulary so callers have one place to check against; the `CaseIntent` type
+ * in the generated database types remains the compile-time source of truth.
+ */
+export const CASE_INTENTS = [
+  "explanation",
+  "reply",
+  "complaint",
+  "application",
+  "objection",
+  "cancellation",
+  "document_request",
+  "reminder",
+  "free_email",
+] as const
+
+export type CaseIntentValue = (typeof CASE_INTENTS)[number]
+
+export function isCaseIntent(value: unknown): value is CaseIntentValue {
+  return typeof value === "string" && (CASE_INTENTS as readonly string[]).includes(value)
+}
