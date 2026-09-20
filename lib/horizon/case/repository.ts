@@ -23,6 +23,11 @@ import {
 import { buildApprovalPayload, computeContentHash, isApprovalValid } from "./approval"
 import { resolveCaseModule } from "./module"
 import { deriveMissingInformation } from "./missing-info"
+import {
+  normalizeTextIntake,
+  textIntakeAuditMetadata,
+  type TextIntakeKind,
+} from "../intake/text"
 
 type Db = Database["public"]
 type CaseRow = Db["Tables"]["cases"]["Row"]
@@ -379,6 +384,49 @@ export class CaseEngineRepository {
       .single()
     if (error) return fail(error.message)
     return ok(mapMessage(data))
+  }
+
+  /**
+   * P6 text intake: stores pasted text or email content verbatim.
+   *
+   * Persisted as a `user`-role message on the case spine rather than as a
+   * `source_documents` row, because that table's `mime` CHECK admits only
+   * PDF/JPEG/PNG and there is no file to store. The text is stored unchanged —
+   * nothing is extracted from it here — and the append-only audit trail records
+   * the input type, length and content hash.
+   *
+   * A `document`-sourced fact requires document_id, page_no and evidence (DB
+   * CHECK), so text-derived facts are `user`-sourced and carry no page number.
+   */
+  async addTextIntake(
+    caseId: string,
+    input: { text: string; kind: TextIntakeKind; locale: string },
+  ): Promise<RepoResult<CaseMessage>> {
+    const owned = await this.getMine(caseId)
+    if (owned.error || !owned.data) return fail(owned.error ?? "Case not found")
+
+    const normalized = normalizeTextIntake(input.text, input.kind)
+    if (!normalized.ok) return fail(`Text intake rejected: ${normalized.reason}`)
+
+    const message = await this.addMessage(caseId, {
+      role: "user",
+      locale: input.locale,
+      content: normalized.value.text,
+    })
+    if (message.error || !message.data) return fail(message.error ?? "Text intake failed")
+
+    const sha256 = await computeContentHash(normalized.value.text)
+    const audited = await this.appendAudit(caseId, "text_intake_added", {
+      ...textIntakeAuditMetadata({
+        kind: normalized.value.kind,
+        characterCount: normalized.value.characterCount,
+        sha256,
+      }),
+      message_id: message.data.id,
+    })
+    if (audited.error) return fail(audited.error)
+
+    return ok(message.data)
   }
 
   async listMessages(caseId: string): Promise<RepoResult<CaseMessage[]>> {

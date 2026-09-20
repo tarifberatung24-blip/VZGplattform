@@ -1,6 +1,6 @@
 "use client"
 
-import { useLanguage } from "@/lib/i18n/language-context"
+import { TextIntakeForm } from "@/components/guide/text-intake-form"
 import type {
   CaseAuditEvent,
   CaseDraft,
@@ -12,6 +12,7 @@ import type {
 
 export type CaseWorkspaceProps = {
   caseId: string
+  locale: string
   documents: readonly CaseSourceDocument[]
   facts: readonly ExtractedFact[]
   drafts: readonly CaseDraft[]
@@ -49,13 +50,16 @@ function Panel({
 }
 
 /**
- * Read-only view of the canonical case spine.
+ * Read-only view of the canonical case spine, plus the P6 text intake control.
  *
- * Mutating controls (upload, confirm, ask, draft, approve) are added by the
- * phases that implement them. Nothing here simulates an action it cannot
- * actually perform, so the surface never implies progress that did not happen.
+ * Mutating controls for later phases (upload, confirm, ask, draft, approve) are
+ * added by the phases that implement them. Nothing here simulates an action it
+ * cannot actually perform, so the surface never implies progress that did not
+ * happen.
  */
 export function CaseWorkspace({
+  caseId,
+  locale,
   documents,
   facts,
   drafts,
@@ -63,11 +67,11 @@ export function CaseWorkspace({
   missing,
   audit,
 }: CaseWorkspaceProps) {
-  const { locale } = useLanguage()
   const de = locale === "de"
 
   const copy = de
     ? {
+        intake: "Text aufnehmen",
         documents: "Dokumente",
         facts: "Fakten",
         drafts: "Entwürfe",
@@ -86,6 +90,7 @@ export function CaseWorkspace({
         noEvidence: "Kein Belegtext",
       }
     : {
+        intake: "Въвеждане на текст",
         documents: "Документи",
         facts: "Факти",
         drafts: "Чернови",
@@ -106,6 +111,10 @@ export function CaseWorkspace({
 
   return (
     <div className="mt-6 grid gap-4 lg:grid-cols-2">
+      <Panel title={copy.intake} empty={copy.none}>
+        <TextIntakeForm caseId={caseId} locale={locale} />
+      </Panel>
+
       <Panel title={copy.missing} empty={copy.missingNone}>
         {missing && !missing.complete ? (
           <div className="space-y-2">

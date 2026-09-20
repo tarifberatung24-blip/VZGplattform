@@ -16,6 +16,7 @@ const isolationTest = read("supabase/tests/rls/horizon_case_engine_isolation.sql
 const repository = read("lib/horizon/case/repository.ts")
 
 const reconciliationMigrations = [auditReconcile, rlsReconcile, draftFix]
+const horizonMigrations = [engineMigration, ...reconciliationMigrations]
 
 /**
  * Strips `--` line comments so security assertions test executable SQL rather
@@ -287,5 +288,51 @@ describe("isolation test covers every canonical table", () => {
     const blocks = isolationTest.split(/do\s*\$\$/).slice(1)
     const blocksUsingFound = blocks.filter((block) => /if not found/.test(block.split("$$;")[0]))
     expect(blocksUsingFound).toHaveLength(1)
+  })
+})
+
+describe("P6 text intake stays non-destructive", () => {
+  const intake = read("lib/horizon/intake/text.ts")
+  const repositorySource = read("lib/horizon/case/repository.ts")
+
+  it("admits text intake without dropping a database constraint", () => {
+    // Text intake has no file to store, and `source_documents.mime` admits only
+    // PDF/JPEG/PNG. Widening that CHECK would require dropping a constraint, so
+    // the decision is to persist text on the message spine instead. A future
+    // constraint drop is a schema change needing explicit owner authorization
+    // and must not arrive silently inside a feature commit.
+    for (const sql of horizonMigrations) {
+      // Comments may quote the forbidden pattern to explain the decision, so the
+      // assertion runs against executable SQL only.
+      const executable = stripSqlComments(sql).toLowerCase()
+      expect(executable).not.toContain("drop constraint")
+      expect(executable).not.toMatch(/alter column .* drop/)
+    }
+    expect(intake).toContain("case_messages")
+  })
+
+  it("persists the supplied text instead of deriving facts from prose", () => {
+    // Intake returns only { text, kind, characterCount }. It must not surface a
+    // parsed date, amount or recipient, because guessing those from prose is
+    // inventing facts.
+    expect(intake).not.toContain("ExtractedFact")
+    expect(intake).not.toContain("NewFactInput")
+    expect(intake).not.toMatch(/new Date\(/)
+    expect(intake).not.toMatch(/parseFloat|parseInt|Number\(/)
+    // No date-like or amount-like pattern is matched out of the text.
+    expect(intake).not.toMatch(/\\d\{2\}\.\\d\{2\}\.\\d\{4\}/)
+  })
+
+  it("bounds intake length to the stored column constraint", () => {
+    expect(intake).toContain("TEXT_INTAKE_MAX_LENGTH = 30000")
+    expect(spineMigration).toContain("check(length(content) between 1 and 30000)")
+  })
+
+  it("routes text intake through the owner-scoped case spine, not a service client", () => {
+    expect(repositorySource).toContain("async addTextIntake(")
+    expect(repositorySource).toContain("normalizeTextIntake(")
+    const intakeMethod = repositorySource.split("async addTextIntake(")[1].split("async listMessages(")[0]
+    expect(intakeMethod).toContain("getMine(caseId)")
+    expect(intakeMethod).not.toContain("createAdminClient")
   })
 })
