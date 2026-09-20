@@ -42,8 +42,8 @@ after a module meets the full DONE definition.
 | P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
 | P1 | PUBLIC LAYER 0 | IMPLEMENTATION VERIFIED — OWNER/LEGAL REVIEW PENDING | NO | YES |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | IMPLEMENTATION VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
-| P3 | HORIZON GUIDE | NOT_STARTED | NO | YES |
-| P4 | HORIZON HOME + FIVE ENTRY MODULES | AUDITED | NO | YES |
+| P3 | HORIZON GUIDE | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
+| P4 | HORIZON HOME + FIVE ENTRY MODULES | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES ACCEPTED, RUNTIME VERIFICATION PENDING | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
@@ -178,18 +178,27 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Persistent HORIZON Guide
 - **TARGET ROUTES:** `/{locale}/guide` with task tree: understand a document, reply to an
   authority, fill an official form, cancel a contract, I do not know what to do.
-- **CURRENT STATUS:** NOT_STARTED
-- **CURRENT IMPLEMENTATION:** none. A repository-wide search found no `/{locale}/guide` route
-  and no guide component. Closest neighbours are `/{locale}/how-it-works` (marketing explainer)
-  and `/{locale}/office` (KintexBG prototype), neither of which is the guide.
+- **CURRENT STATUS:** IMPLEMENTATION ADDED — 33 unit tests pass; runtime verification pending.
+  (Earlier ledger revisions recorded this as NOT_STARTED; that was stale. The route, task tree and
+  case-engine wiring exist and build.)
+- **CURRENT IMPLEMENTATION:** `/{locale}/guide` (`app/[locale]/guide/page.tsx`) renders
+  `components/guide/guide-chooser.tsx`: the five task-shaped entries (understand a document,
+  reply to an authority, fill an official form, cancel a contract, I do not know what to do)
+  plus the user's open cases, with empty, error and loading states and localized copy.
+  `lib/horizon/guide/intents.ts` is the single vocabulary for intents, icons, module mapping,
+  `cases.intent` mapping and case titles; `lib/horizon/guide/actions.ts` creates a canonical
+  case through the P5 engine; `lib/horizon/guide/guard.ts` centralises auth and locale
+  normalisation and redirects to login rather than throwing when Supabase is unconfigured.
+  `components/layout/user-sidebar.tsx` links the guide permanently, so it stays reachable after
+  onboarding. `unsure` routes to `general` rather than guessing a department.
 - **REUSE:** `how-it-works` layout patterns, `module-page`, `guided-wizard` component,
   case intent vocabulary in `lib/office/supabase/database.ts`
   (`explanation`, `reply`, `complaint`, `application`, `objection`, `cancellation`,
   `document_request`, `reminder`, `free_email`).
-- **MISSING:** the entire guide route, task tree, entry points from header/dashboard,
-  and routing from a guide task into a case.
+- **MISSING:** runtime verification with an authenticated session; no route-level test exercising
+  the chooser end to end.
 - **DEPENDENCIES:** P1 (entry points), P2 (authenticated context), P5 (case creation).
-- **BLOCKERS:** depends on the P5 case model decision.
+- **BLOCKERS:** none known; runtime verification needs a configured Supabase instance.
 - **DONE CRITERIA:** guide is permanently accessible after onboarding; all five task entries
   work; each entry routes into the shared case engine; localized; loading/error/empty states;
   tests, build, and real verification pass.
@@ -203,22 +212,31 @@ after a module meets the full DONE definition.
 - **SYSTEM:** HORIZON Home and the five entry modules
 - **TARGET ROUTES:** `/{locale}/dashboard` with modules Agentur für Arbeit, Jobcenter,
   Kündigung, Steuererklärung, Unterlagen erklären, plus My Cases, Profile, Settings/Security.
-- **CURRENT STATUS:** AUDITED
-- **CURRENT IMPLEMENTATION:** `/{locale}/dashboard` renders `VzgDashboard` and reads
-  `profiles`, `contracts`, `documents`, `deadlines` via `ensureHousehold`.
+- **CURRENT STATUS:** IMPLEMENTATION ADDED — 12 registry unit tests pass; runtime verification
+  pending. (Earlier ledger revisions recorded this as AUDITED; the entries and both
+  `/{locale}/dashboard` and the case flows now exist and build.)
+- **CURRENT IMPLEMENTATION:** `/{locale}/dashboard` renders `VzgDashboard`, which reads
+  `profiles`, `contracts`, `documents`, `deadlines` via `ensureHousehold` and composes
+  `components/horizon/horizon-home.tsx`. That surface presents exactly the five HORIZON entry
+  modules (Agentur für Arbeit, Jobcenter, Kündigung, Steuererklärung, Unterlagen erklären) from
+  `lib/horizon/modules/registry.ts`, each a real form submit through
+  `lib/horizon/modules/actions.ts` into the shared P5 case engine — the same engine and the same
+  destination as the guide, so the two surfaces cannot drift. Per-module case counts are resolved
+  through `resolveCaseModule`, so pre-P5 rows are attributed by legacy intent rather than dropped.
+  Secondary destinations are My Cases (`/guide`), Documents, Profile and Security, all existing
+  pages. Module labels come from the guide vocabulary, so the two surfaces cannot disagree.
   Supporting components: `workplace-action-center`, `missing-information-interviewer`,
-  `smart-dashboard-preview`, `personal-dashboard`, `dashboard-workspace`.
-  Module navigation is defined in `lib/kintex-navigation.ts` (10 modules, several flagged
-  `planned`: insurance, credits, deadlines, opportunities).
-- **REUSE:** `VzgDashboard`, `workplace-action-center`, `missing-information-interviewer`,
-  `dashboard-layout`, `user-sidebar`, `module-page`, `module-workspaces`,
-  `smartDashboardRules`.
-- **MISSING:** none of the five HORIZON modules (Agentur für Arbeit, Jobcenter, Kündigung,
-  Steuererklärung, Unterlagen erklären) exists as a dashboard entry;
-  no My Cases surface; no consolidated Settings/Security entry from the dashboard;
-  dashboard still uses KintexBG-era navigation labels.
+  `smart-dashboard-preview`, `dashboard-workspace`.
+- **REUSE:** `VzgDashboard`, `HorizonHome`, `workplace-action-center`,
+  `missing-information-interviewer`, `dashboard-layout`, `user-sidebar`, `module-page`,
+  `module-workspaces`, `smartDashboardRules`.
+- **MISSING:** runtime verification with an authenticated session; the dashboard still renders
+  legacy KintexBG-era cards alongside the HORIZON module entry, and
+  `lib/kintex-navigation.ts` retains 10 modules (several flagged `planned`) that are not part of
+  the HORIZON five; no route-level test of the dashboard.
 - **DEPENDENCIES:** P0, P2 (onboarding), P5 (case engine).
-- **BLOCKERS:** module entry points cannot be finalized before the P5 case model is fixed.
+- **BLOCKERS:** none known; runtime verification needs a configured Supabase instance. Removing
+  the legacy cards is a visual/behaviour change and is out of scope until the owner authorizes it.
 - **DONE CRITERIA:** dashboard presents exactly the five user modules plus My Cases, Profile,
   and Settings/Security; each entry is functional and routes into a real flow; loading, error,
   and empty states complete; localized; tests, build, and real verification pass.
