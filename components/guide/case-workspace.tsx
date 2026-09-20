@@ -4,6 +4,7 @@ import { TextIntakeForm } from "@/components/guide/text-intake-form"
 import { DocumentIntakeForm } from "@/components/guide/document-intake-form"
 import { CaseAssistantPanel } from "@/components/guide/case-assistant-panel"
 import { DraftReviewPanel } from "@/components/guide/draft-review-panel"
+import { OfficialFormPanel } from "@/components/guide/official-form-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
 import type {
@@ -87,6 +88,7 @@ export function CaseWorkspace({
         facts: "Fakten",
         drafts: "Entwürfe",
         draftReview: "Entwurf prüfen und freigeben",
+        officialForm: "Amtliches Formular",
         tasks: "Aufgaben",
         missing: "Fehlende Angaben",
         audit: "Verlauf",
@@ -108,6 +110,7 @@ export function CaseWorkspace({
         facts: "Факти",
         drafts: "Чернови",
         draftReview: "Преглед и одобрение на чернова",
+        officialForm: "Официален формуляр",
         tasks: "Задачи",
         missing: "Липсващи данни",
         audit: "История",
@@ -195,6 +198,10 @@ export function CaseWorkspace({
             </p>
           </div>
         ))}
+      </Panel>
+
+      <Panel title={copy.officialForm} empty={copy.none}>
+        <OfficialFormPanel caseId={caseId} locale={locale} />
       </Panel>
 
       <Panel title={copy.draftReview} empty={copy.none}>
