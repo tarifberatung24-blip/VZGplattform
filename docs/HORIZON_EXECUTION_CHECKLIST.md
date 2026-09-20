@@ -171,8 +171,9 @@ Canonical phase status: `docs/HORIZON_BUILD_LEDGER.md`
 
 ## P9 — Official PDF Form Engine
 
-Status: IN_PROGRESS — end-to-end generation works for one verified reference form
-(Hauptvordruck ESt 1 A 2025, page 1). Breadth remains; mechanism is proven.
+Status: PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE.
+End-to-end generation works for one verified reference form (Hauptvordruck
+ESt 1 A 2025, page 1). Breadth remains; mechanism is proven. 1 of 9 mappings verified.
 
 - ✅ Source-integrity verification: the template SHA-256 is recomputed from the
   file bytes and a mismatch refuses generation
@@ -206,7 +207,7 @@ Status: IN_PROGRESS — end-to-end generation works for one verified reference f
 - ✅ **Private owner-scoped storage:** the artifact is written to the
   `source-documents` bucket under `{ownerId}/{caseId}/...`, and is removed again if
   the draft or audit write fails, so storage and records never disagree
-- ✅ 70 PDF tests (27 new overlay tests); full suite 560 pass; TSC, lint, build pass
+- ✅ 70 PDF tests (27 new overlay tests); full suite now 591 pass; TSC, lint, build pass
 - ⬜ Verified overlay mappings for the other 8 FMS templates — each needs its own
   measurement against its own hash. Populating them by guessing is prohibited
 - ⬜ Agentur fuer Arbeit and Jobcenter official templates
@@ -217,15 +218,41 @@ Status: IN_PROGRESS — end-to-end generation works for one verified reference f
 
 ## P10 — Signature Engine
 
-- Visual-signature scope
-- Cryptographic / PAdES / QES scope separated
-- Implementation/provider choice
-- Bind signature to approved document
-- Signature audit event
-- Applicable-form verification
-- Tests
-- Real verification
-- FROZEN
+Status: IN_PROGRESS — a VISUAL signature is applied end-to-end for one verified
+reference form (Hauptvordruck ESt 1 A 2025, page 2). Mechanism proven; breadth and
+the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
+
+- ✅ Visual-signature scope stated plainly in code, record and UI
+- ✅ Cryptographic / PAdES / QES scope separated — the type vocabulary holds only
+  `VISUAL`, so no caller can label the output as something stronger
+- ✅ Approach implemented for the reference template (`lib/horizon/pdf/signature-*`)
+- ✅ **Placement bound to template SHA-256 + tax year + placement version.** An
+  unverified template is refused, never estimated
+- ✅ Placement measured from the real PDF: the printed caption
+  "Datum, Unterschrift(en) …" names the area, which is empty on the page (no drawn
+  box, no image, no curve). Evidence recorded as `labelBox` + `areaBox`
+- ✅ **Bind signature to approved document:** the signed bytes must hash to the
+  manifest's recorded `outputSha256`, and the approval must still match the draft's
+  current content hash. A changed document cannot be signed under a stale approval
+- ✅ **Approved bytes never mutated** — the signature is drawn onto a copy; verified
+  by re-hashing the input after the write
+- ✅ Signature image validated by magic bytes (PNG/JPEG only); size and emptiness
+  refused; the date must be unambiguous ISO and is refused rather than guessed
+- ✅ Explicit confirmation required — an "I accept" button is never presented as a
+  signature, and the UI says it is not a qualified or advanced electronic signature
+- ✅ **Signature audit event** `pdf_signature_applied` with unsigned hash, signed
+  hash, approval content hash, placement version and page
+- ✅ Signed artifact stored privately and owner-scoped, with rollback of object and
+  row if a later write fails; the signed record is its own draft
+- ✅ **Real functional verification:** signed PDF produced from the real P9 artifact;
+  image and date extract inside the measured area; date clear of the image; the
+  pre-existing QR untouched; page count unchanged; all page-1 values preserved
+- ✅ 31 dedicated signature tests; full suite 591 pass; TSC, lint, build pass
+- ⬜ Measured signature placements for the other 8 FMS templates
+- ⬜ Owner decision: whether a legally stronger signature is required and, if so, which
+- ⬜ Multi-signatory support ("Unterschrift(en)" covers spouses; one signature drawn)
+- ⬜ Runtime/E2E verification of the signing surface (needs an authenticated session)
+- ⬜ FROZEN
 
 ## P11 — Email Connection + Send Engine
 

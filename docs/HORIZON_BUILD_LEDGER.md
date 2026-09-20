@@ -48,8 +48,8 @@ after a module meets the full DONE definition.
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES ACCEPTED, RUNTIME VERIFICATION PENDING | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | PARTIAL — REVIEW+APPROVAL SURFACE IMPLEMENTED, RUNTIME VERIFICATION PENDING | NO | YES |
-| P9 | OFFICIAL PDF FORM ENGINE | NOT_STARTED | NO | YES |
-| P10 | SIGNATURE ENGINE | NOT_STARTED | NO | YES |
+| P9 | OFFICIAL PDF FORM ENGINE | PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
+| P10 | SIGNATURE ENGINE | IN_PROGRESS — VISUAL SIGNATURE VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | NOT_STARTED | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | NOT_STARTED | NO | YES |
 | P13 | JOBCENTER | NOT_STARTED | NO | YES |
@@ -469,10 +469,11 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Official PDF form engine
 - **TARGET ROUTES:** consumed by P12, P13, P15; existing readiness endpoint `/api/steuer/pdf`;
   preparation surface inside the case workspace (`components/guide/official-form-panel.tsx`).
-- **CURRENT STATUS:** IN_PROGRESS — end-to-end generation works for one verified reference form
-  (Hauptvordruck ESt 1 A 2025, page 1). A filled artifact is produced, stored privately and
-  queued for review with full provenance. Remaining work is breadth (further verified mappings),
-  not mechanism.
+- **CURRENT STATUS:** PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE.
+  End-to-end generation works for one verified reference form (Hauptvordruck ESt 1 A 2025, page 1).
+  A filled artifact is produced, stored privately and queued for review with full provenance.
+  Remaining work is breadth (further verified mappings), not mechanism. Not DONE, not FROZEN:
+  1 of 9 mappings is verified.
 - **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
   `registry.ts` holds the 9 official FMS 2025 templates with authority, official source, form
   name, Form-ID, version, tax year, retrieval date and source SHA-256, keyed by tax year with no
@@ -515,21 +516,61 @@ after a module meets the full DONE definition.
 
 - **ID:** P10
 - **SYSTEM:** Signature engine
-- **TARGET ROUTES:** consumed by P14 and P15.
-- **CURRENT STATUS:** NOT_STARTED
-- **CURRENT IMPLEMENTATION:** none. A search for signature capabilities found only Storage
-  signed URLs (`createSignedUrl`, 300 s) and file-signature validation
-  (`FILE_INVALID_SIGNATURE`, magic-byte checks) — neither is document signing.
-- **REUSE:** the approval/hash model from P8 for binding decisions, and the audit spine.
-- **MISSING:** provider selection, applicable-form verification, signature record,
-  signature audit trail.
-- **DEPENDENCIES:** P8 (approval), P9 (document to sign).
-- **BLOCKERS:** no signature provider is selected or approved.
-  `docs/TERRA_START.md` states signing requires a separate provider choice and verification of
-  the applicable form, and that an "I accept" button must not be presented as a signature.
-- **DONE CRITERIA:** provider explicitly approved; signature applies only to approved documents;
-  signature events are recorded and auditable; an acceptance button is never presented as a
-  signature; tests, build, real verification pass.
+- **TARGET ROUTES:** consumed by P14 and P15; signing surface inside the case workspace
+  (`components/guide/signature-panel.tsx`, mounted in `components/guide/case-workspace.tsx`).
+- **CURRENT STATUS:** PARTIAL / VERIFIED FOR THE REFERENCE FORM — NOT DONE. A visual signature is
+  applied end-to-end to a real generated document for the one template whose signature area has
+  been measured (Hauptvordruck ESt 1 A 2025, page 2), producing a new signed artifact with its
+  own provenance and audit entry. The mechanism is proven; breadth and the remaining criteria
+  below are not met. This module is **NOT FROZEN** and must not be treated as complete.
+- **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
+  `signature-map.ts` holds measured signature placements bound to the template SHA-256 and tax
+  year, with the measured evidence recorded (`labelBox`, `areaBox`, identification method). It is
+  a registry separate from `overlay-map.ts` on purpose, so a template can be fillable and not yet
+  signable without implying otherwise. `signature-plan.ts` validates a signing request and
+  defines the signature type vocabulary (currently the single value `VISUAL`), the raster formats
+  (`png`, `jpeg`, detected by magic bytes) and the date formatting. `signature-writer.ts` draws
+  the image and date with `pdf-lib` onto a *copy* of the approved bytes. `signature-actions.ts`
+  runs the flow: locate the artifact from the `pdf_form_generated` audit entry, re-hash the
+  downloaded bytes, match the draft by its recorded output hash, require a current approval, sign,
+  store privately, attach, save the signed record as a draft, and audit. `manifest.ts` gains
+  `PdfSignatureRecord`, `renderSignatureBody`, `renderSignatureSubject`.
+- **REUSE:** P8 approval/hash binding (`getApprovalState`, `listApprovals`, `recordApproval`) —
+  the signature is refused unless the approval still matches the current content hash, so a
+  changed document cannot be signed under a stale approval and no historic approval row is
+  rewritten. P9 generation audit trail (`pdf_form_generated` records `storage_path`,
+  `output_sha256`, `source_sha256`) is the source of truth for what is being signed. The P6/P9
+  private-storage convention is reused for the signed artifact, including rollback of the
+  uploaded object and the attached row if a later write fails. `encoding.ts` guards the date
+  before pdf-lib measures it.
+- **MISSING:** (1) measured signature placements for the other 8 FMS templates — none are
+  populated, and an unverified template is refused rather than guessed at; (2) a legally stronger
+  signature (qualified/advanced electronic, or a cryptographic/PAdES signature) — not attempted,
+  not approved, and out of scope for a visual signature; (3) multi-signatory support (the
+  reference area is captioned "Unterschrift(en)", i.e. plural for spouses, and only a single
+  signature is drawn); (4) signature of documents that are not engine-generated PDFs.
+- **DEPENDENCIES:** P8 (satisfied, reused), P9 (satisfied for the reference form), `pdf-lib`
+  1.17.1 (owner-approved; `embedPng`/`embedJpg` used, no new dependency).
+- **BLOCKERS:** none technical for the reference form. The remaining DONE criteria below depend
+  on owner decisions, not on implementation.
+- **DONE CRITERIA:** provider/approach explicitly approved; a signature applies only to a
+  currently approved document; the signed artifact is a new artifact and the approved bytes are
+  never mutated; unsigned and signed hashes and the approval content hash are recorded and
+  auditable; an unverified placement is refused rather than estimated; the UI states plainly that
+  this is not a qualified or advanced electronic signature; an acceptance button is never
+  presented as a signature; tests, build and real functional verification pass.
+  **Met and verified for the reference form. The legal-strength question and the multi-signatory
+  question remain open owner decisions, so P10 is NOT DONE.**
+- **VERIFICATION RECORDED (reference form, 2026-09-19):** a real signed PDF was produced from the
+  real P9 artifact. Unsigned SHA-256 `dc122a91…`, signed SHA-256 `45fe3737…` (distinct). The
+  applied signature image and the drawn date both extract inside the measured area
+  (x 39.17-535.71, top 688.08-719.64); the date lands at top 709.50 in the left column
+  (x 57.18-99.70), clear of the image; the pre-existing QR image at top 449.40 is untouched. Page
+  count stays at 2, and every unsigned value on page 1 (`Müller-Öztürk`, `Anna`, `Berlin`) is
+  still present after signing. The writer leaves the input bytes unchanged (verified by hashing
+  the input after the write). 31 dedicated tests pass.
+- **NOT A CRYPTOGRAPHIC SIGNATURE:** the hash chain proves *what* was signed, not *who* signed in
+  any legal sense. No certificate, no PAdES, no cryptographic binding to the signer.
 - **FROZEN:** NO
 
 ---

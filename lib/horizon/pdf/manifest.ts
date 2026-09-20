@@ -124,3 +124,69 @@ export function renderManifestBody(manifest: PdfGenerationManifest): string {
 export function renderManifestSubject(manifest: PdfGenerationManifest): string {
   return `Amtliches Formular ${manifest.formName}${manifest.formId ? ` (${manifest.formId})` : ""}`
 }
+
+/**
+ * P10 — provenance for a visually signed artifact.
+ *
+ * The signed document is a new artifact, so it needs its own record rather than
+ * an extra column on the unsigned one. The unsigned hash is carried in
+ * deliberately: it is what ties this artifact to the exact bytes that were
+ * approved, and it is the value a later step re-checks.
+ *
+ * No cryptographic claim is made anywhere here. `signatureType` is `VISUAL`,
+ * which is the only value this engine can produce.
+ */
+export type PdfSignatureRecord = {
+  signatureType: "VISUAL"
+  caseId: string
+  /** The draft id of the generated (unsigned) document this signature applies to. */
+  sourceDocumentId: string
+  unsignedSha256: string
+  signedSha256: string
+  /** The content hash the approval was bound to when signing was allowed. */
+  approvalContentHash: string
+  signerId: string
+  signedAt: string
+  page: number
+  placementVersion: string
+  templateId: string
+  templateSourceSha256: string
+}
+
+/**
+ * Rendering of the signed artifact's record, used as the body of its own draft.
+ *
+ * The order is fixed and it is *not* re-sorted: this body is what the user
+ * reviews before release, so the hash chain reads top to bottom in the order it
+ * is verified. The unsigned document's own approved body text is appended
+ * verbatim — passed in as the exact text that was approved, not re-rendered from
+ * a parsed manifest, so there is nothing to re-parse and no risk of the
+ * reproduction drifting from what the approval actually covers.
+ */
+export function renderSignatureBody(
+  record: PdfSignatureRecord,
+  unsignedBody: string,
+): string {
+  return [
+    "Signatur (VISUAL)",
+    "Keine qualifizierte oder fortgeschrittene elektronische Signatur und keine kryptografische Signatur.",
+    `Vorgang: ${record.caseId}`,
+    `Dokument (unveröffentlichte Fassung): ${record.sourceDocumentId}`,
+    `Unsignierte PDF-SHA-256: ${record.unsignedSha256}`,
+    `Signierte PDF-SHA-256: ${record.signedSha256}`,
+    `Freigabe-Inhaltshash: ${record.approvalContentHash}`,
+    `Unterzeichner: ${record.signerId}`,
+    `Zeitpunkt: ${record.signedAt}`,
+    `Seite: ${record.page}`,
+    `Platzierungsversion: ${record.placementVersion}`,
+    `Vorlage: ${record.templateId}`,
+    `Vorlagen-SHA-256: ${record.templateSourceSha256}`,
+    "",
+    "--- Unveröffentlichte Fassung ---",
+    unsignedBody,
+  ].join("\n")
+}
+
+export function renderSignatureSubject(formName: string): string {
+  return `Signiertes amtliches Formular ${formName} (VISUAL)`
+}
