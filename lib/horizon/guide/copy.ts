@@ -126,6 +126,27 @@ export function getGuideCopy(locale: Locale): GuideCopy {
   return copies[locale] ?? copies.bg
 }
 
+/**
+ * "not started" marker and the counted case label.
+ *
+ * The count is rendered as a numeric badge beside an inflected noun, never as
+ * a slash-joined pair: Bulgarian uses the counted form "случая" for any count
+ * other than one, while German inflects the noun itself (Vorgang/Vorgänge).
+ */
+export function caseCountNoun(locale: Locale, count: number): string {
+  if (locale === "de") return count === 1 ? "Vorgang" : "Vorgänge"
+  return count === 1 ? "случай" : "случая"
+}
+
+export function notStartedLabel(locale: Locale): string {
+  return locale === "de" ? "Noch nicht begonnen" : "Още не е започнат"
+}
+
+export function caseCountLabel(locale: Locale, count: number): string {
+  if (count <= 0) return notStartedLabel(locale)
+  return `${count} ${caseCountNoun(locale, count)}`
+}
+
 export function guideModuleLabel(locale: Locale, module: string): string {
   return (guideModules[locale] ?? guideModules.bg)[module] ?? module
 }

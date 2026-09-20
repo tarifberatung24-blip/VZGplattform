@@ -12,7 +12,7 @@ import {
   isGuideIntent,
   isKnownLegacyIntent,
 } from "./intents"
-import { getGuideCopy, guideModules } from "./copy"
+import { caseCountLabel, caseCountNoun, getGuideCopy, guideModules, notStartedLabel } from "./copy"
 
 const locales = ["bg", "de"] as const
 
@@ -138,6 +138,40 @@ describe("guide intent vocabulary does not collide with the lifecycle", () => {
   it("keeps case titles out of the status vocabulary", () => {
     for (const title of Object.values(guideIntentCaseTitle)) {
       expect(LEGACY_CASE_STATUSES as readonly string[]).not.toContain(title)
+    }
+  })
+})
+
+describe("case count labels", () => {
+  it("inflects the noun per locale instead of joining both forms", () => {
+    expect(caseCountLabel("de", 1)).toBe("1 Vorgang")
+    expect(caseCountLabel("de", 3)).toBe("3 Vorgänge")
+    expect(caseCountLabel("bg", 1)).toBe("1 случай")
+    expect(caseCountLabel("bg", 3)).toBe("3 случая")
+  })
+
+  it("never renders a slash-joined plural placeholder", () => {
+    for (const locale of locales) {
+      for (const count of [0, 1, 2, 7]) {
+        expect(caseCountLabel(locale, count)).not.toContain("/")
+      }
+    }
+  })
+
+  it("shows the not-started marker at zero and below, in locale", () => {
+    for (const locale of locales) {
+      expect(caseCountLabel(locale, 0)).toBe(notStartedLabel(locale))
+      expect(caseCountLabel(locale, -1)).toBe(notStartedLabel(locale))
+      expect(notStartedLabel(locale).length).toBeGreaterThan(0)
+    }
+    expect(notStartedLabel("de")).not.toBe(notStartedLabel("bg"))
+  })
+
+  it("keeps the badge noun free of a leading digit so it renders beside the badge", () => {
+    for (const locale of locales) {
+      for (const count of [1, 5]) {
+        expect(caseCountNoun(locale, count)).not.toMatch(/\d/)
+      }
     }
   })
 })

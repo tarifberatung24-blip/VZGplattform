@@ -14,7 +14,12 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { homeModuleIcon, homeModules, homeShortcuts } from "@/lib/horizon/modules/registry"
 import { startModuleCase } from "@/lib/horizon/modules/actions"
-import { getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
+import {
+  caseCountNoun,
+  getGuideCopy,
+  guideModuleLabel,
+  notStartedLabel,
+} from "@/lib/horizon/guide/copy"
 
 const icons: Record<string, LucideIcon> = { Building2, Briefcase, FileX2, Receipt, FileSearch }
 
@@ -97,14 +102,17 @@ export function HorizonHome({
                 label={guideModuleLabel(locale, definition.module)}
                 pendingLabel={copy.starting}
               />
-              <p className="mt-1 px-1 text-[11px] text-muted-foreground">
-                {count > 0
-                  ? de
-                    ? `${count} Vorgang/Vorgänge`
-                    : `${count} случай/случая`
-                  : de
-                    ? "Noch nicht begonnen"
-                    : "Още не е започнат"}
+              <p className="mt-1 flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground">
+                {count > 0 ? (
+                  <>
+                    <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-foreground">
+                      {count}
+                    </span>
+                    <span>{caseCountNoun(locale, count)}</span>
+                  </>
+                ) : (
+                  <span>{notStartedLabel(locale)}</span>
+                )}
               </p>
             </form>
           )
