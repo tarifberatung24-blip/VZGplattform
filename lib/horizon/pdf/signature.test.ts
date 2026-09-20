@@ -15,6 +15,7 @@ import {
   signaturePlacementForTemplate,
 } from "./signature-map"
 import {
+  readJointAssessment,
   detectSignatureImageFormat,
   formatSignatureDate,
   planSignature,
@@ -182,6 +183,8 @@ describe("an unapproved or stale document cannot be signed", () => {
     manifestContentHash: "a".repeat(64),
     dateIso: "2026-03-04",
     confirmed: true,
+    jointAssessment: false,
+    jointAssessmentUnconfirmed: false,
   }
 
   it("accepts a fully consistent request", () => {
@@ -281,6 +284,8 @@ describe("writing a signature onto the real generated document", () => {
       manifestContentHash: "f".repeat(64),
       dateIso: "2026-03-04",
       confirmed: true,
+      jointAssessment: false,
+      jointAssessmentUnconfirmed: false,
     })
     expect(planned.ok).toBe(true)
     if (!planned.ok) return
@@ -309,6 +314,8 @@ describe("writing a signature onto the real generated document", () => {
       manifestContentHash: "f".repeat(64),
       dateIso: "2026-03-04",
       confirmed: true,
+      jointAssessment: false,
+      jointAssessmentUnconfirmed: false,
     })
     if (!planned.ok) throw new Error("plan failed")
     const written = await applyVisualSignature({ unsignedBytes: unsigned, plan: planned.plan, imageBytes: PNG_1X1 })
@@ -333,6 +340,8 @@ describe("writing a signature onto the real generated document", () => {
       manifestContentHash: "f".repeat(64),
       dateIso: "2026-03-04",
       confirmed: true,
+      jointAssessment: false,
+      jointAssessmentUnconfirmed: false,
     })
     if (!planned.ok) throw new Error("plan failed")
     const written = await applyVisualSignature({ unsignedBytes: unsigned, plan: planned.plan, imageBytes: PNG_1X1 })
@@ -388,5 +397,95 @@ describe("the signature record states plainly what kind of signature it is", () 
 
   it("labels the subject as VISUAL", () => {
     expect(renderSignatureSubject("Hauptvordruck ESt 1 A")).toContain("VISUAL")
+  })
+})
+describe("multi-signatory refusal", () => {
+  const base = {
+    manifest: {
+      sourceSha256: template.sourceSha256,
+      outputSha256: "a".repeat(64),
+      caseId: "case-1",
+    },
+    expectedCaseId: "case-1",
+    unsignedSha256: "a".repeat(64),
+    templateSourceSha256: template.sourceSha256,
+    placement,
+    imageBytes: PNG_1X1,
+    approvedHash: "a".repeat(64),
+    manifestContentHash: "a".repeat(64),
+    dateIso: "2026-03-04",
+    confirmed: true,
+    jointAssessment: false,
+    jointAssessmentUnconfirmed: false,
+  }
+
+  it("the reference form is recorded as possibly requiring two signatures", () => {
+    expect(placement.signatoryRule.max).toBe(2)
+    expect(placement.signatoryRule.basis).toContain("Ehegatten")
+  })
+
+  it("refuses when the form can require two signatures and a joint assessment is confirmed", () => {
+    const planned = planSignature({ ...base, jointAssessment: true })
+    expect(planned.ok).toBe(false)
+    if (planned.ok) throw new Error("expected refusal")
+    expect(planned.code).toBe("multiple_signatures_required")
+  })
+
+  it("refuses when a joint-assessment fact exists but is unconfirmed", () => {
+    // Neither answer is safe: assuming single may under-sign, assuming joint
+    // blocks a valid single signature. The user must resolve it.
+    const planned = planSignature({ ...base, jointAssessmentUnconfirmed: true })
+    expect(planned.ok).toBe(false)
+    if (planned.ok) throw new Error("expected refusal")
+    expect(planned.code).toBe("joint_assessment_unconfirmed")
+  })
+
+  it("still allows a single signature when no joint assessment is evidenced", () => {
+    const planned = planSignature(base)
+    expect(planned.ok).toBe(true)
+  })
+})
+
+describe("readJointAssessment", () => {
+  const fact = (key: string, value: string, confirmed: boolean) => ({
+    key,
+    value,
+    confirmedAt: confirmed ? "2026-03-01T00:00:00.000Z" : null,
+  })
+
+  it("treats no recognised fact as not joint and not unconfirmed", () => {
+    expect(readJointAssessment([fact("city", "Berlin", true)])).toEqual({
+      joint: false,
+      unconfirmed: false,
+    })
+  })
+
+  it("reads a confirmed affirmative fact as joint", () => {
+    expect(readJointAssessment([fact("joint_assessment", "true", true)])).toEqual({
+      joint: true,
+      unconfirmed: false,
+    })
+  })
+
+  it("reads a confirmed negative fact as deliberately not joint", () => {
+    expect(readJointAssessment([fact("joint_assessment", "false", true)])).toEqual({
+      joint: false,
+      unconfirmed: false,
+    })
+  })
+
+  it("reports an unconfirmed recognised fact as unconfirmed rather than guessing", () => {
+    expect(readJointAssessment([fact("joint_assessment", "true", false)])).toEqual({
+      joint: false,
+      unconfirmed: true,
+    })
+  })
+
+  it("does not infer joint status from free-text marital wording", () => {
+    // "verheiratet" is not a recognised key; the engine must not infer from it.
+    expect(readJointAssessment([fact("marital_status", "verheiratet", true)])).toEqual({
+      joint: false,
+      unconfirmed: false,
+    })
   })
 })

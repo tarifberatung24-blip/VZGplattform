@@ -60,6 +60,10 @@ export function SignaturePanel({
         document_not_found: "Kein erzeugtes Dokument gefunden, das signiert werden könnte.",
         case_not_found: "Vorgang nicht gefunden.",
         storage_unavailable: "Der private Speicher ist nicht verfügbar. Es wurde nichts gespeichert.",
+        multiple_signatures_required:
+          "Dieses Formular muss von beiden Ehegatten / Lebenspartnern unterschrieben werden. Eine einzelne Signatur würde das Dokument unvollständig lassen, deshalb wird nichts angewendet.",
+        joint_assessment_unconfirmed:
+          "Ob eine gemeinsame Veranlagung vorliegt, ist nicht bestätigt. Bitte die Angabe bestätigen oder entfernen — es wird nicht geraten.",
         manual: "Amtliches Formular öffnen",
       }
     : {
@@ -90,6 +94,10 @@ export function SignaturePanel({
         document_not_found: "Няма намерен създаден документ, който да бъде подписан.",
         case_not_found: "Случаят не е намерен.",
         storage_unavailable: "Частното хранилище не е достъпно. Нищо не е запазено.",
+        multiple_signatures_required:
+          "Този формуляр трябва да бъде подписан от двамата съпрузи / партньори. Един подпис би оставил документа непълен, затова нищо не се прилага.",
+        joint_assessment_unconfirmed:
+          "Не е потвърдено дали има съвместно данъчно оценяване. Моля, потвърди или премахни данните — не се нагажда приблизително.",
         manual: "Отвори официалния формуляр",
       }
 

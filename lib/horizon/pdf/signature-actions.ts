@@ -9,7 +9,12 @@ import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { findTemplateById } from "./registry"
 import { computeSha256 } from "./source"
 import { renderSignatureBody, renderSignatureSubject } from "./manifest"
-import { detectSignatureImageFormat, planSignature, SIGNATURE_IMAGE_MAX_BYTES } from "./signature-plan"
+import {
+  detectSignatureImageFormat,
+  planSignature,
+  readJointAssessment,
+  SIGNATURE_IMAGE_MAX_BYTES,
+} from "./signature-plan"
 import { signaturePlacementForTemplate } from "./signature-map"
 import { applyVisualSignature } from "./signature-writer"
 
@@ -26,6 +31,8 @@ export type SignatureState = {
     | "image_empty"
     | "date_required"
     | "not_confirmed"
+    | "multiple_signatures_required"
+    | "joint_assessment_unconfirmed"
     | "case_not_found"
     | "storage_unavailable"
     | "failed"
@@ -193,6 +200,18 @@ export async function signGeneratedDocument(
     return { status: "document_hash_mismatch", detail: null, manualPath: null }
   }
 
+  // Joint-assessment intent is read from the case's own facts, so a form that can
+  // require two signatures is never satisfied with one drawn signature.
+  const caseFacts = await engine.repository.listFacts(rawCaseId)
+  if (caseFacts.error) return { status: "failed", detail: caseFacts.error, manualPath: null }
+  const joint = readJointAssessment(
+    (caseFacts.data ?? []).map((fact) => ({
+      key: fact.key,
+      value: fact.value,
+      confirmedAt: fact.confirmedAt,
+    })),
+  )
+
   const imageBytes = new Uint8Array(await image.arrayBuffer())
   if (!detectSignatureImageFormat(imageBytes)) {
     return { status: "unsupported_image_format", detail: null, manualPath: null }
@@ -214,6 +233,8 @@ export async function signGeneratedDocument(
     manifestContentHash: sourceDraft.contentHash,
     dateIso: rawDate,
     confirmed: true,
+    jointAssessment: joint.joint,
+    jointAssessmentUnconfirmed: joint.unconfirmed,
   })
   if (!planned.ok) {
     const status: SignatureState["status"] =
@@ -235,7 +256,11 @@ export async function signGeneratedDocument(
                       ? "unsupported_image_format"
                       : planned.code === "date_unsupported"
                         ? "date_required"
-                        : "failed"
+                        : planned.code === "multiple_signatures_required"
+                          ? "multiple_signatures_required"
+                          : planned.code === "joint_assessment_unconfirmed"
+                            ? "joint_assessment_unconfirmed"
+                            : "failed"
     return { status, detail: planned.detail, manualPath: null }
   }
 

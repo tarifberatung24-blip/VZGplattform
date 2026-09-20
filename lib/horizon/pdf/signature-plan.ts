@@ -56,6 +56,8 @@ export type SignaturePlanFailure =
   | "case_mismatch"
   | "date_unsupported"
   | "not_confirmed"
+  | "multiple_signatures_required"
+  | "joint_assessment_unconfirmed"
 
 export type SignaturePlan = {
   kind: SignatureType
@@ -117,6 +119,48 @@ export function formatSignatureDate(iso: string): string | null {
 }
 
 /**
+ * Fact keys the engine recognises as establishing a joint assessment (a jointly
+ * assessed couple, where German tax forms require both spouses to sign).
+ *
+ * Deliberately a whitelist of explicit keys rather than a heuristic over marital
+ * status wording: the engine must not infer a legal filing status from free text,
+ * and an unrecognised key is simply not evidence either way.
+ */
+export const JOINT_ASSESSMENT_FACT_KEYS = ["joint_assessment", "veranlagung_zusammen"] as const
+
+export type JointAssessmentReading = {
+  /** A recognised fact is present and confirmed as affirmative. */
+  joint: boolean
+  /** A recognised fact is present but not confirmed by the user. */
+  unconfirmed: boolean
+}
+
+/**
+ * Reads joint-assessment intent from the case's facts.
+ *
+ * Only an explicitly affirmative value counts as joint. `false`/`nein`/anything
+ * else recorded is treated as a deliberate negative, not as joint. A present but
+ * unconfirmed recognised fact is reported as `unconfirmed` so the caller can
+ * refuse instead of choosing an answer the user never gave.
+ */
+export function readJointAssessment(
+  facts: readonly { key: string; value: string; confirmedAt: string | null }[],
+): JointAssessmentReading {
+  const recognised = facts.filter((fact) =>
+    (JOINT_ASSESSMENT_FACT_KEYS as readonly string[]).includes(fact.key),
+  )
+  if (recognised.length === 0) return { joint: false, unconfirmed: false }
+
+  const confirmed = recognised.filter((fact) => fact.confirmedAt)
+  if (confirmed.length === 0) return { joint: false, unconfirmed: true }
+
+  const affirmative = confirmed.some((fact) =>
+    ["true", "ja", "1", "yes", "zusammen"].includes(fact.value.trim().toLowerCase()),
+  )
+  return { joint: affirmative, unconfirmed: false }
+}
+
+/**
  * The subset of a generation manifest that signing actually relies on. Narrowed
  * deliberately: the planner has no business reading the rest of a manifest, and
  * accepting the whole type would invite it to.
@@ -145,9 +189,42 @@ export function planSignature(input: {
   dateIso: string
   /** The user's explicit confirmation that they intend to sign this document. */
   confirmed: boolean
+  /**
+   * Whether the case's own facts establish a second required signatory — e.g. a
+   * jointly assessed couple. Derived by the caller from confirmed facts only, so
+   * an unknown marital status is not treated as either yes or no.
+   */
+  jointAssessment: boolean
+  /** The joint-assessment fact is present but not confirmed by the user. */
+  jointAssessmentUnconfirmed: boolean
 }): SignaturePlanResult {
   if (!input.placement) {
     return { ok: false, code: "no_verified_placement", detail: null }
+  }
+  /*
+   * Multi-signatory refusal, and why it comes before anything is drawn.
+   *
+   * Some official forms require more than one handwritten signature — the
+   * reference area is explicitly captioned "bei Ehegatten / Lebenspartnern von
+   * beiden". This engine draws exactly one signature, so when the form can
+   * require two *and* the case's confirmed facts establish a joint assessment,
+   * one signature would leave the document materially incomplete while looking
+   * finished. That is worse than refusing. It is refused outright, never
+   * partially applied, and the record is never presented as fully signed.
+   *
+   * An *unconfirmed* joint-assessment fact also refuses: the engine cannot tell
+   * whether a second signature is required, and guessing either way is unsafe —
+   * assume "single" and we may under-sign; assume "joint" and we block a valid
+   * single signature. The user resolves it by confirming or removing the fact.
+   */
+  if (input.placement.signatoryRule.max > 1 && input.jointAssessment) {
+    return { ok: false, code: "multiple_signatures_required", detail: null }
+  }
+  // Kept distinct from the above so the user is told which of the two situations
+  // they are in: "this form needs two signatures" versus "we cannot tell whether
+  // it does, because the relevant fact is unconfirmed".
+  if (input.placement.signatoryRule.max > 1 && input.jointAssessmentUnconfirmed) {
+    return { ok: false, code: "joint_assessment_unconfirmed", detail: null }
   }
   if (!input.confirmed) {
     return { ok: false, code: "not_confirmed", detail: null }

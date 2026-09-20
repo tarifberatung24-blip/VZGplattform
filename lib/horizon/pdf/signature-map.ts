@@ -58,6 +58,20 @@ export type SignaturePlacement = {
   inset: number
   /** Drawn at the top of the area, so the area itself stays identifiable. */
   dateFontSize: number
+  /**
+   * How many handwritten signatures the official form's own wording can require.
+   *
+   * This is a property of the printed form, not of the user, and it is recorded
+   * so the engine can refuse rather than under-sign. The reference area's caption
+   * reads "… – bei Ehegatten / Lebenspartnern von beiden – zu unterschreiben.",
+   * i.e. a jointly assessed couple must both sign. The engine can draw exactly one
+   * signature, so it cannot satisfy `max > 1` on its own and must not pretend to.
+   */
+  signatoryRule: {
+    max: number
+    /** The printed wording this is derived from. */
+    basis: string
+  }
 }
 
 /** Bump when the date/signature split or insets change. */
@@ -82,6 +96,11 @@ export const SIGNATURE_PLACEMENTS: Readonly<Record<string, SignaturePlacement>> 
     dateColumnWidth: 92,
     inset: 3,
     dateFontSize: 9,
+    signatoryRule: {
+      max: 2,
+      basis:
+        "Datum, Unterschrift(en) – Steuererklärungen sind eigenhändig – bei Ehegatten / Lebenspartnern von beiden – zu unterschreiben.",
+    },
   },
 }
 
