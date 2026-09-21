@@ -355,6 +355,99 @@
       "other": "Sonstiges"
     }
   },
+  "contractHub": {
+    "previewLabel": "Design-Vorschau · nur Demonstration",
+    "title": "SPAREN + VERWALTEN",
+    "subtitle": "Verträge, Dokumente, Fristen und mögliche Einsparungen in einer ruhigen Übersicht.",
+    "demoNotice": "Demo-Ansicht: Alle Werte, Daten und Nummern unten sind erfunden und keine echten Angebote oder Nutzerdaten.",
+    "demoTag": "Demo-Wert",
+    "notConfirmed": "Nicht bestätigt",
+    "missingValue": "Demo-Daten fehlen",
+    "demoProviders": {
+      "providerA": "Beispiel Anbieter A",
+      "providerB": "Beispiel Anbieter B"
+    },
+    "demoCategories": {
+      "internet": "Internet und Telefon",
+      "mobile": "Mobilfunk",
+      "energy": "Energie",
+      "insurance": "Versicherung",
+      "other": "Sonstige Leistung"
+    },
+    "demoValues": {
+      "activeContracts": "Demo: 7",
+      "monthlyFixedCosts": "Demo: € 142",
+      "documentsUploaded": "Demo: 23",
+      "deadlinesNext90Days": "Demo: 4",
+      "savingsOpportunities": "Demo: 2",
+      "priceA": "Demo: € 49,90",
+      "priceB": "Demo: € 29,90",
+      "priceC": "Demo: € 34,50",
+      "priceD": "Demo: € 189,00",
+      "currentPrice": "Demo: € 189,00",
+      "examplePrice": "Demo: € 154,50",
+      "contractA": "Demo-Nummer: A-2026-…",
+      "contractB": "Demo-Nummer: B-2026-…",
+      "contractC": "Demo-Nummer: C-2026-…",
+      "contractD": "Demo-Nummer: D-2026-…",
+      "dateA": "Demo-Datum: 15.11.2026",
+      "dateB": "Demo-Datum: 03.01.2027",
+      "dateC": "Demo-Datum: 28.02.2027",
+      "dateD": "Demo-Datum: 01.06.2027"
+    },
+    "dashboard": {
+      "title": "Übersicht",
+      "activeContracts": "Aktive Verträge",
+      "monthlyFixedCosts": "Monatliche Fixkosten",
+      "documentsUploaded": "Hochgeladene Dokumente",
+      "deadlinesNext90Days": "Fristen in den nächsten 90 Tagen",
+      "savingsOpportunities": "Mögliche Einsparungen"
+    },
+    "radar": {
+      "title": "HORIZON Radar",
+      "description": "Fristen, Kündigungsfristen und Empfehlungen werden nur aus bestätigten Vertragsfakten angezeigt.",
+      "actionRequired": "Handlung erforderlich",
+      "checkSoon": "Bald prüfen",
+      "ok": "Keine Auffälligkeit markiert",
+      "missingData": "Bestätigte Daten fehlen",
+      "review": "Prüfen",
+      "cancellation": "Kündigung vorbereiten",
+      "compare": "Vergleich"
+    },
+    "documents": {
+      "title": "Verträge und Dokumente",
+      "upload": "Dokument hochladen",
+      "extract": "Fakten zur Prüfung auslesen",
+      "confirm": "Daten bestätigen",
+      "steps": ["Demo-PDF oder Bild", "Vorgeschlagene Fakten bleiben unbestätigt", "Nur bestätigte Fakten steuern Fristen und Radar"]
+    },
+    "deadlines": {
+      "title": "Fristen und Radar",
+      "description": "Unbestätigte Daten erzeugen keine Fristen, Kündigungsfristen oder Empfehlungen. Prüfe und bestätige die Fakten zuerst."
+    },
+    "savings": {
+      "title": "Mögliche Einsparungen",
+      "current": "Demo aktueller Aufwand",
+      "example": "Demo-Beispielalternative",
+      "disclaimer": "Dies ist eine visuelle Vorschau, kein echter Vergleich und keine echte Ersparnisberechnung. Echte Angebote und Partnerlogik sind nicht verbunden."
+    },
+    "household": {
+      "title": "Haushaltsübersicht",
+      "description": "Die Demo-Ansicht bündelt Verträge, Dokumente und Fristen an einem Ort. Im echten Ablauf wäre der Zugriff auf bestätigte Nutzerdaten begrenzt."
+    },
+    "ai": {
+      "title": "AI Home Office Assistant",
+      "explains": "Begriffe erklären",
+      "missing": "Fehlende Daten finden",
+      "cancellation": "Kündigung zur Prüfung vorbereiten",
+      "nextSteps": "Nächste Schritte vorschlagen",
+      "noExecution": "Der Assistent führt keine Aktionen aus. Ohne ausdrückliche Bestätigung des Nutzers wird nichts versendet oder geändert."
+    },
+    "cta": {
+      "start": "Demo-Ablauf ansehen",
+      "contact": "Kontakt aufnehmen"
+    }
+  },
   "optimizeFlow": {
     "optimize": "Für mich optimieren",
     "loading": "Daten werden für dich ausgefüllt…",
