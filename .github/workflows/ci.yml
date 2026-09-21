@@ -21,7 +21,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # 22.13 is the floor required by pdfjs-dist (see "engines" in
+          # package.json). On Node 20 `Promise.withResolvers` is missing, so the
+          # AcroForm field reader throws and fillable official templates are
+          # silently misclassified as non-fillable.
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
