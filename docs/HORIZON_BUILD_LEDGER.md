@@ -54,7 +54,7 @@ after a module meets the full DONE definition.
 | P12 | AGENTUR FÜR ARBEIT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P13 | JOBCENTER | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (shipped `0fb190a`; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
-| P15 | STEUERERKLÄRUNG | AUDITED | NO | YES |
+| P15 | STEUERERKLÄRUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year registry + case wiring shipped; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | AUDITED | NO | YES |
 | P17 | CONTRACT MANAGEMENT | AUDITED | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
@@ -755,7 +755,19 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`,
   `/{locale}/finanzamt`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year-aware registry and
+  case wiring shipped; unit tests and build verified; authenticated runtime E2E pending).
+- **ADDED THIS PHASE:** `lib/horizon/steuer/registry.ts` (tax-year-aware registry: only 2025 is
+  `supported`; 2026 is `not_yet_published`; other years `out_of_scope`; every entry carries an
+  official source and a verification date), `lib/horizon/steuer/actions.ts` (records the chosen
+  year as a confirmed case fact and refuses an unsupported year with its reason),
+  `lib/horizon/steuer/copy.ts` (BG + DE), `components/steuer/steuer-panel.tsx` (year selection,
+  year-scoped form list, Anlagen from confirmed facts only, signature availability, gated
+  download), `app/api/horizon/cases/[id]/tax-form/route.ts` (owner-scoped, approval-bound,
+  integrity-checked download), `readFormOutputSha` in `lib/horizon/pdf/manifest.ts`.
+  `OfficialFormPanel` no longer hardcodes 2025: it shows a tax year's forms only when that year is
+  supported, and shows none otherwise. 71 unit tests in `lib/horizon/steuer/steuer.test.ts`.
+  No 2025 Form-ID, row, threshold or rule is reused for 2026.
 - **CURRENT IMPLEMENTATION:** tax questionnaire (`tax-questionnaire`, `tax-questionnaire-schema`),
   official form registry UI and data (`tax-form-registry`, `tax_form_registry`),
   canonical tax model (`lib/canonical-tax-model.ts`), tax pipeline and PDF readiness

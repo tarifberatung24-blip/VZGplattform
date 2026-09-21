@@ -349,14 +349,17 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
 ## P15 — Steuererklärung
 
 - ✅ Tax model/FMS groundwork exists
-- Verified current official tax forms/process
-- Questionnaire → canonical tax facts
-- Official PDF mapping
-- Review/approval
-- Applicable signature path
-- Manual submission path to competent Finanzamt
-- No ELSTER submission until real approved integration exists
-- End-to-end verification
+- ✅ Tax-year-aware form registry: only 2025 is `supported`; 2026 is `not_yet_published`; other years `out_of_scope`; every entry carries an official source and a verification date
+- ✅ Official-source verification performed: ELSTER ESt 1 A lists 2025 back to 2019; no 2026 ESt 1 A/Anlage N is publicly confirmed
+- ✅ Unsupported/unpublished years are refused with a reason; no 2025 Form-ID, row, threshold or rule is carried into 2026
+- ✅ Tax year recorded as a canonical case fact; missing-information keys become year-scoped
+- ✅ Official PDF mapping for ESt 1 A (2025) bound to the exact template SHA-256 and year; a mismatched year or hash is refused
+- ✅ Review/approval reuses P8; approval invalidates when the generated content changes
+- ✅ Applicable signature path: placement offered only where measured and hash/year-bound
+- ✅ Manual submission path to the competent Finanzamt (official online route + official forms links); HORIZON transmits nothing
+- ✅ No ELSTER submission: no credential, certificate or transmission field exists anywhere in the registry
+- 71 unit tests pass (`lib/horizon/steuer/steuer.test.ts`); tsc/lint/i18n/build green
+- Authenticated runtime E2E (deferred to the consolidated pass after P17)
 - FROZEN
 
 ## P16 — Unterlagen erklären

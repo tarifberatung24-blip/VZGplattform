@@ -8,7 +8,7 @@ import { caseDocumentStoragePath } from "@/lib/horizon/intake/document"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { findTemplateById } from "./registry"
 import { computeSha256 } from "./source"
-import { renderSignatureBody, renderSignatureSubject } from "./manifest"
+import { readFormOutputSha, renderSignatureBody, renderSignatureSubject } from "./manifest"
 import {
   detectSignatureImageFormat,
   planSignature,
@@ -43,18 +43,6 @@ export type SignatureState = {
 }
 
 const CASE_DOCUMENT_BUCKET = "source-documents"
-
-/** The engine's own marker for the generated artifact's hash, as rendered into a draft body. */
-const OUTPUT_SHA_LINE_PREFIX = "Ausgabe-SHA-256: "
-
-function readOutputShaFromBody(body: string): string | null {
-  const line = body
-    .split("\n")
-    .find((candidate) => candidate.startsWith(OUTPUT_SHA_LINE_PREFIX))
-  if (!line) return null
-  const value = line.slice(OUTPUT_SHA_LINE_PREFIX.length).trim()
-  return /^[0-9a-f]{64}$/.test(value) ? value : null
-}
 
 /**
  * P10 — apply a visual signature to the exact approved generated document.
@@ -160,7 +148,7 @@ export async function signGeneratedDocument(
   const drafts = await engine.repository.listDrafts(rawCaseId)
   if (drafts.error) return { status: "failed", detail: drafts.error, manualPath: null }
   const sourceDraft = (drafts.data ?? []).find(
-    (draft) => readOutputShaFromBody(draft.body) === recordedOutputSha,
+    (draft) => readFormOutputSha(draft.body) === recordedOutputSha,
   )
   if (!sourceDraft) {
     return { status: "document_not_found", detail: null, manualPath: null }
