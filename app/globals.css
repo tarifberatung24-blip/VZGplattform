@@ -49,6 +49,42 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-display: var(--font-geist), Geist, Inter, sans-serif;
   --font-text: var(--font-geist), Geist, Inter, sans-serif;
+
+  /* Layer 0 hero animations (approved v0 design "mnimal-animated-hero"). */
+  --animate-line-shadow: line-shadow 15s linear infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+
+  @keyframes line-shadow {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 100% -100%;
+    }
+  }
+
+  @keyframes shimmer-slide {
+    to {
+      transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes spin-around {
+    0% {
+      transform: translateZ(0) rotate(0);
+    }
+    15%,
+    35% {
+      transform: translateZ(0) rotate(90deg);
+    }
+    65%,
+    85% {
+      transform: translateZ(0) rotate(270deg);
+    }
+    100% {
+      transform: translateZ(0) rotate(360deg);
+    }
+  }
 }
 
 :root {
@@ -163,6 +199,12 @@
   button:not([data-slot="icon"]), [role="button"] {
     min-height: 2.75rem;
   }
+}
+
+/* Layer 0 home: restore approved design button dimensions on mobile. */
+.layer0-hero button,
+.layer0-hero [role="button"] {
+  min-height: unset;
 }
 
 /* KintexBG customer workspace. */

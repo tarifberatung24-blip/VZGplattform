@@ -27,6 +27,17 @@
     "heroTitle": "Es bleibt mehr Geld für dich.",
     "heroSubtitle": "Der Finanz- und Verwaltungsassistent für dein Leben in Deutschland.",
     "heroDescription": "Prüfe Steuern, staatliche Hilfen, Verträge und monatliche Kosten — verständlich und an einem Ort.",
+    "hero": {
+      "badge": "HORIZON by VZG",
+      "navFeatures": "Funktionen",
+      "navSecurity": "Sicherheit",
+      "navAbout": "So funktioniert's",
+      "navContact": "Kontakt",
+      "headline1": "Dokumente. Verträge. Behörden.",
+      "headline2": "Einfacher mit HORIZON.",
+      "subtitle": "Verstehe Dokumente, bereite Anträge vor und erledige wichtige Verwaltungs- und Vertragsaufgaben in Deutschland – Schritt für Schritt.",
+      "primaryCta": "Jetzt starten"
+    },
     "ctaPrimary": "Möglichkeiten prüfen",
     "ctaSecondary": "Meine Kosten optimieren",
     "trust": "Kostenlos starten.",
