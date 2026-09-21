@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import Script from "next/script"
 import { ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SiteFooter } from "@/components/marketing/site-footer"
@@ -26,8 +25,6 @@ export default function ProduktePage() {
                 </Button>
               </div>
             </div>
-            <div id="c24pp-dsl-iframe" className="sr-only" aria-hidden="true" />
-            <Script src="https://files.check24.net/widgets/auto/1174585/c24pp-dsl-iframe/dsl-iframe.js" strategy="lazyOnload" />
           </div>
         </section>
       </main>

@@ -1,6 +1,7 @@
 "use client"
 
 import { Send } from "lucide-react"
+import Link from "next/link"
 import { useState } from "react"
 import { submitLead, type LeadSubmitResult } from "./lead-submit"
 
@@ -57,6 +58,12 @@ export default function ContactForm({ locale }: { locale: string }) {
         </label>
 
         <div className="flex flex-col gap-3">
+          <p className="text-xs leading-5 text-muted-foreground">
+            {locale === "bg" ? "Съобщението и данните за контакт се обработват за отговор на запитването. Вижте " : "Ihre Nachricht und Kontaktdaten werden zur Bearbeitung Ihrer Anfrage verarbeitet. Mehr dazu in der "}
+            <Link className="underline hover:text-foreground" href={`/${locale}/datenschutz`}>
+              {locale === "bg" ? "политиката за поверителност" : "Datenschutzerklärung"}
+            </Link>.
+          </p>
           {state && "ok" in state && state.ok && (
             <p className="text-sm text-foreground">
               {locale === "bg" ? "Съобщението е изпратено. Благодарим." : "Nachricht gesendet. Vielen Dank."}
