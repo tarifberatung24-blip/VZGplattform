@@ -71,6 +71,8 @@ export type VerifiedAttachment = {
   sizeBytes: number
   /** Recomputed from the bytes that will actually be sent. */
   sha256: string
+  /** The bytes `sha256` was computed from, carried so they are the bytes sent. */
+  bytes: Uint8Array
 }
 
 export type SendPlanInput = {

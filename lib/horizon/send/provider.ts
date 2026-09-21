@@ -12,10 +12,11 @@
  * receipt, and it may not throw to signal a policy problem — policy problems are
  * decided upstream and never reach here.
  *
- * No mail dependency exists in this repository. Rather than pretend otherwise,
- * the default provider is `unavailableProvider`, which is a real, correct
- * outcome: the pipeline runs end to end and stops at a clean
- * PROVIDER_UNAVAILABLE state.
+ * The available transport is a generic SMTP provider configured solely from
+ * server-side environment variables. When that configuration is absent or
+ * invalid, the active provider is `unavailableProvider`, which is a real,
+ * correct outcome: the pipeline runs end to end and stops at a clean
+ * PROVIDER_UNAVAILABLE state with nothing transmitted.
  */
 
 import "server-only"
@@ -27,6 +28,15 @@ export type EmailAttachment = {
   contentType: string
   sizeBytes: number
   sha256: string
+  /**
+   * The bytes that were hashed above.
+   *
+   * Carried inline so a transport sends exactly what was verified rather than
+   * re-reading it. A provider that re-read from storage would reintroduce the
+   * possibility that the verified bytes and the sent bytes differ, which is the
+   * one thing the hash is there to rule out.
+   */
+  bytes: Uint8Array
 }
 
 export type OutboundEmail = {

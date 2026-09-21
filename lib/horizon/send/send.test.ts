@@ -141,6 +141,7 @@ describe("attachments are bound to the exact bytes", () => {
       contentType: "application/pdf",
       sizeBytes: 1000,
       sha256: HASH_A,
+      bytes: new Uint8Array([1, 2, 3]),
     },
   ]
 

@@ -4,20 +4,21 @@
  * At most one provider is active, and its key is recorded on every attempt so the
  * transport behind a delivery is always identifiable after the fact.
  *
- * The repository has no mail dependency, and adding one is an owner decision, not
- * an implementation detail. So the default active provider is
+ * The active transport is chosen here and nowhere else. When SMTP is fully
+ * configured it is the SMTP provider; otherwise the active provider is
  * `unavailableProvider`: a real provider that truthfully reports it cannot send.
  * This is what makes "no credentials configured" a clean, testable state instead
  * of a crash or — far worse — a fabricated success.
  *
- * A real transport is added by implementing `EmailProvider` and registering it
- * here together with its required configuration. Nothing else in the pipeline
- * changes, because the engine never knows which transport it is using.
+ * Nothing else in the pipeline changes when a transport is added, because the
+ * engine never knows which transport it is using.
  */
 
 import "server-only"
 
 import type { EmailProvider, ProviderResult } from "./provider"
+import { readSmtpConfig, type SmtpConfigResult } from "./smtp-config"
+import { createSmtpProvider } from "./smtp-provider"
 
 /**
  * Reports unavailability rather than failing.
@@ -41,14 +42,38 @@ export const unavailableProvider: EmailProvider = {
 }
 
 /**
+ * The SMTP configuration for this process, read once.
+ *
+ * Cached so that `resolveProvider` and `isSendProviderAvailable` cannot disagree
+ * about whether a provider is configured, and so a send is never attempted
+ * against a configuration that changed between the check and the send.
+ *
+ * `undefined` means "not read yet"; `null` means "read, and no usable provider".
+ */
+let cachedConfig: SmtpConfigResult | null | undefined
+
+/** Reads and caches the SMTP configuration. Exposed for a redacted status display. */
+export function smtpConfig(): SmtpConfigResult | null {
+  if (cachedConfig === undefined) {
+    const result = readSmtpConfig()
+    cachedConfig = result.ok ? result : null
+  }
+  return cachedConfig
+}
+
+/**
  * The provider to use for this request.
  *
- * Returns the unavailable provider when nothing is configured. It deliberately
- * does not fall back to a "best effort" or a logged-only sender: a send that
- * cannot actually happen must be reported as such, never simulated.
+ * Returns the unavailable provider when SMTP is not fully configured. There is
+ * deliberately no partial-credit path: a host without credentials, or credentials
+ * without a sender, is treated as absent rather than as a best effort, because a
+ * half-configured relay could hand a customer's documents to the wrong server or
+ * send them in the clear.
  */
 export async function resolveProvider(): Promise<EmailProvider> {
-  return unavailableProvider
+  const config = smtpConfig()
+  if (!config) return unavailableProvider
+  return createSmtpProvider(config)
 }
 
 /**

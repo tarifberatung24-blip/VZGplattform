@@ -259,10 +259,12 @@ the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
 - ✅ Draft download exists
 - Composition adapter
 - ✅ Send engine (`lib/horizon/send/`: provider abstraction, registry, recipient, policy, record, actions)
-- ⬜ A real transport (none configured; default provider reports unavailability)
+- ✅ Generic SMTP transport (`nodemailer@7.0.9`; server-side env only; all-or-nothing config; STARTTLS required; secure certificate verification not configurable)
+- ✅ SMTP configuration validation (12 unit tests; partial/malformed config refuses rather than transmits)
+- ⬜ A real provider configured in a running environment (none configured; without it every send ends `PROVIDER_UNAVAILABLE` with nothing transmitted)
+- ⬜ Committed automated test for the SMTP transport (transmits over the network; covered so far by a local live-server STARTTLS check, not by unit tests)
 - Gmail OAuth adapter
 - Microsoft OAuth adapter
-- Generic SMTP path if approved
 - ✅ Attachment handling (selected-only; SHA-256 bound to sent bytes; total-size limit refuses rather than truncates)
 - ✅ Recipient preview (recorded address only, never derived; explicit per-send confirmation)
 - ✅ Explicit user approval before send (current approval required; per-send confirmation separate from content approval)

@@ -50,7 +50,7 @@ after a module meets the full DONE definition.
 | P8 | DRAFT / REVIEW / USER APPROVAL | PARTIAL — REVIEW+APPROVAL SURFACE IMPLEMENTED, RUNTIME VERIFICATION PENDING | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
 | P10 | SIGNATURE ENGINE | IN_PROGRESS — VISUAL SIGNATURE VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
-| P11 | EMAIL CONNECTION + SEND ENGINE | IN_PROGRESS — SEND ENGINE IMPLEMENTED, NO TRANSPORT CONFIGURED — RUNTIME VERIFICATION PENDING | NO | YES |
+| P11 | EMAIL CONNECTION + SEND ENGINE | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (SMTP transport implemented; no real provider configured, runtime E2E pending) | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | NOT_STARTED | NO | YES |
 | P13 | JOBCENTER | NOT_STARTED | NO | YES |
 | P14 | KÜNDIGUNG | NOT_STARTED | NO | YES |
@@ -580,8 +580,11 @@ after a module meets the full DONE definition.
 - **ID:** P11
 - **SYSTEM:** Email connection and send engine
 - **TARGET ROUTES:** consumed by P12–P17.
-- **CURRENT STATUS:** IN_PROGRESS — send engine implemented and unit-verified; no transport is
-  configured, so no real message has been sent. NOT DONE.
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN. The send engine and a
+  generic SMTP transport are implemented. No real provider is configured in any deployment, so no
+  message has been sent to a real recipient from a running environment. Owner decision: keep
+  `IN_PROGRESS / IMPLEMENTED — NOT DONE — NOT FROZEN` until a real provider and runtime E2E are
+  verified.
 - **CURRENT IMPLEMENTATION:** download only (`/api/office/drafts/{id}/export` returns
   `text/plain` attachment). An outbound webhook with a shared secret exists in
   `/api/service-requests`. There is no inbound mailbox connection. The **send engine** now exists
@@ -589,7 +592,12 @@ after a module meets the full DONE definition.
   provider truthfully reports unavailability (`registry.ts`), recipient validation that never
   derives an address (`recipient.ts`), pure send policy (`send-plan.ts`), outcome recording
   (`record.ts`), and orchestration (`actions.ts`) with a form entry point (`submitSend`). A
-  `SendPanel` is wired into the case workspace after the signature panel.
+  `SendPanel` is wired into the case workspace after the signature panel. A **generic SMTP
+  transport** now exists: `smtp-config.ts` (server-side environment parsing with all-or-nothing
+  validation), `smtp-provider.ts` (nodemailer over STARTTLS or implicit TLS), `attachment-bytes.ts`
+  (storage read plus SHA-256 recomputation, returning the hashed bytes), and `registry.ts` selecting
+  SMTP only when fully configured. `EmailAttachment` and `VerifiedAttachment` now carry the verified
+  bytes so the transport sends exactly what was hashed.
 - **REUSE:** draft/approval model (P8), audit spine, `correspondence_drafts.attachments`,
   `approvals`, and the n8n webhook pattern (`N8N_WEBHOOK_SECRET`).
 - **DESIGN DECISION:** an outbound send is recorded as a normal artifact — a new draft carrying
@@ -601,16 +609,25 @@ after a module meets the full DONE definition.
 - **SEND RECORD GUARD:** because a send record is itself a draft, `correspondence_drafts.model` is
   set to `horizon-send-record` and the policy refuses to send any draft carrying that marker
   (`IS_SEND_RECORD`). Without it, the record of a delivery could itself be offered for sending.
-- **MISSING:** an actual transport. **No mail dependency exists in `package.json`.** Mailbox
-  connection (Gmail/IMAP/SMTP), delivery-status handling from a real provider, and end-to-end
-  runtime verification against a configured transport.
+- **MAIL DEPENDENCY:** `nodemailer@7.0.9` plus the types-only `@types/nodemailer@7.0.4`, both
+  explicitly owner-approved. No second mail SDK was added.
+- **SMTP CONFIGURATION:** exclusively server-side environment variables —
+  `HORIZON_SMTP_HOST`, `HORIZON_SMTP_PORT`, `HORIZON_SMTP_USER`, `HORIZON_SMTP_PASSWORD`,
+  `HORIZON_SMTP_FROM`, with optional `HORIZON_SMTP_SECURE` and `HORIZON_SMTP_HELO_NAME`. No host,
+  port, sender or credential is hardcoded. Configuration is validated as a whole: a partial or
+  malformed configuration yields `PROVIDER_UNAVAILABLE` with nothing transmitted, never a
+  best-effort connection. Certificate verification stays at its secure default and is not
+  configurable. STARTTLS is required (`requireTLS`) on the non-implicit-TLS path.
+- **MISSING:** an inbound mailbox connection (Gmail/IMAP), delivery-status (bounce/DSN) handling
+  from a real provider, and end-to-end runtime verification against a real configured provider in a
+  running environment.
 - **DEPENDENCIES:** P8, P1 (privacy/legal wording), P4 (settings surface).
-- **BLOCKERS:** adding a mail dependency requires explicit owner approval; mailbox provider and
-  consent model must be approved; `DOCUMENT_FEASIBILITY_AUDIT.md` states notification/connector
-  work requires a configured connector, consent model, retry/idempotency, audit logs, and a
-  deployment environment. **Until a provider is registered, every send ends as
-  `PROVIDER_UNAVAILABLE` with nothing transmitted — this is the verified current behaviour, not a
-  defect.**
+- **BLOCKERS:** no real SMTP provider is configured in any environment, and no credentials may be
+  committed, so runtime end-to-end verification against a real provider is still outstanding. The
+  mailbox provider (inbound) and the consent model remain unapproved; `DOCUMENT_FEASIBILITY_AUDIT.md`
+  states notification/connector work requires a configured connector, consent model,
+  retry/idempotency, audit logs, and a deployment environment. **Where SMTP is not configured, every
+  send ends as `PROVIDER_UNAVAILABLE` with nothing transmitted — verified behaviour, not a defect.**
 - **DONE CRITERIA:** an approved mail channel is connected; sending requires a current approval;
   the recipient is recorded data confirmed per send and never derived; attachments the user sees
   are bound by SHA-256 to the bytes actually sent; every send is idempotent and audited; a
@@ -619,8 +636,18 @@ after a module meets the full DONE definition.
   tests, build, real verification pass. Implemented and unit-verified now: approval gating,
   recipient validation, attachment hashing/selection/limits, idempotency, duplicate protection,
   send-record guard, truthful unavailable/blocked/failed/sent outcomes, and outcome recording.
-  Outstanding: a configured transport and end-to-end runtime verification.
-- **FROZEN:** NO
+  Implemented: a generic SMTP transport with all-or-nothing server-side configuration, STARTTLS
+  enforcement, secure certificate verification by default, and no path that reports `SENT` without a
+  transport-issued message id.
+  A real end-to-end check was run locally against a live SMTP server with a real STARTTLS handshake:
+  the provider returned `SENT` with a genuine provider message id, and the attachment bytes decoded
+  from the received `DATA` payload matched the verified SHA-256 byte for byte. That run used
+  test-local credentials and a test-local certificate; it is not a substitute for verification
+  against a real configured provider.
+  Outstanding: a real configured provider and runtime end-to-end verification in a running
+  environment. `nodemailer` transmits over the network and cannot be covered by unit tests alone, so
+  the SMTP transport has no committed automated test; `smtp-config.ts` is unit-tested (12 tests).
+- **FROZEN:** NO — owner decision: not FROZEN until a real provider and runtime E2E are verified.
 
 ---
 

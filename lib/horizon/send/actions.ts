@@ -31,17 +31,11 @@
 
 import { createCaseEngine } from "@/lib/horizon/case"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
-import { createAdminClient } from "@/lib/office/supabase/admin"
-import { computeSha256 } from "@/lib/horizon/pdf/source"
 import { isSendProviderAvailable, resolveProvider } from "./registry"
-import { planSend, type SendBlocker, type VerifiedAttachment } from "./send-plan"
+import { loadAttachmentBytes, readRecordedAttachments } from "./attachment-bytes"
+import { planSend, type SendBlocker } from "./send-plan"
 import { checkRecipient, redactRecipient } from "./recipient"
 import { renderSendBody, renderSendSubject, SEND_RECORD_MODEL, type SendState } from "./record"
-
-const CASE_DOCUMENT_BUCKET = "source-documents"
-
-/** An attachment as recorded on the draft, before its bytes are read. */
-type RecordedAttachment = { storagePath: string; filename: string; sha256: string }
 
 export type SendResult =
   | {
@@ -70,63 +64,6 @@ export type SendPreview = {
   blockers: readonly SendBlocker[]
   providerKey: string
   providerAvailable: boolean
-}
-
-/**
- * Reads the attachment rows recorded on a draft.
- *
- * The draft's `attachments` column is a jsonb array. Malformed or partial entries
- * are dropped rather than repaired: an attachment whose hash cannot be
- * established cannot be verified before sending, so it must not silently become
- * part of a set the user believes is verified.
- */
-function readRecordedAttachments(value: unknown): RecordedAttachment[] {
-  if (!Array.isArray(value)) return []
-  const out: RecordedAttachment[] = []
-  for (const entry of value) {
-    if (typeof entry !== "object" || entry === null) continue
-    const record = entry as Record<string, unknown>
-    const storagePath = typeof record.storagePath === "string" ? record.storagePath : null
-    const filename = typeof record.filename === "string" ? record.filename : null
-    const sha256 = typeof record.sha256 === "string" ? record.sha256 : null
-    if (!storagePath || !filename || !sha256) continue
-    out.push({ storagePath, filename, sha256 })
-  }
-  return out
-}
-
-/**
- * Reads attachment bytes from private storage and returns their real size and
- * hash.
- *
- * Uses the admin client because the bytes live in a private bucket and the
- * download must not depend on a client-side URL. Ownership is already enforced:
- * the draft, and the attachment paths recorded on it, were read through the
- * RLS-enforced session client for this case.
- */
-async function readRecordedAttachmentBytes(
-  recorded: readonly RecordedAttachment[],
-): Promise<VerifiedAttachment[] | null> {
-  if (recorded.length === 0) return []
-  const admin = createAdminClient()
-  if (!admin) return null
-
-  const verified: VerifiedAttachment[] = []
-  for (const attachment of recorded) {
-    const downloaded = await admin.storage
-      .from(CASE_DOCUMENT_BUCKET)
-      .download(attachment.storagePath)
-    if (downloaded.error || !downloaded.data) return null
-    const bytes = new Uint8Array(await downloaded.data.arrayBuffer())
-    verified.push({
-      storagePath: attachment.storagePath,
-      filename: attachment.filename,
-      contentType: downloaded.data.type || "application/octet-stream",
-      sizeBytes: bytes.byteLength,
-      sha256: await computeSha256(bytes),
-    })
-  }
-  return verified
 }
 
 /** A recorded success for this exact draft. */
@@ -162,7 +99,7 @@ async function loadSendContext(input: { caseId: string; draftId: string }) {
   ])
 
   const recorded = readRecordedAttachments(rawAttachments.data)
-  const verified = await readRecordedAttachmentBytes(recorded)
+  const verified = await loadAttachmentBytes(recorded)
 
   return {
     draft,
@@ -415,6 +352,9 @@ export async function sendApprovedDraft(input: {
       contentType: attachment.contentType,
       sizeBytes: attachment.sizeBytes,
       sha256: attachment.sha256,
+      // The bytes that were hashed above, so the transport sends exactly what was
+      // verified instead of re-reading storage.
+      bytes: attachment.bytes,
     })),
   })
 
