@@ -38,6 +38,8 @@ export function GlobalHeader() {
     return () => listener.subscription.unsubscribe()
   }, [])
 
+  if (stripLocale(pathname) === "/") return null
+
   const labels =
     locale === "de"
       ? {

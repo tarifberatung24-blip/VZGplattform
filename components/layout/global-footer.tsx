@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { localizedPath } from "@/lib/i18n/routing"
+import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { usePathname } from "next/navigation"
 
 export function GlobalFooter() {
   const pathname = usePathname() ?? "/"
+  if (stripLocale(pathname) === "/") return null
   const locale = pathname.startsWith("/de") ? "de" : "bg"
   const isDe = locale === "de"
 
