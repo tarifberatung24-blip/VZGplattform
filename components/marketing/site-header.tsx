@@ -27,8 +27,8 @@ export function SiteHeader() {
   }, [])
 
   const labels = locale === "de"
-    ? { home: "Startseite", services: "Leistungen", taxes: "Steuern", benefits: "Staatliche Hilfen", tariffs: "Tarife", documents: "Dokumente", about: "Über KintexBG", profile: "Persönlicher Bereich", logout: "Abmelden", install: "App installieren", menu: "Menü" }
-    : { home: "Начало", services: "Услуги", taxes: "Данъци", benefits: "Държавни помощи", tariffs: "Тарифи", documents: "Документи", about: "За KintexBG", profile: "Личен профил", logout: "Изход", install: "Инсталирай приложението", menu: "Меню" }
+    ? { home: "Startseite", services: "Leistungen", taxes: "Steuern", benefits: "Staatliche Hilfen", tariffs: "Tarife", documents: "Dokumente", about: "Über HORIZON by VZG", profile: "Persönlicher Bereich", logout: "Abmelden", install: "App installieren", menu: "Menü" }
+    : { home: "Начало", services: "Услуги", taxes: "Данъци", benefits: "Държавни помощи", tariffs: "Тарифи", documents: "Документи", about: "За HORIZON by VZG", profile: "Личен профил", logout: "Изход", install: "Инсталирай приложението", menu: "Меню" }
   const links = [
     { href: "/", label: labels.home },
     { href: "/uslugi", label: labels.services },
@@ -47,7 +47,7 @@ export function SiteHeader() {
     <>
     <header className="sticky top-0 z-40 border-b border-border bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 lg:px-8">
-        <Link href="/" aria-label="KintexBG — BY VZG" className="shrink-0">
+        <Link href="/" aria-label="HORIZON by VZG" className="shrink-0">
           <Logo />
         </Link>
 

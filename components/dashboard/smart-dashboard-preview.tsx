@@ -150,11 +150,11 @@ function PreviewSurface() {
   ]
 
   return (
-    <div className="kintex-preview-frame" aria-label="KintexBG Produktvorschau ohne Kontodaten">
+    <div className="kintex-preview-frame" aria-label="HORIZON by VZG Produktvorschau ohne Kontodaten">
       <div className="flex items-center justify-between border-b border-border bg-[#fbfbf9] px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5">
           <span className="grid size-7 place-items-center rounded-md bg-primary text-xs font-bold text-primary-foreground">K</span>
-          <span className="text-sm font-semibold tracking-tight text-foreground">KintexBG</span>
+          <span className="text-sm font-semibold tracking-tight text-foreground">HORIZON by VZG</span>
         </div>
         <span className="border border-border bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Preview</span>
       </div>
@@ -332,7 +332,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
             <div className="flex flex-col justify-between gap-4 border-b border-border px-5 py-4 sm:flex-row sm:items-center">
               <div>
                 <h2 id="payments-title" className="text-lg font-semibold">Месечни плащания</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Групирани от въведените договори в KintexBG</p>
+                <p className="mt-1 text-xs text-muted-foreground">Групирани от въведените договори в HORIZON by VZG</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button type="button" variant={onlyNeedsAttention ? "secondary" : "outline"} size="sm" className="rounded-lg" onClick={() => setOnlyNeedsAttention((value) => !value)}><Filter className="size-4" />За внимание</Button>
@@ -451,7 +451,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
               </div>
             </section>
             <section className="rounded-2xl border border-border bg-card p-5 shadow-sm shadow-slate-200/40" aria-labelledby="radar-title">
-              <div className="flex items-center justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Kintex Radar</p><h2 id="radar-title" className="mt-1 font-semibold">Сигнали от твоите данни</h2></div><span className="text-xs text-muted-foreground">{radarSignals.length}</span></div>
+              <div className="flex items-center justify-between gap-3"><div><p className="text-[11px] font-semibold uppercase tracking-wide text-primary">HORIZON Radar</p><h2 id="radar-title" className="mt-1 font-semibold">Сигнали от твоите данни</h2></div><span className="text-xs text-muted-foreground">{radarSignals.length}</span></div>
               <div className="mt-4 space-y-3">{radarSignals.length === 0 ? <p className="text-sm text-muted-foreground">Няма открити сигнали.</p> : radarSignals.slice(0, 3).map((signal) => <div key={signal.id} className="border-l-2 border-primary px-3 py-1"><p className="text-sm font-medium">{signal.title}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{signal.detail}</p></div>)}</div>
               <p className="mt-4 text-[11px] text-muted-foreground">Radar показва само записани данни. Не изчислява измислени спестявания.</p>
             </section>
@@ -493,14 +493,14 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
               </div>
             </section>
             <section>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Kintex Radar</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">HORIZON Radar</p>
               <div className="space-y-2">{radarSignals.length === 0 ? <p className="text-sm text-muted-foreground">Няма сигнали за проверка.</p> : radarSignals.slice(0, 4).map((signal) => <div key={signal.id} className="border-l-2 border-primary px-3 py-2"><p className="text-sm font-medium">{signal.title}</p><p className="mt-1 text-xs text-muted-foreground">{signal.detail}</p></div>)}</div>
             </section>
             <AiHomeOfficeChat />
           </div>
           <footer className="border-t border-border p-5">
             <Button asChild variant="outline" className="h-12 w-full justify-between rounded-xl"><Link href="/assistant"><span>Отвори пълния AI Assistant</span><Send className="size-4" /></Link></Button>
-            <p className="mt-3 text-center text-[11px] text-muted-foreground">Работи само с данните в твоя KintexBG профил.</p>
+            <p className="mt-3 text-center text-[11px] text-muted-foreground">Работи само с данните в твоя HORIZON by VZG профил.</p>
           </footer>
         </aside>
       </div>}

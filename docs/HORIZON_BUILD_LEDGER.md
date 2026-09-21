@@ -51,7 +51,7 @@ after a module meets the full DONE definition.
 | P9 | OFFICIAL PDF FORM ENGINE | PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
 | P10 | SIGNATURE ENGINE | IN_PROGRESS — VISUAL SIGNATURE VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (SMTP transport implemented; no real provider configured, runtime E2E pending) | NO | YES |
-| P12 | AGENTUR FÜR ARBEIT | NOT_STARTED | NO | YES |
+| P12 | AGENTUR FÜR ARBEIT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P13 | JOBCENTER | NOT_STARTED | NO | YES |
 | P14 | KÜNDIGUNG | NOT_STARTED | NO | YES |
 | P15 | STEUERERKLÄRUNG | AUDITED | NO | YES |
@@ -657,16 +657,32 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Agentur für Arbeit module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, running on the shared
   case engine.
-- **CURRENT STATUS:** NOT_STARTED
-- **CURRENT IMPLEMENTATION:** none. No Agentur für Arbeit route, component, form registry, or
-  recipient rule set exists. Related general surfaces exist only as generic modules:
-  `/{locale}/anspruch` (entitlement navigator), `/{locale}/finanzamt` (Finanzamt requests).
-- **REUSE:** shared engines E1–E10 only; no module-specific code to reuse.
-- **MISSING:** information pages, process/form selection, module form registry, required fields,
-  recipient rules, guided questions, official template mapping, cover text, approval flow.
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (implementation, tests and
+  build verified; authenticated browser runtime E2E pending)
+- **CURRENT IMPLEMENTATION:**
+  - `lib/horizon/agentur/registry.ts` — four canonical BA tasks (`arbeitsuchend_melden`,
+    `arbeitslos_melden`, `arbeitslosengeld_beantragen`, `veraenderungen_mitteilen`), each with the
+    current official route, the BA's own links, and task-scoped required/optional fact keys. Every
+    cited page and online service on `arbeitsagentur.de` was retrieved and returned HTTP 200.
+  - `lib/horizon/agentur/mappings.ts` — fact→field mappings for the one fillable official form.
+  - `lib/horizon/agentur/copy.ts` — BG/DE copy, typed so a new task cannot render unlabelled.
+  - `lib/horizon/agentur/actions.ts` — server action recording the chosen task as a confirmed,
+    audited, user-sourced fact on the case.
+  - `components/agentur/agentur-task-panel.tsx` — the in-case surface: choose the task, see the
+    current official route, and reach the official source.
+  - `lib/horizon/pdf/registry.ts` — `AGENTUR_FUER_ARBEIT_TEMPLATES` with the official
+    Veränderungsmitteilung (BA030410, printed revision `GR 22 - 09/2020`), source SHA-256, and
+    measured `acroform` + `xfaHybrid` capability.
+  - `lib/horizon/pdf/actions.ts` and `lib/horizon/case/missing-info.ts` — Agentur mappings wired
+    into the fill path; missing-information derivation is now module- and task-aware.
+- **REUSE:** shared engines E1–E10, the P9 writer/inspection path, and the P5 case spine.
+- **MISSING:** authenticated browser runtime E2E; additional BA form mappings only when a real
+  workflow needs them (coordinates must be measured from the exact template bytes).
+- **SCOPE DECISION (recorded, not a defect):** three of the four tasks are `online_only` or
+  `online_preferred` and expose no official fillable PDF. They are represented as online-only and
+  link to the BA's own service rather than being given an invented PDF equivalent.
 - **DEPENDENCIES:** P5, P6, P7, P8, P9 (and P10/P11 for sign/send).
-- **BLOCKERS:** depends on P9 PDF writer and official template verification; adding PDF
-  dependencies needs owner approval.
+- **BLOCKERS:** none for implementation. Runtime verification requires an authenticated session.
 - **DONE CRITERIA:** information → choose process/form → AI-guided questions → confirmed facts →
   fill the original official German template → German cover text → preview → user review →
   required acknowledgement → explicit approval → PDF download or approved send;

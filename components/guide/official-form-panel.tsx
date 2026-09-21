@@ -2,9 +2,24 @@
 
 import { useActionState } from "react"
 import { prepareOfficialForm, type PdfGenerationState } from "@/lib/horizon/pdf/actions"
-import { FMS_2025_TEMPLATES } from "@/lib/horizon/pdf/registry"
+import { FMS_2025_TEMPLATES, AGENTUR_FUER_ARBEIT_TEMPLATES } from "@/lib/horizon/pdf/registry"
 
 const initialState: PdfGenerationState = { status: null, detail: null, manualPath: null }
+
+/**
+ * Official templates a module may offer.
+ *
+ * A module sees only its own authority's templates. Showing the tax forms inside
+ * an Agentur-für-Arbeit case would invite the user to prepare a form that has
+ * nothing to do with their situation, and a case's module is the one thing that
+ * legitimately narrows this list.
+ */
+function templatesForModule(module: string) {
+  if (module === "agentur_fuer_arbeit" || module === "jobcenter") {
+    return AGENTUR_FUER_ARBEIT_TEMPLATES
+  }
+  return FMS_2025_TEMPLATES
+}
 
 /**
  * P9 — official form preparation.
@@ -23,12 +38,16 @@ const initialState: PdfGenerationState = { status: null, detail: null, manualPat
 export function OfficialFormPanel({
   caseId,
   locale,
+  module,
 }: {
   caseId: string
   locale: string
+  module: string
 }) {
   const [state, action, pending] = useActionState(prepareOfficialForm, initialState)
   const de = locale === "de"
+  const templates = templatesForModule(module)
+  const isTaxModule = templates === FMS_2025_TEMPLATES
 
   const copy = de
     ? {
@@ -106,7 +125,10 @@ export function OfficialFormPanel({
       <form action={action} className="space-y-2">
         <input type="hidden" name="caseId" value={caseId} />
         <input type="hidden" name="locale" value={locale} />
-        <input type="hidden" name="taxYear" value="2025" />
+        {/* Tax forms are year-scoped and only the 2025 set is verified; a BA form
+            carries no tax year, and sending one would be a claim the registry does
+            not make. */}
+        {isTaxModule ? <input type="hidden" name="taxYear" value="2025" /> : null}
 
         <label className="block text-xs font-medium" htmlFor="pdf-template">
           {copy.form}
@@ -115,9 +137,9 @@ export function OfficialFormPanel({
           id="pdf-template"
           name="templateId"
           className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
-          defaultValue={FMS_2025_TEMPLATES[0]?.id}
+          defaultValue={templates[0]?.id}
         >
-          {FMS_2025_TEMPLATES.map((template) => (
+          {templates.map((template) => (
             <option key={template.id} value={template.id}>
               {template.formName}
               {template.formId ? ` (${template.formId})` : ""} · {template.version}

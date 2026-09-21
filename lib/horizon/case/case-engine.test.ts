@@ -20,7 +20,12 @@ import {
   toLegacyStatus,
 } from "./lifecycle"
 import { isCaseModule, moduleFromIntent, resolveCaseModule } from "./module"
-import { deriveMissingInformation } from "./missing-info"
+import {
+  AGENTUR_TASK_FACT_KEY,
+  deriveMissingInformation,
+  requiredKeysFor,
+  selectedAgenturTask,
+} from "./missing-info"
 import { buildApprovalPayload, computeContentHash, isApprovalValid } from "./approval"
 
 describe("case contract vocabularies", () => {
@@ -242,6 +247,52 @@ describe("missing-information derivation", () => {
 
   it("does not require module-specific keys for the explain module", () => {
     expect(deriveMissingInformation([], "unterlagen_erklaeren").complete).toBe(true)
+  })
+
+  it("makes the Agentur module ask for the task before task-specific facts", () => {
+    const base = deriveMissingInformation([], "agentur_fuer_arbeit")
+    expect(base.missingFactKeys).toEqual(["recipient_institution", "claim_type"])
+  })
+
+  it("adds a selected task's own requirements to the module's", () => {
+    const result = deriveMissingInformation(
+      [{ key: AGENTUR_TASK_FACT_KEY, value: "arbeitslosengeld_beantragen" }],
+      "agentur_fuer_arbeit",
+    )
+    expect(result.missingFactKeys).toContain("recipient_institution")
+    expect(result.missingFactKeys).toContain("bank_iban")
+    expect(result.missingFactKeys).toContain("unemployment_start_date")
+  })
+
+  it("does not let one task's requirements leak into another", () => {
+    const melden = deriveMissingInformation(
+      [{ key: AGENTUR_TASK_FACT_KEY, value: "arbeitslos_melden" }],
+      "agentur_fuer_arbeit",
+    )
+    expect(melden.missingFactKeys).not.toContain("bank_iban")
+  })
+
+  it("ignores a task value that is not a known task", () => {
+    const result = deriveMissingInformation(
+      [{ key: AGENTUR_TASK_FACT_KEY, value: "not_a_task" }],
+      "agentur_fuer_arbeit",
+    )
+    expect(result.missingFactKeys).toEqual(["recipient_institution", "claim_type"])
+    expect(selectedAgenturTask([{ key: AGENTUR_TASK_FACT_KEY, value: "not_a_task" }])).toBeNull()
+  })
+
+  /**
+   * Re-selecting a task appends a superseding fact, and `listFacts` returns rows
+   * oldest-first. Resolving to the first match would keep the user's *previous*
+   * choice and silently ask the wrong follow-up questions.
+   */
+  it("resolves the newest task selection, not the oldest", () => {
+    const facts = [
+      { key: AGENTUR_TASK_FACT_KEY, value: "arbeitslos_melden" },
+      { key: AGENTUR_TASK_FACT_KEY, value: "arbeitslosengeld_beantragen" },
+    ]
+    expect(selectedAgenturTask(facts)).toBe("arbeitslosengeld_beantragen")
+    expect(requiredKeysFor("agentur_fuer_arbeit", facts)).toContain("bank_iban")
   })
 })
 

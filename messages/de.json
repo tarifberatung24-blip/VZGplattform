@@ -1,13 +1,13 @@
 {
   "brand": {
-    "name": "HAMMAL by VZG",
+    "name": "HORIZON by VZG",
     "tagline": "Dein digitaler Finanz- und Verwaltungsassistent in Deutschland."
   },
   "nav": {
     "services": "Leistungen",
     "benefits": "Staatliche Hilfen",
     "contracts": "Verträge",
-    "about": "Über HAMMAL by VZG",
+    "about": "Über HORIZON by VZG",
     "help": "Hilfe",
     "login": "Anmelden",
     "register": "Registrieren",
@@ -31,12 +31,12 @@
     "ctaSecondary": "Meine Kosten optimieren",
     "trust": "Kostenlos starten.",
     "promise": "Lass kein Geld liegen.",
-    "promiseSub": "HAMMAL by VZG prüft Verträge, Kosten, Steuermöglichkeiten und mögliche staatliche Hilfen, die für deine Situation relevant sind.",
+    "promiseSub": "HORIZON by VZG prüft Verträge, Kosten, Steuermöglichkeiten und mögliche staatliche Hilfen, die für deine Situation relevant sind.",
     "opportunityTitle": "Wo verlierst du Geld?",
     "opportunitySub": "Wähle, wo wir mit der Prüfung beginnen.",
     "servicesTitle": "Alles für das Leben in Deutschland — an einem Ort",
     "servicesSub": "Werkzeuge, die dir helfen, mehr zu bekommen und weniger zu zahlen.",
-    "howTitle": "So funktioniert HAMMAL by VZG",
+    "howTitle": "So funktioniert HORIZON by VZG",
     "howSub": "Einfach Schritt für Schritt — ohne Verwirrung.",
     "step1Title": "Beantworte ein paar Fragen",
     "step1Desc": "Erzähl uns kurz von deiner Situation. Keine Dokumente, keine Verpflichtung.",
@@ -44,14 +44,14 @@
     "step2Desc": "Wir zeigen dir Steuermöglichkeiten, Hilfen und Verträge, die sich zu prüfen lohnen.",
     "step3Title": "Handle mit Sicherheit",
     "step3Desc": "Wir bereiten Dokumente, Fristen und nächste Schritte vor — klar und verständlich.",
-    "whatTitle": "Wobei HAMMAL by VZG dir hilft",
+    "whatTitle": "Wobei HORIZON by VZG dir hilft",
     "what1": "Welches Geld kann ich rechtmäßig bekommen?",
     "what2": "Wo kann ich meine Kosten senken?",
     "what3": "Wie bewältige ich schwierige Dokumente in Deutschland?",
     "what4": "Welche Verträge und Fristen muss ich im Blick behalten?",
     "finalCtaTitle": "Bereit, deine Möglichkeiten zu prüfen?",
-    "finalCtaDesc": "Erstelle ein kostenloses Profil und speichere deine Ergebnisse in HAMMAL by VZG.",
-    "disclaimer": "HAMMAL by VZG bietet Informationen und Dokumentenvorbereitung. Es ist kein Steuerberater, Rechtsanwalt oder Versicherungsberater. Offizielle Entscheidungen treffen die zuständigen Behörden."
+    "finalCtaDesc": "Erstelle ein kostenloses Profil und speichere deine Ergebnisse in HORIZON by VZG.",
+    "disclaimer": "HORIZON by VZG bietet Informationen und Dokumentenvorbereitung. Es ist kein Steuerberater, Rechtsanwalt oder Versicherungsberater. Offizielle Entscheidungen treffen die zuständigen Behörden."
   },
   "opportunityCards": {
     "taxTitle": "Steuern",
@@ -98,9 +98,9 @@
     }
   },
   "auth": {
-    "loginTitle": "Melde dich bei deinem HAMMAL by VZG-Profil an",
+    "loginTitle": "Melde dich bei deinem HORIZON by VZG-Profil an",
     "loginSubtitle": "Mach dort weiter, wo du aufgehört hast.",
-    "registerTitle": "Erstelle ein kostenloses HAMMAL by VZG-Profil",
+    "registerTitle": "Erstelle ein kostenloses HORIZON by VZG-Profil",
     "registerSubtitle": "Speichere Ergebnisse und entdecke neue Möglichkeiten.",
     "email": "E-Mail",
     "password": "Passwort",
@@ -249,8 +249,8 @@
       "description": "Fordere ein konkretes Angebot an und erhalte eine manuell geprüfte Antwort."
     },
     "about": {
-      "title": "Über HAMMAL by VZG",
-      "description": "HAMMAL by VZG hilft dir, deine finanzielle Situation klarer zu verstehen und gut vorbereitet zu handeln."
+      "title": "Über HORIZON by VZG",
+      "description": "HORIZON by VZG hilft dir, deine finanzielle Situation klarer zu verstehen und gut vorbereitet zu handeln."
     },
     "dashboard": {
       "nextStep": "Nächste Schritte",
@@ -291,7 +291,7 @@
     "saved": "Profil gespeichert."
   },
   "contractWorkspace": {
-    "eyebrow": "Verträge · Kintex Radar",
+    "eyebrow": "Verträge · HORIZON Radar",
     "title": "Verträge sicher erfassen",
     "description": "PDFs werden sicher serverseitig ausgelesen. KI-Vorschläge bleiben unverifiziert, bis du sie bearbeitest und bestätigst.",
     "contracts": "Verträge",
@@ -317,7 +317,7 @@
     "noContracts": "Noch keine Verträge erfasst.",
     "confirmed": "Bestätigt",
     "reviewOpen": "Prüfung offen",
-    "radarNote": "Kintex Radar speichert deduplizierte Signale mit Regelversion. Ohne Betrag oder bestätigte Daten wird keine Ersparnis erfunden.",
+    "radarNote": "HORIZON Radar speichert deduplizierte Signale mit Regelversion. Ohne Betrag oder bestätigte Daten wird keine Ersparnis erfunden.",
     "missingCostNote": "Vertrag/Verträge brauchen noch monatliche Kosten, bevor Radar sie vollständig auswerten kann.",
     "household": "Haushalt",
     "rls": "Der Datenzugriff ist durch Supabase RLS begrenzt.",
@@ -332,7 +332,7 @@
     "extracted": "wurde ausgelesen. Bitte alle Fakten prüfen und bestätigen.",
     "networkError": "Netzwerkfehler bei der Dokumentverarbeitung.",
     "confirmationFailed": "Bestätigung fehlgeschlagen.",
-    "confirmedCreated": "Fakten bestätigt und Vertrag angelegt. Kintex Radar nutzt ihn ab sofort.",
+    "confirmedCreated": "Fakten bestätigt und Vertrag angelegt. HORIZON Radar nutzt ihn ab sofort.",
     "categories": {
       "electricity": "Strom",
       "gas": "Gas",

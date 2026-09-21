@@ -275,16 +275,24 @@ the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
 
 ## P12 — Agentur für Arbeit
 
-- Verified official current forms/process sources
-- Module case flow
-- Document intake
-- Missing-information questions
-- Draft/form generation
-- Review/approval
-- Download/send path
-- Audit/deadline handling
-- End-to-end verification
-- FROZEN
+Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated runtime E2E pending).
+
+- ✅ Verified official current process/form sources — every cited `arbeitsagentur.de` page and
+  online service was re-fetched this session and returned HTTP 200
+- ✅ Module case flow — the chosen task is recorded as a confirmed, audited, user-sourced fact on
+  the shared case spine, and missing-information derivation is module- and task-aware
+  (`requiredKeysFor`), unit-tested including task re-selection
+- ✅ Official template provenance — the Veränderungsmitteilung (BA030410) SHA-256 matches the live
+  BA file byte-for-byte, and every mapped field name was verified to exist in that template's own
+  field list
+- ✅ Form generation for the one fillable official form — plan → write → read-back test proves the
+  confirmed values render in the produced PDF and the source template is unmodified
+- ✅ Online-only processes represented as online-only — three of four tasks expose no official
+  fillable PDF and are shown as online-only with the authority's own link; no PDF was invented
+- ✅ No invented eligibility, deadline, amount, recipient, or form field; checkbox/radio widgets
+  with no evidenced case fact are deliberately left blank and the UI states this
+- ⬜ Authenticated browser end-to-end verification
+- ⬜ FROZEN
 
 ## P13 — Jobcenter
 

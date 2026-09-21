@@ -1,7 +1,7 @@
 import { GuidedWizard } from "@/components/finance/guided-wizard"
 
 export const metadata = {
-  title: "Kindergeld Navigator | KintexBG",
+  title: "Kindergeld Navigator | HORIZON by VZG",
   description: "Структурирана предварителна проверка на формулярите за Kindergeld.",
 }
 

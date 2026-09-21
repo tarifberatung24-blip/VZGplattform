@@ -7,8 +7,10 @@ import { DraftReviewPanel } from "@/components/guide/draft-review-panel"
 import { OfficialFormPanel } from "@/components/guide/official-form-panel"
 import { SendPanel } from "@/components/guide/send-panel"
 import { SignaturePanel } from "@/components/guide/signature-panel"
+import { AgenturTaskPanel } from "@/components/agentur/agentur-task-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
+import { selectedAgenturTask } from "@/lib/horizon/case/missing-info"
 import type {
   CaseApproval,
   CaseAuditEvent,
@@ -139,6 +141,13 @@ export function CaseWorkspace({
 
   return (
     <div className="mt-6 space-y-4">
+      <AgenturTaskPanel
+        caseId={caseId}
+        locale={locale}
+        module={module}
+        selectedTask={selectedAgenturTask(facts)}
+      />
+
       <CaseAssistantPanel caseId={caseId} module={module} locale={locale} />
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -207,7 +216,7 @@ export function CaseWorkspace({
       </Panel>
 
       <Panel title={copy.officialForm} empty={copy.none}>
-        <OfficialFormPanel caseId={caseId} locale={locale} />
+        <OfficialFormPanel caseId={caseId} locale={locale} module={module} />
       </Panel>
 
       <Panel title={copy.draftReview} empty={copy.none}>

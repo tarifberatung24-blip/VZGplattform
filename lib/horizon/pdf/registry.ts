@@ -52,6 +52,24 @@ export type OfficialPdfTemplate = {
   path: string
   /** What the bytes support, as measured — not assumed. */
   capability: PdfFormCapability
+  /**
+   * Version string printed on the form itself, when the form carries one.
+   *
+   * Recorded separately from `version` because an official form's printed
+   * revision (e.g. `GR 22 - 09/2020`) is what an authority recognises, and it is
+   * not the same claim as "the revision this repository retrieved".
+   */
+  printedVersion?: string
+  /**
+   * True when the file carries an XFA packet alongside AcroForm fields.
+   *
+   * Measured, not assumed. The writer (`pdf-lib`) drops the XFA packet when it
+   * saves, so generation yields a plain AcroForm document whose values render.
+   * Recorded because "hybrid" is a material fact about the template: a reader
+   * that renders XFA (Acrobat) must not be used to interpret a filled copy as the
+   * authority's own rendered form.
+   */
+  xfaHybrid?: boolean
 }
 
 /**
@@ -213,9 +231,44 @@ export const FMS_2025_REFERENCE_DOCUMENTS: readonly OfficialPdfTemplate[] = [
   },
 ] as const
 
+/**
+ * Official Agentur-für-Arbeit templates (P12).
+ *
+ * These are *not* tax forms, so `taxYear` is null and they never appear in the
+ * year-scoped picker. `capability: "acroform"` is measured, not assumed: the
+ * field names below were read from these exact bytes, and a filled copy was
+ * verified to render its values.
+ *
+ * The Veränderungsmitteilung is an XFA *hybrid* (`formModel both`): it carries a
+ * 131 KB XFA template packet alongside its 59 AcroForm widgets. This matters
+ * because a reader that renders XFA ignores AcroForm values entirely. The writer
+ * drops the XFA packet on save (verified: `/XFA` is absent from generated
+ * output), so the generated document is a plain AcroForm PDF whose values render
+ * in any viewer. `xfaHybrid: true` records the source's nature so nobody later
+ * mistakes the template for a single-format file.
+ */
+export const AGENTUR_FUER_ARBEIT_TEMPLATES: readonly OfficialPdfTemplate[] = [
+  {
+    id: "ba-veraenderungsmitteilung-alg",
+    authority: "bundesagentur_fuer_arbeit",
+    formName: "Veränderungsmitteilung Arbeitslosengeld",
+    formId: "BA030410",
+    officialSource: "https://www.arbeitsagentur.de/datei/aenderungsmitteilung-alg_ba030410.pdf",
+    taxYear: null,
+    version: "2020-09",
+    printedVersion: "GR 22 - 09/2020 (ID: 5746, BA II 1e)",
+    retrievalDate: "2026-09-21",
+    sourceSha256: "5f8721a5775244b236e1ce865cb13985fba801049ae478d5e670d8a9193b57ad",
+    path: "public/forms/BA_Veraenderungsmitteilung_Arbeitslosengeld_09-2020.pdf",
+    capability: "acroform",
+    xfaHybrid: true,
+  },
+] as const
+
 export const OFFICIAL_PDF_TEMPLATES: readonly OfficialPdfTemplate[] = [
   ...FMS_2025_TEMPLATES,
   ...FMS_2025_REFERENCE_DOCUMENTS,
+  ...AGENTUR_FUER_ARBEIT_TEMPLATES,
 ]
 
 export function findTemplateById(id: string): OfficialPdfTemplate | null {

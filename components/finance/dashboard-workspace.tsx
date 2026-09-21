@@ -37,7 +37,7 @@ export function DashboardWorkspace({ userId, firstName, initialDeadlines }: Prop
     <main className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-          <Link href="/" className="text-lg font-bold tracking-tight text-primary">KintexBG</Link>
+          <Link href="/" className="text-lg font-bold tracking-tight text-primary">HORIZON by VZG</Link>
           <div className="flex items-center gap-2"><Button asChild variant="ghost" size="sm"><Link href="/security"><ShieldCheck className="size-4" /> {de ? "Sicherheit" : "Сигурност"}</Link></Button><form action="/auth/logout" method="post"><Button variant="outline" size="sm">{de ? "Abmelden" : "Изход"}</Button></form></div>
         </div>
       </header>

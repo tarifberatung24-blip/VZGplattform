@@ -18,6 +18,7 @@ import {
   generateAcroFormPdf,
 } from "./writer"
 import { mappingsForTemplate } from "./mappings"
+import { agenturMappingsForTemplate, hasAgenturMappings } from "@/lib/horizon/agentur/mappings"
 import { planOverlayFill } from "./overlay-fill"
 import { staticMappingForTemplate } from "./overlay-map"
 
@@ -144,7 +145,11 @@ export async function prepareOfficialForm(
   const confirmedFactKeys = facts.filter((fact) => fact.confirmedAt).map((fact) => fact.key)
 
   const staticMapping = staticMappingForTemplate(template.id)
-  const mappingVersion = staticMapping?.mappingVersion ?? "acroform-v1"
+  const agenturMapping = hasAgenturMappings(template.id)
+  const acroFormMapping = agenturMapping
+    ? agenturMappingsForTemplate(template.id)
+    : mappingsForTemplate(template.id)
+  const mappingVersion = staticMapping?.mappingVersion ?? (agenturMapping ? "agentur-acroform-v1" : "acroform-v1")
   const generatedAt = new Date().toISOString()
 
   let assignments: { fieldName: string; kind: "text"; value: string }[] = []
@@ -162,7 +167,7 @@ export async function prepareOfficialForm(
       template,
       inspection: inspected.inspection,
       taxYear,
-      mappings: mappingsForTemplate(template.id),
+      mappings: acroFormMapping,
       facts,
       confirmedFactKeys,
     })

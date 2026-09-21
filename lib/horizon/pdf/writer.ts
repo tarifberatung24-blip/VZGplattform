@@ -70,12 +70,19 @@ export type FieldReader = () => Promise<readonly string[] | null>
  * returns `null`, which the capability detector treats as "no exposed fields" —
  * the conservative interpretation that leads to a refusal rather than a
  * guess.
+ *
+ * The reader is handed a *copy* of the bytes. pdf.js transfers ownership of the
+ * `data` it is given and detaches the underlying buffer on cleanup, so passing the
+ * caller's array would leave it zero-length afterwards. Callers read field names
+ * and then hash and fill the same bytes, so that detachment previously turned every
+ * official form into a spurious `source_hash_mismatch`. Copying here keeps the
+ * caller's bytes intact and is the only place that needs to know about this.
  */
 export async function readAcroFormFieldNames(bytes: Uint8Array): Promise<readonly string[] | null> {
   try {
     const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs")
     const document = await pdfjs.getDocument({
-      data: bytes,
+      data: new Uint8Array(bytes),
       useSystemFonts: false,
     }).promise
     try {

@@ -89,7 +89,7 @@ export function ProductOpportunityBoard() {
             Finde die Hebel, die <span className="text-primary">wirklich zählen.</span>
           </h1>
           <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
-            KintexBG sammelt nur die Angaben, die fuer ein echtes Angebot gebraucht werden. Danach geht die Anfrage an den n8n Workflow und wird manuell bearbeitet.
+            HORIZON by VZG sammelt nur die Angaben, die fuer ein echtes Angebot gebraucht werden. Danach geht die Anfrage an den n8n Workflow und wird manuell bearbeitet.
           </p>
         </div>
 
