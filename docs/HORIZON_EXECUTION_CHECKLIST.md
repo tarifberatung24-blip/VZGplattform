@@ -1,17 +1,17 @@
 # HORIZON by VZG — Execution Checklist
 
-Това е простият работен списък за проекта.
+This is the simple work list for the project.
 
-Правило:
-- ✅ = готово и проверено
-- Всичко без ✅ още трябва да се направи или потвърди.
+Rule:
+- ✅ = Done and verified
+- Everything except ✅ ...still needs to be done or confirmed.
 
 Canonical architecture: `docs/HORIZON_MASTER_MAP.md`  
 Canonical phase status: `docs/HORIZON_BUILD_LEDGER.md`
 
-Този checklist не отменя Master Map, Build Ledger или governance правилата.
+This checklist does not supersede the Master Map, the Build Ledger, or the governance rules.
 
-## Текуща позиция
+## Current position
 
 - ✅ P0 governance/map foundation
 - ✅ Phase-scoped context loader
