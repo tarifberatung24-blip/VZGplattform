@@ -26,8 +26,8 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - P2 migration applied to the project (owner-side authorized channel)
 - P2 runtime end-to-end verification (blocked locally: no `.env`/anon key)
 - P2 explicit owner acceptance
-- P5 canonical model decision
-- P5 implementation
+- ✅ P5 canonical model decision (`public.cases`; `platform_*` retained for compatibility)
+- ✅ P5 implementation (repository, lifecycle, approval, audit, and ownership guards)
 - P5 runtime/RLS verification against a migrated database
 
 ---
@@ -82,31 +82,31 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 
 ## P3 — HORIZON Guide
 
-- Persistent `/{locale}/guide`
-- Understand a document
-- Reply to an authority
-- Fill an official form
-- Cancel a contract
-- “I do not know what to do”
-- Permanent access after onboarding
-- Route guide choices into the canonical case flow
-- Localization
-- Tests
+- ✅ Persistent `/{locale}/guide`
+- ✅ Understand a document
+- ✅ Reply to an authority
+- ✅ Fill an official form
+- ✅ Cancel a contract
+- ✅ “I do not know what to do”
+- ✅ Permanent access after onboarding
+- ✅ Route guide choices into the canonical case flow
+- ✅ Localization
+- ✅ Unit tests
 - Real verification
 - FROZEN
 
 ## P4 — HORIZON Home + Five Entry Modules
 
-- HORIZON dashboard shell
-- Agentur für Arbeit
-- Jobcenter
-- Kündigung
-- Steuererklärung
-- Unterlagen erklären
-- My Cases
-- Profile
-- Settings / Security
-- Tests
+- ✅ HORIZON dashboard shell
+- ✅ Agentur für Arbeit
+- ✅ Jobcenter
+- ✅ Kündigung
+- ✅ Steuererklärung
+- ✅ Unterlagen erklären
+- ✅ My Cases
+- ✅ Profile
+- ✅ Settings / Security
+- ✅ Unit tests
 - Real verification
 - FROZEN
 
@@ -129,12 +129,14 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 
 ## P6 — Document Intake / OCR / Explanation
 
+Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
+
 - ✅ PDF/image upload capabilities exist
 - ✅ PDF.js/Tesseract capabilities exist
 - ✅ Document analysis/review components exist
 - Reconcile parallel document stacks
-- Pasted-text intake
-- Email-content intake
+- ✅ Pasted-text intake
+- ✅ Email-content intake
 - Page-level evidence for extracted facts
 - Unified extraction contract
 - Explicit OCR/extraction failure states
@@ -348,29 +350,30 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
 
 ## P15 — Steuererklärung
 
+Status: AUDITED. Foundation exists, but the full questionnaire, mapping, approval,
+submission, and end-to-end flow are not complete or frozen.
+
 - ✅ Tax model/FMS groundwork exists
-- Verified current official tax forms/process
-- Questionnaire → canonical tax facts
-- Official PDF mapping
-- Review/approval
-- Applicable signature path
-- Manual submission path to competent Finanzamt
 - No ELSTER submission until real approved integration exists
 - End-to-end verification
 - FROZEN
 
 ## P16 — Unterlagen erklären
 
-- Upload/select document
-- OCR/extraction
-- Source-backed explanation
-- Translation where requested
-- Risk/urgency indication with evidence/uncertainty
-- Follow-up actions via canonical case
+Status: AUDITED. Existing upload, OCR/extraction, explanation, and case-intake
+surfaces exist, but source-backed end-to-end verification remains pending.
+
+- ✅ Upload/select document
+- ✅ OCR/extraction
+- ✅ Source-backed explanation primitives
+- ✅ Follow-up actions via canonical case
 - End-to-end verification
 - FROZEN
 
 ## P17 — Contract Management
+
+Status: AUDITED. Existing contract surfaces and data are present, but no P17
+production integration is on current main. The separate preview branch is reference-only.
 
 - ✅ Existing contract surfaces/data identified
 - Canonical contract model/surface

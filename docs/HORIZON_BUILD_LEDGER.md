@@ -2,7 +2,7 @@
 
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
-Base: `main` @ `f6a8eb777e630106c934856a74de3796c1ad506c`
+Base: `origin/main` @ `731d7c688b095a6ab5a406ea291be43576b10828`
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -54,9 +54,9 @@ after a module meets the full DONE definition.
 | P12 | AGENTUR FÜR ARBEIT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P13 | JOBCENTER | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (shipped `0fb190a`; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
-| P15 | STEUERERKLÄRUNG | AUDITED | NO | YES |
-| P16 | UNTERLAGEN ERKLÄREN | AUDITED | NO | YES |
-| P17 | CONTRACT MANAGEMENT | AUDITED | NO | YES |
+| P15 | STEUERERKLÄRUNG | AUDITED — FOUNDATION PRESENT, IMPLEMENTATION NOT COMPLETE | NO | YES |
+| P16 | UNTERLAGEN ERKLÄREN | AUDITED — EXISTING INTAKE/EXPLANATION SURFACES, E2E PENDING | NO | YES |
+| P17 | CONTRACT MANAGEMENT | AUDITED — PRODUCTION WORK NOT INTEGRATED; PREVIEW REFERENCE ONLY | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -231,7 +231,7 @@ after a module meets the full DONE definition.
   `missing-information-interviewer`, `dashboard-layout`, `user-sidebar`, `module-page`,
   `module-workspaces`, `smartDashboardRules`.
 - **MISSING:** runtime verification with an authenticated session; the dashboard still renders
-  legacy KintexBG-era cards alongside the HORIZON module entry, and
+  legacy-era cards alongside the HORIZON module entry, and
   `lib/kintex-navigation.ts` retains 10 modules (several flagged `planned`) that are not part of
   the HORIZON five; no route-level test of the dashboard.
 - **DEPENDENCIES:** P0, P2 (onboarding), P5 (case engine).
