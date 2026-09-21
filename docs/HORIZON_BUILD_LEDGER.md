@@ -55,7 +55,7 @@ after a module meets the full DONE definition.
 | P13 | JOBCENTER | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (shipped `0fb190a`; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P15 | STEUERERKLÄRUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year registry + case wiring shipped; tests/build verified; authenticated runtime E2E pending) | NO | YES |
-| P16 | UNTERLAGEN ERKLÄREN | AUDITED | NO | YES |
+| P16 | UNTERLAGEN ERKLÄREN | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis engine + panel shipped; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P17 | CONTRACT MANAGEMENT | AUDITED | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
@@ -799,7 +799,22 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Unterlagen erklären module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/documents` and `/{locale}/office/cases/{id}`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis
+  engine and case panel shipped; unit tests and build verified; authenticated runtime E2E pending).
+- **ADDED THIS PHASE:** `lib/horizon/unterlagen/deadline.ts` (three-way deadline evidence:
+  `printed` with the verbatim line quoted, `calculated` only from a period the document itself
+  states plus a reference date it states and always flagged for user verification, `unknown`
+  otherwise — no German statutory period is hardcoded, and an impossible printed date or a period
+  with no reference date yields no date), `lib/horizon/unterlagen/classify.ts` (classification
+  from printed cues with the matching line quoted, `unclear` rather than a nearest guess, plus
+  three asymmetric risk states whose caveats say what was *checked* rather than what is *true*),
+  `lib/horizon/unterlagen/analysis.ts` (assembles the above from stored page text; a model may
+  later explain this output but never produces it), `lib/horizon/unterlagen/copy.ts` (BG + DE),
+  `components/unterlagen/unterlagen-panel.tsx` (classification with a user-correction control,
+  deadline with evidence kind and quote, risk state with caveat, one next action),
+  `lib/horizon/unterlagen/actions.ts` (records a user correction as a confirmed fact),
+  `CaseEngineRepository.listDocumentPages` (reads existing `document_pages` under the existing
+  `document_pages_read_own` policy). 48 unit tests.
 - **CURRENT IMPLEMENTATION:** document upload with validation, extraction, Tesseract OCR,
   Groq/Cerebras analysis, fact confirmation, signed URLs, and explanation components
   (`document-intake`, `document-explanation`, `document-facts-review`, `documents-workspace`).

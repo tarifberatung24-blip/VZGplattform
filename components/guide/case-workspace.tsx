@@ -11,6 +11,7 @@ import { AgenturTaskPanel } from "@/components/agentur/agentur-task-panel"
 import { JobcenterTaskPanel } from "@/components/jobcenter/jobcenter-task-panel"
 import { KuendigungPanel } from "@/components/kuendigung/kuendigung-panel"
 import { SteuerPanel } from "@/components/steuer/steuer-panel"
+import { UnterlagenPanel } from "@/components/unterlagen/unterlagen-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
 import {
@@ -39,6 +40,8 @@ export type CaseWorkspaceProps = {
   missing: MissingInformation | null
   approvals: readonly CaseApproval[]
   audit: readonly CaseAuditEvent[]
+  /** P16: combined extracted text of the case's documents, or "" when none. */
+  documentText?: string
 }
 
 function Panel({
@@ -88,6 +91,7 @@ export function CaseWorkspace({
   missing,
   approvals,
   audit,
+  documentText,
 }: CaseWorkspaceProps) {
   const de = locale === "de"
 
@@ -181,6 +185,15 @@ export function CaseWorkspace({
         facts={facts}
         drafts={drafts}
         approvals={approvals}
+      />
+
+      <UnterlagenPanel
+        caseId={caseId}
+        locale={locale}
+        module={module}
+        documentText={documentText ?? ""}
+        facts={facts}
+        unconfirmedFactCount={missing?.unconfirmedCriticalFactKeys.length ?? 0}
       />
 
       <CaseAssistantPanel caseId={caseId} module={module} locale={locale} />

@@ -21,7 +21,7 @@ export default async function GuideCasePage({
   // which keeps case existence from leaking across accounts.
   if (loaded.error || !loaded.data) notFound()
 
-  const [documents, facts, drafts, tasks, missing, approvals, audit] = await Promise.all([
+  const [documents, facts, drafts, tasks, missing, approvals, audit, pages] = await Promise.all([
     engine.repository!.listDocuments(caseId),
     engine.repository!.listFacts(caseId),
     engine.repository!.listDrafts(caseId),
@@ -29,7 +29,13 @@ export default async function GuideCasePage({
     engine.repository!.getMissingInformation(caseId),
     engine.repository!.listApprovals(caseId),
     engine.repository!.listAudit(caseId),
+    engine.repository!.listDocumentPages(caseId),
   ])
+
+  // P16 reads the extracted page text the document stack already stored. A case
+  // with no extracted pages yields "", which the analysis reports as unanalysable
+  // rather than as a document with no deadline and no risk.
+  const documentText = (pages.data ?? []).map((page) => page.text).join("\n\n")
 
   const copy = getGuideCopy(locale)
 
@@ -65,6 +71,7 @@ export default async function GuideCasePage({
           missing={missing.data ?? null}
           approvals={approvals.data ?? []}
           audit={audit.data ?? []}
+          documentText={documentText}
         />
       </div>
     </main>

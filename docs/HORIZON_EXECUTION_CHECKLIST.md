@@ -364,13 +364,19 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
 
 ## P16 — Unterlagen erklären
 
-- Upload/select document
-- OCR/extraction
-- Source-backed explanation
-- Translation where requested
-- Risk/urgency indication with evidence/uncertainty
-- Follow-up actions via canonical case
-- End-to-end verification
+- ✅ Upload/select document (existing P6 stack: PDF, photo, screenshot, pasted text, email content)
+- ✅ OCR/extraction (existing P6 stack; pages read through the existing `document_pages_read_own` policy)
+- ✅ Classification from printed cues, with the matching line quoted, and `unclear` instead of a nearest guess
+- ✅ User correction of the classification, recorded as a confirmed fact and audited as a correction
+- ✅ Three-way deadline evidence: `printed` (quoted), `calculated` (only from a period the document itself states, always flagged for verification), `unknown`
+- ✅ No German statutory period is hardcoded; a period with no reference date yields no date; an impossible printed date is refused
+- ✅ Risk indication with three asymmetric states whose caveats state what was checked, not what is true
+- ✅ No accusation of fraud or wrongdoing in any state
+- ✅ One next action derived from the evidence, with `no_action_evident` rather than invented work
+- ✅ Official German documents stay in German; the explanation explains rather than producing an official translation
+- ✅ Follow-up via the canonical case (P8 review/approval, P10 signature, P11 send reused)
+- 48 unit tests pass (`lib/horizon/unterlagen/unterlagen.test.ts`); tsc/lint/i18n/build green
+- Authenticated runtime E2E (deferred to the consolidated pass after P17)
 - FROZEN
 
 ## P17 — Contract Management
