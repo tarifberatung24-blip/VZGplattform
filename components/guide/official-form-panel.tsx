@@ -2,7 +2,11 @@
 
 import { useActionState } from "react"
 import { prepareOfficialForm, type PdfGenerationState } from "@/lib/horizon/pdf/actions"
-import { FMS_2025_TEMPLATES, AGENTUR_FUER_ARBEIT_TEMPLATES } from "@/lib/horizon/pdf/registry"
+import {
+  FMS_2025_TEMPLATES,
+  AGENTUR_FUER_ARBEIT_TEMPLATES,
+  JOBCENTER_TEMPLATES,
+} from "@/lib/horizon/pdf/registry"
 
 const initialState: PdfGenerationState = { status: null, detail: null, manualPath: null }
 
@@ -15,8 +19,11 @@ const initialState: PdfGenerationState = { status: null, detail: null, manualPat
  * legitimately narrows this list.
  */
 function templatesForModule(module: string) {
-  if (module === "agentur_fuer_arbeit" || module === "jobcenter") {
+  if (module === "agentur_fuer_arbeit") {
     return AGENTUR_FUER_ARBEIT_TEMPLATES
+  }
+  if (module === "jobcenter") {
+    return JOBCENTER_TEMPLATES
   }
   return FMS_2025_TEMPLATES
 }

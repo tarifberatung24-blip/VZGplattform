@@ -265,10 +265,59 @@ export const AGENTUR_FUER_ARBEIT_TEMPLATES: readonly OfficialPdfTemplate[] = [
   },
 ] as const
 
+/**
+ * Official Jobcenter (SGB II) templates (P13).
+ *
+ * Both are plain AcroForm documents — no XFA packet, no `/Widget` marker in the
+ * downloadable file — with stable, human-readable field names, so they are filled
+ * by field name rather than by coordinate overlay. Capability is measured from
+ * these exact bytes, not assumed.
+ *
+ * `taxYear` is null: these are benefit forms, not tax forms, and they must never
+ * appear in the tax-year picker.
+ *
+ * Terminology note: the BA's transition (effective 01.07.2026) renamed the cash
+ * benefit to Grundsicherungsgeld but explicitly keeps already-issued forms valid,
+ * so these 04/2026 forms still print "Bürgergeld". `formName` records the printed
+ * title because that is what the authority recognises; the printed revision is
+ * recorded separately in `printedVersion`.
+ */
+export const JOBCENTER_TEMPLATES: readonly OfficialPdfTemplate[] = [
+  {
+    id: "jobcenter-hauptantrag",
+    authority: "jobcenter",
+    formName: "Hauptantrag Bürgergeld",
+    formId: "Jobcenter-HA",
+    officialSource: "https://www.arbeitsagentur.de/datei/antrag-sgb2_ba042689.pdf",
+    taxYear: null,
+    version: "2026-04",
+    printedVersion: "Jobcenter-HA - 04/2026",
+    retrievalDate: "2026-09-21",
+    sourceSha256: "5901f5fb3ab2d3d1be882326b5f016183bde902f5baa0d9dc4caf907f1707282",
+    path: "public/forms/Jobcenter_HA_Hauptantrag_04-2026.pdf",
+    capability: "acroform",
+  },
+  {
+    id: "jobcenter-weiterbewilligung",
+    authority: "jobcenter",
+    formName: "Weiterbewilligungsantrag (WBA)",
+    formId: "Jobcenter-WBA",
+    officialSource: "https://www.arbeitsagentur.de/datei/weiterbewilligung-sgb2_ba042699.pdf",
+    taxYear: null,
+    version: "2026-04",
+    printedVersion: "Jobcenter-WBA - 04/2026",
+    retrievalDate: "2026-09-21",
+    sourceSha256: "4920513e6cc2efe9d9df29eed9906a48c31c5cc1a22c101637a2d026e02489d7",
+    path: "public/forms/Jobcenter_WBA_Weiterbewilligung_04-2026.pdf",
+    capability: "acroform",
+  },
+] as const
+
 export const OFFICIAL_PDF_TEMPLATES: readonly OfficialPdfTemplate[] = [
   ...FMS_2025_TEMPLATES,
   ...FMS_2025_REFERENCE_DOCUMENTS,
   ...AGENTUR_FUER_ARBEIT_TEMPLATES,
+  ...JOBCENTER_TEMPLATES,
 ]
 
 export function findTemplateById(id: string): OfficialPdfTemplate | null {

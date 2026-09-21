@@ -8,9 +8,10 @@ import { OfficialFormPanel } from "@/components/guide/official-form-panel"
 import { SendPanel } from "@/components/guide/send-panel"
 import { SignaturePanel } from "@/components/guide/signature-panel"
 import { AgenturTaskPanel } from "@/components/agentur/agentur-task-panel"
+import { JobcenterTaskPanel } from "@/components/jobcenter/jobcenter-task-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
-import { selectedAgenturTask } from "@/lib/horizon/case/missing-info"
+import { selectedAgenturTask, selectedJobcenterTask } from "@/lib/horizon/case/missing-info"
 import type {
   CaseApproval,
   CaseAuditEvent,
@@ -146,6 +147,14 @@ export function CaseWorkspace({
         locale={locale}
         module={module}
         selectedTask={selectedAgenturTask(facts)}
+      />
+
+      <JobcenterTaskPanel
+        caseId={caseId}
+        locale={locale}
+        module={module}
+        selectedTask={selectedJobcenterTask(facts)}
+        facts={facts}
       />
 
       <CaseAssistantPanel caseId={caseId} module={module} locale={locale} />

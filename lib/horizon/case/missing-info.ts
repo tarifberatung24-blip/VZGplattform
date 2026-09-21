@@ -1,5 +1,9 @@
 import type { MissingInformation } from "./contract"
 import { isAgenturTask, requiredFactKeysForTask } from "../agentur/registry"
+import {
+  isJobcenterTask,
+  requiredFactKeysForJobcenterTask,
+} from "../jobcenter/registry"
 
 /**
  * Required fact keys per module. A key is "required" only in the sense that the
@@ -25,6 +29,16 @@ export const REQUIRED_FACT_KEYS: Record<string, readonly string[]> = {
  * reload and appears in the audit trail like every other input.
  */
 export const AGENTUR_TASK_FACT_KEY = "agentur_task"
+
+/**
+ * The fact key under which a Jobcenter task selection is stored.
+ *
+ * Separate from the Agentur key so the same case cannot confuse a BA claim with a
+ * Jobcenter claim: the two authorities have different forms and different
+ * processes, and merging the selections would let one module's task answer the
+ * other's questions.
+ */
+export const JOBCENTER_TASK_FACT_KEY = "jobcenter_task"
 
 /**
  * The most recently created fact for a key.
@@ -58,12 +72,20 @@ export function requiredKeysFor(
   facts: readonly { key: string; value?: string }[],
 ): readonly string[] {
   const base = REQUIRED_FACT_KEYS[module] ?? []
-  if (module !== "agentur_fuer_arbeit") return base
 
-  const taskFact = latestFactWithKey(facts, AGENTUR_TASK_FACT_KEY)
-  if (!taskFact || !isAgenturTask(taskFact.value)) return base
+  if (module === "agentur_fuer_arbeit") {
+    const taskFact = latestFactWithKey(facts, AGENTUR_TASK_FACT_KEY)
+    if (!taskFact || !isAgenturTask(taskFact.value)) return base
+    return [...new Set([...base, ...requiredFactKeysForTask(taskFact.value)])]
+  }
 
-  return [...new Set([...base, ...requiredFactKeysForTask(taskFact.value)])]
+  if (module === "jobcenter") {
+    const taskFact = latestFactWithKey(facts, JOBCENTER_TASK_FACT_KEY)
+    if (!taskFact || !isJobcenterTask(taskFact.value)) return base
+    return [...new Set([...base, ...requiredFactKeysForJobcenterTask(taskFact.value)])]
+  }
+
+  return base
 }
 
 /** The Agentur task recorded on a case, when one has been chosen. */
@@ -73,6 +95,15 @@ export function selectedAgenturTask(
   const taskFact = latestFactWithKey(facts, AGENTUR_TASK_FACT_KEY)
   if (!taskFact) return null
   return isAgenturTask(taskFact.value) ? taskFact.value : null
+}
+
+/** The Jobcenter task recorded on a case, when one has been chosen. */
+export function selectedJobcenterTask(
+  facts: readonly { key: string; value?: string }[],
+): string | null {
+  const taskFact = latestFactWithKey(facts, JOBCENTER_TASK_FACT_KEY)
+  if (!taskFact) return null
+  return isJobcenterTask(taskFact.value) ? taskFact.value : null
 }
 
 /**

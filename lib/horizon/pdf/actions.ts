@@ -19,6 +19,7 @@ import {
 } from "./writer"
 import { mappingsForTemplate } from "./mappings"
 import { agenturMappingsForTemplate, hasAgenturMappings } from "@/lib/horizon/agentur/mappings"
+import { jobcenterMappingsForTemplate, hasJobcenterMappings } from "@/lib/horizon/jobcenter/mappings"
 import { planOverlayFill } from "./overlay-fill"
 import { staticMappingForTemplate } from "./overlay-map"
 
@@ -146,10 +147,19 @@ export async function prepareOfficialForm(
 
   const staticMapping = staticMappingForTemplate(template.id)
   const agenturMapping = hasAgenturMappings(template.id)
+  const jobcenterMapping = hasJobcenterMappings(template.id)
   const acroFormMapping = agenturMapping
     ? agenturMappingsForTemplate(template.id)
-    : mappingsForTemplate(template.id)
-  const mappingVersion = staticMapping?.mappingVersion ?? (agenturMapping ? "agentur-acroform-v1" : "acroform-v1")
+    : jobcenterMapping
+      ? jobcenterMappingsForTemplate(template.id)
+      : mappingsForTemplate(template.id)
+  const mappingVersion =
+    staticMapping?.mappingVersion ??
+    (agenturMapping
+      ? "agentur-acroform-v1"
+      : jobcenterMapping
+        ? "jobcenter-acroform-v1"
+        : "acroform-v1")
   const generatedAt = new Date().toISOString()
 
   let assignments: { fieldName: string; kind: "text"; value: string }[] = []
