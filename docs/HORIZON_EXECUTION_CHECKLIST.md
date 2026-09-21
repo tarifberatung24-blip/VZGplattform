@@ -296,28 +296,55 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
 
 ## P13 — Jobcenter
 
-- Verified official current forms/process sources
-- Module case flow
-- Main application + relevant appendices mapping
-- Document intake
-- Missing-information questions
-- Review/approval
-- Download/send path
-- End-to-end verification
-- FROZEN
+Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated runtime E2E pending).
+
+Shipped in `0fb190a` (13 files, +1276 −9); CI green and live on Render at that revision.
+
+- ✅ Verified official current process/form sources — the BA's application, continuation, change
+  and Anlage pages, plus the `jobcenter.digital` online services, were re-fetched and cited in
+  `JOBCENTER_OFFICIAL_SOURCES`
+- ✅ Module case flow — the chosen task is recorded as a confirmed, audited, user-sourced fact on
+  the shared case spine; missing-information derivation is task-aware
+- ✅ Online-first fact recorded, not converted — the BA states the application is not tied to a
+  form, so the online service is shown as recommended while the 04/2026 paper form stays valid
+- ✅ No form manufactured for the online-only path — the current SGB II Veränderungsmitteilung has
+  no public PDF, so that task exposes none rather than reusing a retired form
+- ✅ Conditional, not universal, Anlagen — an Anlage is selected only from confirmed case facts;
+  absent or unconfirmed facts activate nothing
+- ✅ Official form generation for the fillable entry (Hauptantrag) through P9, with
+  `lib/horizon/jobcenter/registry.test.ts` (39 tests) covering selection and refusal branches
+- ✅ No invented eligibility, deadline, benefit amount, authority, recipient or form field
+- ⬜ Authenticated browser end-to-end verification
+- ⬜ FROZEN
 
 ## P14 — Kündigung
 
-- Upload/select contract
-- Extract evidenced contract facts
-- Source-backed termination data
-- Explanation
-- Kündigungsschreiben
-- Preview/review/approval
-- Optional signature
-- Download/send
-- Audit
-- FROZEN
+Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated runtime E2E pending).
+
+- ✅ Contract facts read from confirmed facts only — an unconfirmed provider address or contact
+  never reaches the letter, and a later confirmed answer supersedes an earlier one
+- ✅ Deadline discipline — a Kündigungsfrist or Vertragsende is produced only when the document
+  states it or the user has verified it themselves; otherwise the result is `unconfirmed` and the
+  letter uses open wording
+- ✅ One calculation rule, implemented and tested — the § 309 Nr. 9 BGB ceiling is computed and
+  labelled as a legal bound requiring the user's own verification, never as a contractual date
+- ✅ "Zum nächstmöglichen Zeitpunkt" is never converted into a date, even when a start date exists
+- ✅ Deterministic German letter — no model, no clock read inside the generator; the same facts
+  and day produce identical text
+- ✅ Real letter PDF via the existing approved writer (`pdf-lib`), byte-identical for identical
+  input so approval cannot break on a regeneration; non-WinAnsi characters are refused, not
+  transliterated
+- ✅ Provenance in the approved draft body — output SHA-256, the facts used and the timing decision
+  are inside the text P8 hashes, so `Content changed since approval` invalidates a stale approval
+- ✅ No claim of completed cancellation — the letter states it is not sent and that only the
+  provider's confirmation ends the contract
+- ✅ Signature refused for the self-drawn letter — no verified placement exists for a
+  non-official artifact, so P10 is not invoked rather than drawing at a guessed position
+- ✅ No invented provider address or email — a send is refused without a recorded, confirmed
+  recipient; the recipient is never derived
+- ✅ Tests — `lib/horizon/kuendigung/kuendigung.test.ts` (44 tests)
+- ⬜ Authenticated browser end-to-end verification (letter preparation, approval, download)
+- ⬜ FROZEN
 
 ## P15 — Steuererklärung
 

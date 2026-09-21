@@ -52,8 +52,8 @@ after a module meets the full DONE definition.
 | P10 | SIGNATURE ENGINE | IN_PROGRESS — VISUAL SIGNATURE VERIFIED FOR REFERENCE TEMPLATE — NOT DONE | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (SMTP transport implemented; no real provider configured, runtime E2E pending) | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
-| P13 | JOBCENTER | NOT_STARTED | NO | YES |
-| P14 | KÜNDIGUNG | NOT_STARTED | NO | YES |
+| P13 | JOBCENTER | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (shipped `0fb190a`; tests/build verified; authenticated runtime E2E pending) | NO | YES |
+| P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P15 | STEUERERKLÄRUNG | AUDITED | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | AUDITED | NO | YES |
 | P17 | CONTRACT MANAGEMENT | AUDITED | NO | YES |
@@ -696,14 +696,19 @@ after a module meets the full DONE definition.
 - **ID:** P13
 - **SYSTEM:** Jobcenter module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
-- **CURRENT STATUS:** NOT_STARTED
-- **CURRENT IMPLEMENTATION:** none for Jobcenter specifically. `/{locale}/anspruch` and
-  `benefit_cases` are the only adjacent benefit surfaces.
-- **REUSE:** shared engines E1–E10; `benefit_cases`, `anspruch` navigator, `module-workspaces`.
-- **MISSING:** Jobcenter information, knowledge, form registry, required fields, recipient rules,
-  guided questions, official template mapping, approval flow. No duplicated engine may be built.
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE (authenticated runtime E2E pending).
+- **CURRENT IMPLEMENTATION:** shipped as a launch vertical slice on the existing engines:
+  `lib/horizon/jobcenter/` (task registry, official-source citations, conditional Anlagen,
+  copy, `selectJobcenterTask` action), `components/jobcenter/jobcenter-task-panel.tsx`, the
+  task-aware `requiredKeysFor`/`selectedJobcenterTask` in `lib/horizon/case/missing-info.ts`,
+  the Jobcenter PDF entries in `lib/horizon/pdf/{registry,actions}.ts`, and the official
+  04/2026 Jobcenter PDFs. The chosen task is recorded as a confirmed, audited fact on the case
+  spine; the online-first fact is represented as such rather than converted to a paper form.
+- **REUSE:** shared engines E1–E10; the P12 module pattern; `lib/horizon/pdf/` for the one
+  fillable official form.
+- **MISSING:** authenticated browser end-to-end verification.
 - **DEPENDENCIES:** P5, P6, P7, P8, P9, and P12 (Agentur für Arbeit pattern).
-- **BLOCKERS:** depends on P12 establishing the reusable module pattern and P9 PDF writer.
+- **BLOCKERS:** none technical.
 - **DONE CRITERIA:** the Agentur für Arbeit workflow is reproduced using the same shared engines,
   with Jobcenter-specific form registry, required fields, and recipient rules;
   no duplicated backend; tests, build, real verification pass.
@@ -716,16 +721,20 @@ after a module meets the full DONE definition.
 - **ID:** P14
 - **SYSTEM:** Kündigung module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
-- **CURRENT STATUS:** NOT_STARTED
-- **CURRENT IMPLEMENTATION:** none as a module. Adjacent reusable material:
-  `/{locale}/vertraege` contracts workspace, `lib/contracts/extraction.ts`,
-  `lib/kintex-radar.ts` (deterministic cancellation-deadline signals), and the
-  `cancellation` case intent in `lib/office/supabase/database.ts`.
-- **REUSE:** contracts workspace, contract extraction, radar date logic, `contracts` table
-  (`end_date`, `cancellation_deadline`), `case_messages`, `correspondence_drafts`.
-- **MISSING:** contract upload/select into a Kündigung case, termination-fact extraction with
-  evidence, Kündigungsschreiben generation, preview, approval, optional signature,
-  download/send.
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE (authenticated runtime E2E pending).
+- **CURRENT IMPLEMENTATION:** a launch vertical slice on the existing engines:
+  `lib/horizon/kuendigung/facts.ts` (confirmed-fact reading, the timing taxonomy and the single
+  § 309 Nr. 9 BGB calculation rule), `letter.ts` (deterministic German letter),
+  `manifest.ts` (provenance embedded in the approved draft body), `copy.ts` (de/bg),
+  `actions.ts` (`prepareKuendigungDraft`), `components/kuendigung/kuendigung-panel.tsx`, and
+  `lib/horizon/pdf/letter-writer.ts` (real PDF via the already-approved `pdf-lib`).
+  Adjacent reusable material from the audit is reused, not rebuilt: the contracts workspace,
+  `lib/contracts/extraction.ts`, radar date logic and the `cancellation` case intent.
+- **REUSE:** contracts workspace, contract extraction, radar date logic, `contracts` table,
+  `case_messages`, `correspondence_drafts`, P8 approval, P9 PDF writer, P10/P11 gates.
+- **MISSING:** authenticated browser end-to-end verification of prepare → review → approve →
+  download. Visual signature of the generated letter is deliberately not offered (no verified
+  placement exists for a self-drawn artifact).
 - **DEPENDENCIES:** P5, P6, P7, P8, P9 (optional P10/P11).
 - **BLOCKERS:** `DOCUMENT_FEASIBILITY_AUDIT.md` states that preparing a cancellation draft and
   checklist is acceptable, but sending requires explicit user approval and a configured lawful
