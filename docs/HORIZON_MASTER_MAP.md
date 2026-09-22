@@ -20,6 +20,101 @@ This document is the single canonical TARGET build map. Implementation status li
 
 This document does not authorize implementation. It records facts and target design only.
 
+## Product North Star — Control → Optimization → Capital
+
+HORIZON by VZG is not only an administrative assistant. Its long-term product direction is a
+**management control center for contracts, recurring mandatory expenses, important dates, and
+personal financial decisions for people living in Germany**.
+
+### Core customer outcome — know, control, optimize
+
+The user should be able to see and manage, in one place:
+
+- which contracts they currently have and with which providers;
+- what each contract costs per month / year;
+- contract start and end dates where evidenced;
+- cancellation deadlines (Kündigungsfrist) where evidenced;
+- price-guarantee periods (Preisgarantie) where evidenced;
+- renewal / review dates and other important lifecycle events;
+- which facts are confirmed, which are missing, and which need user verification.
+
+The product lifecycle is:
+
+```text
+DISCOVER → TRACK → WARN → COMPARE → OPTIMIZE → RENEW
+```
+
+HORIZON should help the user reduce avoidable recurring costs over time by surfacing relevant
+alternatives from approved partner / affiliate networks when a contract, guarantee period, or
+financial product reaches a review point. Examples include energy, internet/mobile, vehicle and
+business insurance, banking products, and credit products. Any comparison or partner handoff must
+remain transparent, evidence-based, and subject to the applicable legal / product boundaries.
+
+The intended economic loop is:
+
+```text
+better contract visibility
+→ timely review
+→ lower recurring mandatory costs where a better option exists
+→ measurable household savings
+→ stronger long-term financial position
+```
+
+Affiliate revenue is a business model layer, not a reason to fabricate a recommendation. An offer is
+shown as an active partner opportunity only when an approved partner and a real configured deeplink
+exist. Partner compensation and sponsored links must be disclosed clearly.
+
+### Administrative capabilities are supporting systems
+
+Document explanation, Behörden workflows, forms, case management, approvals, deadlines, and the
+P12–P17 modules remain important because they help the user manage real-life obligations in Germany.
+They support the broader control-center model; they are not the complete product vision by
+themselves.
+
+### Future Capital Layer — separate later stage
+
+After the contract-control and cost-optimization layers are stable, HORIZON may resume the preserved
+Capital work as a separate financial analysis and long-term wealth-building layer.
+
+Target purpose:
+
+```text
+confirmed household facts + savings capacity
+→ risk / scenario analysis
+→ long-term planning views
+→ user-controlled investment decisions
+→ long-term capital accumulation
+```
+
+The Capital Layer may support research, scenario modelling, risk analysis, compounding projections,
+portfolio/asset comparison, and long-term planning around traditional financial instruments such as
+shares, ETFs, securities, and similar regulated market assets.
+
+**Cryptocurrency is explicitly outside the intended product direction.**
+
+Capital outputs must not present uncertain forecasts as guaranteed outcomes. Personalized investment
+recommendation, execution, custody, suitability, or regulated advisory functionality requires a
+separate explicit product/legal decision before implementation. Existing BlackRock/Aladdin-related
+research in this repository is architectural/reference material only and must not imply affiliation,
+licensed access, or a production integration unless separately verified and authorized.
+
+### Directional roadmap
+
+```text
+STAGE A — HORIZON CONTROL
+Contracts + documents + cases + dates + reminders + lifecycle visibility
+
+STAGE B — HORIZON OPTIMIZE
+Partner network + transparent comparisons + renewal timing + recurring-cost reduction
+
+STAGE C — HORIZON CAPITAL
+Separate later layer for analysis, scenarios, risk and long-term wealth planning
+```
+
+Current implementation work remains governed by the approved Phase 0–17 sequence. This North Star
+defines the direction the product is moving toward; it does not authorize jumping ahead of the
+active phase or bypassing safety, legal, RLS, approval, or evidence requirements.
+
 ---
 
 ## 0. First principle — state model
