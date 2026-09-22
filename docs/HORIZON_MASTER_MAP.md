@@ -106,6 +106,123 @@ are not completed. No UI route exposes Capital.
 
 ---
 
+## 1.1 Owner product direction — Management Center, Savings Flywheel, Capital later
+
+The long-term product direction is broader than an administrative assistant.
+
+HORIZON by VZG is intended to become a **management center for contracts, mandatory recurring
+expenses and personal financial control for people in Germany**.
+
+The user should be able to see and manage, in one place:
+
+- which contracts they have and with which providers;
+- current recurring cost;
+- contract duration and renewal state;
+- Kündigungsfrist;
+- end of Preisgarantie or other important tariff conditions;
+- relevant dates and events;
+- where a cheaper or better-suited alternative may exist.
+
+The operating flywheel is:
+
+```text
+DISCOVER → MONITOR → ALERT → COMPARE → OPTIMIZE → RENEW → SAVE
+```
+
+The product goal is not merely to store contracts. HORIZON should help users reduce mandatory
+monthly costs over time by surfacing relevant alternatives through approved affiliate/partner
+relationships, for example electricity/gas, Kfz insurance, business insurance, bank accounts,
+credit products and other recurring-cost products when a real partner and compliant handoff exist.
+
+Any comparison or recommendation surface must remain evidence-based. No partner product is
+presented as active unless an approved partner and exact configured affiliate URL exist.
+
+### HORIZON Capital — strategic direction, currently frozen
+
+A later Capital layer may use part of the user's savings or separately allocated funds for
+long-term capital-building workflows around traditional investments and assets, with analysis,
+risk assessment, scenario modelling and compound-interest projections.
+
+This future layer may cover shares, ETFs, securities and other traditional assets. Crypto is
+outside the intended scope.
+
+Capital analysis must remain informational and scenario-based; it must not represent future
+returns as guaranteed and the investment decision remains with the user.
+
+**Execution decision:** Capital is preserved but fully frozen for the next 30 days. Existing
+Capital code must not be expanded during this period.
+
+---
+
+## 1.2 30-day decision map and execution plan
+
+### Evidence wall
+
+- **F1:** HORIZON serves Bulgarians in Germany. Current operating model combines trust/acquisition
+  with contract-management, savings and affiliate revenue.
+- **F2:** The founder currently remains the human operating layer for cases while workflows are
+  progressively digitized.
+- **F3:** Current demand is strongest around contracts such as electricity, gas and insurance.
+  The core commercial loop is the contract-management flywheel above.
+- **F4:** HORIZON Capital and native mobile-app development are frozen for the next 30 days.
+
+### Frozen for the next 30 days
+
+1. No Capital portfolio-analysis, investment or compound-interest implementation.
+2. No new native iOS/Android development; use the existing web platform.
+3. No broad expansion into new modules outside the three selected scenarios below.
+
+### Priority build order
+
+1. **Administrative document intake / Layer 1**
+   - upload a letter/document;
+   - create or update a case;
+   - expose case status;
+   - return founder/human-layer feedback through the platform rather than ad-hoc chat/phone.
+
+2. **Strom/Gas optimization / Layer 2**
+   - capture the current contract;
+   - track Preisgarantie and Kündigungsfrist;
+   - surface a comparison at the relevant time;
+   - hand off through an approved affiliate offer.
+
+3. **Insurance flow / Firmenversicherung / Layer 2**
+   - make the insurance area reachable from the authenticated product;
+   - collect only what is necessary for the chosen operating model;
+   - hand off to an approved partner using the exact configured affiliate URL;
+   - do not imply an active partner when none exists.
+
+### Reversal rule
+
+If Layer 2 does not convert, do not immediately remove the functionality. First test:
+
+1. UX/interface friction;
+2. unsuitable offer or partner;
+3. incorrect timing relative to contract lifecycle.
+
+### 30-day Flywheel experiment
+
+**Owner:** Founder
+
+**Baseline:** predominantly manual service, no reliable case-time baseline and no reliable
+affiliate conversion baseline.
+
+**Success metrics:**
+
+- **Automation:** reduce founder time per case by 50% for the three selected scenarios.
+- **Engagement:** contracts added per user; percentage with confirmed Kündigungsfrist /
+  Preisgarantie.
+- **Monetization and customer value:** euros saved, successful switches and affiliate revenue.
+- **Retention:** percentage of users adding a second contract or returning with another request.
+
+**Stop condition:** if processing through HORIZON takes more founder time than manual servicing,
+stop interface expansion and simplify the flow to the minimum viable path.
+
+This 30-day decision map governs execution priority. It does not delete or invalidate P0–P17;
+it determines which parts of the existing architecture receive product attention first.
+
+---
+
 ## 2. Current-state route inventory
 
 Facts only. Nothing here is deleted, redirected, or renamed. Branding drift is reported, not fixed.
