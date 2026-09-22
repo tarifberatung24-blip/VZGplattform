@@ -6,15 +6,16 @@ import { localizedPath } from "@/lib/i18n/routing"
 
 export function AnimatedHero() {
   const { t, locale } = useLanguage()
+  const brandName = t.home.hero.badge.replace(" by VZG", "")
+  const brandSuffix = t.home.hero.badge.slice(brandName.length)
 
   return (
     <div className="layer0-hero relative h-[100dvh] min-h-[100dvh] overflow-hidden">
       <div className="absolute inset-0 bg-black">
         {/* Flowing wave rays overlay */}
       <div className="absolute inset-0">
-        <span className="absolute left-6 top-6 z-10 text-sm font-medium tracking-[0.3em] text-white/70">{t.home.hero.badge}</span>
         <svg
-            className="flow-visual absolute inset-0 h-full w-full"
+            className="absolute inset-0 h-full w-full"
             viewBox="0 0 1200 800"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +96,7 @@ export function AnimatedHero() {
                 <stop offset="100%" stopColor="rgba(0,0,0,1)" />
               </linearGradient>
               <filter id="backgroundBlur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feGaussianBlur stdDeviation="8" result="blur" />
                 <feTurbulence baseFrequency="0.9" numOctaves="3" result="noise" />
                 <feColorMatrix in="noise" type="saturate" values="0" result="monoNoise" />
                 <feComponentTransfer in="monoNoise" result="alphaAdjustedNoise">
@@ -107,7 +108,7 @@ export function AnimatedHero() {
                 </feMerge>
               </filter>
               <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
                 <feMerge>
                   <feMergeNode in="coloredBlur" />
                   <feMergeNode in="SourceGraphic" />
@@ -115,7 +116,7 @@ export function AnimatedHero() {
               </filter>
             </defs>
 
-            <g className="flow-layer">
+            <g>
               {/* Adding hero text background shape */}
               <ellipse
                 cx="300"
@@ -690,40 +691,6 @@ export function AnimatedHero() {
       </div>
 
       <style jsx>{`
-        .flow-layer > path {
-          vector-effect: non-scaling-stroke;
-        }
-
-        .flow-layer > path:nth-of-type(-n + 12) {
-          opacity: 0.34;
-          filter: url(#backgroundBlur);
-          stroke-width: 0.75;
-        }
-
-        .flow-layer > path:nth-of-type(n + 13):nth-of-type(-n + 24) {
-          opacity: 0.58;
-          stroke-width: 1;
-        }
-
-        .flow-layer > path:nth-of-type(n + 25) {
-          opacity: 0.78;
-          stroke-width: 1.35;
-        }
-
-        .flow-layer > circle:nth-of-type(-n + 12) {
-          opacity: 0.42;
-        }
-
-        .flow-layer > circle:nth-of-type(n + 25) {
-          opacity: 0.86;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .flow-visual {
-            display: none;
-          }
-        }
-
         @keyframes flow {
           0%, 100% {
             opacity: 0.3;
@@ -751,11 +718,16 @@ export function AnimatedHero() {
         }
       `}</style>
 
-      <main className="relative z-10 flex h-full min-h-0 items-center justify-center px-6">
-        <div className="flex flex-col items-center gap-8">
-          <span className="text-center text-lg font-bold tracking-[0.08em] text-white sm:text-2xl">
-            {t.home.hero.badge}
-          </span>
+      <main className="relative z-10 flex h-full min-h-0 items-center px-6 sm:px-12 lg:px-20">
+        <div className="flex w-full max-w-xl flex-col items-center gap-8 sm:items-start">
+          <h1 className="font-display text-center text-white sm:text-left">
+            <span className="block text-[clamp(1.8rem,2.8vw,3rem)] font-semibold leading-none tracking-[0.1em]">
+              {brandName}
+            </span>
+            <span className="mt-2 block text-[clamp(0.85rem,1.35vw,1.35rem)] font-light leading-none tracking-[0.1em] text-white/75">
+              {brandSuffix}
+            </span>
+          </h1>
           <nav aria-label="Authentication" className="flex items-center gap-3">
             <Link
               href={localizedPath("/auth/login", locale)}

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
+import { authenticatedHomePath } from "@/lib/supabase/auth-routing"
 
 export function GlobalHeader() {
   const pathname = usePathname() ?? "/"
@@ -73,6 +74,10 @@ export function GlobalHeader() {
   }
 
   const closeMobile = () => setMobileOpen(false)
+  const homeHref =
+    sessionReady && sessionActive
+      ? authenticatedHomePath(locale)
+      : localizedPath("/", locale)
 
   const navLinks: { href: string; labelKey: keyof typeof labels }[] = [
     { href: "/how-it-works", labelKey: "howItWorks" },
@@ -85,7 +90,7 @@ export function GlobalHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-none">
       <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-6 px-5 lg:px-8">
         <Link
-          href={localizedPath("/", locale)}
+          href={homeHref}
           className="flex items-baseline gap-3 text-2xl font-black tracking-[-0.04em] text-foreground"
         >
           HORIZON by VZG
@@ -96,7 +101,7 @@ export function GlobalHeader() {
 
         <nav className="hidden items-center gap-1 md:flex">
           <Link
-            href={localizedPath("/", locale)}
+            href={homeHref}
             className={cn(
               "px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
               isActivePath("/") ? "text-foreground" : ""
@@ -172,7 +177,7 @@ export function GlobalHeader() {
         <div className="border-t border-border bg-background md:hidden">
           <nav className="flex flex-col gap-1 px-4 py-4">
             <Link
-              href={localizedPath("/", locale)}
+              href={homeHref}
               onClick={closeMobile}
               className={cn(
                 "rounded-sm px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",

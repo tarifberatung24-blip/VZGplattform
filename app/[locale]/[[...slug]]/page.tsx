@@ -37,6 +37,8 @@ import EmailGeneratorPage from "@/app/[locale]/email-generator/page"
 import HowItWorksPage from "@/app/[locale]/how-it-works/page"
 import { FunctionsPage } from "@/components/marketing/public-layer-page"
 import type { Locale } from "@/lib/i18n/dictionaries"
+import { hasSupabaseConfig } from "@/lib/supabase/config"
+import { createClient } from "@/lib/supabase/server"
 
 /**
  * Onboarding outlet for the localized catch-all. The four real step pages live
@@ -68,6 +70,11 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 
 export default async function LocalizedPage({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
   const {locale, slug = []} = await params
+  if (slug.length === 0 && hasSupabaseConfig()) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) redirect(`/${locale}/dashboard`)
+  }
   if (slug.join("/") === "functions") return <FunctionsPage locale={locale as Locale} />
   if (slug.join("/") === "protected") redirect("/dashboard")
   if (slug[0] === "onboarding") return <OnboardingOutlet locale={locale} step={slug[1]} />
