@@ -4,7 +4,7 @@ Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, and `docs/TERRA_START.md` before work
 
 Canonical identity: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HORIZON by VZG`, CODEBASE `VZGplattform`. Keep these four names distinct; do not use them interchangeably.
 
-The current user-approved product direction is **HORIZON by VZG**, V1 for private customers: contract management, private documents, translation/explanation, deadlines, and user-approved actions. B2B remains a separate draft. This narrows the older broad product roadmap; it does not relax its safety rules.
+The current user-approved product direction is **HORIZON by VZG**. V1 remains focused on private customers and the current Phase 0–17 build, but the canonical long-term North Star is broader: HORIZON becomes a management control center for contracts, recurring mandatory expenses, important dates, and personal financial decisions in Germany. The directional product stages are **CONTROL → OPTIMIZE → CAPITAL**: first track/manage contracts and obligations; then use approved, transparently disclosed partner/affiliate alternatives to help users reduce recurring costs where a better evidenced option exists; later resume the separate Capital layer for risk/scenario analysis and long-term wealth planning. Cryptocurrency is outside the intended Capital direction. The exact canonical wording and boundaries live in `docs/HORIZON_MASTER_MAP.md`. B2B remains a separate draft.
 
 ## Current development stack
 
