@@ -11,6 +11,7 @@ import { MissingInformationInterviewer } from "@/components/dashboard/missing-in
 import { DocumentAnalyzer, type DashboardDocument } from "@/components/dashboard/document-analyzer"
 import { getSmartDashboardNextAction } from "@/lib/kintex-smart-dashboard"
 import { HorizonHome } from "@/components/horizon/horizon-home"
+import { DataFlowVisual } from "@/components/marketing/data-flow-visual"
 
 export type VzgDashboardProps = {
   firstName?: string | null
@@ -46,8 +47,9 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
   const nextAction = getSmartDashboardNextAction({ profileCompleteness: profile?.completeness ?? 0, contracts: contracts.length, documents: documents.length, documentsNeedingReview: reviewCount, contractsNeedingInfo: missingCosts }, de ? "de" : "bg")
   const questions = contracts.filter((item) => item.monthly_amount == null).slice(0, 2).map((item) => ({ id: item.id, label: `${de ? "Monatlicher Betrag für" : "Месечна сума за"} „${item.title}“?`, detail: de ? "Dieser Wert fehlt und wird nicht automatisch erfunden." : "Тази стойност липсва и няма да бъде измисляна автоматично.", href: "/vertraege" }))
 
-  return <main className="min-h-[calc(100dvh-5rem)] min-w-0 overflow-x-hidden bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6 lg:px-8">
-    <div className="mx-auto min-w-0 max-w-[1440px]">
+  return <main className="relative min-h-[calc(100dvh-5rem)] min-w-0 overflow-x-hidden bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6 lg:px-8">
+    <DataFlowVisual />
+    <div className="relative z-10 mx-auto min-w-0 max-w-[1440px]">
       <header className="flex flex-col justify-between gap-5 border-b border-border pb-6 xl:flex-row xl:items-center">
         <div className="flex items-center gap-4"><div className="grid size-11 place-items-center rounded-md bg-primary text-primary-foreground shadow-none"><LayoutDashboard className="size-5" /></div><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HORIZON by VZG</p><h1 className="mt-1 text-3xl font-semibold tracking-tight">{de ? `Willkommen${firstName ? `, ${firstName}` : ""}` : `Добре дошъл${firstName ? `, ${firstName}` : ""}`}</h1><p className="mt-1 text-sm text-muted-foreground">{de ? "Finanzielle Übersicht aus bestätigten Daten." : "Финансов преглед от потвърдени данни."}</p></div></div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row"><div className="relative w-full sm:w-72"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input className="h-11 w-full bg-card pl-9" placeholder={de ? "Verträge durchsuchen…" : "Търсене в договори…"} /></div><Button asChild className="h-11 w-full sm:w-auto"><Link href="/vertraege"><Plus className="mr-2 size-4" />{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button></div>

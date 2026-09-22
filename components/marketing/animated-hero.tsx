@@ -1,26 +1,20 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Menu } from "lucide-react"
-import { LineShadowText } from "@/components/marketing/line-shadow-text"
-import { ShimmerButton } from "@/components/marketing/shimmer-button"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 
 export function AnimatedHero() {
   const { t, locale } = useLanguage()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="layer0-hero min-h-screen relative overflow-hidden">
+    <div className="layer0-hero relative h-[100dvh] min-h-[100dvh] overflow-hidden">
       <div className="absolute inset-0 bg-black">
         {/* Flowing wave rays overlay */}
       <div className="absolute inset-0">
         <span className="absolute left-6 top-6 z-10 text-sm font-medium tracking-[0.3em] text-white/70">{t.home.hero.badge}</span>
         <svg
-            className="absolute inset-0 w-full h-full"
+            className="flow-visual absolute inset-0 h-full w-full"
             viewBox="0 0 1200 800"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +95,7 @@ export function AnimatedHero() {
                 <stop offset="100%" stopColor="rgba(0,0,0,1)" />
               </linearGradient>
               <filter id="backgroundBlur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
                 <feTurbulence baseFrequency="0.9" numOctaves="3" result="noise" />
                 <feColorMatrix in="noise" type="saturate" values="0" result="monoNoise" />
                 <feComponentTransfer in="monoNoise" result="alphaAdjustedNoise">
@@ -113,7 +107,7 @@ export function AnimatedHero() {
                 </feMerge>
               </filter>
               <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
                 <feMerge>
                   <feMergeNode in="coloredBlur" />
                   <feMergeNode in="SourceGraphic" />
@@ -121,7 +115,7 @@ export function AnimatedHero() {
               </filter>
             </defs>
 
-            <g>
+            <g className="flow-layer">
               {/* Adding hero text background shape */}
               <ellipse
                 cx="300"
@@ -696,6 +690,40 @@ export function AnimatedHero() {
       </div>
 
       <style jsx>{`
+        .flow-layer > path {
+          vector-effect: non-scaling-stroke;
+        }
+
+        .flow-layer > path:nth-of-type(-n + 12) {
+          opacity: 0.34;
+          filter: url(#backgroundBlur);
+          stroke-width: 0.75;
+        }
+
+        .flow-layer > path:nth-of-type(n + 13):nth-of-type(-n + 24) {
+          opacity: 0.58;
+          stroke-width: 1;
+        }
+
+        .flow-layer > path:nth-of-type(n + 25) {
+          opacity: 0.78;
+          stroke-width: 1.35;
+        }
+
+        .flow-layer > circle:nth-of-type(-n + 12) {
+          opacity: 0.42;
+        }
+
+        .flow-layer > circle:nth-of-type(n + 25) {
+          opacity: 0.86;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .flow-visual {
+            display: none;
+          }
+        }
+
         @keyframes flow {
           0%, 100% {
             opacity: 0.3;
@@ -723,100 +751,26 @@ export function AnimatedHero() {
         }
       `}</style>
 
-      {/* Header Navigation */}
-      <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 py-4 lg:px-12">
-        <div className="flex items-center space-x-2 pl-3 sm:pl-6 lg:pl-12">
-          <span className="text-white text-sm sm:text-base lg:text-lg font-bold tracking-[0.08em]">
+      <main className="relative z-10 flex h-full min-h-0 items-center justify-center px-6">
+        <div className="flex flex-col items-center gap-8">
+          <span className="text-center text-lg font-bold tracking-[0.08em] text-white sm:text-2xl">
             {t.home.hero.badge}
           </span>
-        </div>
-
-        <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-          <Link href={localizedPath("/functions", locale)} className="text-white/80 hover:text-white transition-colors text-sm lg:text-base">
-            {t.home.hero.navFeatures}
-          </Link>
-          <Link href={localizedPath("/security", locale)} className="text-white/80 hover:text-white transition-colors text-sm lg:text-base">
-            {t.home.hero.navSecurity}
-          </Link>
-          <Link href={localizedPath("/how-it-works", locale)} className="text-white/80 hover:text-white transition-colors text-sm lg:text-base">
-            {t.home.hero.navAbout}
-          </Link>
-          <Link href={localizedPath("/contact", locale)} className="text-white/80 hover:text-white transition-colors text-sm lg:text-base">
-            {t.home.hero.navContact}
-          </Link>
-        </nav>
-
-        {/* Mobile menu button */}
-        <button className="md:hidden text-white p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          <Menu className="w-6 h-6" />
-        </button>
-
-        <Link href={localizedPath("/auth/login", locale)} className="hidden md:inline text-white/80 hover:text-white transition-colors text-sm lg:text-base">
-          {t.nav.login}
-        </Link>
-
-        <Link href={localizedPath("/auth/sign-up", locale)}>
-          <ShimmerButton className="hidden md:flex bg-orange-500 hover:bg-orange-600 text-white px-4 lg:px-6 py-2 rounded-xl text-sm lg:text-base font-medium shadow-lg">
-            {t.nav.register}
-          </ShimmerButton>
-        </Link>
-      </header>
-
-      {mobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-sm border-b border-white/10 z-20">
-          <nav className="flex flex-col space-y-4 px-6 py-6">
-            <Link href={localizedPath("/functions", locale)} className="text-white/80 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              {t.home.hero.navFeatures}
-            </Link>
-            <Link href={localizedPath("/security", locale)} className="text-white/80 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              {t.home.hero.navSecurity}
-            </Link>
-            <Link href={localizedPath("/how-it-works", locale)} className="text-white/80 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              {t.home.hero.navAbout}
-            </Link>
-            <Link href={localizedPath("/contact", locale)} className="text-white/80 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              {t.home.hero.navContact}
-            </Link>
-            <Link href={localizedPath("/auth/login", locale)} className="text-white/80 hover:text-white transition-colors w-fit" onClick={() => setMobileMenuOpen(false)}>
+          <nav aria-label="Authentication" className="flex items-center gap-3">
+            <Link
+              href={localizedPath("/auth/login", locale)}
+              className="rounded-lg border border-white/20 px-4 py-2 text-sm text-white/80 transition-colors hover:border-white/40 hover:text-white"
+            >
               {t.nav.login}
             </Link>
-            <Link href={localizedPath("/auth/sign-up", locale)} className="w-fit" onClick={() => setMobileMenuOpen(false)}>
-              <ShimmerButton className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium shadow-lg w-fit">
-                {t.nav.register}
-              </ShimmerButton>
+            <Link
+              href={localizedPath("/auth/sign-up", locale)}
+              className="rounded-lg border border-orange-400/40 bg-orange-500/90 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
+            >
+              {t.nav.register}
             </Link>
           </nav>
         </div>
-      )}
-
-      {/* Main Content */}
-      <main className="relative z-10 flex flex-col items-start justify-start sm:justify-center min-h-[calc(100vh-80px)] px-4 sm:px-6 lg:px-12 max-w-6xl pt-4 sm:-mt-12 lg:-mt-24 pl-6 sm:pl-12 lg:pl-20">
-        {/* Trial Badge */}
-        <div className="mb-4 sm:mb-8">
-          <div className="inline-flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 sm:px-4 py-2">
-            <span className="text-white text-xs md:text-xs">{t.home.hero.badge}</span>
-          </div>
-        </div>
-
-        <h1 className="text-white text-4xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-8xl font-bold leading-tight mb-4 sm:mb-6 text-balance">
-          {t.home.hero.headline1}
-          <br />
-          <LineShadowText className="italic font-light" shadowColor="white">
-            {t.home.hero.headline2}
-          </LineShadowText>
-        </h1>
-
-        <p className="text-white/70 text-sm sm:text-base md:text-sm lg:text-2xl mb-6 sm:mb-8 max-w-2xl text-pretty">
-          {t.home.hero.subtitle}
-        </p>
-
-        <Button asChild className="group relative h-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base md:text-xs lg:text-lg font-semibold flex items-center gap-2 backdrop-blur-sm border border-orange-400/30 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5">
-          <Link href={localizedPath("/auth/sign-up", locale)}>
-            {t.home.hero.primaryCta}
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 group-hover:-rotate-12 transition-transform duration-300" />
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </Link>
-        </Button>
       </main>
     </div>
   )
