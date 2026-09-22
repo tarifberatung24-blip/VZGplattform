@@ -25,8 +25,8 @@ const horizonMigrations = [engineMigration, ...reconciliationMigrations]
  */
 const stripSqlComments = (sql: string) =>
   sql
-    .split("\n")
-    .map((line) => line.replace(/--.*$/, ""))
+    .split(/\r?\n/)
+    .map((line) => line.replace(/--.*$/g, "").replace(/\r$/, ""))
     .join("\n")
 
 const executableRls = stripSqlComments(rlsReconcile)
