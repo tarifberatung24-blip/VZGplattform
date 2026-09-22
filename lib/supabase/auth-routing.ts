@@ -1,4 +1,5 @@
-import { stripLocale } from "../i18n/routing"
+import { localizedPath, stripLocale } from "../i18n/routing"
+import type { Locale } from "../i18n/dictionaries"
 
 const protectedPrefixes = [
   "/dashboard",
@@ -63,4 +64,8 @@ export function isAuthFlowPath(pathname: string) {
 export function pathLocale(pathname: string) {
   const segment = pathname.split("/")[1]
   return segment === "de" ? "de" : "bg"
+}
+
+export function authenticatedHomePath(locale: Locale) {
+  return localizedPath("/dashboard", locale)
 }

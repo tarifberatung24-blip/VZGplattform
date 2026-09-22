@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  authenticatedHomePath,
   isAuthFlowPath,
   isKnownOnboardingStep,
   isOnboardingComplete,
@@ -11,6 +12,11 @@ import {
 } from "./auth-routing"
 
 describe("auth routing", () => {
+  it("keeps authenticated home navigation localized to the dashboard", () => {
+    expect(authenticatedHomePath("bg")).toBe("/bg/dashboard")
+    expect(authenticatedHomePath("de")).toBe("/de/dashboard")
+  })
+
   it("accepts local destinations and rejects external redirects", () => {
     expect(sanitizeNextPath("/protected/home-office")).toBe("/protected/home-office")
     expect(sanitizeNextPath("//evil.example")).toBe("/dashboard")

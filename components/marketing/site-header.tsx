@@ -9,8 +9,10 @@ import { Logo } from "@/components/brand/logo"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { localizedPath } from "@/lib/i18n/routing"
 import { cn } from "@/lib/utils"
 import { openPwaInstallPrompt } from "@/components/pwa-install-prompt"
+import { authenticatedHomePath } from "@/lib/supabase/auth-routing"
 
 export function SiteHeader() {
   const { t, locale } = useLanguage()
@@ -39,7 +41,11 @@ export function SiteHeader() {
     { href: "/documents", label: labels.documents },
     { href: "/za-nas", label: labels.about },
   ]
-  const localizedHref = (href: string) => href === "/" ? `/${locale}` : `/${locale}${href}`
+  const homeHref =
+    authReady && authenticated
+      ? authenticatedHomePath(locale)
+      : localizedPath("/", locale)
+  const localizedHref = (href: string) => href === "/" ? homeHref : localizedPath(href, locale)
   const closeMenu = () => setOpen(false)
   async function logout() { await createClient().auth.signOut(); closeMenu(); router.push("/") }
 
@@ -47,7 +53,7 @@ export function SiteHeader() {
     <>
     <header className="sticky top-0 z-40 border-b border-border bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 lg:px-8">
-        <Link href="/" aria-label="HORIZON by VZG" className="shrink-0">
+        <Link href={homeHref} aria-label="HORIZON by VZG" className="shrink-0">
           <Logo />
         </Link>
 
@@ -67,7 +73,7 @@ export function SiteHeader() {
           <LanguageSwitcher className="hidden sm:inline-flex" />
           {authReady && authenticated ? (
             <>
-                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex"><Link href="/dashboard">{labels.profile}</Link></Button>
+                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex"><Link href={authenticatedHomePath(locale)}>{labels.profile}</Link></Button>
               <Button variant="outline" size="sm" className="hidden md:inline-flex" onClick={logout}>{labels.logout}</Button>
             </>
           ) : authReady ? (
@@ -109,7 +115,7 @@ export function SiteHeader() {
             <div className="flex gap-2">
               {authReady && authenticated ? (
                 <>
-                  <Button asChild variant="outline" size="sm"><Link href="/dashboard" onClick={closeMenu}>{labels.profile}</Link></Button>
+                  <Button asChild variant="outline" size="sm"><Link href={authenticatedHomePath(locale)} onClick={closeMenu}>{labels.profile}</Link></Button>
                   <Button variant="outline" size="sm" onClick={logout}>{labels.logout}</Button>
                 </>
               ) : authReady ? (
