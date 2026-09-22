@@ -22,6 +22,126 @@ This document does not authorize implementation. It records facts and target des
 
 ---
 
+## Strategic product direction — HORIZON CONTROL → OPTIMIZE → CAPITAL
+
+The owner-approved long-term product direction is broader than an administrative assistant.
+
+### HORIZON CONTROL — the management center
+
+HORIZON should become the user's **management center for contracts, recurring obligations,
+important dates, and financial control in Germany**.
+
+The user should be able to see and manage, in one place:
+
+- which contracts they have and with which providers;
+- current price / recurring monthly or annual cost;
+- contract term and renewal date;
+- cancellation deadline (`Kündigungsfrist`);
+- price-guarantee end (`Preisgarantie`) where evidenced;
+- important contract events and reminders;
+- confirmed documents and facts that support those records.
+
+The core lifecycle is:
+
+```text
+DISCOVER → TRACK → WARN → COMPARE → OPTIMIZE → RENEW / SWITCH → TRACK AGAIN
+```
+
+HORIZON must not silently invent contract dates, prices, savings, or eligibility. Unknown values
+remain unknown until supported by a document, provider response, or explicit user confirmation.
+
+### Cost optimization and affiliate partner network
+
+A major product goal is to help users reduce mandatory recurring costs over time by surfacing
+better alternatives when there is a real comparison opportunity, especially before contract,
+renewal, cancellation, or price-guarantee deadlines.
+
+Target categories include, as partner coverage becomes available:
+
+- electricity and gas;
+- internet and mobile;
+- Kfz and other insurance products;
+- business insurance for self-employed users and companies;
+- banking products with lower or no recurring account fees;
+- credit/refinancing options with potentially lower borrowing cost than the user's existing credit;
+- other recurring household or business services.
+
+Affiliate / partner offers are a **distribution and monetization layer**, not permission to fabricate
+a recommendation. A partner product becomes active only when there is a real approved partner,
+an exact configured partner/affiliate URL, required disclosures, and a safe user handoff.
+
+The preferred user benefit loop is:
+
+```text
+CURRENT CONTRACT / COST
+→ EVIDENCED RENEWAL OR REVIEW MOMENT
+→ COMPARISON OPPORTUNITY
+→ PARTNER OFFER(S)
+→ USER DECISION
+→ NEW CONTRACT
+→ NEW LIFECYCLE MONITORING
+```
+
+The business model should favor repeat value across the contract lifecycle rather than one-off
+lead generation.
+
+### HORIZON CAPITAL — later financial-investment layer
+
+After the control and cost-optimization layers are stable, HORIZON Capital is the long-term
+financial-investment extension. It remains **outside the current active P0–P17 build sequence**
+until explicitly reopened by the owner.
+
+Its intended role is to help users analyze how part of their saved money or additional personal
+funds could be allocated, at their own discretion, toward long-term capital formation.
+
+Target capabilities include:
+
+- research and market analysis;
+- explicit risk analysis;
+- scenario modeling;
+- deterministic compound-interest calculations;
+- long-term goal and feasibility modeling;
+- comparison of traditional investment assets;
+- portfolio and net-worth tracking after separately approved implementation.
+
+Potential future asset coverage may include shares, ETFs, securities and other traditional
+long-term investment assets. **Cryptocurrency is explicitly out of scope for the product vision.**
+
+Capital outputs must distinguish facts, assumptions, scenarios and uncertainty. They must not
+present forecasts as guaranteed results. Any later personalized investment-advice functionality
+requires separate legal/compliance review and explicit owner authorization before implementation.
+
+### Development direction
+
+The intended product sequence is:
+
+```text
+1. COMPLETE AND STABILIZE CORE HORIZON
+   Auth → Guide → Documents → Cases → P12–P17 → real E2E
+
+2. HORIZON CONTROL
+   Contract inventory → lifecycle dates → reminders → Radar → recurring-cost visibility
+
+3. HORIZON OPTIMIZE
+   Partner registry → insurance/tariff/banking/credit categories
+   → evidence-based comparison moments → affiliate handoff → savings tracking
+
+4. HORIZON GUIDE / MANAGEMENT UX
+   Clear left navigation + contextual right-side guide
+   → show where the user is, what is missing, and the next valid action
+
+5. HORIZON CAPITAL
+   Only after explicit reopening
+   → confirmed financial facts → risk/scenario engines → long-term capital planning
+```
+
+This strategic direction does not authorize schema, RLS, payment, brokerage, insurance-advice,
+investment-advice, or production changes by itself. Each implementation still follows the normal
+phase, safety, legal and owner-approval gates.
+
+---
+
+
 ## 0. First principle — state model
 
 The project is developed sequentially from this one Master Map. Every system moves through:
