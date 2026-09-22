@@ -26,8 +26,8 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - P2 migration applied to the project (owner-side authorized channel)
 - P2 runtime end-to-end verification (blocked locally: no `.env`/anon key)
 - P2 explicit owner acceptance
-- P5 canonical model decision
-- P5 implementation
+- ✅ P5 canonical model decision (`public.cases`; `platform_*` retained for compatibility)
+- ✅ P5 implementation (repository, lifecycle, approval, audit, and ownership guards)
 - P5 runtime/RLS verification against a migrated database
 
 ---
@@ -82,31 +82,31 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 
 ## P3 — HORIZON Guide
 
-- Persistent `/{locale}/guide`
-- Understand a document
-- Reply to an authority
-- Fill an official form
-- Cancel a contract
-- “I do not know what to do”
-- Permanent access after onboarding
-- Route guide choices into the canonical case flow
-- Localization
-- Tests
+- ✅ Persistent `/{locale}/guide`
+- ✅ Understand a document
+- ✅ Reply to an authority
+- ✅ Fill an official form
+- ✅ Cancel a contract
+- ✅ “I do not know what to do”
+- ✅ Permanent access after onboarding
+- ✅ Route guide choices into the canonical case flow
+- ✅ Localization
+- ✅ Unit tests
 - Real verification
 - FROZEN
 
 ## P4 — HORIZON Home + Five Entry Modules
 
-- HORIZON dashboard shell
-- Agentur für Arbeit
-- Jobcenter
-- Kündigung
-- Steuererklärung
-- Unterlagen erklären
-- My Cases
-- Profile
-- Settings / Security
-- Tests
+- ✅ HORIZON dashboard shell
+- ✅ Agentur für Arbeit
+- ✅ Jobcenter
+- ✅ Kündigung
+- ✅ Steuererklärung
+- ✅ Unterlagen erklären
+- ✅ My Cases
+- ✅ Profile
+- ✅ Settings / Security
+- ✅ Unit tests
 - Real verification
 - FROZEN
 
@@ -129,12 +129,14 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 
 ## P6 — Document Intake / OCR / Explanation
 
+Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
+
 - ✅ PDF/image upload capabilities exist
 - ✅ PDF.js/Tesseract capabilities exist
 - ✅ Document analysis/review components exist
 - Reconcile parallel document stacks
-- Pasted-text intake
-- Email-content intake
+- ✅ Pasted-text intake
+- ✅ Email-content intake
 - Page-level evidence for extracted facts
 - Unified extraction contract
 - Explicit OCR/extraction failure states
@@ -348,38 +350,65 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
 
 ## P15 — Steuererklärung
 
+Status: IMPLEMENTED — NOT DONE — NOT FROZEN. Authenticated runtime E2E remains pending
+as part of the consolidated verification pass after P17.
+
 - ✅ Tax model/FMS groundwork exists
-- Verified current official tax forms/process
-- Questionnaire → canonical tax facts
-- Official PDF mapping
-- Review/approval
-- Applicable signature path
-- Manual submission path to competent Finanzamt
-- No ELSTER submission until real approved integration exists
-- End-to-end verification
+- ✅ Tax-year-aware form registry: only 2025 is `supported`; 2026 is `not_yet_published`; other years `out_of_scope`; every entry carries an official source and a verification date
+- ✅ Official-source verification performed: ELSTER ESt 1 A lists 2025 back to 2019; no 2026 ESt 1 A/Anlage N is publicly confirmed
+- ✅ Unsupported/unpublished years are refused with a reason; no 2025 Form-ID, row, threshold or rule is carried into 2026
+- ✅ Tax year recorded as a canonical case fact; missing-information keys become year-scoped
+- ✅ Official PDF mapping for ESt 1 A (2025) bound to the exact template SHA-256 and year; a mismatched year or hash is refused
+- ✅ Review/approval reuses P8; approval invalidates when the generated content changes
+- ✅ Applicable signature path: placement offered only where measured and hash/year-bound
+- ✅ Manual submission path to the competent Finanzamt (official online route + official forms links); HORIZON transmits nothing
+- ✅ No ELSTER submission: no credential, certificate or transmission field exists anywhere in the registry
+- 71 unit tests pass (`lib/horizon/steuer/steuer.test.ts`); tsc/lint/i18n/build green
+- Authenticated runtime E2E (deferred to the consolidated pass after P17)
 - FROZEN
 
 ## P16 — Unterlagen erklären
 
-- Upload/select document
-- OCR/extraction
-- Source-backed explanation
-- Translation where requested
-- Risk/urgency indication with evidence/uncertainty
-- Follow-up actions via canonical case
-- End-to-end verification
+Status: IMPLEMENTED — NOT DONE — NOT FROZEN. Authenticated runtime E2E remains pending
+as part of the consolidated verification pass after P17.
+
+- ✅ Upload/select document (existing P6 stack: PDF, photo, screenshot, pasted text, email content)
+- ✅ OCR/extraction (existing P6 stack; pages read through the existing `document_pages_read_own` policy)
+- ✅ Classification from printed cues, with the matching line quoted, and `unclear` instead of a nearest guess
+- ✅ User correction of the classification, recorded as a confirmed fact and audited as a correction
+- ✅ Three-way deadline evidence: `printed` (quoted), `calculated` (only from a period the document itself states, always flagged for verification), `unknown`
+- ✅ No German statutory period is hardcoded; a period with no reference date yields no date; an impossible printed date is refused
+- ✅ Risk indication with three asymmetric states whose caveats state what was checked, not what is true
+- ✅ No accusation of fraud or wrongdoing in any state
+- ✅ One next action derived from the evidence, with `no_action_evident` rather than invented work
+- ✅ Official German documents stay in German; the explanation explains rather than producing an official translation
+- ✅ Follow-up via the canonical case (P8 review/approval, P10 signature, P11 send reused)
+- 48 unit tests pass (`lib/horizon/unterlagen/unterlagen.test.ts`); tsc/lint/i18n/build green
+- Authenticated runtime E2E (deferred to the consolidated pass after P17)
 - FROZEN
 
 ## P17 — Contract Management
 
+Status: IMPLEMENTED — NOT DONE — NOT FROZEN. Authenticated runtime E2E remains pending
+as part of the consolidated verification pass after P17. The separate preview branch
+remains reference-only.
+
 - ✅ Existing contract surfaces/data identified
-- Canonical contract model/surface
-- Contract import/intake
-- Deadlines/radar
-- Change/cancellation flows
-- User-approved actions
-- Audit/history
-- End-to-end verification
+- ✅ Contract archive reused (`/{locale}/vertraege`, `contracts-workspace`; provider, category, evidenced cost, evidenced dates, `review_status`)
+- ✅ Contract import/intake reused (upload + extraction + review, existing `/api/contracts` CRUD)
+- ✅ Deterministic Radar reused (`lib/kintex-radar.ts`, `contract_radar_history`) — signals state missing cost and unconfirmed review, never an estimate
+- ✅ Cancellation deadline shown from the archive and labelled as awaiting confirmation when `review_status` is not `confirmed`
+- ✅ Contract-to-case linkage: "Kündigung vorbereiten" opens a real `kuendigung` case through the shared engine (`lib/horizon/contracts/linkage.ts`, `actions.ts`)
+- ✅ Only evidenced fields become case facts; absent fields stay absent so the normal missing-information path asks for them
+- ✅ A malformed date is dropped rather than interpreted; a non-existent day is refused
+- ✅ The archive's cancel-by deadline is not seeded as a termination date
+- ✅ A `needs_review` contract's values seed the case **unconfirmed**, so P14 will not compute or write a date from them
+- ✅ Session-client read carries `contracts_household_owner_all` + the household check, so another household's contract behaves like a missing one
+- ✅ Audit trail: `contract_linked` (and `contract_link_seed_failed` when seeding fails)
+- ✅ Neutral analysis kept separate from affiliate offers (stated in both UI languages)
+- ✅ Dashboard shortcut `/{locale}/vertraege` added to real HORIZON navigation
+- 18 unit tests pass (`lib/horizon/contracts/contracts.test.ts`); tsc/lint/i18n/build green
+- Authenticated runtime E2E (deferred to the consolidated pass)
 - FROZEN
 
 ---

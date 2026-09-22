@@ -2,7 +2,7 @@
 
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
-Base: `main` @ `f6a8eb777e630106c934856a74de3796c1ad506c`
+Base: `origin/main` @ `3fafcf3f5f86d185aa6e02a21a03bbb4167f8917`
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -54,9 +54,9 @@ after a module meets the full DONE definition.
 | P12 | AGENTUR FÜR ARBEIT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P13 | JOBCENTER | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (shipped `0fb190a`; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
-| P15 | STEUERERKLÄRUNG | AUDITED | NO | YES |
-| P16 | UNTERLAGEN ERKLÄREN | AUDITED | NO | YES |
-| P17 | CONTRACT MANAGEMENT | AUDITED | NO | YES |
+| P15 | STEUERERKLÄRUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year registry + case wiring shipped; tests/build verified; authenticated runtime E2E pending) | NO | YES |
+| P16 | UNTERLAGEN ERKLÄREN | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis engine + panel shipped; tests/build verified; authenticated runtime E2E pending) | NO | YES |
+| P17 | CONTRACT MANAGEMENT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case linkage shipped; archive/Radar reused; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -231,7 +231,7 @@ after a module meets the full DONE definition.
   `missing-information-interviewer`, `dashboard-layout`, `user-sidebar`, `module-page`,
   `module-workspaces`, `smartDashboardRules`.
 - **MISSING:** runtime verification with an authenticated session; the dashboard still renders
-  legacy KintexBG-era cards alongside the HORIZON module entry, and
+  legacy-era cards alongside the HORIZON module entry, and
   `lib/kintex-navigation.ts` retains 10 modules (several flagged `planned`) that are not part of
   the HORIZON five; no route-level test of the dashboard.
 - **DEPENDENCIES:** P0, P2 (onboarding), P5 (case engine).
@@ -755,7 +755,19 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`,
   `/{locale}/finanzamt`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year-aware registry and
+  case wiring shipped; unit tests and build verified; authenticated runtime E2E pending).
+- **ADDED THIS PHASE:** `lib/horizon/steuer/registry.ts` (tax-year-aware registry: only 2025 is
+  `supported`; 2026 is `not_yet_published`; other years `out_of_scope`; every entry carries an
+  official source and a verification date), `lib/horizon/steuer/actions.ts` (records the chosen
+  year as a confirmed case fact and refuses an unsupported year with its reason),
+  `lib/horizon/steuer/copy.ts` (BG + DE), `components/steuer/steuer-panel.tsx` (year selection,
+  year-scoped form list, Anlagen from confirmed facts only, signature availability, gated
+  download), `app/api/horizon/cases/[id]/tax-form/route.ts` (owner-scoped, approval-bound,
+  integrity-checked download), `readFormOutputSha` in `lib/horizon/pdf/manifest.ts`.
+  `OfficialFormPanel` no longer hardcodes 2025: it shows a tax year's forms only when that year is
+  supported, and shows none otherwise. 71 unit tests in `lib/horizon/steuer/steuer.test.ts`.
+  No 2025 Form-ID, row, threshold or rule is reused for 2026.
 - **CURRENT IMPLEMENTATION:** tax questionnaire (`tax-questionnaire`, `tax-questionnaire-schema`),
   official form registry UI and data (`tax-form-registry`, `tax_form_registry`),
   canonical tax model (`lib/canonical-tax-model.ts`), tax pipeline and PDF readiness
@@ -787,7 +799,22 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Unterlagen erklären module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/documents` and `/{locale}/office/cases/{id}`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis
+  engine and case panel shipped; unit tests and build verified; authenticated runtime E2E pending).
+- **ADDED THIS PHASE:** `lib/horizon/unterlagen/deadline.ts` (three-way deadline evidence:
+  `printed` with the verbatim line quoted, `calculated` only from a period the document itself
+  states plus a reference date it states and always flagged for user verification, `unknown`
+  otherwise — no German statutory period is hardcoded, and an impossible printed date or a period
+  with no reference date yields no date), `lib/horizon/unterlagen/classify.ts` (classification
+  from printed cues with the matching line quoted, `unclear` rather than a nearest guess, plus
+  three asymmetric risk states whose caveats say what was *checked* rather than what is *true*),
+  `lib/horizon/unterlagen/analysis.ts` (assembles the above from stored page text; a model may
+  later explain this output but never produces it), `lib/horizon/unterlagen/copy.ts` (BG + DE),
+  `components/unterlagen/unterlagen-panel.tsx` (classification with a user-correction control,
+  deadline with evidence kind and quote, risk state with caveat, one next action),
+  `lib/horizon/unterlagen/actions.ts` (records a user correction as a confirmed fact),
+  `CaseEngineRepository.listDocumentPages` (reads existing `document_pages` under the existing
+  `document_pages_read_own` policy). 48 unit tests.
 - **CURRENT IMPLEMENTATION:** document upload with validation, extraction, Tesseract OCR,
   Groq/Cerebras analysis, fact confirmation, signed URLs, and explanation components
   (`document-intake`, `document-explanation`, `document-facts-review`, `documents-workspace`).
@@ -816,7 +843,19 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/vertraege`, `/{locale}/tarife`, `/{locale}/angebote/{offer}`, `/go/{offer}`,
   `/api/contracts`, `/api/contracts/{id}`, `/api/radar`, `/api/optimize/*`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case
+  linkage and dashboard entry shipped; archive, Radar and optimize surfaces reused; tests and build
+  verified; authenticated runtime E2E pending).
+- **ADDED THIS PHASE:** `lib/horizon/contracts/linkage.ts` (evidenced-only `contractFactSeeds`
+  under the P14 vocabulary; a field the archive does not hold is *absent* rather than empty, a
+  malformed date is dropped rather than interpreted, a date from a `needs_review` contract is
+  carried across unverified so P14 refuses to rely on it, and the archive's `cancellation_deadline`
+  is deliberately *not* seeded because a cancel-by date is not a termination date),
+  `lib/horizon/contracts/actions.ts` (`startKuendigungFromContract`: reads the contract through the
+  session client so `contracts_household_owner_all` and the household check both apply; creates the
+  case through the shared engine; auto-confirms facts only for a `confirmed` contract; audits
+  `contract_linked`), `lib/horizon/contracts/copy.ts` (BG + DE), and a "Kündigung vorbereiten"
+  action per contract row. `/{locale}/vertraege` added as a dashboard shortcut. 18 unit tests.
 - **CURRENT IMPLEMENTATION:** contracts workspace and contract-center workspace;
   contract CRUD APIs; deterministic contract Radar (`lib/kintex-radar.ts` with
   `contract_radar_history` and `radar_events`); optimize sessions

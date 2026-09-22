@@ -24,7 +24,6 @@
     "@napi-rs/canvas": "^1.0.9",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
-    "@vercel/analytics": "1.6.1",
     "ai": "^7.0.92",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
