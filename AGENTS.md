@@ -4,7 +4,7 @@ Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, and `docs/TERRA_START.md` before work
 
 Canonical identity: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HORIZON by VZG`, CODEBASE `VZGplattform`. Keep these four names distinct; do not use them interchangeably.
 
-The current user-approved product direction is **HORIZON by VZG**, V1 for private customers: contract management, private documents, translation/explanation, deadlines, and user-approved actions. B2B remains a separate draft. This narrows the older broad product roadmap; it does not relax its safety rules.
+The current user-approved product direction is **HORIZON by VZG** as a management center for contracts, recurring obligations, important dates and financial control in Germany. The core product loop is: discover contracts/costs → track lifecycle dates and Preisgarantie/Kündigungsfrist where evidenced → warn → compare → optimize through real approved partner/affiliate offers → renew/switch only by user decision → continue monitoring. Documents, cases, Agentur/Jobcenter, tax, cancellation and explanation modules support this management system rather than define the whole product. The long-term **HORIZON Capital** layer is preserved for later: research, risk/scenario analysis, deterministic compound-interest and long-term traditional-asset planning, with **cryptocurrency explicitly out of scope**. Capital remains outside the active P0–P17 sequence until the owner explicitly reopens it. B2B remains a separate draft. Safety, legal, evidence and user-approval boundaries remain unchanged.
 
 ## Current development stack
 
