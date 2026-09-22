@@ -56,7 +56,7 @@ after a module meets the full DONE definition.
 | P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P15 | STEUERERKLÄRUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year registry + case wiring shipped; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis engine + panel shipped; tests/build verified; authenticated runtime E2E pending) | NO | YES |
-| P17 | CONTRACT MANAGEMENT | AUDITED | NO | YES |
+| P17 | CONTRACT MANAGEMENT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case linkage shipped; archive/Radar reused; tests/build verified; authenticated runtime E2E pending) | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -843,7 +843,19 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/vertraege`, `/{locale}/tarife`, `/{locale}/angebote/{offer}`, `/go/{offer}`,
   `/api/contracts`, `/api/contracts/{id}`, `/api/radar`, `/api/optimize/*`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case
+  linkage and dashboard entry shipped; archive, Radar and optimize surfaces reused; tests and build
+  verified; authenticated runtime E2E pending).
+- **ADDED THIS PHASE:** `lib/horizon/contracts/linkage.ts` (evidenced-only `contractFactSeeds`
+  under the P14 vocabulary; a field the archive does not hold is *absent* rather than empty, a
+  malformed date is dropped rather than interpreted, a date from a `needs_review` contract is
+  carried across unverified so P14 refuses to rely on it, and the archive's `cancellation_deadline`
+  is deliberately *not* seeded because a cancel-by date is not a termination date),
+  `lib/horizon/contracts/actions.ts` (`startKuendigungFromContract`: reads the contract through the
+  session client so `contracts_household_owner_all` and the household check both apply; creates the
+  case through the shared engine; auto-confirms facts only for a `confirmed` contract; audits
+  `contract_linked`), `lib/horizon/contracts/copy.ts` (BG + DE), and a "Kündigung vorbereiten"
+  action per contract row. `/{locale}/vertraege` added as a dashboard shortcut. 18 unit tests.
 - **CURRENT IMPLEMENTATION:** contracts workspace and contract-center workspace;
   contract CRUD APIs; deterministic contract Radar (`lib/kintex-radar.ts` with
   `contract_radar_history` and `radar_events`); optimize sessions

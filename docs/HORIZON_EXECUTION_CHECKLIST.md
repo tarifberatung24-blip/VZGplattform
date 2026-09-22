@@ -382,13 +382,21 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
 ## P17 — Contract Management
 
 - ✅ Existing contract surfaces/data identified
-- Canonical contract model/surface
-- Contract import/intake
-- Deadlines/radar
-- Change/cancellation flows
-- User-approved actions
-- Audit/history
-- End-to-end verification
+- ✅ Contract archive reused (`/{locale}/vertraege`, `contracts-workspace`; provider, category, evidenced cost, evidenced dates, `review_status`)
+- ✅ Contract import/intake reused (upload + extraction + review, existing `/api/contracts` CRUD)
+- ✅ Deterministic Radar reused (`lib/kintex-radar.ts`, `contract_radar_history`) — signals state missing cost and unconfirmed review, never an estimate
+- ✅ Cancellation deadline shown from the archive and labelled as awaiting confirmation when `review_status` is not `confirmed`
+- ✅ Contract-to-case linkage: "Kündigung vorbereiten" opens a real `kuendigung` case through the shared engine (`lib/horizon/contracts/linkage.ts`, `actions.ts`)
+- ✅ Only evidenced fields become case facts; absent fields stay absent so the normal missing-information path asks for them
+- ✅ A malformed date is dropped rather than interpreted; a non-existent day is refused
+- ✅ The archive's cancel-by deadline is not seeded as a termination date
+- ✅ A `needs_review` contract's values seed the case **unconfirmed**, so P14 will not compute or write a date from them
+- ✅ Session-client read carries `contracts_household_owner_all` + the household check, so another household's contract behaves like a missing one
+- ✅ Audit trail: `contract_linked` (and `contract_link_seed_failed` when seeding fails)
+- ✅ Neutral analysis kept separate from affiliate offers (stated in both UI languages)
+- ✅ Dashboard shortcut `/{locale}/vertraege` added to real HORIZON navigation
+- 18 unit tests pass (`lib/horizon/contracts/contracts.test.ts`); tsc/lint/i18n/build green
+- Authenticated runtime E2E (deferred to the consolidated pass)
 - FROZEN
 
 ---
