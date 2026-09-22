@@ -3,9 +3,10 @@
 import { useActionState } from "react"
 import { prepareOfficialForm, type PdfGenerationState } from "@/lib/horizon/pdf/actions"
 import {
-  FMS_2025_TEMPLATES,
   AGENTUR_FUER_ARBEIT_TEMPLATES,
   JOBCENTER_TEMPLATES,
+  templatesForTaxYear,
+  type OfficialPdfTemplate,
 } from "@/lib/horizon/pdf/registry"
 
 const initialState: PdfGenerationState = { status: null, detail: null, manualPath: null }
@@ -18,14 +19,17 @@ const initialState: PdfGenerationState = { status: null, detail: null, manualPat
  * nothing to do with their situation, and a case's module is the one thing that
  * legitimately narrows this list.
  */
-function templatesForModule(module: string) {
+function templatesForModule(module: string): readonly OfficialPdfTemplate[] {
   if (module === "agentur_fuer_arbeit") {
     return AGENTUR_FUER_ARBEIT_TEMPLATES
   }
   if (module === "jobcenter") {
     return JOBCENTER_TEMPLATES
   }
-  return FMS_2025_TEMPLATES
+  // Modules with no official forms of their own show none. The tax forms are
+  // reached through the tax-year registry, not through this fallback, so a
+  // cancellation or document-explanation case is never offered a tax form.
+  return []
 }
 
 /**
@@ -46,15 +50,25 @@ export function OfficialFormPanel({
   caseId,
   locale,
   module,
+  taxYear,
 }: {
   caseId: string
   locale: string
   module: string
+  /** The case's selected tax year, when the module is the tax module. */
+  taxYear?: number | null
 }) {
   const [state, action, pending] = useActionState(prepareOfficialForm, initialState)
   const de = locale === "de"
-  const templates = templatesForModule(module)
-  const isTaxModule = templates === FMS_2025_TEMPLATES
+  const isTaxModule = module === "steuererklaerung"
+  // A tax form is offered only for a tax year the registry actually supports. An
+  // unsupported or unpublished year yields an empty list rather than another
+  // year's forms, so the picker can never present 2025 as if it were 2026.
+  const templates = isTaxModule
+    ? taxYear != null
+      ? templatesForTaxYear(taxYear)
+      : []
+    : templatesForModule(module)
 
   const copy = de
     ? {
@@ -132,35 +146,44 @@ export function OfficialFormPanel({
       <form action={action} className="space-y-2">
         <input type="hidden" name="caseId" value={caseId} />
         <input type="hidden" name="locale" value={locale} />
-        {/* Tax forms are year-scoped and only the 2025 set is verified; a BA form
-            carries no tax year, and sending one would be a claim the registry does
-            not make. */}
-        {isTaxModule ? <input type="hidden" name="taxYear" value="2025" /> : null}
+        {/* A tax form carries the year it belongs to; a BA form carries no tax
+            year, and sending one would be a claim the registry does not make. */}
+        {isTaxModule && taxYear != null ? (
+          <input type="hidden" name="taxYear" value={String(taxYear)} />
+        ) : null}
 
-        <label className="block text-xs font-medium" htmlFor="pdf-template">
-          {copy.form}
-        </label>
-        <select
-          id="pdf-template"
-          name="templateId"
-          className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
-          defaultValue={templates[0]?.id}
-        >
-          {templates.map((template) => (
-            <option key={template.id} value={template.id}>
-              {template.formName}
-              {template.formId ? ` (${template.formId})` : ""} · {template.version}
-            </option>
-          ))}
-        </select>
+        {isTaxModule && templates.length === 0 ? (
+          <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
+            {copy.tax_year_required}
+          </p>
+        ) : (
+          <>
+            <label className="block text-xs font-medium" htmlFor="pdf-template">
+              {copy.form}
+            </label>
+            <select
+              id="pdf-template"
+              name="templateId"
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+              defaultValue={templates[0]?.id}
+            >
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.formName}
+                  {template.formId ? ` (${template.formId})` : ""} · {template.version}
+                </option>
+              ))}
+            </select>
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
-        >
-          {pending ? copy.preparing : copy.submit}
-        </button>
+            <button
+              type="submit"
+              disabled={pending}
+              className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              {pending ? copy.preparing : copy.submit}
+            </button>
+          </>
+        )}
       </form>
 
       {state.status === "draft_created" ? (

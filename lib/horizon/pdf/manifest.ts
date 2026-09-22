@@ -125,6 +125,25 @@ export function renderManifestSubject(manifest: PdfGenerationManifest): string {
   return `Amtliches Formular ${manifest.formName}${manifest.formId ? ` (${manifest.formId})` : ""}`
 }
 
+/** The engine's own marker for the generated artifact's hash, as rendered into a body. */
+export const FORM_OUTPUT_SHA_PREFIX = "Ausgabe-SHA-256: "
+
+/**
+ * Reads the generated artifact's hash back out of a stored draft body.
+ *
+ * Used by the owner-scoped download route to locate the draft that approved a
+ * given artifact, by the *value* it records rather than by its position, so a
+ * different draft cannot be substituted for it. Returns null for a body that
+ * carries no hash — a letter draft, or a plain correspondence draft — so the
+ * three kinds stay distinguishable instead of confusable.
+ */
+export function readFormOutputSha(body: string): string | null {
+  const line = body.split("\n").find((candidate) => candidate.startsWith(FORM_OUTPUT_SHA_PREFIX))
+  if (!line) return null
+  const value = line.slice(FORM_OUTPUT_SHA_PREFIX.length).trim()
+  return /^[0-9a-f]{64}$/.test(value) ? value : null
+}
+
 /**
  * P10 — provenance for a visually signed artifact.
  *

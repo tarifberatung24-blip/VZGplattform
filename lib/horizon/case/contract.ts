@@ -67,6 +67,15 @@ export type CaseSourceDocument = {
   createdAt: string
 }
 
+/** One extracted page of a case document, as P16 reads it for explanation. */
+export type DocumentPageText = {
+  documentId: string
+  pageNo: number
+  text: string
+  /** OCR confidence, when the page came from OCR rather than a text layer. */
+  confidence: number | null
+}
+
 export type ExtractedFact = {
   id: string
   caseId: string

@@ -9,6 +9,7 @@ import {
   type CaseModule,
   type CaseSourceDocument,
   type CaseTask,
+  type DocumentPageText,
   type DraftReviewStatus,
   type ExtractedFact,
   type HorizonCaseAction,
@@ -311,6 +312,32 @@ export class CaseEngineRepository {
       .order("created_at", { ascending: false })
     if (error) return fail(error.message)
     return ok((data ?? []).map(mapDocument))
+  }
+
+  /**
+   * The extracted text of a case's documents, page-ordered, for P16.
+   *
+   * Read through the session client with the `owner_id` filter, so the existing
+   * `document_pages_read_own` policy and this filter both apply. Returns the text
+   * only — the caller classifies and quotes it, and a document whose pages were
+   * never extracted simply contributes nothing rather than being guessed at.
+   */
+  async listDocumentPages(caseId: string): Promise<RepoResult<DocumentPageText[]>> {
+    const { data, error } = await this.client
+      .from("document_pages")
+      .select("document_id, page_no, text_content, confidence")
+      .eq("case_id", caseId)
+      .eq("owner_id", this.userId)
+      .order("page_no", { ascending: true })
+    if (error) return fail(error.message)
+    return ok(
+      (data ?? []).map((row) => ({
+        documentId: row.document_id,
+        pageNo: row.page_no,
+        text: row.text_content,
+        confidence: row.confidence,
+      })),
+    )
   }
 
   async addFacts(caseId: string, facts: readonly NewFactInput[]): Promise<RepoResult<ExtractedFact[]>> {
