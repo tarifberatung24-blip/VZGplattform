@@ -60,6 +60,27 @@ better contract visibility
 → stronger long-term financial position
 ```
 
+### Contract lifecycle and recurring-cost optimization
+
+HORIZON should treat every confirmed contract as a lifecycle object, not as a one-time comparison.
+The target is that, for the typical multi-year contract cycle, the user is warned early enough before
+Kündigungsfrist, Vertragsende, Preisgarantie expiry, renewal, or another evidenced review point to
+re-check the market and decide whether to keep, renegotiate, switch, or cancel.
+
+Optimization opportunities may include, when supported by an approved partner and applicable product/legal boundaries:
+
+- electricity and gas tariffs with better total cost / conditions;
+- internet and mobile contracts;
+- Kfz and other insurance products;
+- health-insurance options where relevant, especially for self-employed users;
+- bank accounts with lower or no recurring account fees;
+- credit/refinancing products with lower effective interest or total cost than a user's evidenced current credit;
+- other recurring mandatory-cost products where the comparison is transparent and evidence-based.
+
+The objective is not perpetual switching for its own sake. The objective is to give the user recurring
+control over unavoidable household/business costs and a documented opportunity to improve terms when
+a materially better option exists.
+
 Affiliate revenue is a business model layer, not a reason to fabricate a recommendation. An offer is
 shown as an active partner opportunity only when an approved partner and a real configured deeplink
 exist. Partner compensation and sponsored links must be disclosed clearly.
