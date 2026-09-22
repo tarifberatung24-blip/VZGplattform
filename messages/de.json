@@ -308,6 +308,7 @@
     "contracts": "Verträge",
     "monthly": "Monatlich erfasst",
     "monthlyUnit": "€ / Monat",
+    "missingData": "Keine Daten erfasst",
     "missingCosts": "Fehlende Kosten",
     "reviewFile": "Vertrag als PDF/Bild prüfen",
     "reviewRequired": "Prüfung erforderlich",

@@ -90,7 +90,6 @@ export const homeModules: readonly HomeModuleDefinition[] = HORIZON_HOME_MODULES
  */
 export const homeShortcuts = [
   { id: "cases", path: "/guide", labelBg: "Моите случаи", labelDe: "Meine Vorgänge" },
-  { id: "contracts", path: "/vertraege", labelBg: "Договори", labelDe: "Verträge" },
   { id: "documents", path: "/documents", labelBg: "Документи", labelDe: "Dokumente" },
   { id: "profile", path: "/profil", labelBg: "Профил", labelDe: "Profil" },
   { id: "security", path: "/protected/security", labelBg: "Сигурност", labelDe: "Sicherheit" },

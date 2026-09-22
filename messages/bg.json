@@ -308,6 +308,7 @@
     "contracts": "Договори",
     "monthly": "Месечно отчетени",
     "monthlyUnit": "€ / месец",
+    "missingData": "Няма въведени данни",
     "missingCosts": "Липсващи разходи",
     "reviewFile": "Провери договор като PDF/изображение",
     "reviewRequired": "Изисква се проверка",

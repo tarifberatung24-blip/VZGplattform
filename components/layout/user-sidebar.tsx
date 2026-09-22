@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   Compass,
+  WalletCards,
 } from "lucide-react"
 
 const navItems = [
@@ -28,6 +29,12 @@ const navItems = [
     labelBg: "Водач",
     labelDe: "Wegweiser",
     icon: Compass,
+  },
+  {
+    href: "/vertraege",
+    labelBg: "Договори",
+    labelDe: "Verträge",
+    icon: WalletCards,
   },
   {
     href: "/steuer",
@@ -112,4 +119,3 @@ export function UserSidebar() {
     </aside>
   )
 }
-
