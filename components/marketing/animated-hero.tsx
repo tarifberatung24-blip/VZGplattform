@@ -14,13 +14,13 @@ export function AnimatedHero() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="layer0-hero min-h-screen relative overflow-hidden">
+    <div className="layer0-hero relative h-[100dvh] min-h-[100dvh] overflow-hidden">
       <div className="absolute inset-0 bg-black">
         {/* Flowing wave rays overlay */}
       <div className="absolute inset-0">
         <span className="absolute left-6 top-6 z-10 text-sm font-medium tracking-[0.3em] text-white/70">{t.home.hero.badge}</span>
         <svg
-            className="absolute inset-0 w-full h-full"
+            className="flow-visual absolute inset-0 h-full w-full"
             viewBox="0 0 1200 800"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +101,7 @@ export function AnimatedHero() {
                 <stop offset="100%" stopColor="rgba(0,0,0,1)" />
               </linearGradient>
               <filter id="backgroundBlur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
                 <feTurbulence baseFrequency="0.9" numOctaves="3" result="noise" />
                 <feColorMatrix in="noise" type="saturate" values="0" result="monoNoise" />
                 <feComponentTransfer in="monoNoise" result="alphaAdjustedNoise">
@@ -113,7 +113,7 @@ export function AnimatedHero() {
                 </feMerge>
               </filter>
               <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
                 <feMerge>
                   <feMergeNode in="coloredBlur" />
                   <feMergeNode in="SourceGraphic" />
@@ -121,7 +121,7 @@ export function AnimatedHero() {
               </filter>
             </defs>
 
-            <g>
+            <g className="flow-layer">
               {/* Adding hero text background shape */}
               <ellipse
                 cx="300"
@@ -696,6 +696,40 @@ export function AnimatedHero() {
       </div>
 
       <style jsx>{`
+        .flow-layer > path {
+          vector-effect: non-scaling-stroke;
+        }
+
+        .flow-layer > path:nth-of-type(-n + 12) {
+          opacity: 0.34;
+          filter: url(#backgroundBlur);
+          stroke-width: 0.75;
+        }
+
+        .flow-layer > path:nth-of-type(n + 13):nth-of-type(-n + 24) {
+          opacity: 0.58;
+          stroke-width: 1;
+        }
+
+        .flow-layer > path:nth-of-type(n + 25) {
+          opacity: 0.78;
+          stroke-width: 1.35;
+        }
+
+        .flow-layer > circle:nth-of-type(-n + 12) {
+          opacity: 0.42;
+        }
+
+        .flow-layer > circle:nth-of-type(n + 25) {
+          opacity: 0.86;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .flow-visual {
+            display: none;
+          }
+        }
+
         @keyframes flow {
           0%, 100% {
             opacity: 0.3;
@@ -790,7 +824,7 @@ export function AnimatedHero() {
       )}
 
       {/* Main Content */}
-      <main className="relative z-10 flex flex-col items-start justify-start sm:justify-center min-h-[calc(100vh-80px)] px-4 sm:px-6 lg:px-12 max-w-6xl pt-4 sm:-mt-12 lg:-mt-24 pl-6 sm:pl-12 lg:pl-20">
+      <main className="relative z-10 flex h-[calc(100dvh-80px)] min-h-0 max-w-6xl flex-col items-start justify-start overflow-hidden px-4 pb-4 pt-4 pl-6 sm:justify-center sm:px-6 sm:pb-6 sm:pl-12 sm:-mt-12 lg:px-12 lg:-mt-24 lg:pl-20">
         {/* Trial Badge */}
         <div className="mb-4 sm:mb-8">
           <div className="inline-flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 sm:px-4 py-2">
