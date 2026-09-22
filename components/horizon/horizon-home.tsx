@@ -8,6 +8,7 @@ import {
   FileSearch,
   FileX2,
   Receipt,
+  WalletCards,
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import {
   guideModuleLabel,
   notStartedLabel,
 } from "@/lib/horizon/guide/copy"
+import { getContractsCopy } from "@/lib/horizon/contracts/copy"
 
 const icons: Record<string, LucideIcon> = { Building2, Briefcase, FileX2, Receipt, FileSearch }
 
@@ -66,6 +68,7 @@ export function HorizonHome({
   const { locale } = useLanguage()
   const de = locale === "de"
   const copy = getGuideCopy(locale)
+  const contracts = getContractsCopy(locale)
 
   return (
     <section className="mt-8" aria-labelledby="horizon-modules">
@@ -117,6 +120,18 @@ export function HorizonHome({
             </form>
           )
         })}
+        <Link
+          href={`/${locale}/vertraege`}
+          className="flex min-h-20 w-full items-start gap-3 rounded-md border border-border bg-card px-4 py-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
+        >
+          <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary/5 text-primary">
+            <WalletCards className="size-4" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-medium">{de ? "Vertragsverwaltung" : "Управление на договори"}</span>
+            <span className="mt-1 block text-xs text-muted-foreground">{contracts.intro}</span>
+          </span>
+        </Link>
       </div>
 
       <nav
