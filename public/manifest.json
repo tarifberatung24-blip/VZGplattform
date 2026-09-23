@@ -1,7 +1,7 @@
 {
-  "name": "VZGplattform",
-  "short_name": "VZGplattform",
-  "description": "BG/DE financial and administrative assistant for Bulgarians in Germany",
+  "name": "HORIZON by VZG",
+  "short_name": "HORIZON",
+  "description": "HORIZON by VZG — Finanz- und Verwaltungsassistent für das Leben in Deutschland. Финансов и административен помощник за живота в Германия.",
   "start_url": "/bg",
   "scope": "/",
   "display": "standalone",

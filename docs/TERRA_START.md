@@ -1,6 +1,6 @@
 # Terra — начално задание и инструменти
 
-Канонична идентичност: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HAMMAL by VZG`, CODEBASE `VZGplattform`. Не използвай тези четири имена взаимозаменяемо; виж `PROJECT_RULES.md`.
+Канонична идентичност: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HORIZON by VZG`, CODEBASE `VZGplattform`. Не използвай тези четири имена взаимозаменяемо; виж `PROJECT_RULES.md`.
 
 ## Решение след анализ на плана
 
