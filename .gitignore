@@ -18,6 +18,12 @@ node_modules
 .next/
 .DS_Store
 
+# Local agent skill installs (project-local, not vendored)
+.agents/
+.claude/skills/
+agent/skills/
+skills-lock.json
+
 .vercel
 .env
 .env.local

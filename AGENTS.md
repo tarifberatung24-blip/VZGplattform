@@ -70,3 +70,25 @@ First run `node scripts/terra-preflight.mjs`. Its output distinguishes tool read
 Use the existing pnpm lockfile. Run TypeScript explicitly with `pnpm exec tsc --noEmit`; the existing CI optional typecheck can otherwise skip it. Do not install new dependencies, rewrite the lockfile, or upgrade tools merely because a different version is available.
 
 Never print environment values, credentials, full customer files, or authenticated URLs.
+
+## Human-facing prose: Humanizer skill
+
+Use the Humanizer skill from `blader/humanizer` for newly created or materially edited
+human-facing prose: website copy, dashboard labels, onboarding text, descriptions, help text,
+empty states, error messages, CTA text, e-mails, customer notices, documentation prose, and
+marketing copy, in German, Bulgarian, and English. Install it project-locally with
+`npx skills add blader/humanizer --agent '*'`; if that runtime is unavailable, follow
+<https://github.com/blader/humanizer/blob/main/SKILL.md> manually as the writing standard.
+
+The skill applies to prose only. Humanizer must not alter code, identifiers, route paths,
+environment variable names, API or database names, structured data, facts, prices, dates, URLs,
+affiliate IDs, or legal and compliance meaning. Regulated statements (no guaranteed premium, no
+guaranteed approval, no automated decision, HORIZON is not the insurer, affiliate/Partnerlink
+disclosures, privacy and consent) keep their exact substance; if a rewrite makes them ambiguous,
+keep the clearer original wording. Do not vendor the skill's `SKILL.md` into this repository;
+reference the source instead.
+
+Draft the prose, run it through Humanizer, verify that no fact or rule changed, then commit.
+Humanizer must never invent facts, statistics, savings, approvals, guarantees, prices, legal
+conclusions, company or customer information, or citations. Bulgarian and German copy is
+humanized independently, not translated word for word from the other.
