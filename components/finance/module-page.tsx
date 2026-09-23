@@ -26,7 +26,7 @@ export function FinanceModulePage({ title, description, items }: { title: string
   const labels = locale === "bg" ? { back: "Към началото", area: "Личен финансов раздел", secure: "Сигурен работен раздел", steps: "Провери стъпките си спокойно.", start: "Започни проверката", dashboard: "Към таблото", expected: "Какво ще направиш", notice: "Това е структурирана предварителна проверка.", disclaimer: "HORIZON by VZG не заменя данъчна или правна консултация." } : { back: "Zur Startseite", area: "Persönlicher Finanzbereich", secure: "Sicherer Arbeitsbereich", steps: "Prüfe deine nächsten Schritte in Ruhe.", start: "Prüfung starten", dashboard: "Zum Dashboard", expected: "Was dich erwartet", notice: "Dies ist eine strukturierte Vorprüfung.", disclaimer: "HORIZON by VZG ersetzt keine Steuer- oder Rechtsberatung." }
   if (isKintexWorkspacePath(pathname)) return (
     <section className="mx-auto max-w-4xl px-5 pb-14 pt-10 sm:px-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HORIZON by VZG</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{labels.area}</p>
       <h1 className="mt-5 text-balance text-5xl font-black tracking-[-0.05em] sm:text-6xl">{displayTitle}</h1>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{displayDescription}</p>
     </section>

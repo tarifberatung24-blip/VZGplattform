@@ -10,7 +10,6 @@ import { MissingInformationInterviewer } from "@/components/dashboard/missing-in
 import { DocumentAnalyzer, type DashboardDocument } from "@/components/dashboard/document-analyzer"
 import { getSmartDashboardNextAction } from "@/lib/kintex-smart-dashboard"
 import { HorizonHome } from "@/components/horizon/horizon-home"
-import { DataFlowVisual } from "@/components/marketing/data-flow-visual"
 import { ContractsChart } from "./charts/contracts-chart"
 import { TimelineChart } from "./charts/timeline-chart"
 import { ContractsTable } from "./charts/contracts-table"
@@ -41,14 +40,13 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
   const nextAction = getSmartDashboardNextAction({ profileCompleteness: profile?.completeness ?? 0, contracts: contracts.length, documents: documents.length, documentsNeedingReview: reviewCount, contractsNeedingInfo: missingCosts }, de ? "de" : "bg")
   const questions = contracts.filter((item) => item.monthly_amount == null).slice(0, 2).map((item) => ({ id: item.id, label: `${de ? "Monatlicher Betrag für" : "Месечна сума за"} „${item.title}“?`, detail: de ? "Dieser Wert fehlt und wird nicht automatisch erfunden." : "Тази стойност липсва и няма да бъде измисляна автоматично.", href: "/vertraege" }))
 
-  return <main className="relative min-h-[calc(100dvh-5rem)] min-w-0 overflow-x-hidden bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6 lg:px-8">
-    <DataFlowVisual />
+  return <div className="relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6 lg:px-8">
     <div className="relative z-10 mx-auto min-w-0 max-w-[1440px]">
       <header className="flex flex-col justify-between gap-5 border-b border-border pb-6 xl:flex-row xl:items-center">
         <div className="flex items-center gap-4">
           <div className="grid size-11 place-items-center rounded-md bg-primary text-primary-foreground shadow-none"><LayoutDashboard className="size-5" /></div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HORIZON by VZG</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{de ? "Übersicht" : "Преглед"}</p>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">{de ? `Willkommen${firstName ? `, ${firstName}` : ""}` : `Добре дошъл${firstName ? `, ${firstName}` : ""}`}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{de ? "Finanzielle Übersicht aus bestätigten Daten." : "Финансов преглед от потвърдени данни."}</p>
           </div>
@@ -80,5 +78,5 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
       <MissingInformationInterviewer questions={questions} />
       <DocumentAnalyzer initialDocuments={documents} />
     </div>
-  </main>
+  </div>
 }
