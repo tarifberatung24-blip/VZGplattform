@@ -429,13 +429,13 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
           <aside className="space-y-4">
             <section className="kintex-panel overflow-hidden" aria-labelledby="assistant-title">
               <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary"><Bot className="size-5" /></span><div><h2 id="assistant-title" className="font-semibold">AI HOME OFFICE von vzg</h2><p className="text-xs text-muted-foreground">Assistant</p></div></div>
+                <div className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary"><Bot className="size-5" /></span><div><h2 id="assistant-title" className="font-semibold">HORIZON by VZG</h2><p className="text-xs text-muted-foreground">Assistant</p></div></div>
                 <span className="size-2 rounded-full bg-emerald-500" aria-label="Активен" />
               </div>
               <div className="space-y-3 p-4">
                 <Link href={nextAction.href} className="block rounded-xl border border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]"><div className="flex items-start gap-3"><CircleAlert className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">Следваща стъпка</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{nextAction.label}</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Отвори <ArrowRight className="size-3" /></span></div></div></Link>
                 <Link href="/documents" className="block rounded-lg border border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]"><FileText className="mt-0.5 size-5 text-primary" /><div><p className="font-semibold">Документи за преглед</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{reviewCount > 0 ? `${reviewCount} документа чакат потвърждение.` : "Няма документи, чакащи потвърждение."}</p></div></Link>
-                <Link href={`/${locale}/office`} className="block rounded-lg border border-primary/20 bg-primary/[0.04] p-4 transition-colors hover:border-primary/50 hover:bg-primary/[0.08]"><div className="flex items-start gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">VZGplattform Office</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Документи, случаи и проверими чернови на едно място.</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Отвори Office <ArrowRight className="size-3" /></span></div></div></Link>
+                <Link href={`/${locale}/office`} className="block rounded-lg border border-primary/20 bg-primary/[0.04] p-4 transition-colors hover:border-primary/50 hover:bg-primary/[0.08]"><div className="flex items-start gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">HORIZON Office</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Документи, случаи и проверими чернови на едно място.</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Отвори Office <ArrowRight className="size-3" /></span></div></div></Link>
                 {problems.length > 0 && <div className="rounded-xl bg-secondary p-4 text-sm text-foreground">{problems.length} сигнала изискват внимание. AI не предприема действие без потвърждение.</div>}
               </div>
               <div className="border-t border-border p-4">
@@ -459,8 +459,8 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
         </div>
       </div>
 
-      <button type="button" onClick={() => setAssistantOpen(true)} className="fixed bottom-5 right-5 z-30 flex h-13 items-center gap-3 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-xl shadow-blue-500/20 transition-transform hover:-translate-y-0.5 focus-visible:outline-none md:bottom-7 md:right-7" aria-label="Отвори AI HOME OFFICE von vzg">
-        <Bot className="size-5" aria-hidden="true" /><span className="hidden sm:inline">AI HOME OFFICE von vzg</span>
+      <button type="button" onClick={() => setAssistantOpen(true)} className="fixed bottom-5 right-5 z-30 flex h-13 items-center gap-3 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-xl shadow-blue-500/20 transition-transform hover:-translate-y-0.5 focus-visible:outline-none md:bottom-7 md:right-7" aria-label="Отвори HORIZON by VZG">
+        <Bot className="size-5" aria-hidden="true" /><span className="hidden sm:inline">HORIZON by VZG</span>
       </button>
 
       {assistantOpen && <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="assistant-drawer-title">
@@ -469,7 +469,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
           <header className="flex items-center justify-between border-b border-border px-5 py-4">
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><Bot className="size-5" /></span>
-              <div><h2 id="assistant-drawer-title" className="font-semibold">AI HOME OFFICE von vzg</h2><p className="text-xs text-muted-foreground">VZGplattform работно пространство</p></div>
+              <div><h2 id="assistant-drawer-title" className="font-semibold">HORIZON by VZG</h2><p className="text-xs text-muted-foreground">HORIZON работно пространство</p></div>
             </div>
             <Button ref={assistantCloseButton} type="button" variant="ghost" size="icon" className="rounded-lg" onClick={() => setAssistantOpen(false)} aria-label="Затвори"><X className="size-5" /></Button>
           </header>

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s · HORIZON by VZG",
   },
   description:
-    "VZGplattform организира договори, документи, срокове и финансови задачи за живота ти в Германия.",
+    "HORIZON by VZG — Finanz- und Verwaltungsassistent für das Leben in Deutschland. Финансов и административен помощник за живота ти в Германия.",
   generator: "v0.app",
   applicationName: "HORIZON by VZG",
   keywords: [

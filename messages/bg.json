@@ -137,7 +137,10 @@
     "backToLogin": "Обратно към вход",
     "sendLink": "Изпрати линк",
     "sending": "Изпращане…",
-    "emailLabel": "Имейл"
+    "emailLabel": "Имейл",
+    "expiredTitle": "Връзката е невалидна или изтекла",
+    "expiredDescription": "Тази връзка вече не може да бъде използвана. Поискай нова, за да продължиш.",
+    "requestNewLink": "Поискай нов линк"
   },
   "dashboard": {
     "greetingMorning": "Добро утро",

@@ -1,6 +1,6 @@
 # VZGplattform Copilot Instructions
 
-Canonical identity: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HAMMAL by VZG`, CODEBASE `VZGplattform`. Keep these distinct. See `/PROJECT_RULES.md`.
+Canonical identity: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HORIZON by VZG`, CODEBASE `VZGplattform`. Keep these distinct. See `/PROJECT_RULES.md`.
 
 Source of truth: `tarifberatung24-blip/VZGplattform` (`main`).
 

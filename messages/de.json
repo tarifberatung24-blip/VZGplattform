@@ -137,7 +137,10 @@
     "backToLogin": "Zurück zur Anmeldung",
     "sendLink": "Link senden",
     "sending": "Wird gesendet…",
-    "emailLabel": "E-Mail"
+    "emailLabel": "E-Mail",
+    "expiredTitle": "Link ungültig oder abgelaufen",
+    "expiredDescription": "Dieser Link kann nicht mehr verwendet werden. Fordere einen neuen an, um fortzufahren.",
+    "requestNewLink": "Neuen Link anfordern"
   },
   "dashboard": {
     "greetingMorning": "Guten Morgen",
