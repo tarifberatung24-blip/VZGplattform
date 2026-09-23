@@ -16,14 +16,14 @@ export function ProviderAuditTimeline({
   const statusIcons: Record<string, React.ReactNode> = {
     created: <Clock className="size-4 text-primary" />,
     validated: <CheckCircle2 className="size-4 text-emerald-600" />,
-    review_required: <AlertCircle className="size-4 text-amber-600" />,
+    review_required: <AlertCircle className="size-4 text-primary" />,
     ready_for_provider: <CheckCircle2 className="size-4 text-emerald-600" />,
     queued: <Loader2 className="size-4 animate-spin text-primary" />,
     transmitting: <Loader2 className="size-4 animate-spin text-primary" />,
     accepted: <CheckCircle2 className="size-4 text-emerald-600" />,
     rejected: <XCircle className="size-4 text-red-600" />,
     failed: <XCircle className="size-4 text-red-600" />,
-    cancelled: <AlertCircle className="size-4 text-amber-600" />,
+    cancelled: <AlertCircle className="size-4 text-primary" />,
   }
 
   if (!events || events.length === 0) {

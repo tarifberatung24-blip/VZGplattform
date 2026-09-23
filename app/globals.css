@@ -31,6 +31,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -155,16 +156,14 @@
   --muted-foreground: #a1a1aa;
   --accent: #2f80ed;
   --accent-foreground: #ffffff;
-  --accent: oklch(0.47 0.12 46.20);
-  --accent-foreground: oklch(0.92 0.12 95.75);
   --destructive: oklch(0.64 0.21 25.33);
   --border: #27272a;
   --input: #27272a;
   --ring: #2f80ed;
-  --chart-1: oklch(0.84 0.16 84.43);
-  --chart-2: oklch(0.67 0.16 58.32);
-  --chart-3: oklch(0.47 0.12 46.20);
-  --chart-4: oklch(0.56 0.15 49.00);
+  --chart-1: #2f80ed;
+  --chart-2: #3b82f6;
+  --chart-3: #60a5fa;
+  --chart-4: #93c5fd;
   --sidebar: #000000;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #2f80ed;
@@ -173,8 +172,7 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #27272a;
   --sidebar-ring: #2f80ed;
-  --sidebar-ring: oklch(0.77 0.16 70.08);
-  --success: oklch(0.67 0.16 58.32);
+  --success: oklch(0.70 0.14 155);
   --success-foreground: oklch(0.20 0 0);
   --focus-ring: var(--ring);
 }
@@ -237,38 +235,51 @@
   }
 }
 
-/* KintexBG customer workspace. */
-.kintex-workspace {
+/* KintexBG customer workspace.
+   The mobile sidebar is rendered through a body-level portal, so it is not a DOM
+   descendant of .kintex-workspace and would otherwise fall back to the light
+   :root --sidebar (#fff), giving a white drawer. The sidebar primitive is only
+   used inside this workspace, so the drawer matches the workspace scope too. */
+.kintex-workspace,
+[data-slot="sidebar"][data-mobile="true"] {
   color-scheme: light;
-  --nm-black: #000000;
-  --nm-white: #ffffff;
-  --nm-yellow: #003f88;
-  --nm-yellow-shadow: transparent;
-  --nm-gray-100: #f2f2ef;
-  --nm-gray-300: #deded9;
-  --nm-gray-600: #60605b;
-  --nm-yellow-dark: #8f1d28;
-  --radius: 0.5rem;
-  --background: var(--nm-white);
-  --foreground: var(--nm-black);
-  --card: var(--nm-white);
-  --card-foreground: var(--nm-black);
-  --popover: var(--nm-white);
-  --popover-foreground: var(--nm-black);
-    --primary: oklch(0.77 0.16 70.08);
-  --primary-foreground: var(--nm-white);
-  --secondary: var(--nm-gray-100);
-  --secondary-foreground: var(--nm-black);
-  --muted: var(--nm-gray-100);
-  --muted-foreground: var(--nm-gray-600);
-    --accent: oklch(0.47 0.12 46.20);
-  --accent-foreground: oklch(1.00 0 0);
-  --border: var(--nm-gray-300);
-  --input: var(--nm-gray-300);
-    --ring: oklch(0.77 0.16 70.08);
-  --focus-ring: oklch(0.77 0.16 70.08);
+  --background: #F3F5F7;
+  --foreground: #17202A;
+  --card: #FCFCFD;
+  --card-foreground: #17202A;
+  --popover: #FCFCFD;
+  --popover-foreground: #17202A;
+  --primary: #174A7E;
+  --primary-foreground: #ffffff;
+  --primary-hover: #123B66;
+  --secondary: #E9EEF3;
+  --secondary-foreground: #17202A;
+  --muted: #E9EEF3;
+  --muted-foreground: #667085;
+  --accent: #E9EEF3;
+  --accent-foreground: #17202A;
+  --border: #D8DEE6;
+  --input: #D8DEE6;
+  --ring: #174A7E;
+  --focus-ring: #174A7E;
   --success: #287047;
-  --success-foreground: var(--nm-white);
+  --success-foreground: #ffffff;
+  /* Spec DANGER. Mapped to --destructive, the token Tailwind actually registers. */
+  --destructive: #B42318;
+  --sidebar: #0B1F33;
+  --sidebar-foreground: #EAF0F6;
+  --sidebar-primary: #174A7E;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #14304F;
+  --sidebar-accent-foreground: #EAF0F6;
+  --sidebar-border: #1E3A5C;
+  --sidebar-ring: #174A7E;
+  --chart-1: #174A7E;
+  --chart-2: #102A43;
+  --chart-3: #486581;
+  --chart-4: #829AB1;
+  --chart-5: #BCCCDC;
+  --radius: 0.5rem;
   font-family: var(--font-inter), Arial, "Helvetica Neue", sans-serif;
 }
 
@@ -292,7 +303,7 @@
 .kintex-skip:focus { transform: translateY(0); }
 
 .kintex-workspace .nm-kicker {
-  color: var(--nm-yellow-dark);
+  color: var(--muted-foreground);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;

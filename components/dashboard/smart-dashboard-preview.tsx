@@ -379,7 +379,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
                             <td className="px-3 py-3 text-right font-semibold tabular-nums">{formatMoney(contract.monthly_amount)}</td>
                             <td className="px-3 py-3 text-muted-foreground">{formatDate(contract.end_date)}</td>
                             <td className="px-3 py-3 text-muted-foreground">Няма данни</td>
-                            <td className="px-3 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${contract.status === "confirmed" || contract.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{statusLabel(contract.status)}</span></td>
+                            <td className="px-3 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${contract.status === "confirmed" || contract.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-secondary text-primary"}`}>{statusLabel(contract.status)}</span></td>
                             <td className="px-4 py-3 text-right"><Button asChild variant="ghost" size="icon" className="size-8 rounded-lg" aria-label={`Отвори ${contract.title}`}><Link href="/vertraege"><Eye className="size-4" /></Link></Button></td>
                           </tr>
                         ))}
@@ -411,7 +411,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
                     {group.items.map((contract) => <article key={contract.id} className="space-y-4 p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div><p className="font-semibold">{contract.title}</p><p className="mt-1 text-xs text-muted-foreground">{contract.provider_name ?? "Доставчикът не е въведен"}</p></div>
-                        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${contract.status === "confirmed" || contract.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{statusLabel(contract.status)}</span>
+                        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${contract.status === "confirmed" || contract.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-secondary text-primary"}`}>{statusLabel(contract.status)}</span>
                       </div>
                       <dl className="grid grid-cols-2 gap-3 text-sm">
                         <div><dt className="text-xs text-muted-foreground">Месечно</dt><dd className="mt-1 font-semibold tabular-nums">{formatMoney(contract.monthly_amount)}</dd></div>
@@ -436,7 +436,7 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
                 <Link href={nextAction.href} className="block rounded-xl border border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]"><div className="flex items-start gap-3"><CircleAlert className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">Следваща стъпка</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{nextAction.label}</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Отвори <ArrowRight className="size-3" /></span></div></div></Link>
                 <Link href="/documents" className="block rounded-lg border border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]"><FileText className="mt-0.5 size-5 text-primary" /><div><p className="font-semibold">Документи за преглед</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{reviewCount > 0 ? `${reviewCount} документа чакат потвърждение.` : "Няма документи, чакащи потвърждение."}</p></div></Link>
                 <Link href={`/${locale}/office`} className="block rounded-lg border border-primary/20 bg-primary/[0.04] p-4 transition-colors hover:border-primary/50 hover:bg-primary/[0.08]"><div className="flex items-start gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold">VZGplattform Office</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Документи, случаи и проверими чернови на едно място.</p><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Отвори Office <ArrowRight className="size-3" /></span></div></div></Link>
-                {problems.length > 0 && <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{problems.length} сигнала изискват внимание. AI не предприема действие без потвърждение.</div>}
+                {problems.length > 0 && <div className="rounded-xl bg-secondary p-4 text-sm text-foreground">{problems.length} сигнала изискват внимание. AI не предприема действие без потвърждение.</div>}
               </div>
               <div className="border-t border-border p-4">
                 <Button asChild variant="outline" className="h-11 w-full justify-between rounded-xl font-normal text-muted-foreground"><Link href="/assistant"><span>Попитай за разходите си</span><Send className="size-4" /></Link></Button>

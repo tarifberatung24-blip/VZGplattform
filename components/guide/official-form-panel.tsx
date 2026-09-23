@@ -191,7 +191,7 @@ export function OfficialFormPanel({
           <p role="status" className="text-xs text-primary">
             {copy.ok}
           </p>
-          {state.detail ? <p className="text-xs text-amber-600">{state.detail}</p> : null}
+          {state.detail ? <p className="text-xs text-primary">{state.detail}</p> : null}
         </div>
       ) : null}
 

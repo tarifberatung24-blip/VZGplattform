@@ -1,14 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { localizedPath, stripLocale } from "@/lib/i18n/routing"
+import { localizedPath } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
 import { usePathname } from "next/navigation"
 
 export function GlobalFooter() {
   const pathname = usePathname() ?? "/"
-  if (stripLocale(pathname) === "/") return null
-
   // Authenticated workspace routes render the HORIZON shell (see WorkspaceShell).
   // The public Layer 0 footer must not appear inside the operational workspace.
   if (isKintexWorkspacePath(pathname)) return null
