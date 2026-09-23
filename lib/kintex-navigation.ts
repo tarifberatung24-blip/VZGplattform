@@ -14,9 +14,14 @@ export const kintexModules = [
 ] as const
 
 // Presentation only. Access control remains in the existing Supabase proxy/pages.
+//
+// Every prefix here must be an authenticated route, because the HORIZON shell hides the public
+// header and footer and shows account controls. Verifying the list against the protection source
+// is required; see lib/kintex-navigation.test.ts. `/anspruch` and `/email-generator` resolve for
+// anonymous visitors, so they are deliberately excluded.
 export function isKintexWorkspacePath(pathname: string) {
   const path = stripLocale(pathname)
-  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/profil", "/assistant", "/steuer", "/finanzamt", "/anspruch", "/email-generator", "/guide"]
+  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/profil", "/assistant", "/steuer", "/finanzamt", "/guide"]
     .some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 

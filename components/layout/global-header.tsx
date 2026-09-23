@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
+import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { authenticatedHomePath } from "@/lib/supabase/auth-routing"
@@ -40,6 +41,10 @@ export function GlobalHeader() {
   }, [])
 
   if (stripLocale(pathname) === "/") return null
+
+  // Authenticated workspace routes render the HORIZON shell (see WorkspaceShell).
+  // The public Layer 0 header must not appear inside the operational workspace.
+  if (isKintexWorkspacePath(pathname)) return null
 
   const labels =
     locale === "de"
