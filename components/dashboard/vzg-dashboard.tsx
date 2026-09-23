@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo } from "react"
-import { ArrowUpRight, Bell, CalendarDays, ChevronRight, FileText, LayoutDashboard, Plus, Receipt, Search, WalletCards } from "lucide-react"
+import { ArrowUpRight, Bell, CalendarDays, LayoutDashboard, Plus, Receipt, Search, WalletCards } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n/language-context"

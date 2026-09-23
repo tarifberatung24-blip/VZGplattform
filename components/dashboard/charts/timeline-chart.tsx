@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
   ReferenceLine,
 } from "recharts"
 import {
@@ -55,7 +54,7 @@ export function TimelineChart({ deadlines }: { deadlines: Deadline[] }) {
       ...item,
       label: index === 0 ? (de ? "Heute" : "Current") : item.month,
     }))
-  }, [deadlines, de, locale])
+  }, [deadlines, de])
 
   return (
     <Card className="border-border bg-card shadow-none">
