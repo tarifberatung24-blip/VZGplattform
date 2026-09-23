@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { activeKintexModule, isKintexWorkspacePath, kintexModules } from "./kintex-navigation"
 import { isProtectedAppPath } from "./supabase/auth-routing"
+import { stripLocale } from "./i18n/routing"
 
 describe("KintexBG workspace navigation", () => {
   it("keeps all ten modules under the existing authentication boundary", () => {
@@ -31,5 +32,38 @@ describe("KintexBG workspace navigation", () => {
       expect(isKintexWorkspacePath(path)).toBe(false)
     }
     expect(isKintexWorkspacePath("/de/steuer/review")).toBe(true)
+  })
+
+  it("does not treat public routes as workspace routes", () => {
+    // These resolve for an anonymous visitor (see the protection assertions below), so the
+    // authenticated shell must not wrap them.
+    for (const path of ["/bg/anspruch", "/de/anspruch", "/bg/email-generator", "/de/email-generator"]) {
+      expect(isKintexWorkspacePath(path)).toBe(false)
+      expect(isProtectedAppPath(path)).toBe(false)
+    }
+  })
+
+  it("keeps representative authenticated routes inside the workspace", () => {
+    for (const path of ["/bg/dashboard", "/bg/vertraege", "/bg/documents", "/bg/steuer", "/bg/guide"]) {
+      expect(isKintexWorkspacePath(path)).toBe(true)
+      expect(isProtectedAppPath(path)).toBe(true)
+    }
+  })
+
+  it("only wraps routes inside the protection boundary", () => {
+    // The workspace shell hides the public header/footer and shows account controls, so any
+    // path it matches must also be proxy-protected. `/protected` is the documented exception:
+    // isProtectedAppPath excludes it while its children (/protected/home-office) are protected.
+    const probes = [
+      "/bg/dashboard", "/bg/vertraege", "/bg/documents", "/bg/steuer", "/bg/steuer/review",
+      "/bg/guide", "/bg/guide/case-1", "/bg/profil", "/bg/assistant", "/bg/finanzbildung",
+      "/bg/finanzamt", "/bg/protected/home-office", "/bg/anspruch", "/bg/email-generator",
+      "/bg/uslugi", "/bg/tarife", "/bg/auth/login", "/bg/kindergeld",
+    ]
+    for (const path of probes) {
+      if (isKintexWorkspacePath(path) && stripLocale(path) !== "/protected") {
+        expect(isProtectedAppPath(path)).toBe(true)
+      }
+    }
   })
 })

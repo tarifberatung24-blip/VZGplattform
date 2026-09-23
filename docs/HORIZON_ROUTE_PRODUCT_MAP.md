@@ -46,10 +46,10 @@ navigation and are not part of the current product.
 
 The insurance hub and the two partner landings are classified by North Star stage, not by an
 implementation phase. `HORIZON_MASTER_MAP.md` places contract comparison and partner handoff in
-`DISCOVER → TRACK → WARN → COMPARE → OPTIMIZE → RENEW` and in `STAGE B — HORIZON OPTIMIZE`, which
+`DISCOVER ã TRACK ã WARN ã COMPARE ã OPTIMIZE ã RENEW` and in `STAGE B ã HORIZON OPTIMIZE`, which
 names vehicle and business insurance among the examples. No phase in the approved P0 to P17
 sequence covers insurance partner surfaces, so none is assigned. `P13` is Jobcenter and `P14` is
-Kündigung.
+Kû¥ndigung.
 
 ## Authentication
 
@@ -78,9 +78,15 @@ back to the unprefixed handler.
 
 ## Authenticated HORIZON workspace
 
-These routes render inside the single workspace shell (`components/finance/workspace-shell.tsx`)
-and are the destinations exposed by the workspace navigation
-(`components/layout/horizon-sidebar.tsx`).
+These routes render inside the single workspace shell (`components/finance/workspace-shell.tsx`).
+The routes the shell wraps are those matched by `isKintexWorkspacePath()` in
+`lib/kintex-navigation.ts`; the destinations exposed by the workspace navigation
+(`components/layout/horizon-sidebar.tsx`) are marked in the last column.
+
+That predicate is presentation only. It decides whether the HORIZON shell draws; it does not grant
+or deny access. Actual protection comes from `protectedPrefixes` in
+`lib/supabase/auth-routing.ts`, applied by `updateSession()` in `lib/supabase/proxy.ts`. The two
+sets are not identical: two routes below are public, as noted.
 
 | Route | Access | Product area | Status | Disposition | In primary nav |
 |---|---|---|---|---|---|
@@ -89,11 +95,9 @@ and are the destinations exposed by the workspace navigation
 | `/{locale}/guide/[caseId]` | AUTH | Guide case detail (P3) | IMPLEMENTED | KEEP | via Guide |
 | `/{locale}/vertraege` | AUTH | Contracts (P17) | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/documents` | AUTH | Documents (P6) | PARTIAL | KEEP | Yes |
-| `/{locale}/steuer` | AUTH | Steuererklärung (P15) | IMPLEMENTED | KEEP | Yes |
+| `/{locale}/steuer` | AUTH | SteuererklûÊrung (P15) | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | KEEP | via Steuern |
 | `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | KEEP | via Steuern |
-| `/{locale}/anspruch` | AUTH (proxy) | Sozialleistungen entry | PARTIAL | KEEP | Yes |
-| `/{locale}/email-generator` | AUTH (proxy) | Correspondence drafting (P11) | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/profil` | AUTH | Profile | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/finanzamt` | AUTH | Finanzamt surfaces | PARTIAL | KEEP | No |
 | `/{locale}/finanzbildung` | AUTH (proxy) | Financial education | PARTIAL | LEGACY | No |
@@ -102,8 +106,31 @@ and are the destinations exposed by the workspace navigation
 module entry. Its data, chart and search behaviour is owned by TAR-10 and was not changed by
 TAR-7/TAR-8.
 
-`/{locale}/anspruch` and `/{locale}/email-generator` contain no session check in the page body;
-they are gated by the proxy against the prefixes in `lib/supabase/auth-routing.ts`.
+## Public routes outside the workspace shell
+
+Reachable without a session. They are **not** matched by `isKintexWorkspacePath()`, so they draw
+the public Layer 0 header and footer and never the authenticated shell. Neither route appears in
+`protectedPrefixes`, and `updateSession()` only redirects when `isProtectedAppPath()` returns true.
+
+| Route | Access | Product area | Status | Disposition |
+|---|---|---|---|---|
+| `/{locale}/anspruch` | PUBLIC | Entitlement navigator (P4, touched by P12–P13) | PARTIAL | REUSE |
+| `/{locale}/email-generator` | PUBLIC | AI letter generator, KintexBG-era (P8, superseded by Draft/Review) | LEGACY | KEEP |
+
+Both were previously recorded as `AUTH (proxy)` in this document, which contradicted
+`HORIZON_MASTER_MAP.md` and the proxy. Their classification is corrected here to `PUBLIC`, matching
+the Master Map. Their access was not changed by TAR-7/TAR-8, and no authenticated equivalent was
+created.
+
+TAR-7/TAR-8 briefly wrapped these two routes in the workspace shell and listed them in the
+authenticated navigation. That combination showed an anonymous visitor the authenticated sidebar and
+logout controls while hiding the public chrome. Both the shell match and the navigation entries were
+removed in the same pass. Whether they deserve protected workspace versions is a future product
+decision.
+
+Setting `finanzbildung` aside, since it is both protected and legacy: the table above lists only
+routes inside the protection boundary. Verify any change to that list against
+`protectedPrefixes` in `lib/supabase/auth-routing.ts` before adding an entry.
 
 ## Legacy and compatibility surfaces
 

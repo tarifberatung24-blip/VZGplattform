@@ -5,10 +5,8 @@ import { usePathname } from "next/navigation"
 import {
   Compass,
   FileText,
-  Landmark,
   LayoutDashboard,
   LogOut,
-  Mail,
   Receipt,
   Settings,
   WalletCards,
@@ -32,9 +30,12 @@ import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 
 /**
- * The single authenticated navigation model. Every entry maps to a real route
- * that enforces its own access control server-side; this file only decides what
- * the workspace shows. Keep it in step with docs/HORIZON_ROUTE_PRODUCT_MAP.md.
+ * The single authenticated navigation model. Every entry must map to a route that is actually
+ * protected by `protectedPrefixes` in lib/supabase/auth-routing.ts; a public destination here
+ * would put an anonymous visitor inside the authenticated shell.
+ *
+ * `/anspruch` and `/email-generator` are public today, so they are not listed. Their workspace
+ * versions are a future product decision. Keep this in step with docs/HORIZON_ROUTE_PRODUCT_MAP.md.
  */
 const primaryNav = [
   { href: "/dashboard", bg: "Преглед", de: "Übersicht", icon: LayoutDashboard },
@@ -42,8 +43,6 @@ const primaryNav = [
   { href: "/vertraege", bg: "Договори", de: "Verträge", icon: WalletCards },
   { href: "/documents", bg: "Документи", de: "Dokumente", icon: FileText },
   { href: "/steuer", bg: "Данъци", de: "Steuern", icon: Receipt },
-  { href: "/anspruch", bg: "Помощи", de: "Hilfen", icon: Landmark },
-  { href: "/email-generator", bg: "Електронна поща", de: "E-Mail", icon: Mail },
 ] as const
 
 const accountNav = [
