@@ -213,7 +213,7 @@ export function CaseWorkspace({
             <p className="text-xs font-medium text-foreground">{copy.missingHas}</p>
             <ul className="space-y-1 text-xs text-muted-foreground">
               {[...missing.missingFactKeys, ...missing.unconfirmedCriticalFactKeys].map((key) => (
-                <li key={key} className="rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1">
+                <li key={key} className="rounded border border-border bg-secondary px-2 py-1">
                   {key}
                 </li>
               ))}

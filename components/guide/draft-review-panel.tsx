@@ -134,9 +134,9 @@ export function DraftReviewPanel({
           {copy.releaseOk}
         </p>
       ) : (
-        <ul className="space-y-1 text-xs text-amber-600">
+        <ul className="space-y-1 text-xs text-primary">
           {release.blockers.map((blocker) => (
-            <li key={blocker} className="rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1">
+            <li key={blocker} className="rounded border border-border bg-secondary px-2 py-1">
               {copy.blockers[blocker]}
             </li>
           ))}
