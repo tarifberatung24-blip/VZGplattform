@@ -40,8 +40,6 @@ export function GlobalHeader() {
     return () => listener.subscription.unsubscribe()
   }, [])
 
-  if (stripLocale(pathname) === "/") return null
-
   // Authenticated workspace routes render the HORIZON shell (see WorkspaceShell).
   // The public Layer 0 header must not appear inside the operational workspace.
   if (isKintexWorkspacePath(pathname)) return null
