@@ -30,7 +30,7 @@ export const insuranceProductContent: Record<InsuranceOfferId, InsuranceProductC
     bg: {
       name: "Firmenversicherung",
       summary:
-        "Застраховки за фирми и свободни професии — Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz. Подготви данните си и продължи директно при партньора.",
+        "Застраховки за фирми и свободни професии: Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz. Подготви данните си и продължи директно при партньора.",
       details: [
         "Подготви бранш, правна форма и брой служители",
         "Сравни Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz",
@@ -41,7 +41,7 @@ export const insuranceProductContent: Record<InsuranceOfferId, InsuranceProductC
     de: {
       name: "Firmenversicherung",
       summary:
-        "Versicherungen für Unternehmen und Freiberufler — Betriebshaftpflicht, Inhaltsversicherung und Rechtsschutz. Bereite deine Angaben vor und geh direkt zum Partner.",
+        "Versicherungen für Unternehmen und Freiberufler: Betriebshaftpflicht, Inhaltsversicherung und Rechtsschutz. Bereite deine Angaben vor und geh direkt zum Partner.",
       details: [
         "Branche, Rechtsform und Mitarbeitende vorbereiten",
         "Betriebshaftpflicht, Inhaltsversicherung und Rechtsschutz vergleichen",
@@ -98,7 +98,7 @@ export const insuranceHubCopy: Record<
     eyebrow: "HORIZON by VZG · Застраховки",
     title: "Застраховки",
     intro:
-      "Избери застраховъчен продукт и подготви данните си спокойно, преди да продължиш към партньора. HORIZON by VZG не е застраховател и не дава индивидуална застрахователна консултация.",
+      "Избери застраховъчен продукт и подготви данните си, преди да продължиш към партньора. HORIZON by VZG не е застраховател и не дава индивидуална застрахователна консултация.",
     productsTitle: "Продукти",
     activeLabel: "Partnerlink",
     plannedLabel: "В подготовка",
@@ -112,7 +112,7 @@ export const insuranceHubCopy: Record<
     eyebrow: "HORIZON by VZG · Versicherungen",
     title: "Versicherungen",
     intro:
-      "Wähle ein Versicherungsprodukt und bereite deine Angaben in Ruhe vor, bevor du zum Partner gehst. HORIZON by VZG ist kein Versicherer und gibt keine individuelle Versicherungsberatung.",
+      "Wähle ein Versicherungsprodukt und bereite deine Angaben vor, bevor du zum Partner gehst. HORIZON by VZG ist kein Versicherer und gibt keine individuelle Versicherungsberatung.",
     productsTitle: "Produkte",
     activeLabel: "Partnerlink",
     plannedLabel: "In Vorbereitung",
