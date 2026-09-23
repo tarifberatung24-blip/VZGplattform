@@ -27,6 +27,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { LogoMark } from "@/components/brand/logo"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 
@@ -78,14 +79,9 @@ export function HorizonSidebar() {
     <Sidebar collapsible="icon" aria-label={de ? "Hauptnavigation" : "Основна навигация"}>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-1 py-1.5 group-data-[collapsible=icon]:justify-center">
-          <span
-            className="grid size-8 shrink-0 place-items-center rounded-md bg-sidebar-primary text-sm font-black text-sidebar-primary-foreground"
-            aria-hidden="true"
-          >
-            H
-          </span>
-          <span className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <span className="block truncate text-sm font-bold leading-tight">HORIZON by VZG</span>
+          <LogoMark className="shrink-0" />
+          <span className="min-w-0 truncate text-sm font-bold leading-tight group-data-[collapsible=icon]:hidden">
+            HORIZON by VZG
           </span>
         </div>
       </SidebarHeader>

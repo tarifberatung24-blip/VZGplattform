@@ -32,9 +32,9 @@ body has no session check and relies on the middleware gate.
 | `/{locale}/functions` | PUBLIC | Layer 0 functions | IMPLEMENTED | KEEP |
 | `/{locale}/security` | PUBLIC | Layer 0 trust | IMPLEMENTED | KEEP |
 | `/{locale}/contact` | PUBLIC | Layer 0 contact | IMPLEMENTED | KEEP |
-| `/{locale}/versicherungen` | PUBLIC | Insurance hub (P13/P14) | IMPLEMENTED | KEEP |
-| `/{locale}/angebote/business-insurance` | PUBLIC | Firmenversicherung affiliate landing | IMPLEMENTED | KEEP |
-| `/{locale}/angebote/kfz` | PUBLIC | Kfz affiliate landing | IMPLEMENTED | KEEP |
+| `/{locale}/versicherungen` | PUBLIC | Insurance hub, partner insurance (HORIZON OPTIMIZE) | IMPLEMENTED | KEEP |
+| `/{locale}/angebote/business-insurance` | PUBLIC | Firmenversicherung partner landing (HORIZON OPTIMIZE) | IMPLEMENTED | KEEP |
+| `/{locale}/angebote/kfz` | PUBLIC | Kfz partner landing (HORIZON OPTIMIZE) | IMPLEMENTED | KEEP |
 | `/{locale}/angebote/[offer]` | PUBLIC | Generic affiliate landing | IMPLEMENTED | REUSE |
 | `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis` | PUBLIC | Legal | IMPLEMENTED | KEEP |
 | `/{locale}/anfrage`, `/{locale}/zayavka`, `/anfrage`, `/zayavka` | PUBLIC | Lead capture | IMPLEMENTED | LEGACY |
@@ -43,6 +43,13 @@ body has no session check and relies on the middleware gate.
 `/check`, `/uslugi`, `/kindergeld`, `/produkte`, `/tarife`, `/za-nas` and `/app` are reachable
 only through the legacy marketing tree. They are not linked from the HORIZON workspace
 navigation and are not part of the current product.
+
+The insurance hub and the two partner landings are classified by North Star stage, not by an
+implementation phase. `HORIZON_MASTER_MAP.md` places contract comparison and partner handoff in
+`DISCOVER → TRACK → WARN → COMPARE → OPTIMIZE → RENEW` and in `STAGE B — HORIZON OPTIMIZE`, which
+names vehicle and business insurance among the examples. No phase in the approved P0 to P17
+sequence covers insurance partner surfaces, so none is assigned. `P13` is Jobcenter and `P14` is
+Kündigung.
 
 ## Authentication
 
@@ -55,7 +62,7 @@ navigation and are not part of the current product.
 | `/auth/update-password` | AUTH | Account recovery | IMPLEMENTED | KEEP |
 | `/auth/mfa-verify` | AUTH | MFA | IMPLEMENTED | KEEP |
 | `/auth/error` | PUBLIC | Auth error surface | IMPLEMENTED | KEEP |
-| `/auth/callback`, `/auth/logout` | — | Route handlers, outside the localized tree | IMPLEMENTED | KEEP |
+| `/auth/callback`, `/auth/logout` | n/a | Route handlers, outside the localized tree | IMPLEMENTED | KEEP |
 
 Auth semantics are untouched by TAR-7/TAR-8. `proxy.ts` normalizes a locale-prefixed auth URL
 back to the unprefixed handler.
