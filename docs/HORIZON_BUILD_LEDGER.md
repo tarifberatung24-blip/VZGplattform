@@ -131,19 +131,21 @@ after a module meets the full DONE definition.
   Account security: `/{locale}/security` with `MfaSettings`.
   Profile: `/{locale}/profil` writes `profiles`; `ensureHousehold` creates the household.
 
-  Sprint 1 additions (owner-authorized for P2):
-  - Routes `/{locale}/onboarding/{language,profile,tour,finish}` with one renderer per step
-    (`app/[locale]/onboarding/*/page.tsx`, `components/onboarding/steps.tsx`).
-  - Deterministic pure state resolver `lib/onboarding/state.ts` (ordered
-    `language → profile → tour → finish → completed`; NULL/unknown resolves to the first step).
+  Current P2 onboarding implementation:
+  - Active routes are `/{locale}/onboarding/profile`, `/{locale}/onboarding/tour`,
+    and `/{locale}/onboarding/finish`.
+  - Legacy `/{locale}/onboarding/language` is compatibility-only and redirects to profile;
+    language selection is persistent in the header and is not an onboarding card.
+  - Deterministic state resolver `lib/onboarding/state.ts` uses
+    `profile → tour → finish → completed`; legacy persisted value `language` normalizes to
+    `profile`.
   - Server guard `lib/onboarding/guard.ts` + reader `lib/onboarding/profile.ts`; proxy
-    first-login gate and dashboard re-check; `/onboarding` added to the protected prefixes.
-  - Additive migration `supabase/migrations/20260919120000_profiles_onboarding_step.sql`:
-    adds `profiles.onboarding_step` (default `language`, CHECK on the five steps), backfills
-    existing rows to `completed`, and adds column-level grants for `onboarding_step`,
-    `first_name`, `last_name`, `preferred_language`, and the columns `profile-form` already
-    writes (`employment_status`, `household_size`, `monthly_income`, `monthly_fixed_costs`,
-    `completeness`, `updated_at`). No table-wide grant; no policy dropped or weakened.
+    first-login gate and dashboard re-check; `/onboarding` is protected.
+  - Production Supabase already contains `profiles.onboarding_step` with the compatibility
+    values `language|profile|tour|finish|completed`. Applied production migration is recorded
+    as version `20260919234220` / `profiles_onboarding_step`. Existing production profile
+    verification on 2026-09-25 showed one profile at `completed`.
+  - Column-level grants cover onboarding/profile writes; no P2 change weakens RLS.
 
   Defensive behaviour: an unreadable step is treated as the first step server-side, while the
   proxy gate is best-effort so a read failure can never lock a user out; the step is used to
@@ -152,22 +154,19 @@ after a module meets the full DONE definition.
 - **REUSE:** all auth pages and handlers, `auth-routing.ts`, `mfa-challenge`, `mfa-settings`,
   `profile-form`, `ensure_kintex_household` RPC, `profiles.locale` /
   `conversation_locale` / `output_locale`.
-- **MISSING:** applied migration. The repository file exists but the change has NOT been applied
-  to project `mteguzgbiuexmdcrqajj`; production `profiles` has no `onboarding_step` column
-  (read-only PostgREST metadata check, 2026-09-19). Until it is applied, the onboarding upsert
-  fails and Step 1 of DONE CRITERIA cannot be reached. Also missing: end-to-end runtime
-  verification, which is blocked because no `.env` and no anon key are available in this
-  environment.
-- **DEPENDENCIES:** P0; consumes P1 public entry points.
-- **BLOCKERS:** (1) applying the additive migration requires an authorized DB channel — the
-  Management API PAT, DB connection string, and Supabase CLI are all absent here, and the
-  available token is a service_role JWT that must not be used for DDL; (2) end-to-end
-  verification needs Supabase URL + anon key.
-- **DONE CRITERIA:** sign up → e-mail confirmation → login → first-login check → language →
-  minimal profile → short click guide → dashboard works end-to-end; the tour runs once and is
-  resumable; onboarding completion is persisted; all steps localized; tests and build pass;
-  real verification performed. **Status: partially satisfied** — tests, typecheck, lint, i18n,
-  and build pass; the end-to-end journey has not been run against a live Supabase.
+- **MISSING:** production end-to-end acceptance evidence for a first-login journey and the
+  recovery/MFA/logout edge paths. The required onboarding column and production migration are
+  already present; no migration blocker remains.
+- **DEPENDENCIES:** P0; consumes frozen P1 public entry points without modifying them.
+- **BLOCKERS:** no schema blocker. Remaining gate is authenticated production runtime
+  verification with an authorized test/existing user.
+- **DONE CRITERIA:** sign up → e-mail confirmation → login → first-login check → minimal profile
+  → short click guide → dashboard works end-to-end; the tour runs once and is resumable;
+  onboarding completion is persisted; legacy `language` state redirects to profile without a
+  visible language card; locale switch remains available in the persistent header; recovery,
+  MFA and logout routes do not enter redirect loops; tests and build pass; real production
+  verification performed. **Status: partially satisfied** — schema/migration and existing
+  completed-profile persistence are verified; full production first-login E2E remains pending.
 - **FROZEN:** NO
 
 ---
