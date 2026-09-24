@@ -19,9 +19,9 @@ export default async function BusinessInsuranceOfferPage({ params }: { params: P
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <AffiliateOfferLanding offer="business-insurance" isConfigured={offer.isConfigured} />
+      <AffiliateOfferLanding offer="business-insurance" isOffered={offer.isOffered} />
       <div className="mx-auto max-w-4xl px-4 pb-20 sm:px-6 lg:px-8">
-        <BusinessInsuranceCalculator locale={locale} isConfigured={offer.isConfigured} />
+        <BusinessInsuranceCalculator locale={locale} isOffered={offer.isOffered} />
         <p className="mt-6 max-w-3xl border-l-2 border-primary pl-4 text-sm leading-7 text-foreground">
           {affiliateDisclosureFor(locale)}
         </p>
