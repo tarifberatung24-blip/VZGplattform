@@ -284,7 +284,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
   }
 
   const copy = {
-    eyebrow: de ? "FinanzBG Angebotsdesk" : "FinanzBG заявка за оферта",
+    eyebrow: de ? "HORIZON by VZG Angebotsdesk" : "HORIZON by VZG заявка за оферта",
     title: de ? "Beschreibe kurz, wir bereiten das bessere Angebot vor." : "Опиши накратко, ние подготвяме по-добрата оферта.",
     intro: de
       ? "Kein schwerer AI-Prozess. Deine Antworten werden strukturiert erfasst und anschließend manuell bearbeitet."
@@ -396,6 +396,16 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
                 </div>
               ))}
             </div>
+          )}
+
+          {current.id === "consent" && (
+            <p className="mt-5 text-xs leading-5 text-muted-foreground">
+              {de ? "Die für die Anfrage erforderlichen Daten werden zur Bearbeitung auf Grundlage von Art. 6 Abs. 1 Buchst. b DSGVO verarbeitet. Service-Anfragen werden sechs Monate nach Abschluss gespeichert. Details: " : "Необходимите за заявката данни се обработват за изпълнение на поисканите действия на основание чл. 6, пар. 1, б. б) GDPR. Service заявките се пазят шест месеца след приключване. Подробности: "}
+              <Link className="underline hover:text-foreground" href={`/${locale}/datenschutz`}>
+                {de ? "Datenschutzerklärung" : "Политика за поверителност"}
+              </Link>
+              .
+            </p>
           )}
 
           {requestId && <p className="mt-5 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">{de ? "Referenz" : "Референция"}: {requestId}</p>}

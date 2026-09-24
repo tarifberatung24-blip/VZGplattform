@@ -1,10 +1,11 @@
 import { Mail, Phone } from "lucide-react"
 import Link from "next/link"
-import { useLanguage } from "@/lib/i18n/language-context"
+import { headers } from "next/headers"
 import { legalAddress, legalProfile } from "@/lib/legal-profile"
 
-export default function ImpressumPage() {
-  const { locale } = useLanguage()
+export default async function ImpressumPage() {
+  const requestHeaders = await headers()
+  const locale = requestHeaders.get("x-locale") === "de" ? "de" : "bg"
   const isBg = locale === "bg"
   const address = legalAddress()
 
@@ -99,7 +100,7 @@ export default function ImpressumPage() {
             </h2>
             <p className="leading-relaxed text-muted-foreground">
               {isBg
-                ? "Тази платформа предоставя информационни обяснения, преводи и екраниране на документи. Предоставяното съдържание не представлява сертифицирана данъчна, правна, финансова или друг вид професионална съветация. За важни решения, срокове и документи винаги се съветвайте с уполномочен специалист и проверявайте оригиналните документи."
+                ? "Тази платформа предоставя информационни обяснения, преводи и преглед на документи. Предоставеното съдържание не представлява индивидуална данъчна, правна, финансова или друга професионална консултация. За важни решения, срокове и документи проверявайте оригиналите и при необходимост се консултирайте с квалифициран специалист."
                 : "Diese Plattform stellt informationelle Erläuterungen, Übersetzungen und Dokumenten-Screenings bereit. Die bereitgestellten Inhalte sind keine zertifizierte steuerliche, rechtliche, finanzielle oder sonstige Fachberatung. Für wichtige Entscheidungen, Fristen und Dokumente sollten Sie stets eine zugelassene Fachkraft hinzuziehen und die Originalunterlagen prüfen."}
             </p>
           </section>
@@ -110,8 +111,8 @@ export default function ImpressumPage() {
             </h2>
             <p className="leading-relaxed text-muted-foreground">
               {isBg
-                ? "За въпроси и заявки използвайте посочената email адреса или телефона. Адреса е достъпен за офис въпроси."
-                : "Für Anfragen und Fragen nutzen Sie bitte die oben angegebene E-Mail-Adresse oder das Telefon. Der Anschrift ist für Fragen zum Büro erreichbar."}
+                ? "За въпроси и заявки използвайте посочения имейл адрес или телефон. Пощенският адрес е посочен по-горе."
+                : "Für Anfragen nutzen Sie bitte die oben angegebene E-Mail-Adresse oder Telefonnummer. Die postalische Anschrift ist oben angegeben."}
             </p>
             <p className="text-sm text-muted-foreground">
               {isBg ? "Свържете се с нас:" : "Erreichbar unter:"} {legalProfile.email ? (

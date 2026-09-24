@@ -2,7 +2,7 @@ import { ServiceRequestWizard } from "@/components/marketing/service-request-wiz
 import { isServiceRequestKind, type ServiceRequestKind } from "@/lib/service-request"
 
 export const metadata = {
-  title: "Заявка за оферта | FinanzBG",
+  title: "Заявка за оферта | HORIZON by VZG",
   description: "Кратка заявка за ток, газ, Kfz застраховка, кредит или SCHUFA ориентация.",
 }
 

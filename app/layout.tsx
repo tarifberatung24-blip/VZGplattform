@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://finanzberaterbg.de"),
+  metadataBase: new URL("https://vzgplattform.onrender.com"),
   title: {
     default: "HORIZON by VZG — VZG CONSULT",
     template: "%s · HORIZON by VZG",
