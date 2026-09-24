@@ -90,16 +90,23 @@ export function ContractsTable({ contracts }: { contracts: ContractLike[] }) {
           onToggle={() => column.toggleSorting(column.getIsSorted() === "asc")}
         />
       ),
-      // Nulls sort as the lowest value so ascending order shows real amounts first.
-      sortingFn: (a, b) => (a.original.monthly_amount ?? -Infinity) - (b.original.monthly_amount ?? -Infinity),
+      // Keep missing amounts after real values in ascending order instead of surfacing unknowns first.
+      sortingFn: (a, b) => {
+        const left = a.original.monthly_amount
+        const right = b.original.monthly_amount
+        if (left == null && right == null) return 0
+        if (left == null) return 1
+        if (right == null) return -1
+        return left - right
+      },
       cell: ({ row }) => <span>{cellMoney(row.getValue("monthly_amount"), locale)}</span>,
     },
     {
-      accessorKey: "status",
-      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{de ? "Status" : "Статус"}</span>,
+      accessorKey: "review_status",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{de ? "Prüfstatus" : "Статус на проверка"}</span>,
       cell: ({ row }) => (
         <span className="whitespace-nowrap rounded-md bg-primary/5 px-2 py-1 text-xs text-primary">
-          {row.getValue("status") === "confirmed" ? (de ? "Bestätigt" : "Потвърден") : (de ? "Prüfung" : "Преглед")}
+          {row.getValue("review_status") === "confirmed" ? (de ? "Bestätigt" : "Потвърден") : (de ? "Prüfung" : "Преглед")}
         </span>
       ),
     },
