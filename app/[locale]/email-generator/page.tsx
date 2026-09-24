@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { EmailGeneratorForm } from "./email-generator-form"
