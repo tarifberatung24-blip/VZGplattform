@@ -9,7 +9,7 @@ const fields: Record<Locale, InsuranceCalculatorField[]> = {
     { id: "legalForm", label: "Правна форма", type: "select", options: ["Едноличен търговец", "GmbH", "UG", "GbR", "Свободна професия"] },
     { id: "employees", label: "Брой служители", type: "number", placeholder: "напр. 4" },
     { id: "revenue", label: "Годишен оборот (ориентировъчно)", type: "select", options: ["до 50 000 €", "50 000 – 250 000 €", "250 000 – 1 млн. €", "над 1 млн. €"] },
-    { id: "coverages", label: "Желани покрития", type: "select", options: ["Betriebshaftpflicht", "Inhaltsversicherung", "Rechtsschutz", "Комбинация"] },
+    { id: "coverages", label: "Покрития за преглед при партньора", type: "select", options: ["Betriebshaftpflicht", "Inhaltsversicherung", "Rechtsschutz", "Комбинация"] },
     { id: "start", label: "Желан начален срок", type: "text", placeholder: "напр. 01/2026" },
   ],
   de: [
@@ -17,7 +17,7 @@ const fields: Record<Locale, InsuranceCalculatorField[]> = {
     { id: "legalForm", label: "Rechtsform", type: "select", options: ["Einzelunternehmen", "GmbH", "UG", "GbR", "Freiberuflich"] },
     { id: "employees", label: "Anzahl Mitarbeitende", type: "number", placeholder: "z. B. 4" },
     { id: "revenue", label: "Jahresumsatz (orientierend)", type: "select", options: ["bis 50.000 €", "50.000 – 250.000 €", "250.000 – 1 Mio. €", "über 1 Mio. €"] },
-    { id: "coverages", label: "Gewünschte Deckungen", type: "select", options: ["Betriebshaftpflicht", "Inhaltsversicherung", "Rechtsschutz", "Kombination"] },
+    { id: "coverages", label: "Deckungen für die Anfrage beim Partner", type: "select", options: ["Betriebshaftpflicht", "Inhaltsversicherung", "Rechtsschutz", "Kombination"] },
     { id: "start", label: "Gewünschter Beginn", type: "text", placeholder: "z. B. 01/2026" },
   ],
 }
@@ -26,7 +26,7 @@ const copy: Record<Locale, InsuranceCalculatorCopy> = {
   bg: {
     title: "Подготви данните за Firmenversicherung",
     intro:
-      "Опиши накратко дейността и желаните покрития, за да можеш да ги въведеш директно при партньора. HORIZON by VZG не е застраховател и не дава индивидуална застрахователна консултация.",
+      "Опиши накратко дейността и избери кои видове покритие искаш да прегледаш при партньора. HORIZON by VZG не е застраховател и не дава индивидуална застрахователна консултация.",
     summaryTitle: "Твоите данни за преглед",
     summaryEmpty: "Попълни полетата, които искаш да подготвиш. Нищо не се изпраща или запазва.",
     limits:
@@ -38,7 +38,7 @@ const copy: Record<Locale, InsuranceCalculatorCopy> = {
   de: {
     title: "Daten für die Firmenversicherung vorbereiten",
     intro:
-      "Beschreibe kurz Tätigkeit und gewünschte Deckungen, damit du sie beim Partner direkt eingeben kannst. HORIZON by VZG ist kein Versicherer und gibt keine individuelle Versicherungsberatung.",
+      "Beschreibe kurz deine Tätigkeit und wähle, welche Deckungsarten du beim Partner ansehen möchtest. HORIZON by VZG ist kein Versicherer und gibt keine individuelle Versicherungsberatung.",
     summaryTitle: "Deine Angaben zur Kontrolle",
     summaryEmpty: "Fülle die Felder aus, die du vorbereiten möchtest. Nichts wird gesendet oder gespeichert.",
     limits:
