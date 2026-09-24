@@ -1,14 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { Bell, CalendarDays, LayoutDashboard, Plus, Receipt, Search, WalletCards } from "lucide-react"
+import { Bell, CalendarDays, LayoutDashboard, Plus, Receipt, WalletCards } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { WorkplaceActionCenter } from "@/components/dashboard/workplace-action-center"
 import { MissingInformationInterviewer } from "@/components/dashboard/missing-information-interviewer"
 import { DocumentAnalyzer, type DashboardDocument } from "@/components/dashboard/document-analyzer"
 import { getSmartDashboardNextAction } from "@/lib/kintex-smart-dashboard"
+import { formatMoney, formatShortDate } from "@/lib/dashboard/contracts-data"
 import { HorizonHome } from "@/components/horizon/horizon-home"
 import { ContractsChart } from "./charts/contracts-chart"
 import { TimelineChart } from "./charts/timeline-chart"
@@ -25,9 +25,10 @@ export type VzgDashboardProps = {
   moduleError?: string | null
 }
 
-function money(value: number) { return new Intl.NumberFormat("bg-BG", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value) }
+// Locale-aware so a German dashboard does not render Euro amounts with Bulgarian grouping.
+function money(value: number, locale: "bg" | "de") { return formatMoney(value, locale) }
 function date(value: string | null, locale: "bg" | "de") {
-  return value ? new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "bg-BG", { day: "2-digit", month: "short" }).format(new Date(value)) : (locale === "de" ? "Keine Daten" : "Няма данни")
+  return formatShortDate(value, locale) ?? (locale === "de" ? "Keine Daten" : "Няма данни")
 }
 
 export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders, caseCounts, moduleError }: VzgDashboardProps) {
@@ -51,17 +52,15 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
             <p className="mt-1 text-sm text-muted-foreground">{de ? "Finanzielle Übersicht aus bestätigten Daten." : "Финансов преглед от потвърдени данни."}</p>
           </div>
         </div>
+        {/* The header search was decorative: it had no state and no handler, and the only working
+            filter is the one in ContractsTable. */}
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <div className="relative w-full sm:w-72">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="h-11 w-full bg-card pl-9" placeholder={de ? "Verträge durchsuchen…" : "Търсене в договори…"} />
-          </div>
           <Button asChild className="h-11 w-full sm:w-auto"><Link href="/vertraege"><Plus className="mr-2 size-4" />{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button>
         </div>
       </header>
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard metrics">
-        {[{ icon: WalletCards, label: de ? "Monatliche Kosten" : "Месечни разходи", value: monthlyTotal ? money(monthlyTotal) : missingData, note: de ? "Nur eingetragene Beträge" : "Само въведени суми" }, { icon: Receipt, label: de ? "Aktive Verträge" : "Активни договори", value: String(contracts.length), note: de ? "Alle gespeicherten Verträge" : "Всички записани договори" }, { icon: CalendarDays, label: de ? "Nächster Termin" : "Следващ срок", value: date(nextReminder?.due_at ?? null, locale), note: nextReminder?.title ?? (de ? "Keine Frist erfasst" : "Няма записан срок") }, { icon: Bell, label: de ? "Zur Prüfung" : "За проверка", value: String(reviewCount + missingCosts), note: de ? "Dokumente und fehlende Beträge" : "Документи и липсващи суми" }].map(({ icon: Icon, label, value, note }) => <article key={label} className="rounded-md border border-border bg-card p-4 shadow-none"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-md bg-primary/5 text-primary"><Icon className="size-5" /></span><p className="text-sm font-medium text-muted-foreground">{label}</p></div><p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></article>)}
+        {[{ icon: WalletCards, label: de ? "Monatliche Kosten" : "Месечни разходи", value: monthlyTotal ? money(monthlyTotal, locale) : missingData, note: de ? "Nur eingetragene Beträge" : "Само въведени суми" }, { icon: Receipt, label: de ? "Aktive Verträge" : "Активни договори", value: String(contracts.length), note: de ? "Alle gespeicherten Verträge" : "Всички записани договори" }, { icon: CalendarDays, label: de ? "Nächster Termin" : "Следващ срок", value: date(nextReminder?.due_at ?? null, locale), note: nextReminder?.title ?? (de ? "Keine Frist erfasst" : "Няма записан срок") }, { icon: Bell, label: de ? "Zur Prüfung" : "За проверка", value: String(reviewCount + missingCosts), note: de ? "Dokumente und fehlende Beträge" : "Документи и липсващи суми" }].map(({ icon: Icon, label, value, note }) => <article key={label} className="rounded-md border border-border bg-card p-4 shadow-none"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-md bg-primary/5 text-primary"><Icon className="size-5" /></span><p className="text-sm font-medium text-muted-foreground">{label}</p></div><p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></article>)}
       </section>
 
       <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,0.8fr)]" aria-label="Dashboard charts">
