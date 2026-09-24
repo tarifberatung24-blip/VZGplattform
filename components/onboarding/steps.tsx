@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 import { useLanguage } from "@/lib/i18n/language-context"
-import type { Locale } from "@/lib/i18n/dictionaries"
 import {
   nextOnboardingStep,
   onboardingPath,
@@ -62,14 +61,8 @@ function useAdvance(userId: string, step: OnboardingStep) {
   const [error, setError] = useState<string | null>(null)
   const copy = getOnboardingCopy(locale)
 
-  // `localeOverride` exists for the language step: there the new locale is
-  // chosen in the same tick as the redirect, and context state has not re-rendered
-  // yet, so the path must not be built from the previous locale.
-  async function advance(
-    persist?: Persist,
-    localeOverride?: Locale,
-  ) {
-    const activeLocale = localeOverride ?? locale
+  async function advance(persist?: Persist) {
+    const activeLocale = locale
     setBusy(true)
     setError(null)
     const target = nextOnboardingStep(step)
@@ -86,46 +79,6 @@ function useAdvance(userId: string, step: OnboardingStep) {
   }
 
   return { busy, error, copy, advance }
-}
-
-export function LanguageStep({ userId, step, previous }: StepProps) {
-  const { locale, setLocale } = useLanguage()
-  const { busy, error, copy, advance } = useAdvance(userId, step)
-
-  function choose(nextLocale: Locale) {
-    setLocale(nextLocale)
-    void advance(async () => {
-      const client = createClient()
-      const result = await client
-        .from("profiles")
-        .upsert({ id: userId, onboarding_step: nextOnboardingStep(step), locale: nextLocale })
-      return { error: result.error }
-    }, nextLocale)
-  }
-
-  return (
-    <Frame previous={previous}>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">{copy.language.title}</h1>
-      <p className="mt-2 leading-6 text-muted-foreground">{copy.language.intro}</p>
-      <p className="mt-6 text-sm font-medium text-foreground">{copy.language.label}</p>
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        {(["bg", "de"] as const).map((value) => (
-          <Button
-            key={value}
-            type="button"
-            variant={locale === value ? "default" : "outline"}
-            disabled={busy}
-            aria-pressed={locale === value}
-            onClick={() => choose(value)}
-          >
-            {value.toUpperCase()}
-          </Button>
-        ))}
-      </div>
-      <p className="mt-4 text-xs leading-5 text-muted-foreground">{copy.language.hint}</p>
-      {error ? <p role="alert" className="mt-4 text-sm text-destructive">{error}</p> : null}
-    </Frame>
-  )
 }
 
 export function ProfileStep({ userId, step, previous }: StepProps) {

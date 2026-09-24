@@ -1,8 +1,8 @@
-import { guardOnboardingStep } from "@/lib/onboarding/guard"
-import { LanguageStep } from "@/components/onboarding/steps"
+import { redirect } from "next/navigation"
+import { isLocale, type Locale } from "@/lib/i18n/dictionaries"
 
 export default async function OnboardingLanguagePage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params
-  const { userId, previous } = await guardOnboardingStep(locale, "language")
-  return <LanguageStep userId={userId} step="language" previous={previous} />
+  const { locale: rawLocale } = await params
+  const locale: Locale = isLocale(rawLocale) ? rawLocale : "bg"
+  redirect(`/${locale}/onboarding/profile`)
 }

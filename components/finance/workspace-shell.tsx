@@ -4,6 +4,7 @@ import { type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
 import { HorizonSidebar } from "@/components/layout/horizon-sidebar"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
@@ -55,6 +56,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             <span className="truncate text-sm font-semibold tracking-tight md:hidden">
               HORIZON by VZG
             </span>
+            <LanguageSwitcher className="ml-auto shrink-0" />
           </header>
           <div className="min-w-0 flex-1">{children}</div>
         </SidebarInset>

@@ -5,6 +5,7 @@ import {
   isKnownOnboardingStep,
   isOnboardingComplete,
   isOnboardingPath,
+  normalizeOnboardingStep,
   isProtectedAppPath,
   pathLocale,
   requiresMfa,
@@ -51,10 +52,13 @@ describe("auth routing", () => {
 })
 
 describe("first-login onboarding routing", () => {
-  it("accepts exactly the persisted steps", () => {
+  it("accepts current steps and the legacy language value", () => {
     for (const step of ["language", "profile", "tour", "finish", "completed"]) {
       expect(isKnownOnboardingStep(step)).toBe(true)
     }
+    expect(normalizeOnboardingStep("language")).toBe("profile")
+    expect(normalizeOnboardingStep("profile")).toBe("profile")
+    expect(normalizeOnboardingStep("../../evil")).toBeNull()
   })
 
   it("rejects values that must never be interpolated into a redirect", () => {

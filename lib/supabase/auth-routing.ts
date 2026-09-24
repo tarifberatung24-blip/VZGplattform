@@ -35,10 +35,17 @@ export function requiresMfa(currentLevel: string | null | undefined, nextLevel: 
  * `onboarding_step` NULL or unknown is treated as not completed, so the proxy
  * routes the user into onboarding rather than the dashboard.
  */
-const onboardingSteps = ["language", "profile", "tour", "finish", "completed"] as const
+const onboardingSteps = ["profile", "tour", "finish", "completed"] as const
 
-export function isKnownOnboardingStep(value: unknown): value is (typeof onboardingSteps)[number] {
+export function isKnownOnboardingStep(value: unknown): value is (typeof onboardingSteps)[number] | "language" {
+  return value === "language" || (typeof value === "string" && (onboardingSteps as readonly string[]).includes(value))
+}
+
+export function normalizeOnboardingStep(value: unknown): (typeof onboardingSteps)[number] | null {
+  if (value === "language") return "profile"
   return typeof value === "string" && (onboardingSteps as readonly string[]).includes(value)
+    ? value as (typeof onboardingSteps)[number]
+    : null
 }
 
 export function isOnboardingComplete(step: string | null | undefined) {

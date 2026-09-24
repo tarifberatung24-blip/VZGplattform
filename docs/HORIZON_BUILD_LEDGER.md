@@ -120,8 +120,8 @@ after a module meets the full DONE definition.
 - **ID:** P2
 - **SYSTEM:** Authentication, first login, onboarding
 - **TARGET ROUTES:** `/{locale}/auth/login`, `/{locale}/auth/sign-up`,
-  `/{locale}/onboarding/language`, `/{locale}/onboarding/profile`,
-  `/{locale}/onboarding/tour`, `/{locale}/onboarding/finish`.
+  `/{locale}/onboarding/profile`, `/{locale}/onboarding/tour`, `/{locale}/onboarding/finish`.
+  Legacy `/{locale}/onboarding/language` redirects to profile; language selection lives in the persistent header.
 - **CURRENT STATUS:** IMPLEMENTATION VERIFIED — END-TO-END RUNTIME VERIFICATION PENDING (not DONE, not FROZEN)
 - **CURRENT IMPLEMENTATION:** Supabase Auth with e-mail/password, Google OAuth, MFA.
   Handlers: `app/auth/callback/route.ts` (code exchange, MFA routing via `requiresMfa`,

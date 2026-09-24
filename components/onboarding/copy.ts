@@ -9,7 +9,6 @@ export type OnboardingCopy = {
   toDashboard: string
   saving: string
   saveError: string
-  language: { title: string; intro: string; label: string; hint: string }
   profile: { title: string; intro: string; firstName: string; lastName: string; required: string; optional: string }
   tour: { title: string; intro: string; items: { title: string; text: string }[] }
   finish: { title: string; intro: string; ready: string }
@@ -42,15 +41,9 @@ const copies: Record<Locale, OnboardingCopy> = {
     toDashboard: "Към таблото",
     saving: "Запазване…",
     saveError: "Промяната не можа да бъде запазена. Опитай отново.",
-    language: {
-      title: "Избери език",
-      intro: "Този език се използва в приложението и в разговора с асистента.",
-      label: "Език на приложението",
-      hint: "Официалните документи винаги се създават на немски.",
-    },
     profile: {
       title: "Малко за теб",
-      intro: "Нужни са само име и език, за да започнем. Останалото може да добавиш по-късно.",
+      intro: "Нужно е само името ти, за да започнем. Езикът може да се сменя по всяко време от горната лента.",
       firstName: "Име",
       lastName: "Фамилия",
       required: "Задължително",
@@ -76,15 +69,9 @@ const copies: Record<Locale, OnboardingCopy> = {
     toDashboard: "Zum Dashboard",
     saving: "Wird gespeichert…",
     saveError: "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.",
-    language: {
-      title: "Sprache wählen",
-      intro: "Diese Sprache gilt für die Anwendung und für das Gespräch mit dem Assistenten.",
-      label: "Sprache der Anwendung",
-      hint: "Amtliche Dokumente werden immer auf Deutsch erstellt.",
-    },
     profile: {
       title: "Kurz zu dir",
-      intro: "Für den Start genügen Name und Sprache. Alles Weitere kannst du später ergänzen.",
+      intro: "Für den Start genügt dein Name. Die Sprache kannst du jederzeit oben in der Kopfzeile wechseln.",
       firstName: "Vorname",
       lastName: "Nachname",
       required: "Pflichtfeld",

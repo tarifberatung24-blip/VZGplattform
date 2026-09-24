@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
 import { cn } from "@/lib/utils"
@@ -91,10 +92,10 @@ export function GlobalHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-none">
-      <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-6 px-5 lg:px-8">
+      <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-2 px-3 sm:gap-6 sm:px-5 lg:px-8">
         <Link
           href={homeHref}
-          className="flex items-baseline gap-3 text-2xl font-black tracking-[-0.04em] text-foreground"
+          className="flex shrink-0 items-baseline gap-3 whitespace-nowrap text-xl font-black tracking-[-0.04em] text-foreground sm:text-2xl"
         >
           HORIZON by VZG
           {/* Redundant lockup below `sm`: at 390px the brand plus the auth
@@ -129,13 +130,14 @@ export function GlobalHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <LanguageSwitcher className="shrink-0" />
           {sessionReady && sessionActive ? (
             <Button
               asChild
               variant="default"
               size="sm"
-              className="rounded-md shadow-none"
+              className="hidden rounded-md shadow-none sm:inline-flex"
             >
               <Link href={localizedPath("/dashboard", locale)}>
                 {labels.dashboard}
