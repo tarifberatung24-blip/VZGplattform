@@ -39,13 +39,13 @@ export function InsuranceCalculator({
   offerId,
   fields,
   copy,
-  isConfigured,
+  isOffered,
   configuredCta,
 }: {
   offerId: string
   fields: InsuranceCalculatorField[]
   copy: InsuranceCalculatorCopy
-  isConfigured: boolean
+  isOffered: boolean
   configuredCta?: string
 }) {
   const [values, setValues] = useState<Record<string, string>>({})
@@ -130,7 +130,7 @@ export function InsuranceCalculator({
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        {isConfigured ? (
+        {isOffered ? (
           <Button asChild size="lg">
             <a href={`/go/${offerId}`} rel="sponsored noopener">
               {configuredCta ?? copy.cta}
