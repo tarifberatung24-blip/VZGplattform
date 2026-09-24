@@ -59,7 +59,9 @@ export default function ContactForm({ locale }: { locale: string }) {
 
         <div className="flex flex-col gap-3">
           <p className="text-xs leading-5 text-muted-foreground">
-            {locale === "bg" ? "Съобщението и данните за контакт се обработват за отговор на запитването. Вижте " : "Ihre Nachricht und Kontaktdaten werden zur Bearbeitung Ihrer Anfrage verarbeitet. Mehr dazu in der "}
+            {locale === "bg"
+              ? "Събираме име, имейл адрес и съобщение за отговор на запитването. За преддоговорни или изрично заявени действия правното основание е чл. 6, пар. 1, б. б) GDPR; за друга оперативна кореспонденция може да се прилага чл. 6, пар. 1, б. е) GDPR след преценка на интересите. Неконвертираните запитвания се пазят шест месеца. Вижте "
+              : "Wir erheben Name, E-Mail-Adresse und Nachricht zur Bearbeitung Ihrer Anfrage. Für vorvertragliche oder ausdrücklich angeforderte Maßnahmen gilt Art. 6 Abs. 1 Buchst. b DSGVO; für sonstige betriebliche Korrespondenz kann Art. 6 Abs. 1 Buchst. f DSGVO nach Interessenabwägung gelten. Nicht konvertierte Anfragen werden sechs Monate gespeichert. Mehr dazu in der "}
             <Link className="underline hover:text-foreground" href={`/${locale}/datenschutz`}>
               {locale === "bg" ? "политиката за поверителност" : "Datenschutzerklärung"}
             </Link>.

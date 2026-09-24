@@ -107,7 +107,7 @@ export function DocumentAnalyzer({ initialDocuments }: { initialDocuments: Dashb
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">AI Document Analyzer</p>
             <h2 id="document-analyzer-title" className="mt-1 text-lg font-semibold">Анализ на документ на български</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">Качи PDF или изображение. Първо извличаме текста, след това AI показва кратко резюме, срокове, суми и следващи стъпки. Всичко трябва да бъде проверено от човек.</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">Качи PDF или изображение. Файлът и извлеченият текст се съхраняват в частен Supabase документен архив. Избраното съдържание може да бъде обработено от Groq или Cerebras за заявения анализ, а резултатът се съхранява в HORIZON. Не качвай ненужни чувствителни данни. Документите и резултатите се изтриват от активната система в рамките на 30 дни след изтриване или закриване на акаунта, освен ако законово съхранение не възпрепятства това. Всичко трябва да бъде проверено от човек.</p>
           </div>
         </div>
         <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">

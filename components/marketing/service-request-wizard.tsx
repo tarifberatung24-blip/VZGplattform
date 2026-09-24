@@ -174,11 +174,11 @@ const consentStep: Step = {
   id: "consent",
   questionBg: "Да подготвим ли заявката?",
   questionDe: "Sollen wir die Anfrage vorbereiten?",
-  helpBg: "След изпращане заявката отива към n8n workflow за ръчна обработка. Целта е до 2 часа да получиш оферта или ясен отговор.",
-  helpDe: "Nach dem Absenden geht die Anfrage an den n8n Workflow zur manuellen Bearbeitung. Ziel ist ein Angebot oder eine klare Antwort innerhalb von 2 Stunden.",
+  helpBg: "След изпращане заявката се обработва ръчно. Целта е до 2 часа да получиш оферта или ясен отговор.",
+  helpDe: "Nach dem Absenden wird die Anfrage manuell bearbeitet. Ziel ist ein Angebot oder eine klare Antwort innerhalb von 2 Stunden.",
   fields: [
-    { id: "privacyConsent", type: "choice", required: true, labelBg: "Съгласие", labelDe: "Einwilligung", choices: [
-      { value: "yes", bg: "Да, обработете данните ми за тази заявка", de: "Ja, verarbeitet meine Daten fuer diese Anfrage" },
+    { id: "privacyConsent", type: "choice", required: true, labelBg: "Потвърждение", labelDe: "Bestätigung", choices: [
+      { value: "yes", bg: "Да, изпрати заявката и обработи необходимите данни", de: "Ja, Anfrage senden und die erforderlichen Daten verarbeiten" },
     ] },
   ],
 }
@@ -245,7 +245,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
   async function submit(event: FormEvent) {
     event.preventDefault()
     if (requiredMissing()) {
-      setMessage(de ? "Bitte bestaetige die Verarbeitung." : "Моля, потвърди обработката.")
+      setMessage(de ? "Bitte bestätige die Anfrage." : "Моля, потвърди заявката.")
       return
     }
     setSubmitting(true)
@@ -276,8 +276,8 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "REQUEST_FAILED"
       setMessage(code === "N8N_WEBHOOK_NOT_CONFIGURED"
-        ? (de ? "n8n Webhook ist noch nicht konfiguriert." : "n8n webhook още не е конфигуриран.")
-        : (de ? "Заявката не можа да бъде изпратена. Bitte versuche es erneut." : "Заявката не можа да бъде изпратена. Опитай отново."))
+        ? (de ? "Die Anfrageverarbeitung ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut." : "Обработката на заявката временно не е налична. Опитай отново по-късно.")
+        : (de ? "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut." : "Заявката не можа да бъде изпратена. Опитай отново."))
     } finally {
       setSubmitting(false)
     }
@@ -287,8 +287,8 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
     eyebrow: de ? "FinanzBG Angebotsdesk" : "FinanzBG заявка за оферта",
     title: de ? "Beschreibe kurz, wir bereiten das bessere Angebot vor." : "Опиши накратко, ние подготвяме по-добрата оферта.",
     intro: de
-      ? "Kein schwerer AI-Prozess. Deine Antworten gehen strukturiert an den n8n Workflow, danach erfolgt die manuelle Bearbeitung."
-      : "Без тежка AI обработка. Отговорите ти отиват структурирано към n8n workflow, след това офертата се обработва ръчно.",
+      ? "Kein schwerer AI-Prozess. Deine Antworten werden strukturiert erfasst und anschließend manuell bearbeitet."
+      : "Без тежка AI обработка. Отговорите ти се записват структурирано и след това се обработват ръчно.",
     promise: de ? serviceRequestMeta[kind].promiseDe : serviceRequestMeta[kind].promiseBg,
     back: de ? "Zurueck" : "Назад",
     next: de ? "Weiter" : "Напред",
