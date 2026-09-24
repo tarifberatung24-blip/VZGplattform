@@ -71,7 +71,7 @@ back to the unprefixed handler.
 
 | Route | Access | Product area | Status | Disposition |
 |---|---|---|---|---|
-| `/{locale}/onboarding/language` | AUTH | First login (P2) | IMPLEMENTED | KEEP |
+| `/{locale}/onboarding/language` | AUTH | Legacy language step | REDIRECT → `/{locale}/onboarding/profile` | REMOVE FROM UI |
 | `/{locale}/onboarding/profile` | AUTH | First login (P2) | IMPLEMENTED | KEEP |
 | `/{locale}/onboarding/tour` | AUTH | First login (P2) | IMPLEMENTED | KEEP |
 | `/{locale}/onboarding/finish` | AUTH | First login (P2) | IMPLEMENTED | KEEP |
