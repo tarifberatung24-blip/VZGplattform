@@ -46,7 +46,7 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
             <h2 id="intake-title" className="font-semibold text-foreground">Dokument hinzufügen</h2>
             <span className="border border-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{connected ? "Supabase + manuelle Prüfung" : "Lokaler Demo-Modus"}</span>
           </div>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{connected ? "PDF, JPG oder PNG werden im geschützten Dokumentbereich gespeichert. Relevante Angaben werden bewusst separat bestätigt." : "PDF, JPG oder PNG bleiben nur in dieser Vorschau und werden nicht übertragen."}</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{connected ? "PDF, JPG oder PNG werden im geschützten Dokumentbereich gespeichert. Ausgewählte Inhalte können für die angeforderte Analyse an Groq oder Cerebras übermittelt werden; das Ergebnis wird in HORIZON gespeichert. Bitte keine unnötigen sensiblen Daten hochladen. Dokumente und Ergebnisse werden innerhalb von 30 Tagen nach Kontolöschung oder Kontoschließung aus dem aktiven System gelöscht, sofern keine gesetzliche Aufbewahrung entgegensteht." : "PDF, JPG oder PNG bleiben nur in dieser Vorschau und werden nicht übertragen."}</p>
         </div>
       </div>
       <input ref={inputRef} className="sr-only" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => void handleFile(event.target.files?.[0])} />
@@ -65,7 +65,7 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
         <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>{t.cleanup.document.choose}</Button>
         <Button type="button" onClick={onAnalyze} disabled={!canAnalyze || isAnalyzed || busy}>{busy ? t.cleanup.document.checking : isAnalyzed ? t.cleanup.document.checked : t.cleanup.document.prepare}</Button>
       </div>
-      <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><LockKeyhole aria-hidden="true" className="size-3.5" />{connected ? "Geschuetzte Verarbeitung · Nutzer bestaetigt Angaben vor Speicherung." : "Lokale Validierung · keine Supabase- oder externe Anfrage."}</p>
+      <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><LockKeyhole aria-hidden="true" className="size-3.5" />{connected ? "Geschützte Verarbeitung · Speicherung in privaten Supabase-Speichern · Nutzer bestätigt Angaben vor Speicherung." : "Lokale Validierung · keine Supabase- oder externe Anfrage."}</p>
     </section>
   )
 }
