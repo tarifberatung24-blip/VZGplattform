@@ -49,13 +49,13 @@ const copy: Record<Locale, InsuranceCalculatorCopy> = {
   },
 }
 
-export function BusinessInsuranceCalculator({ locale, isConfigured }: { locale: Locale; isConfigured: boolean }) {
+export function BusinessInsuranceCalculator({ locale, isOffered }: { locale: Locale; isOffered: boolean }) {
   return (
     <InsuranceCalculator
       offerId="business-insurance"
       fields={fields[locale]}
       copy={copy[locale]}
-      isConfigured={isConfigured}
+      isOffered={isOffered}
     />
   )
 }
