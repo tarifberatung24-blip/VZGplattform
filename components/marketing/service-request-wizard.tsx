@@ -284,7 +284,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
   }
 
   const copy = {
-    eyebrow: de ? "FinanzBG Angebotsdesk" : "FinanzBG заявка за оферта",
+    eyebrow: de ? "HORIZON by VZG Angebotsdesk" : "HORIZON by VZG заявка за оферта",
     title: de ? "Beschreibe kurz, wir bereiten das bessere Angebot vor." : "Опиши накратко, ние подготвяме по-добрата оферта.",
     intro: de
       ? "Kein schwerer AI-Prozess. Deine Antworten werden strukturiert erfasst und anschließend manuell bearbeitet."
