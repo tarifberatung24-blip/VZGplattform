@@ -54,7 +54,7 @@ export const smartDashboardModules = [
 
 export const smartDashboardAgents = [
   { id: "intake-agent", stage: "1", title: "Document Intake Agent", status: "ACTIVE", output: "Upload, validation, household-scoped storage" },
-  { id: "workflow-router", stage: "2", title: "n8n Intake Workflow", status: "ACTIVE", output: "Route offer requests to manual processing" },
+  { id: "workflow-router", stage: "2", title: "Workflow Router", status: "PLANNED", output: "Future orchestration for offer requests after deployment and legal verification" },
   { id: "review-agent", stage: "3", title: "Manual Review Desk", status: "ACTIVE", output: "Human confirmation before offers become trusted" },
   { id: "radar-agent", stage: "4", title: "Radar Orchestrator", status: "NEXT", output: "Rank contracts, documents, deadlines, claims" },
   { id: "workflow-agent", stage: "5", title: "Connector Layer", status: "PLANNED", output: "Gmail, Telegram, Calendar, GitHub/Vercel workflows after approval" },
