@@ -97,7 +97,10 @@ export function GlobalHeader() {
           className="flex items-baseline gap-3 text-2xl font-black tracking-[-0.04em] text-foreground"
         >
           HORIZON by VZG
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          {/* Redundant lockup below `sm`: at 390px the brand plus the auth
+              controls exceed the viewport and clip the menu button. The suffix
+              is decorative, so it is the safe thing to drop on small screens. */}
+          <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">
             by VZG CONSULT
           </span>
         </Link>
