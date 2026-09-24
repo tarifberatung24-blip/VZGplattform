@@ -192,8 +192,11 @@ export function ledgerFrozenSummary(ledger, index) {
     if (cells.length >= 4 && cells[3] === "YES") phases.push(`${cells[0]} (${cells[1]})`)
   }
   return {
-    frozenYesCount: yes.length + phases.length,
-    systemLine: "NONE. No module is DONE, so no module is FROZEN. Freeze requires explicit owner acceptance.",
+    frozenYesCount: yes.length,
+    systemLine:
+      yes.length === 0
+        ? "NONE. No module is currently FROZEN. Freeze requires explicit owner acceptance."
+        : "FROZEN modules are listed below. They must not be modified without explicit owner reopening.",
     phaseLines: phases,
     source: `docs/HORIZON_BUILD_LEDGER.md (exact form: ${index.ledgerFrozenPattern})`,
   }
@@ -202,7 +205,7 @@ export function ledgerFrozenSummary(ledger, index) {
 /** Out-of-scope is a fixed summary plus the phase's own exclusion rule, not a bulk dump. */
 export function outOfScopeSummary(index, phase) {
   const always = [
-    "FROZEN modules: none (no module is DONE and no module is FROZEN).",
+    "FROZEN modules: see FROZEN_SYSTEMS; do not modify them without explicit owner reopening.",
     "Capital code (lib/capital/**, docs/research/capital/**): PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE.",
     "Application code, Supabase/schema/RLS, env, dependencies, lockfile, deployment: out of scope unless the owner authorizes it.",
     "Branding drift and KintexBG/HAMMAL legacy references: report only, do not fix and do not delete.",

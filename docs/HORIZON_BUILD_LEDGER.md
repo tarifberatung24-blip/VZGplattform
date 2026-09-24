@@ -109,7 +109,7 @@ after a module meets the full DONE definition.
 - **DONE CRITERIA:** every Layer 0 target route exists and is usable in each supported UI locale;
   branding is consistent with HORIZON by VZG; legal pages complete and reviewed; loading, error,
   and empty states present; real HTTP checks pass against production; no legacy route broken silently.
-- **FROZEN:** YES — owner explicitly approved `P1 FREEZE` on 2026-09-25 after final live legal re-audit passed.
+- **FROZEN:** YES
 - **OWNER APPROVAL REQUIRED:** SATISFIED — recorded 2026-09-25.
 - **FREEZE BASELINE:** production commit `46a5fa3e90827c6d085fd24206f502e93bd9be83`; reopen P1 explicitly before changing its public/legal surfaces.
 

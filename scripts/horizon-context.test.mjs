@@ -176,8 +176,9 @@ test("dependencies are declared but not expanded", () => {
 
 test("frozen summary reports the ledger FROZEN: YES count only", () => {
   const context = buildContext("P1")
-  assert.ok(context.FROZEN_SYSTEMS.includes("Frozen count: YES = 0"))
-  assert.ok(context.FROZEN_SYSTEMS.includes("NONE."))
+  assert.ok(context.FROZEN_SYSTEMS.includes("Frozen count: YES = 1"))
+  assert.ok(context.FROZEN_SYSTEMS.includes("P1 (PUBLIC LAYER 0)"))
+  assert.ok(context.FROZEN_SYSTEMS.includes("must not be modified without explicit owner reopening"))
   assert.ok(!context.FROZEN_SYSTEMS.includes("*FROZEN:* NO"), "individual NO rows are not dumped")
 })
 
