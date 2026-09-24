@@ -49,7 +49,7 @@ export function TimelineChart({ deadlines }: { deadlines: DeadlineLike[] }) {
       </CardHeader>
       <CardContent>
         {!hasDeadlines ? (
-          <p className="flex h-[300px] items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
+          <p className="flex min-h-[120px] items-center justify-center rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
             {de
               ? "Keine Fristen erfasst. Die nächsten zwölf Monate erscheinen, sobald Fristen vorliegen."
               : "Няма записани срокове. Следващите дванадесет месеца се показват, когато има срокове."}
