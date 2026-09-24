@@ -4,11 +4,11 @@ import type { Locale } from "@/lib/i18n/dictionaries"
  * Ordered first-login onboarding steps. `completed` is terminal: the user has
  * finished onboarding and must never be routed back into it.
  */
-export const onboardingSteps = ["language", "profile", "tour", "finish", "completed"] as const
+export const onboardingSteps = ["profile", "tour", "finish", "completed"] as const
 
 export type OnboardingStep = (typeof onboardingSteps)[number]
 
-export const firstOnboardingStep: OnboardingStep = "language"
+export const firstOnboardingStep: OnboardingStep = "profile"
 export const completedOnboardingStep: OnboardingStep = "completed"
 
 export const onboardingSegment = "onboarding"
@@ -25,6 +25,8 @@ export function isOnboardingStep(value: unknown): value is OnboardingStep {
  * so a missing or unreadable value can never strand a user past onboarding.
  */
 export function resolveOnboardingStep(value: unknown): OnboardingStep {
+  // Legacy profiles created before the language card was removed resume at profile.
+  if (value === "language") return "profile"
   return isOnboardingStep(value) ? value : firstOnboardingStep
 }
 
