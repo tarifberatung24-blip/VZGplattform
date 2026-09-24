@@ -26,7 +26,7 @@ const privacySections: Array<[string, string, string]> = [
   ["Betroffenenrechte und Beschwerde", "Sie haben nach Maßgabe der DSGVO insbesondere Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Datenschutzanfragen können Sie über die im Impressum genannte Kontakt-E-Mail stellen. Sie können sich außerdem bei einer Datenschutzaufsichtsbehörde beschweren.", "Съгласно GDPR имате по-специално право на достъп, коригиране, изтриване, ограничаване на обработката, преносимост на данните и възражение. Искания относно лични данни можете да изпращате на имейла за контакт, посочен в Импресума. Можете също да подадете жалба до надзорен орган за защита на данните."],
 ]
 
-const privacyHeadingBg: Record<string, string> = {
+const legalHeadingBg: Record<string, string> = {
   Verantwortlicher: "Администратор",
   "Verarbeitungskategorien und Rechtsgrundlagen": "Категории данни и правни основания",
   "Konto, Verträge und Dokumente": "Акаунт, договори и документи",
@@ -44,17 +44,36 @@ const privacyHeadingBg: Record<string, string> = {
   "Sicherheit und Audit-Ereignisse": "Сигурност и audit събития",
   Partnerlinks: "Партньорски линкове",
   "Betroffenenrechte und Beschwerde": "Права на лицата и жалби",
+  Anbieter: "Доставчик",
+  Kontakt: "Контакт",
+  "Register und Umsatzsteuer": "Регистър и ДДС",
+  "Inhaltlich verantwortlich": "Отговорност за съдържанието",
+  Geltungsbereich: "Обхват",
+  Leistungsumfang: "Обхват на услугата",
+  "Keine individuelle Beratung": "Без индивидуална консултация",
+  "Pflichten der Nutzer": "Задължения на потребителите",
+  Partnerangebote: "Партньорски предложения",
+  Kosten: "Разходи",
+  Verbraucherstreitbeilegung: "Потребителско извънсъдебно решаване на спорове",
+  Kennzeichnung: "Обозначаване",
+  Vergütung: "Възнаграждение",
+  "Unabhängige Entscheidung": "Самостоятелно решение",
+  "Externe Websites": "Външни сайтове",
+  "Aktueller Stand": "Текущо положение",
+  Partnerverträge: "Договори с партньори",
+  "Künftige kostenpflichtige Leistungen": "Бъдещи платени услуги",
 }
 
 const content: Record<LegalPageType, { title: string; titleBg: string; intro: string; introBg?: string; sections: Array<[string, string, string?]> }> = {
   imprint: {
     title: "Impressum", titleBg: "Импресум",
     intro: "Angaben gemäß § 5 DDG.",
+    introBg: "Задължителни данни за доставчика съгласно § 5 DDG.",
     sections: [
-      ["Anbieter", "Die vollständigen Anbieterangaben werden aus den geschützten Deployment-Einstellungen geladen."],
-      ["Kontakt", "Für Anfragen nutzen Sie bitte die unten angegebene Kontakt-E-Mail. Eine Telefonnummer wird veröffentlicht, sobald sie hinterlegt ist."],
-      ["Register und Umsatzsteuer", "Angaben zu Handelsregister und Umsatzsteuer-ID werden nur angezeigt, wenn sie für den Anbieter tatsächlich bestehen."],
-      ["Inhaltlich verantwortlich", "Verantwortlich für die Inhalte dieser Website ist die im Impressum angegebene vertretungsberechtigte Person."],
+      ["Anbieter", "Die vollständigen Anbieterangaben werden aus den hinterlegten öffentlichen Unternehmensdaten geladen.", "Пълните данни за доставчика се зареждат от въведените публични фирмени данни."],
+      ["Kontakt", "Für Anfragen nutzen Sie bitte die angegebene Kontakt-E-Mail oder Telefonnummer.", "За запитвания използвайте посочения имейл адрес или телефон."],
+      ["Register und Umsatzsteuer", "Angaben zu Handelsregister und Umsatzsteuer-ID werden nur angezeigt, wenn sie für den Anbieter tatsächlich bestehen.", "Данни за търговски регистър и ДДС номер се показват само ако действително са приложими за доставчика."],
+      ["Inhaltlich verantwortlich", "Verantwortlich für die Inhalte dieser Website ist die im Impressum angegebene verantwortliche Person.", "За съдържанието на този сайт отговаря посоченото в Импресума отговорно лице."],
     ],
   },
   privacy: {
@@ -66,33 +85,36 @@ const content: Record<LegalPageType, { title: string; titleBg: string; intro: st
   terms: {
     title: "Allgemeine Geschäftsbedingungen", titleBg: "Общи условия",
     intro: "Rahmenbedingungen für die Nutzung der HORIZON-Plattform durch Privatkunden.",
+    introBg: "Условия за използване на платформата HORIZON от частни потребители.",
     sections: [
-      ["Geltungsbereich", "Diese Bedingungen regeln die Nutzung der digitalen HORIZON-Plattform durch private Nutzerinnen und Nutzer."],
-      ["Leistungsumfang", "HORIZON by VZG unterstützt beim Ordnen von Dokumenten, beim Anzeigen von Vertragsinformationen und bei der verständlichen Orientierung. Der konkrete Funktionsumfang kann sich je nach freigeschaltetem Bereich unterscheiden."],
-      ["Keine individuelle Beratung", "Automatisierte Zusammenfassungen, Übersetzungen und Hinweise sind keine individuelle Rechts-, Steuer-, Anlage-, Kredit- oder Versicherungsberatung. Wichtige Entscheidungen und Fristen müssen anhand des Originals und gegebenenfalls mit einer zugelassenen Fachperson geprüft werden."],
-      ["Pflichten der Nutzer", "Es dürfen nur rechtmäßig bereitgestellte Inhalte hochgeladen werden. Zugangsdaten sind vertraulich zu behandeln. Unklare oder fehlerhafte Analyseergebnisse dürfen nicht ungeprüft als Grundlage für Entscheidungen verwendet werden."],
-      ["Partnerangebote", "Partnerangebote sind als solche gekennzeichnet. Ein Vertrag mit einem Partner kommt ausschließlich zwischen Ihnen und dem jeweiligen Partner zustande; dessen Bedingungen und Datenschutzinformationen gelten ergänzend."],
-      ["Kosten", "Die Plattform enthält derzeit keinen eigenen Online-Checkout und HORIZON by VZG schließt derzeit keinen eigenen kostenpflichtigen B2C-Vertrag über diese Website ab. Bevor kostenpflichtige HORIZON-Leistungen online buchbar werden, werden Preis, Leistungsumfang, Vertragslaufzeit und die hierfür geltenden Verbraucherinformationen separat veröffentlicht."],
-      ["Verbraucherstreitbeilegung", "Tarifberater24 erklärt derzeit keine freiwillige Teilnahme an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle. Eine gesetzlich verpflichtende Teilnahme bleibt hiervon unberührt."],
+      ["Geltungsbereich", "Diese Bedingungen regeln die Nutzung der digitalen HORIZON-Plattform durch private Nutzerinnen und Nutzer.", "Тези условия уреждат използването на дигиталната платформа HORIZON от частни потребители."],
+      ["Leistungsumfang", "HORIZON by VZG unterstützt beim Ordnen von Dokumenten, beim Anzeigen von Vertragsinformationen und bei der verständlichen Orientierung. Der konkrete Funktionsumfang kann sich je nach freigeschaltetem Bereich unterscheiden.", "HORIZON by VZG подпомага подреждането на документи, показването на информация за договори и разбираемата ориентация. Конкретният обхват зависи от активираната функционалност."],
+      ["Keine individuelle Beratung", "Automatisierte Zusammenfassungen, Übersetzungen und Hinweise sind keine individuelle Rechts-, Steuer-, Anlage-, Kredit- oder Versicherungsberatung. Wichtige Entscheidungen und Fristen müssen anhand des Originals und gegebenenfalls mit einer zugelassenen Fachperson geprüft werden.", "Автоматичните резюмета, преводи и указания не представляват индивидуална правна, данъчна, инвестиционна, кредитна или застрахователна консултация. Важни решения и срокове трябва да се проверяват по оригиналните документи и при необходимост с квалифициран специалист."],
+      ["Pflichten der Nutzer", "Es dürfen nur rechtmäßig bereitgestellte Inhalte hochgeladen werden. Zugangsdaten sind vertraulich zu behandeln. Unklare oder fehlerhafte Analyseergebnisse dürfen nicht ungeprüft als Grundlage für Entscheidungen verwendet werden.", "Могат да се качват само законосъобразно предоставени материали. Данните за достъп трябва да се пазят поверително. Неясни или грешни резултати от анализ не трябва да се използват без проверка като основа за решения."],
+      ["Partnerangebote", "Partnerangebote sind als solche gekennzeichnet. Ein Vertrag mit einem Partner kommt ausschließlich zwischen Ihnen und dem jeweiligen Partner zustande; dessen Bedingungen und Datenschutzinformationen gelten ergänzend.", "Партньорските предложения се обозначават като такива. Договор с партньор се сключва единствено между Вас и съответния партньор; прилагат се и неговите условия и политика за поверителност."],
+      ["Kosten", "Die Plattform enthält derzeit keinen eigenen Online-Checkout und HORIZON by VZG schließt derzeit keinen eigenen kostenpflichtigen B2C-Vertrag über diese Website ab. Bevor kostenpflichtige HORIZON-Leistungen online buchbar werden, werden Preis, Leistungsumfang, Vertragslaufzeit und die hierfür geltenden Verbraucherinformationen separat veröffentlicht.", "В момента платформата няма собствен онлайн checkout и чрез този сайт HORIZON by VZG не сключва собствен платен B2C договор. Преди да бъдат активирани платени HORIZON услуги онлайн, ще бъдат публикувани отделно цена, обхват, срок и приложимата потребителска информация."],
+      ["Verbraucherstreitbeilegung", "Tarifberater24 erklärt derzeit keine freiwillige Teilnahme an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle. Eine gesetzlich verpflichtende Teilnahme bleibt hiervon unberührt.", "Tarifberater24 понастоящем не заявява доброволно участие в процедура пред потребителски помирителен орган. Евентуално законово задължително участие остава незасегнато."],
     ],
   },
   affiliate: {
     title: "Hinweis zu Partnerlinks", titleBg: "Партньорска прозрачност",
     intro: "Transparenz zu Empfehlungen und externen Partnerangeboten.",
+    introBg: "Прозрачност за препоръки и външни партньорски предложения.",
     sections: [
-      ["Kennzeichnung", "Links zu Partnern und Empfehlungen werden als Partnerangebot oder Werbung gekennzeichnet."],
-      ["Vergütung", "Bei einem erfolgreichen Abschluss über einen gekennzeichneten Link kann HORIZON by VZG vom Partner eine Vergütung erhalten. Für Sie entstehen durch das Anklicken eines Links allein keine zusätzlichen Kosten."],
-      ["Unabhängige Entscheidung", "Ob ein Angebot zu Ihnen passt, entscheiden Sie selbst anhand der Vertragsunterlagen des Partners. HORIZON by VZG gibt keine individuelle Finanz-, Versicherungs-, Kredit- oder Rechtsberatung."],
-      ["Externe Websites", "Für Preise, Verfügbarkeit, Vertragsabschluss und Datenschutz auf Partnerseiten ist ausschließlich der jeweilige Partner verantwortlich."],
+      ["Kennzeichnung", "Links zu Partnern und Empfehlungen werden als Partnerangebot oder Werbung gekennzeichnet.", "Линковете към партньори и препоръките се обозначават като партньорско предложение или реклама."],
+      ["Vergütung", "Bei einem erfolgreichen Abschluss über einen gekennzeichneten Link kann HORIZON by VZG vom Partner eine Vergütung erhalten. Für Sie entstehen durch das Anklicken eines Links allein keine zusätzlichen Kosten.", "При успешно сключване чрез обозначен линк HORIZON by VZG може да получи възнаграждение от партньора. Самото натискане на линка не води до допълнителни разходи за Вас."],
+      ["Unabhängige Entscheidung", "Ob ein Angebot zu Ihnen passt, entscheiden Sie selbst anhand der Vertragsunterlagen des Partners. HORIZON by VZG gibt keine individuelle Finanz-, Versicherungs-, Kredit- oder Rechtsberatung.", "Вие сами преценявате дали дадено предложение е подходящо според документите на партньора. HORIZON by VZG не предоставя индивидуална финансова, застрахователна, кредитна или правна консултация."],
+      ["Externe Websites", "Für Preise, Verfügbarkeit, Vertragsabschluss und Datenschutz auf Partnerseiten ist ausschließlich der jeweilige Partner verantwortlich.", "За цени, наличност, сключване на договор и защита на данните в сайтовете на партньорите отговаря съответният партньор."],
     ],
   },
   withdrawal: {
     title: "Widerruf und Verbraucherinformationen", titleBg: "Отказ и информация за потребители",
     intro: "Hinweise zu Verträgen mit HORIZON by VZG und zu externen Partnerangeboten.",
+    introBg: "Информация за договори с HORIZON by VZG и за външни партньорски предложения.",
     sections: [
-      ["Aktueller Stand", "Über diese Website wird derzeit kein eigener kostenpflichtiger Vertrag mit HORIZON by VZG online abgeschlossen. Deshalb gibt es aktuell kein separates Online-Widerrufsformular für HORIZON-Leistungen."],
-      ["Partnerverträge", "Für Verträge, die Sie direkt mit einem Partner schließen, gelten ausschließlich dessen Widerrufsbelehrung, Vertragsbedingungen und Kontaktwege."],
-      ["Künftige kostenpflichtige Leistungen", "Bevor HORIZON by VZG eigene kostenpflichtige Leistungen online anbietet, werden die gesetzlich erforderlichen Verbraucherinformationen, Preise, Laufzeiten und eine passende Widerrufsbelehrung bereitgestellt."],
+      ["Aktueller Stand", "Über diese Website wird derzeit kein eigener kostenpflichtiger Vertrag mit HORIZON by VZG online abgeschlossen. Deshalb gibt es aktuell kein separates Online-Widerrufsformular für HORIZON-Leistungen.", "В момента чрез този сайт не се сключва собствен платен онлайн договор с HORIZON by VZG. Поради това към момента няма отделен онлайн формуляр за отказ от HORIZON услуги."],
+      ["Partnerverträge", "Für Verträge, die Sie direkt mit einem Partner schließen, gelten ausschließlich dessen Widerrufsbelehrung, Vertragsbedingungen und Kontaktwege.", "За договори, които сключвате директно с партньор, се прилагат неговите указания за отказ, договорни условия и канали за контакт."],
+      ["Künftige kostenpflichtige Leistungen", "Bevor HORIZON by VZG eigene kostenpflichtige Leistungen online anbietet, werden die gesetzlich erforderlichen Verbraucherinformationen, Preise, Laufzeiten und eine passende Widerrufsbelehrung bereitgestellt.", "Преди HORIZON by VZG да предлага собствени платени услуги онлайн, ще бъдат предоставени изискуемата по закон потребителска информация, цени, срокове и подходящи указания за отказ."],
     ],
   },
 }
@@ -128,7 +150,7 @@ export function LegalPage({ type }: { type: LegalPageType }) {
           </section>
         )}
         <div className="flex flex-col gap-6">
-          {page.sections.map(([heading, body, bodyBg]) => <section key={heading} className="flex flex-col gap-2 border-t border-border pt-6"><h2 className="text-xl font-semibold">{isBg ? (privacyHeadingBg[heading] ?? heading) : heading}</h2><p className="leading-relaxed text-muted-foreground">{isBg ? (bodyBg ?? body) : body}</p></section>)}
+          {page.sections.map(([heading, body, bodyBg]) => <section key={heading} className="flex flex-col gap-2 border-t border-border pt-6"><h2 className="text-xl font-semibold">{isBg ? (legalHeadingBg[heading] ?? heading) : heading}</h2><p className="leading-relaxed text-muted-foreground">{isBg ? (bodyBg ?? body) : body}</p></section>)}
         </div>
       </article>
     </main>
