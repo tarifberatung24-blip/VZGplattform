@@ -2,7 +2,7 @@
 
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
-Base: `origin/main` @ `3fafcf3f5f86d185aa6e02a21a03bbb4167f8917`
+Base: `origin/main` @ `46a5fa3e90827c6d085fd24206f502e93bd9be83`
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -30,7 +30,7 @@ Legend for the columns used in every phase record:
 - **FROZEN** — freeze state
 - **OWNER APPROVAL REQUIRED** — whether the owner must approve to proceed/publish
 
-**No module is FROZEN.** No module is DONE. Freeze is granted only by explicit owner acceptance
+**P1 Public Layer 0 is DONE and FROZEN.** All other modules remain unfrozen. Freeze is granted only by explicit owner acceptance
 after a module meets the full DONE definition.
 
 ---
@@ -40,7 +40,7 @@ after a module meets the full DONE definition.
 | ID | SYSTEM | CURRENT STATUS | FROZEN | OWNER APPROVAL REQUIRED |
 | --- | --- | --- | --- | --- |
 | P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
-| P1 | PUBLIC LAYER 0 | IMPLEMENTATION VERIFIED — OWNER/LEGAL REVIEW PENDING | NO | YES |
+| P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | IMPLEMENTATION VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P3 | HORIZON GUIDE | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
@@ -92,7 +92,7 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Public Layer 0
 - **TARGET ROUTES:** `/{locale}` → `/`, `/how-it-works`, `/functions`, `/security`, `/contact`,
   `/auth/login`, `/auth/sign-up`, legal pages.
-- **CURRENT STATUS:** IMPLEMENTATION VERIFIED — OWNER/LEGAL REVIEW PENDING
+- **CURRENT STATUS:** FROZEN — OWNER ACCEPTED 2026-09-25
 - **CURRENT IMPLEMENTATION:** public marketing and legal surfaces are available in BG/DE with
   HORIZON by VZG customer-facing branding. Public `/security` is a trust page; account/MFA
   security remains protected at `/protected/security`.
@@ -103,15 +103,15 @@ after a module meets the full DONE definition.
   `/zayavka`, `/anfrage`, `/angebote/{offer}`, `/email-generator`.
 - **REUSE:** `GlobalHeader`, `GlobalFooter`, `legal-page`, `hero`, `site-header`, `site-footer`,
   `LanguageSwitcher`, `legal-profile.ts`, `/api/leads`, `lead-submit.ts`, PWA install pages.
-- **MISSING:** a decision on the fate of the legacy marketing routes (no redirects yet);
-  legal review of final Impressum/AGB/Datenschutz against HORIZON wording.
+- **MISSING:** none for the accepted P1 scope. Legacy marketing routes that remain are treated as preserved public compatibility surfaces; changing or removing them requires an explicit P1 reopen.
 - **DEPENDENCIES:** P0.
-- **BLOCKERS:** legal review by the owner/legal reviewer is required before public launch;
-  `DOCUMENT_FEASIBILITY_AUDIT.md` records that a public launch with unfinished legal pages is blocked.
+- **BLOCKERS:** none. Final live legal re-audit passed on production commit `46a5fa3e90827c6d085fd24206f502e93bd9be83`.
 - **DONE CRITERIA:** every Layer 0 target route exists and is usable in each supported UI locale;
   branding is consistent with HORIZON by VZG; legal pages complete and reviewed; loading, error,
   and empty states present; real HTTP checks pass against production; no legacy route broken silently.
-- **FROZEN:** NO
+- **FROZEN:** YES — owner explicitly approved `P1 FREEZE` on 2026-09-25 after final live legal re-audit passed.
+- **OWNER APPROVAL REQUIRED:** SATISFIED — recorded 2026-09-25.
+- **FREEZE BASELINE:** production commit `46a5fa3e90827c6d085fd24206f502e93bd9be83`; reopen P1 explicitly before changing its public/legal surfaces.
 
 ---
 
