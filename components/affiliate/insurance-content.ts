@@ -36,7 +36,7 @@ export const insuranceProductContent: Record<InsuranceOfferId, InsuranceProductC
         "Прегледай Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz при партньора",
         "Продължи директно при партньора за конкретна оферта",
       ],
-      cta: "Weiter zum Partner",
+      cta: "Продължи към партньора",
     },
     de: {
       name: "Firmenversicherung",
@@ -62,7 +62,7 @@ export const insuranceProductContent: Record<InsuranceOfferId, InsuranceProductC
         "Разбери разликата между Haftpflicht, Teilkasko и Vollkasko",
         "Сравни покритие и условия директно при партньора",
       ],
-      cta: "Weiter zum Partner",
+      cta: "Продължи към партньора",
     },
     de: {
       name: "Kfz-Versicherung",
