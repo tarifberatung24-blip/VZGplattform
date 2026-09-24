@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseConfig, hasSupabaseConfig, missingConfigurationMessage } from './config'
-import { isProtectedAppPath, isOnboardingComplete, isKnownOnboardingStep, isOnboardingPath, isAuthFlowPath, pathLocale, requiresMfa } from './auth-routing'
+import { isProtectedAppPath, isOnboardingComplete, isKnownOnboardingStep, normalizeOnboardingStep, isOnboardingPath, isAuthFlowPath, pathLocale, requiresMfa } from './auth-routing'
 import { stripLocale } from '../i18n/routing'
 
 export async function updateSession(request: NextRequest) {
@@ -107,10 +107,13 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (profile && isKnownOnboardingStep(profile.onboarding_step) && !isOnboardingComplete(profile.onboarding_step)) {
-      const url = request.nextUrl.clone()
-      url.pathname = `/${pathLocale(request.nextUrl.pathname)}/onboarding/${profile.onboarding_step}`
-      url.search = ''
-      return NextResponse.redirect(url)
+      const step = normalizeOnboardingStep(profile.onboarding_step)
+      if (step) {
+        const url = request.nextUrl.clone()
+        url.pathname = `/${pathLocale(request.nextUrl.pathname)}/onboarding/${step}`
+        url.search = ''
+        return NextResponse.redirect(url)
+      }
     }
   }
 
