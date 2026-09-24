@@ -10,7 +10,7 @@ const fields: Record<Locale, InsuranceCalculatorField[]> = {
     { id: "firstRegistration", label: "Първа регистрация", type: "text", placeholder: "напр. 03/2019" },
     { id: "sfClass", label: "SF клас", type: "select", options: ["SF 1/2", "SF 1", "SF 2", "SF 3", "SF 4", "SF 5+"] },
     { id: "usage", label: "Начин на използване", type: "select", options: ["Частно", "Служебно", "Пътуване до работа"] },
-    { id: "coverage", label: "Желано покритие", type: "select", options: ["Haftpflicht", "Teilkasko", "Vollkasko"] },
+    { id: "coverage", label: "Покритие за преглед при партньора", type: "select", options: ["Haftpflicht", "Teilkasko", "Vollkasko"] },
   ],
   de: [
     { id: "vehicle", label: "Marke und Modell", type: "text", placeholder: "z. B. VW Golf" },
@@ -18,7 +18,7 @@ const fields: Record<Locale, InsuranceCalculatorField[]> = {
     { id: "firstRegistration", label: "Erstzulassung", type: "text", placeholder: "z. B. 03/2019" },
     { id: "sfClass", label: "SF-Klasse", type: "select", options: ["SF 1/2", "SF 1", "SF 2", "SF 3", "SF 4", "SF 5+"] },
     { id: "usage", label: "Nutzung", type: "select", options: ["Privat", "Gewerblich", "Arbeitsweg"] },
-    { id: "coverage", label: "Gewünschter Schutz", type: "select", options: ["Haftpflicht", "Teilkasko", "Vollkasko"] },
+    { id: "coverage", label: "Deckungsart für den Partnervergleich", type: "select", options: ["Haftpflicht", "Teilkasko", "Vollkasko"] },
   ],
 }
 
@@ -26,7 +26,7 @@ const copy: Record<Locale, InsuranceCalculatorCopy> = {
   bg: {
     title: "Подготви данните за Kfz застраховка",
     intro:
-      "Събери информацията за автомобила и желаното покритие, за да можеш да я въведеш директно при партньора. Тук не се изчислява цена и не се взема решение за приемане.",
+      "Събери информацията за автомобила и избери коя категория покритие искаш да прегледаш при партньора. Тук не се изчислява цена и не се взема решение за приемане.",
     summaryTitle: "Твоите данни за преглед",
     summaryEmpty: "Попълни полетата, които искаш да подготвиш. Нищо не се изпраща или запазва.",
     limits:
@@ -38,7 +38,7 @@ const copy: Record<Locale, InsuranceCalculatorCopy> = {
   de: {
     title: "Daten für die Kfz-Versicherung vorbereiten",
     intro:
-      "Sammle die Angaben zu Fahrzeug und gewünschtem Schutz, damit du sie beim Partner direkt eingeben kannst. Hier wird kein Preis berechnet und keine Annahme entschieden.",
+      "Sammle die Fahrzeugdaten und wähle die Deckungsart, die du beim Partner ansehen möchtest. Hier wird kein Preis berechnet und keine Annahme entschieden.",
     summaryTitle: "Deine Angaben zur Kontrolle",
     summaryEmpty: "Fülle die Felder aus, die du vorbereiten möchtest. Nichts wird gesendet oder gespeichert.",
     limits:
