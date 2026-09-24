@@ -1,12 +1,11 @@
-"use client"
-
 import { Mail, Phone } from "lucide-react"
 import Link from "next/link"
-import { useLanguage } from "@/lib/i18n/language-context"
+import { headers } from "next/headers"
 import { legalAddress, legalProfile } from "@/lib/legal-profile"
 
-export default function ImpressumPage() {
-  const { locale } = useLanguage()
+export default async function ImpressumPage() {
+  const requestHeaders = await headers()
+  const locale = requestHeaders.get("x-locale") === "de" ? "de" : "bg"
   const isBg = locale === "bg"
   const address = legalAddress()
 
