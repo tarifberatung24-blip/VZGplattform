@@ -72,14 +72,24 @@ export default function ImpressumPage() {
 
               {legalProfile.businessName && (
                 <p className="text-sm text-muted-foreground">
-                  {isBg ? "Фирма:" : " Unternehmen:"} {legalProfile.businessName}
+                  {isBg ? "Наименование:" : "Unternehmen:"} {legalProfile.businessName}
+                </p>
+              )}
+              {legalProfile.legalForm && (
+                <p className="text-sm text-muted-foreground">
+                  {isBg ? "Правна форма:" : "Rechtsform:"} {legalProfile.legalForm}
                 </p>
               )}
               {legalProfile.representative && (
                 <p className="text-sm text-muted-foreground">
-                  {isBg ? "Собственик и отговорно лицо:" : " Inhaber und Geschäftsführer:"} {legalProfile.representative}
+                  {isBg ? "Собственик:" : "Inhaber:"} {legalProfile.representative}
                 </p>
               )}
+              <p className="text-sm text-muted-foreground">
+                {isBg
+                  ? "VZG CONSULT е експертният бранд, а HORIZON by VZG е продукт на Tarifberater24."
+                  : "VZG CONSULT ist die Expertenmarke; HORIZON by VZG ist ein Produkt von Tarifberater24."}
+              </p>
             </div>
           </section>
 
