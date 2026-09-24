@@ -30,21 +30,21 @@ export const insuranceProductContent: Record<InsuranceOfferId, InsuranceProductC
     bg: {
       name: "Firmenversicherung",
       summary:
-        "Застраховки за фирми и свободни професии: Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz. Подготви данните си и продължи директно при партньора.",
+        "Застраховки за фирми и свободни професии: Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz. Подготви данните си и прегледай видовете покритие директно при партньора.",
       details: [
         "Подготви бранш, правна форма и брой служители",
-        "Сравни Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz",
+        "Прегледай Betriebshaftpflicht, Inhaltsversicherung и Rechtsschutz при партньора",
         "Продължи директно при партньора за конкретна оферта",
       ],
-      cta: "Weiter zum Partner",
+      cta: "Продължи към партньора",
     },
     de: {
       name: "Firmenversicherung",
       summary:
-        "Versicherungen für Unternehmen und Freiberufler: Betriebshaftpflicht, Inhaltsversicherung und Rechtsschutz. Bereite deine Angaben vor und geh direkt zum Partner.",
+        "Versicherungen für Unternehmen und Freiberufler: Betriebshaftpflicht, Inhaltsversicherung und Rechtsschutz. Bereite deine Angaben vor und sieh dir die Deckungsarten direkt beim Partner an.",
       details: [
         "Branche, Rechtsform und Mitarbeitende vorbereiten",
-        "Betriebshaftpflicht, Inhaltsversicherung und Rechtsschutz vergleichen",
+        "Betriebshaftpflicht, Inhaltsversicherung und Rechtsschutz beim Partner ansehen",
         "Direkt beim Partner ein konkretes Angebot anfragen",
       ],
       cta: "Weiter zum Partner",
@@ -56,18 +56,18 @@ export const insuranceProductContent: Record<InsuranceOfferId, InsuranceProductC
     bg: {
       name: "Kfz-Versicherung",
       summary:
-        "Автомобилна застраховка за твоето превозно средство. Подготви данните за колата и желаното покритие, после сравни при партньора.",
+        "Автомобилна застраховка за твоето превозно средство. Подготви данните за колата и прегледай предлаганите видове покритие при партньора.",
       details: [
         "Подготви HSN/TSN, Erstzulassung и SF клас",
         "Разбери разликата между Haftpflicht, Teilkasko и Vollkasko",
         "Сравни покритие и условия директно при партньора",
       ],
-      cta: "Weiter zum Partner",
+      cta: "Продължи към партньора",
     },
     de: {
       name: "Kfz-Versicherung",
       summary:
-        "Kfz-Versicherung für dein Fahrzeug. Bereite Fahrzeugdaten und gewünschten Schutz vor und vergleiche anschließend beim Partner.",
+        "Kfz-Versicherung für dein Fahrzeug. Bereite die Fahrzeugdaten vor und sieh dir die angebotenen Deckungsarten anschließend beim Partner an.",
       details: [
         "HSN/TSN, Erstzulassung und SF-Klasse vorbereiten",
         "Haftpflicht, Teilkasko und Vollkasko unterscheiden",
