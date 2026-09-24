@@ -1,5 +1,6 @@
 type LegalProfile = {
   businessName: string
+  legalForm: string
   representative: string
   street: string
   postalCode: string
@@ -15,7 +16,8 @@ type LegalProfile = {
 
 const publicDefaults = {
   businessName: "Tarifberater24",
-  representative: "Inhaber: Svetlozar Gitsov",
+  legalForm: "Einzelunternehmen",
+  representative: "Svetlozar Gitsov",
   street: "Hospitalstraße 30",
   postalCode: "66798",
   city: "Wallerfangen",
@@ -35,6 +37,7 @@ function value(name: string, fallback = "") {
  */
 export const legalProfile: LegalProfile = {
   businessName: value("LEGAL_BUSINESS_NAME", publicDefaults.businessName),
+  legalForm: value("LEGAL_FORM", publicDefaults.legalForm),
   representative: value("LEGAL_REPRESENTATIVE", publicDefaults.representative),
   street: value("LEGAL_STREET", publicDefaults.street),
   postalCode: value("LEGAL_POSTAL_CODE", publicDefaults.postalCode),
