@@ -202,6 +202,9 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 - ✅ Prompt/model version registry
 - ✅ Per-module guard rails
 - ✅ Provenance on AI outputs
+- ✅ Rail ordering fixed 2026-09-25: validation and ownership now run before the provider gate;
+  live a foreign case returns `404` and a malformed body `400` (previously both `503`), and the
+  owner still gets a clean `503 AI_PROVIDER_NOT_CONFIGURED`; locked by 7 route tests
 - ✅ **Authenticated runtime observed (2026-09-25):** case assistant route `401` anon, `503`
   `AI_PROVIDER_NOT_CONFIGURED` under a live session — no crash, nothing transmitted
 - ⬜ End-to-end case-context answer generation — blocked on an owner-provided provider key

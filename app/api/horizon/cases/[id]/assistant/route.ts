@@ -54,10 +54,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     )
   }
 
-  if (!process.env.GROQ_API_KEY) {
-    return Response.json({ code: "AI_PROVIDER_NOT_CONFIGURED" }, { status: 503 })
-  }
-
   // The path id is authoritative. Accepting a case id in the body as well would
   // create two sources of truth for which case is being read.
   if (!z.string().uuid().safeParse(caseId).success) {
@@ -74,6 +70,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // A case owned by someone else fails here exactly like a missing one, so the
     // response cannot be used to probe which case ids exist.
     return Response.json({ code: "CASE_NOT_FOUND" }, { status: 404 })
+  }
+
+  // The provider gate is deliberately last. If it ran before validation and
+  // ownership, an unconfigured deployment would answer 503 for every request,
+  // which would both skip the ownership rail entirely and confirm that an id was
+  // otherwise well-formed.
+  if (!process.env.GROQ_API_KEY) {
+    return Response.json({ code: "AI_PROVIDER_NOT_CONFIGURED" }, { status: 503 })
   }
 
   const result = streamText({

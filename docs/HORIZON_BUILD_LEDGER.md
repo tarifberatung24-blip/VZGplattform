@@ -46,7 +46,7 @@ after a module meets the full DONE definition.
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; real account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`, `/de/security` respond) | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS RE-VERIFIED 2026-09-25 (two real authenticated users: owner case/fact writes 201; other user read `[]` for case, fact and profile; spoofed-owner fact insert `42501`; cross-owner profile PATCH returned 0 rows — row unchanged; anon denied `401`; owner positive control 200) | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | DONE — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence reachable on the HORIZON path (authenticated browser E2E read a real uploaded PDF into `document_pages`, `UPLOADED → READY`, and the P16 explanation quoted its text); one shared READY rule now used by both stacks (`lib/documents/extraction-contract.ts`), closing the office path's empty-extraction `READY` bug (live: text-free PDF → `NEEDS_CONFIRMATION`) | NO | YES |
-| P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); end-to-end answer owner-blocked on provider key | NO | YES |
+| P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); rail ordering fixed so validation/ownership run before the provider gate (live: foreign case `404`, malformed body `400`, previously both `503`); end-to-end answer owner-blocked on provider key | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`) | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Every FMS 2025 template carries a measured overlay mapping asserted against the real template bytes (label x/width and baseline-origin top within 0.6 pt); all 9 generate a real `%PDF-` artifact with page count preserved and source bytes untouched; 8 of 8 Anlagen produced drafts through the authenticated browser, each naming its own official Form-ID; full chain re-verified generate → approve → gated download → real signed PDF containing `Müller`/`Anna` | NO | YES |
 | P10 | SIGNATURE ENGINE | PARTIAL / REFERENCE FORM VERIFIED — OWNER DECISION PENDING. AUTHENTICATED BROWSER E2E PASS 2026-09-25 (PNG+date signed a real approved form → new VISUAL draft v2 with distinct signed SHA-256, page 2; approve → gated download real PDF 62,961 bytes). Breadth gap closed as INAPPLICABLE 2026-09-25: the 8 Anlagen carry no signature wording and are attachments, so only the declaration is signable (locked in by test). Remaining: owner decision on QES/PAdES and two-signature joint assessment | NO | YES |
@@ -506,6 +506,16 @@ after a module meets the full DONE definition.
   `AI_PROVIDER_NOT_CONFIGURED` because no provider key is set — no crash, no partial stream, and
   nothing transmitted to a provider. End-to-end answer generation remains owner-blocked on a
   provider key (`docs/TERRA_START.md`: a missing cloud key must block end-to-end success claims).
+  **Rail ordering fixed 2026-09-25.** The provider-config gate ran before request validation and
+  ownership, so on an unconfigured deployment every request returned `503` and neither the
+  uuid/body validation nor the ownership check was reachable — the ownership rail was present in
+  the code but unexercised, and the `503` confirmed that an id was otherwise well-formed. The gate
+  now runs last: re-verified live under a real owner session, a foreign/unknown case returns
+  `404 CASE_NOT_FOUND` and a malformed body returns `400 INVALID_CHAT_REQUEST` (previously both
+  were `503`), while the owner still gets a clean `503 AI_PROVIDER_NOT_CONFIGURED`. Locked by
+  `app/api/horizon/cases/[id]/assistant/route.test.ts` (7 tests: unauthenticated `401`, malformed
+  `400`, non-uuid `404`, foreign case `404`, missing key `503` after ownership passes, stream on
+  the happy path, and a database error not surfacing as a provider problem).
   (commit `f6ec2d6`).
 - **CURRENT IMPLEMENTATION:** `/{locale}/assistant` renders `home-office-workspace`;
   `app/api/chat/route.ts` streams via `@ai-sdk/groq` with rate limiting;
