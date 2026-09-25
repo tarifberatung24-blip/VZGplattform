@@ -41,7 +41,7 @@ after a module meets the full DONE definition.
 | --- | --- | --- | --- | --- |
 | P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
 | P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
-| P2 | AUTH + FIRST LOGIN + ONBOARDING | IMPLEMENTATION + LOCAL E2E VERIFIED — AWAITING OWNER MIGRATION APPLY | NO | YES |
+| P2 | AUTH + FIRST LOGIN + ONBOARDING | DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (blocker migration applied + live `profiles.upsert` 200; fresh-user login/onboarding/second-login E2E pass; FROZEN pending owner acceptance) | NO | YES |
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/horizon`, `/de/dashboard`, `/de/profile`, `/de/contracts`, `/de/documents` all 200) | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS VERIFIED (owner-scoped write policies confirmed end-to-end) | NO | YES |
@@ -51,12 +51,12 @@ after a module meets the full DONE definition.
 | P9 | OFFICIAL PDF FORM ENGINE | VERIFIED — 35 FORM-ENGINE TESTS PASS ON REAL REFERENCE TEMPLATES; ROUTE GATES UNTIL A FORM IS GENERATED | NO | YES |
 | P10 | SIGNATURE ENGINE | VERIFIED — SIGNATURE TESTS PASS ON THE REAL GENERATED DOCUMENT (110 combined) | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | IMPLEMENTED — SMTP TRANSPORT + SEND PLAN TESTS PASS (42); ABSENT PARTIAL CONFIG REFUSED BY DESIGN; NO REAL PROVIDER CONFIGURED (owner-only) | NO | YES |
-| P12 | AGENTUR FÜR ARBEIT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E PASS) | NO | YES |
-| P13 | JOBCENTER | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (shipped `0fb190a`; tests/build verified; authenticated runtime E2E PASS) | NO | YES |
-| P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E PASS) | NO | YES |
-| P15 | STEUERERKLÄRUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year registry + case wiring shipped; tests/build verified; authenticated runtime E2E PASS) | NO | YES |
+| P12 | AGENTUR FÜR ARBEIT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 4-task selector, task recorded as confirmed fact + audited) | NO | YES |
+| P13 | JOBCENTER | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 3-task selector, task recorded as case fact + audited) | NO | YES |
+| P14 | KÜNDIGUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (contract→case link, draft v1, approval, gated real-PDF download) | NO | YES |
+| P15 | STEUERERKLÄRUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (tax-year panel, 2025 supported, 2026 unpublished notice, no ELSTER transmit) | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (pasted-text/email intake now analysed; classification + quoted evidence, printed deadline, risk caveat, next action rendered) | NO | YES |
-| P17 | CONTRACT MANAGEMENT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case linkage shipped; archive/Radar reused; tests/build verified; authenticated runtime E2E PASS) | NO | YES |
+| P17 | CONTRACT MANAGEMENT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (archive render, Kündigung-vorbereiten link creates seeded `kuendigung` case, `contract_linked` audited) | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -746,11 +746,13 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Agentur für Arbeit module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, running on the shared
   case engine.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (implementation, tests and
-  build verified; browser-driven E2E pending). **Authenticated runtime observed 2026-09-25:** an
-  `application` case (`Agentur Test`, institution `Agentur fuer Arbeit`) created through the live
-  API (`201`) rendered its Agentur surface live at `/{locale}/guide/{id}` (`200`), including the
-  task panel ("Arbeitsuchend", "Arbeitslos"), the official-source context and the official
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (implementation, tests
+  and build verified). Case opened from `/{locale}/dashboard` via the "Agentur für Arbeit" module
+  button (`200`); the task selector offered all four canonical tasks; selecting "Arbeitslosengeld
+  beantragen" recorded `agentur_task: arbeitslosengeld_beantragen` as a confirmed case fact
+  (visible in the FAKTEN panel), the panel showed "Gewähltes Anliegen" with the official online
+  route, and the audit trail appended `agentur_task_selected`. Earlier in the same window an
+  `application` case rendered its Agentur surface live (`200`) including the official
   Veränderungsmitteilung form entry.
 - **CURRENT IMPLEMENTATION:**
   - `lib/horizon/agentur/registry.ts` — four canonical BA tasks (`arbeitsuchend_melden`,
@@ -789,11 +791,12 @@ after a module meets the full DONE definition.
 - **ID:** P13
 - **SYSTEM:** Jobcenter module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE (browser-driven E2E pending).
-  **Authenticated runtime observed 2026-09-25:** an `application` case created with
-  `horizon_module = jobcenter` rendered its module surface live at `/{locale}/guide/{id}` (`200`),
-  showing the Jobcenter task panel and the official German form context. Repository creation and
-  the rendering path both exercised against the live database.
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25. Case opened from
+  `/{locale}/dashboard` via the "Jobcenter" module button (`200`); the task selector offered
+  `erstantrag`, `weiterbewilligung` and `veraenderung_mitteilen`; selecting "Erstantrag" recorded the
+  task as a case fact and appended `jobcenter_task_selected` to the audit trail. Earlier in the same
+  window an `application` case created with `horizon_module = jobcenter` rendered its module surface
+  live (`200`), showing the Jobcenter task panel and the official German form context.
 - **CURRENT IMPLEMENTATION:** shipped as a launch vertical slice on the existing engines:
   `lib/horizon/jobcenter/` (task registry, official-source citations, conditional Anlagen,
   copy, `selectJobcenterTask` action), `components/jobcenter/jobcenter-task-panel.tsx`, the
@@ -818,17 +821,16 @@ after a module meets the full DONE definition.
 - **ID:** P14
 - **SYSTEM:** Kündigung module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE (authenticated runtime E2E pending).
-  **Authenticated E2E partially observed 2026-09-25:** a real `cancellation` case
-  (`Kuendigung Test`, institution `Test GmbH`) was created through the live API with an
-  authenticated owner session (`201`). The deterministic generator refused to draft with only
-  partial facts and returned `needsInfo` with localized German questions (`recipient`,
-  `subject`, `request`) rather than inventing them; after those confirmed facts were supplied it
-  produced draft v1 `Kuendigung des Vertrags VZ-99231` with the deterministic model tag
-  (`deterministic-rules-v1`), a correct German body and the recipient carried from the confirmed
-  facts. Draft export returned `200` with the corrected HORIZON filename (see the branding fix
-  note). Remaining gate: preview → approve → download driven from the browser, and send is
-  blocked on P11.
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25. A contract was linked
+  from `/{locale}/vertraege` ("Kündigung vorbereiten"), creating a real `kuendigung` case with its
+  confirmed provider/reference facts seeded (so the missing-information gate was already cleared).
+  "Kündigung vorbereiten" generated draft v1; the review panel showed the letter body; ticking the
+  acknowledgement and submitting "Entwurf freigeben" released it ("Dieser Entwurf ist freigegeben
+  und unverändert."); the download link then appeared and `GET /api/horizon/cases/{id}/letter`
+  returned `200` with a short-lived signed URL whose bytes are a real PDF (magic `%PDF-`, 1528
+  bytes). An unapproved draft returns `403 not_approved` and a changed one `403 approval_stale`.
+  The deterministic generator still refuses to draft with partial facts and returns `needsInfo`
+  with localized questions rather than inventing them.
 - **CURRENT IMPLEMENTATION:** a launch vertical slice on the existing engines:
   `lib/horizon/kuendigung/facts.ts` (confirmed-fact reading, the timing taxonomy and the single
   § 309 Nr. 9 BGB calculation rule), `letter.ts` (deterministic German letter),
@@ -862,8 +864,11 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`,
   `/{locale}/finanzamt`.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year-aware registry and
-  case wiring shipped; unit tests and build verified; authenticated runtime E2E pending).
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (tax-year-aware registry
+  and case wiring shipped; unit tests and build verified). A case opened from `/{locale}/dashboard`
+  via the tax module button (`200`); the panel rendered the tax-year selector with 2025 supported
+  and reported 2026 as "Amtlich noch nicht veröffentlicht"; no ELSTER transmission field or
+  credential exists anywhere on the surface, so HORIZON transmits nothing.
 - **ADDED THIS PHASE:** `lib/horizon/steuer/registry.ts` (tax-year-aware registry: only 2025 is
   `supported`; 2026 is `not_yet_published`; other years `out_of_scope`; every entry carries an
   official source and a verification date), `lib/horizon/steuer/actions.ts` (records the chosen
@@ -969,12 +974,13 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/vertraege`, `/{locale}/tarife`, `/{locale}/angebote/{offer}`, `/go/{offer}`,
   `/api/contracts`, `/api/contracts/{id}`, `/api/radar`, `/api/optimize/*`.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case
-  linkage and dashboard entry shipped; archive, Radar and optimize surfaces reused; tests and build
-  verified; browser-driven E2E pending). **Authenticated runtime observed 2026-09-25:** a contract
-  was created through the live `/api/contracts` (`201`) with a household and audit event, and
-  `/{locale}/vertraege` returned `200` under a live owner session. `GET /api/contracts` is not a
-  supported method (`405`), which is correct — the surface is create/update/delete plus the page.
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (contract-to-case linkage
+  and dashboard entry shipped; archive, Radar and optimize surfaces reused; tests and build
+  verified). `/{locale}/vertraege` rendered the archive under an owner session with its Radar notes;
+  the "Kündigung vorbereiten" control on a contract opened a real `kuendigung` case
+  (`/{locale}/guide/{id}`, `200`) with its evidenced facts seeded and `contract_linked` audited —
+  the same flow that then drives P14's letter to approval and download. `GET /api/contracts` is not
+  a supported method (`405`), which is correct — the surface is create/update/delete plus the page.
 - **ADDED THIS PHASE:** `lib/horizon/contracts/linkage.ts` (evidenced-only `contractFactSeeds`
   under the P14 vocabulary; a field the archive does not hold is *absent* rather than empty, a
   malformed date is dropped rather than interpreted, a date from a `needs_review` contract is

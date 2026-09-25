@@ -315,7 +315,7 @@ the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
 
 ## P12 — Agentur für Arbeit
 
-Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated runtime E2E pending).
+Status: DONE — AUTHENTICATED BROWSER E2E PASS 2026-09-25 — NOT FROZEN.
 
 - ✅ Verified official current process/form sources — every cited `arbeitsagentur.de` page and
   online service was re-fetched this session and returned HTTP 200
@@ -331,16 +331,18 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
   fillable PDF and are shown as online-only with the authority's own link; no PDF was invented
 - ✅ No invented eligibility, deadline, amount, recipient, or form field; checkbox/radio widgets
   with no evidenced case fact are deliberately left blank and the UI states this
-- ✅ **Authenticated runtime observed (2026-09-25):** an `application` case rendered its Agentur
-  surface live at `/{locale}/guide/{id}` (`200`), including the task panel and the official
-  Veränderungsmitteilung form entry; browser-driven E2E still pending
+- ✅ **Authenticated browser E2E PASS (2026-09-25):** case opened from `/de/dashboard` via the
+  "Agentur für Arbeit" module button (`200`); the task selector offered all four canonical tasks
+  (`arbeitsuchend_melden`, `arbeitslos_melden`, `arbeitslosengeld_beantragen`,
+  `veraenderungen_mitteilen`); choosing "Arbeitslosengeld beantragen" and submitting recorded
+  `agentur_task: arbeitslosengeld_beantragen` as a confirmed case fact (visible under FAKTEN),
+  the panel then showed "Gewähltes Anliegen" with the official online route, and the audit trail
+  recorded `agentur_task_selected`
 - ⬜ FROZEN
 
 ## P13 — Jobcenter
 
-Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (browser-driven E2E pending).
-**Authenticated runtime observed (2026-09-25):** a `horizon_module = jobcenter` case rendered its
-Jobcenter surface live at `/{locale}/guide/{id}` (`200`).
+Status: DONE — AUTHENTICATED BROWSER E2E PASS 2026-09-25 — NOT FROZEN.
 
 Shipped in `0fb190a` (13 files, +1276 −9); CI green and live on Render at that revision.
 
@@ -358,13 +360,15 @@ Shipped in `0fb190a` (13 files, +1276 −9); CI green and live on Render at that
 - ✅ Official form generation for the fillable entry (Hauptantrag) through P9, with
   `lib/horizon/jobcenter/registry.test.ts` (39 tests) covering selection and refusal branches
 - ✅ No invented eligibility, deadline, benefit amount, authority, recipient or form field
-- ✅ **Authenticated runtime observed (2026-09-25):** module case creation and the live module
-  surface verified against the database; browser-driven E2E still pending
+- ✅ **Authenticated browser E2E PASS (2026-09-25):** case opened from `/de/dashboard` via the
+  "Jobcenter" module button (`200`); the task selector offered `erstantrag`, `weiterbewilligung`
+  and `veraenderung_mitteilen`; choosing "Erstantrag" and submitting recorded the task as a case
+  fact and appended `jobcenter_task_selected` to the audit trail
 - ⬜ FROZEN
 
 ## P14 — Kündigung
 
-Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated runtime E2E pending).
+Status: DONE — AUTHENTICATED BROWSER E2E PASS 2026-09-25 — NOT FROZEN.
 
 - ✅ Contract facts read from confirmed facts only — an unconfirmed provider address or contact
   never reaches the letter, and a later confirmed answer supersedes an earlier one
@@ -388,13 +392,19 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
 - ✅ No invented provider address or email — a send is refused without a recorded, confirmed
   recipient; the recipient is never derived
 - ✅ Tests — `lib/horizon/kuendigung/kuendigung.test.ts` (44 tests)
-- ⬜ Authenticated browser end-to-end verification (letter preparation, approval, download)
+- ✅ **Authenticated browser E2E PASS (2026-09-25):** a contract was linked from
+  `/{locale}/vertraege` ("Kündigung vorbereiten"), creating a real `kuendigung` case with its
+  confirmed provider/reference facts seeded, so the missing-information gate was already cleared.
+  "Kündigung vorbereiten" then generated draft v1; the review panel showed the letter body; ticking
+  the acknowledgement and submitting "Entwurf freigeben" released it ("Dieser Entwurf ist
+  freigegeben und unverändert."); the download link appeared and `GET /api/horizon/cases/{id}/letter`
+  returned `200` with a short-lived signed URL whose contents are a real PDF (magic `%PDF-`,
+  1528 bytes). An unapproved or stale draft stays gated (`403 not_approved` / `approval_stale`).
 - ⬜ FROZEN
 
 ## P15 — Steuererklärung
 
-Status: IMPLEMENTED — NOT DONE — NOT FROZEN. Authenticated runtime E2E remains pending
-as part of the consolidated verification pass after P17.
+Status: DONE — AUTHENTICATED BROWSER E2E PASS 2026-09-25 — NOT FROZEN.
 
 - ✅ Tax model/FMS groundwork exists
 - ✅ Tax-year-aware form registry: only 2025 is `supported`; 2026 is `not_yet_published`; other years `out_of_scope`; every entry carries an official source and a verification date
@@ -407,7 +417,10 @@ as part of the consolidated verification pass after P17.
 - ✅ Manual submission path to the competent Finanzamt (official online route + official forms links); HORIZON transmits nothing
 - ✅ No ELSTER submission: no credential, certificate or transmission field exists anywhere in the registry
 - 71 unit tests pass (`lib/horizon/steuer/steuer.test.ts`); tsc/lint/i18n/build green
-- Authenticated runtime E2E (deferred to the consolidated pass after P17)
+- ✅ **Authenticated browser E2E PASS (2026-09-25):** case opened from `/de/dashboard` via the tax
+  module button (`200`); the panel rendered the tax-year selector with 2025 supported and reported
+  2026 as "Amtlich noch nicht veröffentlicht"; no ELSTER transmission field or credential exists
+  anywhere on the surface
 - FROZEN
 
 ## P16 — Unterlagen erklären
@@ -438,8 +451,7 @@ Status: DONE — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 — NOT FROZEN.
 
 ## P17 — Contract Management
 
-Status: IMPLEMENTED — NOT DONE — NOT FROZEN. Authenticated runtime E2E remains pending
-as part of the consolidated verification pass after P17. The separate preview branch
+Status: DONE — AUTHENTICATED BROWSER E2E PASS 2026-09-25 — NOT FROZEN. The separate preview branch
 remains reference-only.
 
 - ✅ Existing contract surfaces/data identified
@@ -457,10 +469,11 @@ remains reference-only.
 - ✅ Neutral analysis kept separate from affiliate offers (stated in both UI languages)
 - ✅ Dashboard shortcut `/{locale}/vertraege` added to real HORIZON navigation
 - 18 unit tests pass (`lib/horizon/contracts/contracts.test.ts`); tsc/lint/i18n/build green
-- ✅ **Authenticated runtime observed (2026-09-25):** contract creation via live `/api/contracts`
-  (`201`, household + audit event) and `/{locale}/vertraege` (`200`) under an owner session;
-  `GET /api/contracts` correctly `405` (create/update/delete + page only). Browser-driven link
-  flow still pending
+- ✅ **Authenticated browser E2E PASS (2026-09-25):** `/{locale}/vertraege` rendered the archive
+  under an owner session with its Radar notes; the "Kündigung vorbereiten" control on a contract
+  opened a real `kuendigung` case (`/{locale}/guide/{id}`, `200`) with its evidenced facts seeded
+  and `contract_linked` audited — the same flow that then drives P14's letter to approval and
+  download. `GET /api/contracts` correctly `405` (create/update/delete + page only).
 - FROZEN
 
 ---
