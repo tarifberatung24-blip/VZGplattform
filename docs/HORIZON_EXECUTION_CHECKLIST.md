@@ -157,6 +157,13 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 - ✅ **Runtime OCR observed (2026-09-25):** real Tesseract over a real official template
   (`ESt_1_A_2025.pdf`, page 1) returned 1,650 chars at 0.70 confidence, correctly reading the
   printed title and section labels
+- ✅ **Runtime file-intake observed (2026-09-25, authenticated):** a real 64,801-byte PDF was
+  uploaded through the case workspace onto the canonical `source_documents` spine at the
+  CHECK-/policy-required path, with its SHA-256 and a `document_intake_added` audit entry; a text
+  file renamed `.pdf` was refused on its bytes, so the magic-byte check governs admission rather
+  than the client-declared type. Extraction then returned `200` with both pages persisted to
+  `document_pages` at confidence `1.0`, the row moving `UPLOADED → READY` with a
+  `document_extracted` audit entry
 - ⬜ Page-level evidence for extracted facts
 - ⬜ Unified extraction contract
 - ⬜ Explicit OCR/extraction failure states

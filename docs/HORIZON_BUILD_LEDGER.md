@@ -39,7 +39,7 @@ after a module meets the full DONE definition.
 
 | ID | SYSTEM | CURRENT STATUS | FROZEN | OWNER APPROVAL REQUIRED |
 | --- | --- | --- | --- | --- |
-| P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
+| P0 | MASTER MAP + GOVERNANCE | DONE — CRITERIA MET 2026-09-25 (master map + ledger + checklist exist; DONE→FROZEN and ACTIVE_PHASE/ALLOWED_FILES/FROZEN_FILES/OUT_OF_SCOPE rules carried in `PROJECT_RULES.md`/`AGENTS.md`/`AI_WORKFLOW.md`; sequence fixed; Capital out of scope; `git diff --check` clean); FROZEN pending owner acceptance | NO | YES |
 | P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (blocker migration applied + live `profiles.upsert` 200; fresh-user login/onboarding/second-login E2E pass; FROZEN pending owner acceptance) | NO | YES |
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
@@ -66,7 +66,15 @@ after a module meets the full DONE definition.
 - **ID:** P0
 - **SYSTEM:** Master map and development governance
 - **TARGET ROUTES:** none (governance only)
-- **CURRENT STATUS:** IN_PROGRESS
+- **CURRENT STATUS:** DONE — CRITERIA MET 2026-09-25 (FROZEN pending owner acceptance).
+  All listed DONE criteria were verified directly: `docs/HORIZON_MASTER_MAP.md`,
+  `docs/HORIZON_BUILD_LEDGER.md` and `docs/HORIZON_EXECUTION_CHECKLIST.md` exist; the DONE → FROZEN
+  rules and the ACTIVE_PHASE / ALLOWED_FILES / FROZEN_FILES / OUT_OF_SCOPE requirement are carried
+  in `PROJECT_RULES.md`, `AGENTS.md` (and `.agents/`) and `AI_WORKFLOW.md`; the canonical P0–P17
+  sequence is fixed in the master map; Capital is classified outside the active sequence in both the
+  map and the ledger; `git diff --check` passes. The remaining gate is the owner's acceptance of
+  Phase 0, which is the same owner-only step that freezes every phase — it is not a build blocker.
+  (No application code, Supabase, package, lockfile, env or deployment file is touched by P0.)
 - **CURRENT IMPLEMENTATION:** `PROJECT_RULES.md`, `AGENTS.md`, `AI_WORKFLOW.md`,
   `DOCUMENT_FEASIBILITY_AUDIT.md`, `docs/TERRA_START.md`, `README.md`,
   `SUPABASE_CONSOLIDATION_PLAN.md`, `REPOSITORY_AUDIT_BG.md`.
@@ -379,11 +387,20 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** no new public route required; enhances `/{locale}/documents` and
   `/{locale}/office/cases/{id}`.
 - **CURRENT STATUS:** PARTIAL — all five input types accepted and unit-tested.
+  **Runtime file-intake observed 2026-09-25 (authenticated):** a real 64,801-byte
+  `application/pdf` was uploaded through the case workspace to the canonical `source_documents`
+  spine at the CHECK- and policy-required `{ownerId}/{caseId}/{documentId}-{name}` path, and
+  appeared in the live table with its SHA-256 and an `document_intake_added` audit entry; a text
+  file renamed `.pdf` was refused on its bytes ("entspricht nicht ihrem angegebenen Typ"), so
+  the magic-byte check is what governs admission rather than the client-declared type. The same
+  upload was then extracted through `/api/office/documents/{id}/extract` returning `200` with
+  both pages persisted to `document_pages` at confidence `1.0`, the row moving `UPLOADED → READY`
+  and a `document_extracted` audit entry written.
   **Runtime OCR observed 2026-09-25:** the real Tesseract path (`ocrScannedPdfPages`) ran against
   a real official template (`public/forms/ESt_1_A_2025.pdf`, page 1) and returned 1,650 characters
   at 0.70 confidence, correctly reading the printed title ("Hauptvordruck ESt 1 A",
   "Einkommensteuererklärung", "Sparzulage"). Provider-level OCR is therefore exercised on real
-  bytes; page-level evidence linkage and the two-stack reconciliation remain open.
+  bytes; page-level fact-evidence linkage and the two-stack reconciliation remain open.
   (commits `b708697`, `3bff5c0`).
 - **CURRENT IMPLEMENTATION:** validated upload with canonical-project guard
   (`lib/documents/validation.ts` + `app/api/documents/upload/route.ts`);
