@@ -125,8 +125,12 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ State-transition audit trail
 - ✅ Owner authorization for architecture/schema decision
 - ✅ Typecheck / Lint / i18n / Tests / Production build
+- ✅ **Live cross-user isolation observed (2026-09-25)** on the production project with two real
+  authenticated identities: user B read the owner's case, drafts and profile as `[]`; a forged
+  cross-owner insert was rejected `42501`; a cross-owner profile `PATCH` changed `0` rows; the
+  owner's own case/fact/draft/approval writes all succeeded. This is the runtime confirmation
+  the earlier segment lacked (previously static-only).
 - Run `horizon_case_engine_isolation.sql` against a migrated disposable database
-- Confirm no cross-user read/write against a live database
 - FROZEN
 
 ## P6 — Document Intake / OCR / Explanation
@@ -164,12 +168,18 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 
 - ✅ Deterministic draft primitives exist
 - ✅ Hash-bound approval primitive exists
+- ✅ **Live approval gate observed (2026-09-25):** missing/invalid hash refused with HTTP 400;
+  correct `content_hash` approved (201) and released the draft; tax-form download `403
+  not_approved` before approval and `200` after
 - Canonical draft/approval model
 - Exact German draft + translation review
 - Confirmed-facts gate
 - Explicit acknowledgement/approval
 - Content change invalidates approval
 - Unapproved export/send blocked
+- ✅ **Branding fix (2026-09-25):** the draft export `Content-Disposition` filename no longer
+  ships the retired `kintex-draft` codename; it is now `HORIZON-by-VZG-draft-v{n}.txt`.
+  Pinned by `lib/horizon/draft-export-branding.test.ts` and confirmed live on a real export.
 - End-to-end verification
 - FROZEN
 
@@ -194,6 +204,11 @@ ESt 1 A 2025, page 1). Breadth remains; mechanism is proven. 1 of 9 mappings ver
   stored values from that evidence
 - ✅ **Real functional verification:** a filled PDF was generated and read back;
   all 7 values land inside their printed boxes
+- ✅ **Live UI E2E (2026-09-25):** the reference form was generated from the case-workspace UI on
+  a real authenticated `Steuer 2025` case; the artifact was stored privately, queued as a draft,
+  audited (`pdf_form_generated`), and the downloaded PDF's SHA-256 matched the manifest's
+  `Ausgabe-SHA-256` exactly (62,971 bytes, `%PDF-1.7`). A `date_de` value in the wrong format was
+  refused live (`unsupported_format_value`) instead of being reinterpreted.
 - ✅ **German characters render correctly:** `Müller-Öztürk` and `Straße 5` (ß)
   round-trip intact through a reader — verified, not assumed
 - ✅ Non-CP1252 values (e.g. Polish/Cyrillic names) are refused before measurement,

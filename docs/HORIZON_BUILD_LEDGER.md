@@ -324,11 +324,15 @@ after a module meets the full DONE definition.
     `lib/horizon/case/migration-contract.test.ts`, and the contract/lifecycle/approval logic by
     `lib/horizon/case/case-engine.test.ts`.
 - **DEPENDENCIES:** P0, P2 (authenticated context).
-- **BLOCKERS:** runtime verification only. `20260919150000_horizon_case_engine.sql` is not yet
-  applied to the production project, and the RLS isolation test cannot run here (no authorized DB
-  channel), so no cross-user isolation assertion has been observed against a live database. Those
-  checks are written and passing as static/unit assertions, not as runtime proof. P5 is therefore
-  not DONE and not FROZEN.
+- **BLOCKERS:** complete for the storage/RLS layer as of 2026-09-25. The case-engine schema is
+  present in the live project (module cases, `extracted_facts`, `correspondence_drafts`,
+  `approvals`, `audit_events` all read and write successfully), and cross-user isolation was
+  observed against the live database with two real authenticated identities rather than only as a
+  static assertion: a second user received `[]` for the first user's case, drafts and profile;
+  a cross-owner `INSERT` into `extracted_facts` was rejected with `42501` (RLS policy); a
+  cross-owner profile `PATCH` changed zero rows; and the owner's own case-creation, fact, draft
+  and approval writes all succeeded. Remaining gate to DONE/FROZEN is the module-wide
+  authenticated E2E in P12–P17, not the isolation layer.
 - **DONE CRITERIA:** one documented canonical case model; every module creates cases through it;
   RLS and repository enforce ownership; cross-tenant isolation tested; every state transition
   audited; case messages, facts, drafts, approvals, tasks all hang off the same case;
@@ -477,6 +481,12 @@ after a module meets the full DONE definition.
   overlapping draft/approval families exist with no canonical choice.
 - **DEPENDENCIES:** P5, P7.
 - **BLOCKERS:** canonical draft/approval model depends on the P5 case-model decision.
+  **Live E2E observed 2026-09-25:** approval was exercised against the real generated tax-form
+  draft. A missing hash was refused with HTTP 400 `"A valid approved content hash is required"`;
+  the recorded `content_hash` produced an approval row (HTTP 201) bound to that exact hash; and
+  the draft then reported as released. Unapproved export/send was refused (`403 not_approved` on
+  the tax-form download before approval, `200` after), so approval genuinely gates downstream
+  export rather than being decorative.
 - **DONE CRITERIA:** user sees the exact German draft and its translation; facts must be
   confirmed; explicit user approval is required and hash-bound; any content change invalidates
   approval; unapproved content cannot be exported or sent; tests, build, real verification pass.
@@ -524,6 +534,16 @@ after a module meets the full DONE definition.
   downloadable; template provenance recorded; approval bound to the exact current
   content/input hash; tests, build, real verification pass.
   **Met for the reference form. Not yet met across all target forms.**
+  **Live E2E observed 2026-09-25** on a real authenticated case (`Steuer 2025`,
+  `horizon_module=steuererklaerung`): the UI generated the reference form, the artifact was
+  stored privately and queued as a draft (`Amtliches Formular Hauptvordruck ESt 1 A
+  (034037_25)`), `pdf_form_generated` was written to the audit trail, the manifest recorded 7
+  filled fields (`name`, `vorname`, `geburtsdatum`, `idnr`, `strasse`, `plz`, `wohnort`) and 0
+  blanks, and the downloaded PDF's recomputed SHA-256 equalled the manifest's recorded
+  `Ausgabe-SHA-256` exactly (`8850f70e…1eba`, 62,971 bytes, `%PDF-1.7`). The
+  `unsupported_format_value` refusal was also observed live when a value did not match its
+  declared `date_de` format (`1988-03-14` accepted, `14.03.1988` refused) — the guard refuses
+  rather than reinterpreting.
 - **OWNER DECISION RECORDED:** the 9 FMS 2025 templates are static printable PDFs (no
   `/AcroForm`, no `/Widget`, no XFA packet; a field lookup returns no fields). The owner
   authorised an overlay approach, one reference form first, with coordinates verified against
@@ -743,6 +763,16 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Kündigung module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
 - **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE (authenticated runtime E2E pending).
+  **Authenticated E2E partially observed 2026-09-25:** a real `cancellation` case
+  (`Kuendigung Test`, institution `Test GmbH`) was created through the live API with an
+  authenticated owner session (`201`). The deterministic generator refused to draft with only
+  partial facts and returned `needsInfo` with localized German questions (`recipient`,
+  `subject`, `request`) rather than inventing them; after those confirmed facts were supplied it
+  produced draft v1 `Kuendigung des Vertrags VZ-99231` with the deterministic model tag
+  (`deterministic-rules-v1`), a correct German body and the recipient carried from the confirmed
+  facts. Draft export returned `200` with the corrected HORIZON filename (see the branding fix
+  note). Remaining gate: preview → approve → download driven from the browser, and send is
+  blocked on P11.
 - **CURRENT IMPLEMENTATION:** a launch vertical slice on the existing engines:
   `lib/horizon/kuendigung/facts.ts` (confirmed-fact reading, the timing taxonomy and the single
   § 309 Nr. 9 BGB calculation rule), `letter.ts` (deterministic German letter),
@@ -805,6 +835,12 @@ after a module meets the full DONE definition.
 - **DEPENDENCIES:** P5, P6, P7, P8, P9.
 - **BLOCKERS:** no approved ELSTER integration exists, so automatic submission stays out of scope.
   `/api/steuer/pdf` returns readiness only. Adding a PDF dependency requires owner approval.
+  **Live E2E observed 2026-09-25:** on the real `Steuer 2025` case the tax-year selector offered
+  the verified 2025 official templates (`Hauptvordruck ESt 1 A` plus the 8 Anlagen) and correctly
+  reported 2026 as "Amtlich noch nicht veröffentlicht", with no 2025 form or rule reused for
+  2026. The generated form downloaded only through the approval gate: `403 not_approved` before
+  approval, then `200` with a signed private-storage URL after approval. Automatic submission
+  remains absent by design.
 - **DONE CRITERIA:** information → official forms → guided collection → deterministic
   calculations where approved → AI explanation/drafting → review → PDF package → manual
   submission. **No automatic ELSTER submission.** Submission is manual to the competent
