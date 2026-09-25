@@ -877,7 +877,11 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/documents` and `/{locale}/office/cases/{id}`.
 - **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis
-  engine and case panel shipped; unit tests and build verified; authenticated runtime E2E pending).
+  engine and case panel shipped; unit tests and build verified; browser-driven E2E pending).
+  **Authenticated runtime observed 2026-09-25:** `/{locale}/documents` returned `200` under a live
+  owner session (anon `307`), and an `explanation` case rendered at `/{locale}/guide/{id}` (`200`).
+  The analysis panel itself needs an uploaded document, so its full surface is exercised in tests
+  and awaits a browser-driven upload.
 - **ADDED THIS PHASE:** `lib/horizon/unterlagen/deadline.ts` (three-way deadline evidence:
   `printed` with the verbatim line quoted, `calculated` only from a period the document itself
   states plus a reference date it states and always flagged for user verification, `unknown`

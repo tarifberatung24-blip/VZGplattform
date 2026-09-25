@@ -413,7 +413,8 @@ as part of the consolidated verification pass after P17.
 - ✅ Official German documents stay in German; the explanation explains rather than producing an official translation
 - ✅ Follow-up via the canonical case (P8 review/approval, P10 signature, P11 send reused)
 - 48 unit tests pass (`lib/horizon/unterlagen/unterlagen.test.ts`); tsc/lint/i18n/build green
-- Authenticated runtime E2E (deferred to the consolidated pass after P17)
+- ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/documents` (`200`; anon `307`) and
+  an `explanation` case surface live; the analysis panel awaits a browser-driven upload
 - FROZEN
 
 ## P17 — Contract Management
