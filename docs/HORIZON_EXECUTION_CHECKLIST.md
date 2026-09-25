@@ -24,6 +24,13 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ P2 runtime E2E: login, first-login gate, onboarding routes, locale consistency (local, migrated disposable DB)
 - ✅ P2 upsert grant gap fixed (`20260925020000_profiles_onboarding_update_id_grant.sql`; denied-before / allowed-after proven on disposable Postgres)
 - ✅ P2 locale-consistency defect fixed (`app/dashboard/page.tsx` prefers route locale over stale cookie)
+- ✅ P2 production E2E re-verified 2026-09-25 on a brand-new confirmed account: forced into
+  `/de/onboarding/profile` on first login, walked profile → tour → finish, reached `/de/dashboard`
+  with `onboarding_step = 'completed'` persisted; second login went straight to the dashboard and
+  did not re-run onboarding
+- ✅ P4 five entry modules re-verified 2026-09-25: all five dashboard entries were clicked in a live
+  session and each created a real case; account routes corrected to the ones that exist
+  (`/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`, `/de/security`)
 - P1 owner/legal acceptance
 - P1 FROZEN after explicit owner acceptance
 - P2 migration applied to the project (owner-side authorized channel)

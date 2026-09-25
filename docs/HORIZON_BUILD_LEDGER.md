@@ -43,7 +43,7 @@ after a module meets the full DONE definition.
 | P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (blocker migration applied + live `profiles.upsert` 200; fresh-user login/onboarding/second-login E2E pass; FROZEN pending owner acceptance) | NO | YES |
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
-| P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/horizon`, `/de/dashboard`, `/de/profile`, `/de/contracts`, `/de/documents` all 200) | NO | YES |
+| P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; real account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`, `/de/security` respond) | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS VERIFIED (owner-scoped write policies confirmed end-to-end) | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES + REAL OCR RUN 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); **page-level evidence now reachable on the HORIZON path** — authenticated browser E2E read a real uploaded PDF into `document_pages` (`UPLOADED → READY`) and the P16 explanation quoted its text; two-stack reconciliation remains open | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); end-to-end answer owner-blocked on provider key | NO | YES |
@@ -240,14 +240,15 @@ after a module meets the full DONE definition.
   `cases.intent` mapping and case titles; `lib/horizon/guide/actions.ts` creates a canonical
   case through the P5 engine; `lib/horizon/guide/guard.ts` centralises auth and locale
   normalisation and redirects to login rather than throwing when Supabase is unconfigured.
-  `components/layout/user-sidebar.tsx` links the guide permanently, so it stays reachable after
-  onboarding. `unsure` routes to `general` rather than guessing a department.
+  `components/layout/horizon-sidebar.tsx` links the guide permanently ("Wegweiser"), so it stays
+  reachable after onboarding. `unsure` routes to `general` rather than guessing a department.
 - **REUSE:** `how-it-works` layout patterns, `module-page`, `guided-wizard` component,
   case intent vocabulary in `lib/office/supabase/database.ts`
   (`explanation`, `reply`, `complaint`, `application`, `objection`, `cancellation`,
   `document_request`, `reminder`, `free_email`).
-- **MISSING:** runtime verification with an authenticated session; no route-level test exercising
-  the chooser end to end.
+- **MISSING:** no route-level automated test exercising the chooser end to end (runtime behaviour
+  was verified in an authenticated session on 2026-09-25; the entries create real cases through
+  the P5 engine).
 - **DEPENDENCIES:** P1 (entry points), P2 (authenticated context), P5 (case creation).
 - **BLOCKERS:** none known; runtime verification needs a configured Supabase instance.
 - **DONE CRITERIA:** guide is permanently accessible after onboarding; all five task entries
@@ -281,12 +282,12 @@ after a module meets the full DONE definition.
   Supporting components: `workplace-action-center`, `missing-information-interviewer`,
   `smart-dashboard-preview`, `dashboard-workspace`.
 - **REUSE:** `VzgDashboard`, `HorizonHome`, `workplace-action-center`,
-  `missing-information-interviewer`, `dashboard-layout`, `user-sidebar`, `module-page`,
+  `missing-information-interviewer`, `dashboard-layout`, `horizon-sidebar`, `module-page`,
   `module-workspaces`, `smartDashboardRules`.
-- **MISSING:** runtime verification with an authenticated session; the dashboard still renders
-  legacy-era cards alongside the HORIZON module entry, and
+- **MISSING:** the dashboard still renders legacy-era cards alongside the HORIZON module entry, and
   `lib/kintex-navigation.ts` retains 10 modules (several flagged `planned`) that are not part of
-  the HORIZON five; no route-level test of the dashboard.
+  the HORIZON five; no route-level automated test of the dashboard (runtime behaviour was verified
+  in an authenticated session on 2026-09-25).
 - **DEPENDENCIES:** P0, P2 (onboarding), P5 (case engine).
 - **BLOCKERS:** none known; runtime verification needs a configured Supabase instance. Removing
   the legacy cards is a visual/behaviour change and is out of scope until the owner authorizes it.
