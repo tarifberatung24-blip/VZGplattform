@@ -13,7 +13,7 @@ import { planOverlayFill, applyFormat, overlayFieldByName } from "./overlay-fill
 import { generateOverlayPdf, createTextMeasurer, readTemplateBytes } from "./writer"
 import { isWinAnsiRepresentable } from "./encoding"
 import { findTemplateById, OFFICIAL_PDF_TEMPLATES } from "./registry"
-import { detectCapability, computeSha256 } from "./source"
+import { detectCapability, computeSha256, verifyTemplateSource } from "./source"
 import { buildManifest, renderManifestBody } from "./manifest"
 import type { PdfFact } from "./fill"
 
@@ -57,21 +57,81 @@ describe("overlay mapping is bound to the verified template", () => {
    * the stored PDF coordinates, so a typo in `x`/`yBottom` fails the suite.
    */
   it("places each box beneath the label it names", () => {
-    for (const field of EST_1_A_2025_MAPPING.fields) {
-      const { labelBox, inputBox, pageHeight } = field.evidence
-      // The box begins at or below the label's bottom edge.
-      expect(inputBox.top, `${field.fieldName} box starts above its label`).toBeGreaterThanOrEqual(
-        labelBox.bottom - 0.5,
-      )
-      // The gap between label and box is small: they are adjacent.
-      expect(inputBox.top - labelBox.bottom).toBeLessThan(3)
-      // The box horizontally covers the start of the label.
-      expect(inputBox.x0).toBeLessThanOrEqual(labelBox.x0)
-      // The stored PDF coordinates are exactly the measured box in PDF space.
-      expect(field.x).toBeCloseTo(inputBox.x0, 1)
-      expect(field.yBottom).toBeCloseTo(toPdfY(inputBox.bottom, pageHeight), 2)
-      expect(field.maxWidth).toBeCloseTo(inputBox.x1 - inputBox.x0, 2)
-      expect(field.maxHeight).toBeCloseTo(inputBox.bottom - inputBox.top, 2)
+    for (const id of staticOverlayTemplateIds()) {
+      for (const field of STATIC_TEMPLATE_MAPPINGS[id].fields) {
+        const { labelBox, inputBox, pageHeight } = field.evidence
+        // The box begins at or below the label's bottom edge.
+        expect(
+          inputBox.top,
+          `${id}/${field.fieldName} box starts above its label`,
+        ).toBeGreaterThanOrEqual(labelBox.bottom - 0.5)
+        // The gap between label and box is small: they are adjacent.
+        expect(inputBox.top - labelBox.bottom).toBeLessThan(3)
+        // The box horizontally covers the start of the label.
+        expect(inputBox.x0).toBeLessThanOrEqual(labelBox.x0)
+        // The stored PDF coordinates are exactly the measured box in PDF space.
+        expect(field.x).toBeCloseTo(inputBox.x0, 1)
+        expect(field.yBottom).toBeCloseTo(toPdfY(inputBox.bottom, pageHeight), 2)
+        expect(field.maxWidth).toBeCloseTo(inputBox.x1 - inputBox.x0, 2)
+        expect(field.maxHeight).toBeCloseTo(inputBox.bottom - inputBox.top, 2)
+      }
+    }
+  })
+
+  /**
+   * The stored evidence must match the real PDF, not merely be internally
+   * consistent. This re-reads each measured Anlage and asserts that a printed
+   * label of the recorded text really sits at the recorded coordinates, so a
+   * coordinate typed from memory would fail here.
+   *
+   * pdfjs reports a glyph run's *baseline* while the evidence records the
+   * font-em box (the convention the verified ESt 1 A reference already uses),
+   * so the baseline is checked for containment in the recorded box rather than
+   * for equality with its edge.
+   */
+  it("re-measures each Anlage label from the real template bytes", async () => {
+    const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs")
+    for (const id of staticOverlayTemplateIds()) {
+      const mapping = STATIC_TEMPLATE_MAPPINGS[id]
+      const template = findTemplateById(id)!
+      const bytes = new Uint8Array(readFileSync(resolve(process.cwd(), template.path)))
+      const doc = await getDocument({ data: bytes }).promise
+      const page = await doc.getPage(1)
+      const viewport = page.getViewport({ scale: 1 })
+      const content = await page.getTextContent()
+      for (const field of mapping.fields) {
+        const runs = content.items.filter(
+          (item): item is import("pdfjs-dist/types/src/display/api").TextItem =>
+            "str" in item,
+        )
+        const exact = runs.filter((item) => item.str.trim() === field.evidence.label)
+        // Some evidence labels are a shortened form of the printed run (the
+        // reference records `Straße` for `Straße (derzeitige Adresse)`), so fall
+        // back to a prefix match. The coordinate checks below still apply.
+        const match = exact.length > 0
+          ? exact
+          : runs.filter((item) => item.str.trim().startsWith(field.evidence.label))
+        expect(match.length, `${id}/${field.fieldName} label not found`).toBeGreaterThan(0)
+        const { labelBox } = field.evidence
+        expect(
+          Math.abs(match[0].transform[4] - labelBox.x0),
+          `${id}/${field.fieldName} label x`,
+        ).toBeLessThan(0.6)
+        if (exact.length > 0) {
+          expect(
+            Math.abs(exact[0].width - (labelBox.x1 - labelBox.x0)),
+            `${id}/${field.fieldName} label width`,
+          ).toBeLessThan(0.6)
+        }
+        const baseline = viewport.height - match[0].transform[5]
+        expect(baseline, `${id}/${field.fieldName} baseline`).toBeGreaterThanOrEqual(
+          labelBox.top - 0.6,
+        )
+        expect(baseline, `${id}/${field.fieldName} baseline`).toBeLessThanOrEqual(
+          labelBox.bottom + 0.6,
+        )
+      }
+      await doc.cleanup()
     }
   })
 
@@ -89,8 +149,8 @@ describe("overlay mapping is bound to the verified template", () => {
     expect(new Set(names).size).toBe(names.length)
   })
 
-  it("refuses to hand out a mapping for an unmeasured template", () => {
-    expect(staticMappingForTemplate("fms-2025-anlage-n")).toBeNull()
+  it("refuses to hand out a mapping for a template that was never measured", () => {
+    expect(staticMappingForTemplate("fms-2025-anleitung-est")).toBeNull()
     expect(staticMappingForTemplate("nope")).toBeNull()
   })
 
@@ -338,6 +398,78 @@ describe("German characters survive the write round-trip", () => {
 })
 
 describe("end-to-end: template → verify → plan → write → manifest", () => {
+  /**
+   * The Anlagen breadth claim has to hold for real generation, not just for the
+   * coordinates. This drives every newly measured mapping through the same
+   * pipeline the reference form uses and asserts a real PDF comes out with the
+   * template's pages intact and the source untouched.
+   */
+  it("generates a real PDF for every measured Anlage identity mapping", async () => {
+    const auftragIds = [
+      "fms-2025-anlage-n",
+      "fms-2025-anlage-vorsorgeaufwand",
+      "fms-2025-anlage-kind",
+      "fms-2025-anlage-sonderausgaben",
+      "fms-2025-anlage-haushaltsnahe",
+      "fms-2025-anlage-n-doppelte-haushaltsfuehrung",
+      "fms-2025-anlage-aussergewoehnliche-belastungen",
+      "fms-2025-anlage-unterhalt",
+    ]
+    const measure = await createTextMeasurer()
+    const facts = [confirmed("last_name", "Müller"), confirmed("first_name", "Anna")]
+
+    for (const id of auftragIds) {
+      const template = findTemplateById(id)!
+      const mapping = STATIC_TEMPLATE_MAPPINGS[id]
+      expect(mapping, id).toBeDefined()
+
+      const bytes = new Uint8Array(readFileSync(resolve(process.cwd(), template.path)))
+      expect((await verifyTemplateSource(template, bytes)).ok, id).toBe(true)
+
+      const plan = planOverlayFill({
+        mapping,
+        templateSourceSha256: template.sourceSha256,
+        taxYear: 2025,
+        facts,
+        confirmedFactKeys: ["last_name", "first_name"],
+        measure,
+      })
+      expect(plan.ok, id).toBe(true)
+      if (!plan.ok) continue
+      expect(plan.filledCount, id).toBe(2)
+
+      const written = await generateOverlayPdf({ templateBytes: bytes, mapping, plan })
+      expect(written.ok, id).toBe(true)
+      if (!written.ok) continue
+
+      expect(new TextDecoder().decode(written.bytes.slice(0, 5)), id).toBe("%PDF-")
+      const outputSha256 = await computeSha256(written.bytes)
+      const { PDFDocument } = await import("pdf-lib")
+      expect((await PDFDocument.load(written.bytes)).getPageCount(), id).toBe(
+        (await PDFDocument.load(bytes)).getPageCount(),
+      )
+      // The source template is never modified by generation.
+      expect(await computeSha256(bytes), id).toBe(template.sourceSha256)
+
+      const manifest = buildManifest({
+        template,
+        mappingVersion: mapping.mappingVersion,
+        caseId: "case-anlagen",
+        generatedAt: "2026-01-01T00:00:00.000Z",
+        assignments: plan.placements.map((placement) => ({
+          fieldName: placement.fieldName,
+          kind: "text" as const,
+          value: placement.value,
+        })),
+        blanks: plan.blanks,
+        outputSha256,
+      })
+      expect(manifest.outputSha256, id).toBe(outputSha256)
+      expect(manifest.sourceSha256, id).toBe(template.sourceSha256)
+      expect(renderManifestBody(manifest), id).toContain(outputSha256)
+    }
+  })
+
   it("produces a private artifact with full provenance and a real output hash", async () => {
     const bytes = await readTemplateBytes(est1a.path)
     expect(bytes.ok).toBe(true)

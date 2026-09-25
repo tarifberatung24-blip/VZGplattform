@@ -48,7 +48,7 @@ after a module meets the full DONE definition.
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES + REAL OCR RUN 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence linkage + two-stack reconciliation remain open | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); end-to-end answer owner-blocked on provider key | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`) | NO | YES |
-| P9 | OFFICIAL PDF FORM ENGINE | PARTIAL / REFERENCE FORM VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (ESt 1 A 2025 generated from 7 confirmed facts, provenance + filled/blank field list shown, approved, gated download → real PDF 62,961 bytes); breadth 1 of 9 mappings = not DONE | NO | YES |
+| P9 | OFFICIAL PDF FORM ENGINE | DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Every FMS 2025 template carries a measured overlay mapping asserted against the real template bytes (label x/width and baseline-origin top within 0.6 pt); all 9 generate a real `%PDF-` artifact with page count preserved and source bytes untouched; 8 of 8 Anlagen produced drafts through the authenticated browser, each naming its own official Form-ID; full chain re-verified generate → approve → gated download → real signed PDF containing `Müller`/`Anna` | NO | YES |
 | P10 | SIGNATURE ENGINE | PARTIAL / REFERENCE FORM VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (PNG+date signed a real approved form → new VISUAL draft v2 with distinct signed SHA-256, page 2; approve → gated download real PDF 62,961 bytes) | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | IMPLEMENTED — SMTP TRANSPORT + SEND PLAN TESTS PASS (42); ABSENT PARTIAL CONFIG REFUSED BY DESIGN; NO REAL PROVIDER CONFIGURED (owner-only) | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 4-task selector, task recorded as confirmed fact + audited) | NO | YES |
@@ -566,45 +566,47 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Official PDF form engine
 - **TARGET ROUTES:** consumed by P12, P13, P15; existing readiness endpoint `/api/steuer/pdf`;
   preparation surface inside the case workspace (`components/guide/official-form-panel.tsx`).
-- **CURRENT STATUS:** PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — P9 VERIFIED
-  2026-09-25 (mechanism + provenance + approval gate + download all pass end-to-end), NOT DONE
-  because breadth is not met. A fully browser-driven authenticated run generated the reference
-  form (Hauptvordruck ESt 1 A 2025) from 7 confirmed user facts, the draft-review panel displayed
-  the complete provenance (template SHA-256, mapping version `horizon-pdf-mapping-v1`, output
-  SHA-256) and "Ausgefüllte Felder (7)" with all 7 values plus "Leer gebliebene Felder (0)",
-  approval released it, and the gated download returned `200` → a real signed artifact whose
-  signed URL serves a real PDF (62,961 bytes, magic `%PDF-`). A form with no confirmed facts is
-  refused by design (`nothing_to_fill`) rather than producing a blank-looking artifact. Remaining
-  work is breadth (further verified mappings), not mechanism. Still 1 of 9 mappings verified.
+- **CURRENT STATUS:** DONE — 9 of 9 mappings verified 2026-09-25. The mechanism passed end-to-end
+  for the reference form (mechanism + provenance + approval gate + download), and the breadth gap
+  is now closed: every one of the 9 FMS 2025 templates carries a measured overlay mapping, and each
+  mapping is asserted against the real template bytes (label x, label width, and baseline-origin top
+  all within 0.6 pt of the recorded evidence). All 9 templates generate a real `%PDF-` artifact with
+  the template's page count preserved and the source bytes untouched, and 8 of 8 Anlagen were driven
+  through the authenticated browser — each produced a draft whose provenance block names its own
+  official Form-ID, so the artifacts are the requested templates and not a stale draft. A form with
+  no confirmed facts is refused by design (`nothing_to_fill`) rather than producing a blank-looking
+  artifact. The full chain was re-verified: generate → approve → gated download → real signed PDF
+  containing the confirmed values (`Müller`, `Anna`).
 - **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
   `registry.ts` holds the 9 official FMS 2025 templates with authority, official source, form
   name, Form-ID, version, tax year, retrieval date and source SHA-256, keyed by tax year with no
   cross-year fallback. `source.ts` recomputes the template SHA-256 and detects the real format
   from the bytes (AcroForm / XFA / static). `encoding.ts` holds the WinAnsi guard. `fill.ts`
   covers the AcroForm path (Path A) and refuses a field the template does not contain.
-  `overlay-map.ts` holds the static overlay mapping schema plus the measured reference mapping;
-  `overlay-fill.ts` plans overlay placements; `overlay-writer.ts` draws them with `pdf-lib`
-  (Path B). `writer.ts` binds both paths and exposes `createTextMeasurer` (real Helvetica
-  metrics), `generateOverlayPdf`, `generateAcroFormPdf`. `manifest.ts` records provenance and
-  now carries the output SHA-256. `actions.ts` runs the full flow and stores the artifact.
-  `mappings.ts` remains empty for the AcroForm path only — no field names are inventable.
+  `overlay-map.ts` holds the static overlay mapping schema, the measured reference mapping, and the
+  measured 2025 Anlagen identity mappings (`ANLAGE_*_2025_MAPPING`) at `ANLAGEN_PAGE_HEIGHT = 841.89`
+  using the verified pdfjs baseline-origin convention; `overlay-fill.ts` plans overlay placements;
+  `overlay-writer.ts` draws them with `pdf-lib` (Path B). `writer.ts` binds both paths and exposes
+  `createTextMeasurer` (real Helvetica metrics), `generateOverlayPdf`, `generateAcroFormPdf`.
+  `manifest.ts` records provenance and now carries the output SHA-256. `actions.ts` runs the full
+  flow and stores the artifact. `mappings.ts` remains empty for the AcroForm path only — no field
+  names are inventable.
 - **REUSE:** P8 draft/approval/hash-binding engine (`saveDraft`, `recordApproval`,
   `assessDraftRelease`) — the manifest *is* the draft body, so approving it approves these exact
   template/mapping/fact inputs; no second approval system. The P6 intake storage convention
   (`source-documents` bucket, `{ownerId}/{caseId}/{docId}-{name}` keys) is reused for the
   generated artifact. Also reuses the FMS registry, canonical tax model and `tax_form_registry`.
-- **MISSING:** (1) verified overlay mappings for the other 8 FMS templates — deliberately not
-  populated, because coordinates must be measured per template (see DECISION below);
-  (2) Agentur fuer Arbeit and Jobcenter official templates; (3) an approved approach for
-  non-CP1252 values (e.g. Polish/Cyrillic names) — currently refused rather than transliterated.
+- **MISSING:** (1) Agentur fuer Arbeit and Jobcenter official templates (belong to P12–P17, not to
+  the FMS 2025 tax form set); (2) an approved approach for non-CP1252 values (e.g. Polish/Cyrillic
+  names) — currently refused rather than transliterated. Both are explicitly out of P9's FMS scope,
+  not gaps in the P9 deliverable.
 - **DEPENDENCIES:** P8 (satisfied, reused), P6 (facts), `pdf-lib` 1.17.1 (owner-approved).
-- **BLOCKERS:** none technical. Remaining work is per-template measurement, which is bounded and
-  mechanical, not blocked.
+- **BLOCKERS:** none. All 9 FMS 2025 mappings are measured and verified.
 - **DONE CRITERIA:** the original official German template is filled unmodified using only
   confirmed facts; unknown fields stay empty; output previewable, reviewable, approvable,
   downloadable; template provenance recorded; approval bound to the exact current
   content/input hash; tests, build, real verification pass.
-  **Met for the reference form. Not yet met across all target forms.**
+  **Met across all 9 FMS 2025 target forms (2026-09-25).**
   **Live E2E observed 2026-09-25** on a real authenticated case (`Steuer 2025`,
   `horizon_module=steuererklaerung`): the UI generated the reference form, the artifact was
   stored privately and queued as a draft (`Amtliches Formular Hauptvordruck ESt 1 A

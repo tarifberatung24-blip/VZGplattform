@@ -225,6 +225,145 @@ export const EST_1_A_2025_MAPPING: StaticTemplateMapping = {
   ],
 }
 
+/** The 2025 Anlagen are also A4. */
+const ANLAGEN_PAGE_HEIGHT = 841.89
+
+/**
+ * The identity header every 2025 Anlage shares.
+ *
+ * Each Anlage prints `Name` and `Vorname` with the value box directly beneath
+ * the printed label, so the same two fields recur. The coordinates are *not*
+ * shared code: every Anlage was measured separately and its own measured boxes
+ * are passed in, because a header that merely looks identical can sit at a
+ * different offset (the reference ESt 1 A header differs from every Anlage by
+ * roughly 300 pt). Reusing one form's offsets would put a name in the wrong box,
+ * which is exactly what the hash and evidence binding exist to prevent.
+ */
+function anlagenIdentityMapping(input: {
+  templateId: string
+  sourceSha256: string
+  nameLabelBox: MeasuredBox
+  nameInputBox: MeasuredBox
+  vornameLabelBox: MeasuredBox
+  vornameInputBox: MeasuredBox
+}): StaticTemplateMapping {
+  const field = (
+    fieldName: string,
+    factKey: string,
+    label: string,
+    labelBox: MeasuredBox,
+    inputBox: MeasuredBox,
+  ): OverlayFieldPlacement => ({
+    fieldName,
+    factKey,
+    page: 1,
+    kind: "text",
+    x: inputBox.x0,
+    yBottom: toPdfY(inputBox.bottom, ANLAGEN_PAGE_HEIGHT),
+    maxWidth: inputBox.x1 - inputBox.x0,
+    maxHeight: inputBox.bottom - inputBox.top,
+    fontSize: 10,
+    evidence: { label, labelBox, pageHeight: ANLAGEN_PAGE_HEIGHT, inputBox },
+  })
+  return {
+    templateId: input.templateId,
+    taxYear: 2025,
+    sourceSha256: input.sourceSha256,
+    mappingVersion: "horizon-pdf-mapping-v1",
+    pageHeight: ANLAGEN_PAGE_HEIGHT,
+    fields: [
+      field("name", "last_name", "Name", input.nameLabelBox, input.nameInputBox),
+      field("vorname", "first_name", "Vorname", input.vornameLabelBox, input.vornameInputBox),
+    ],
+  }
+}
+
+/**
+ * Anlage N (2025), page 1, identity boxes.
+ *
+ * Measured from `public/forms/Anlage_N_2025.pdf` at the registry hash. `Name`
+ * label sits at top 46.42 and its box begins at top 55.01; `Vorname` at 72.70
+ * and 81.17.
+ */
+export const ANLAGE_N_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-n",
+  sourceSha256: "8350d72b44ad725811ce4deaf3911efac678304024022922747281e28dccac34",
+  nameLabelBox: { x0: 67.45, top: 46.42, x1: 83.45, bottom: 52.42 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 416.07, bottom: 70.85 },
+  vornameLabelBox: { x0: 67.45, top: 72.7, x1: 91.79, bottom: 78.7 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 416.07, bottom: 97.13 },
+})
+
+/** Anlage Vorsorgeaufwand (2025), page 1, identity boxes. */
+export const ANLAGE_VORSORGEAUFWAND_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-vorsorgeaufwand",
+  sourceSha256: "16e365a7e336f0bb3e030d48c04245b3df5c08396cc1d13a7969440c2073754b",
+  nameLabelBox: { x0: 67.45, top: 47.01, x1: 83.45, bottom: 53.01 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 416.07, bottom: 70.85 },
+  vornameLabelBox: { x0: 67.45, top: 73.3, x1: 91.79, bottom: 79.3 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 416.07, bottom: 97.13 },
+})
+
+/** Anlage Kind (2025), page 1, identity boxes (its boxes are ~1 pt taller). */
+export const ANLAGE_KIND_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-kind",
+  sourceSha256: "d283ab8565a142f3d93082d5ba2bfc19e810abf9c68344cb2dd7531b5d1afaba",
+  nameLabelBox: { x0: 67.45, top: 47.01, x1: 83.45, bottom: 53.01 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 416.07, bottom: 72.04 },
+  vornameLabelBox: { x0: 67.45, top: 73.3, x1: 91.79, bottom: 79.3 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 416.07, bottom: 98.32 },
+})
+
+/** Anlage Sonderausgaben (2025), page 1, identity boxes. */
+export const ANLAGE_SONDERAUSGABEN_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-sonderausgaben",
+  sourceSha256: "bd7c6e9c3026bed8865929e96081b7294ae7d725d9a9b183defa6a3ffe8b2ac7",
+  nameLabelBox: { x0: 67.45, top: 47.01, x1: 83.45, bottom: 53.01 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 419.05, bottom: 70.85 },
+  vornameLabelBox: { x0: 67.45, top: 73.3, x1: 91.79, bottom: 79.3 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 419.05, bottom: 97.13 },
+})
+
+/** Anlage Haushaltsnahe Aufwendungen (2025), page 1, identity boxes. */
+export const ANLAGE_HAUSHALTSNAHE_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-haushaltsnahe",
+  sourceSha256: "ecf58b3b9b34a28b26ab4803de1dccbdb0b1b8779df8ee8442e0f595b6a54b75",
+  nameLabelBox: { x0: 67.45, top: 47.01, x1: 83.45, bottom: 53.01 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 415.48, bottom: 70.85 },
+  vornameLabelBox: { x0: 67.45, top: 73.3, x1: 91.79, bottom: 79.3 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 415.48, bottom: 97.13 },
+})
+
+/** Anlage N — Doppelte Haushaltsführung (2025), page 1, identity boxes. */
+export const ANLAGE_N_DOPPELTE_HAUSHALTSFUEHRUNG_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-n-doppelte-haushaltsfuehrung",
+  sourceSha256: "d8f8358bb0e1a2048e9d622cb303e865c900b272ac35164f89bdbf150ca6469f",
+  nameLabelBox: { x0: 67.45, top: 47.01, x1: 83.45, bottom: 53.01 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 416.07, bottom: 70.85 },
+  vornameLabelBox: { x0: 67.45, top: 73.3, x1: 91.79, bottom: 79.3 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 416.07, bottom: 97.01 },
+})
+
+/** Anlage Außergewöhnliche Belastungen (2025), page 1, identity boxes. */
+export const ANLAGE_AUSSERGEWOEHNLICHE_BELASTUNGEN_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-aussergewoehnliche-belastungen",
+  sourceSha256: "fdbe738e8e0c5f2c7624ce4aeee91db929bcff7a2e4f502af93860484349d5fc",
+  nameLabelBox: { x0: 67.45, top: 47.01, x1: 83.45, bottom: 53.01 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 416.07, bottom: 70.85 },
+  vornameLabelBox: { x0: 67.45, top: 73.3, x1: 91.79, bottom: 79.3 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 416.07, bottom: 97.13 },
+})
+
+/** Anlage Unterhalt (2025), page 1, identity boxes. */
+export const ANLAGE_UNTERHALT_2025_MAPPING = anlagenIdentityMapping({
+  templateId: "fms-2025-anlage-unterhalt",
+  sourceSha256: "9e13dcac4a628356b9f423f7a1b8d0999d85593866601f63b692cfd980ca410e",
+  nameLabelBox: { x0: 67.45, top: 47.01, x1: 83.45, bottom: 53.01 },
+  nameInputBox: { x0: 61.73, top: 55.01, x1: 416.07, bottom: 70.85 },
+  vornameLabelBox: { x0: 67.45, top: 73.3, x1: 91.79, bottom: 79.3 },
+  vornameInputBox: { x0: 61.73, top: 81.17, x1: 416.07, bottom: 97.13 },
+})
+
 /**
  * Verified overlay mappings, keyed by template id.
  *
@@ -235,6 +374,16 @@ export const EST_1_A_2025_MAPPING: StaticTemplateMapping = {
  */
 export const STATIC_TEMPLATE_MAPPINGS: Readonly<Record<string, StaticTemplateMapping>> = {
   "fms-2025-est-1-a": EST_1_A_2025_MAPPING,
+  "fms-2025-anlage-n": ANLAGE_N_2025_MAPPING,
+  "fms-2025-anlage-vorsorgeaufwand": ANLAGE_VORSORGEAUFWAND_2025_MAPPING,
+  "fms-2025-anlage-kind": ANLAGE_KIND_2025_MAPPING,
+  "fms-2025-anlage-sonderausgaben": ANLAGE_SONDERAUSGABEN_2025_MAPPING,
+  "fms-2025-anlage-haushaltsnahe": ANLAGE_HAUSHALTSNAHE_2025_MAPPING,
+  "fms-2025-anlage-n-doppelte-haushaltsfuehrung":
+    ANLAGE_N_DOPPELTE_HAUSHALTSFUEHRUNG_2025_MAPPING,
+  "fms-2025-anlage-aussergewoehnliche-belastungen":
+    ANLAGE_AUSSERGEWOEHNLICHE_BELASTUNGEN_2025_MAPPING,
+  "fms-2025-anlage-unterhalt": ANLAGE_UNTERHALT_2025_MAPPING,
 }
 
 export function staticMappingForTemplate(templateId: string): StaticTemplateMapping | null {

@@ -330,9 +330,9 @@ describe("form support is measured against the real template bytes", () => {
   })
 
   it("reports a template with no verified mapping as manual-only", () => {
-    // Anlage N has official bytes in the repository but no measured coordinates,
-    // so it must not be offered as something HORIZON fills.
-    expect(formSupportForTemplate("fms-2025-anlage-n")).toBe("manual_only")
+    // The Est-Anleitung has official bytes in the repository but no measured
+    // coordinates, so it must not be offered as something HORIZON fills.
+    expect(formSupportForTemplate("fms-2025-anleitung-est")).toBe("manual_only")
   })
 
   it("reports an unknown template as manual-only rather than fillable", () => {
@@ -342,7 +342,14 @@ describe("form support is measured against the real template bytes", () => {
   it("lists only genuinely fillable templates for the year", () => {
     const fillable = steuerFillableTemplateIds(2025)
     expect(fillable).toContain("fms-2025-est-1-a")
-    expect(fillable).not.toContain("fms-2025-anlage-n")
+    expect(fillable).not.toContain("fms-2025-anleitung-est")
+  })
+
+  it("offers every 2025 official template HORIZON can genuinely fill", () => {
+    const fillable = steuerFillableTemplateIds(2025)
+    expect(fillable).toContain("fms-2025-anlage-n")
+    expect(fillable).toContain("fms-2025-anlage-kind")
+    expect(fillable).toContain("fms-2025-anlage-unterhalt")
   })
 
   it("verifies the shipped ESt 1 A bytes still match the registry hash", async () => {

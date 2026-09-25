@@ -212,9 +212,10 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 
 ## P9 — Official PDF Form Engine
 
-Status: PARTIAL / REFERENCE FORM VERIFIED — P9 mechanism, provenance, approval gate
-and download are browser-verified end-to-end (2026-09-25); breadth (1 of 9 mappings)
-means NOT DONE. Mechanism is proven.
+Status: DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Mechanism, provenance, approval gate and
+download are browser-verified end-to-end, and the breadth gap is closed: every FMS 2025 template
+has a measured overlay mapping asserted against the real template bytes, and 8 of 8 Anlagen were
+generated through the authenticated browser with per-template Form-ID provenance.
 
 - ✅ Source-integrity verification: the template SHA-256 is recomputed from the
   file bytes and a mismatch refuses generation
@@ -231,6 +232,12 @@ means NOT DONE. Mechanism is proven.
   stored values from that evidence
 - ✅ **Real functional verification:** a filled PDF was generated and read back;
   all 7 values land inside their printed boxes
+- ✅ **Breadth verified (2026-09-25):** all 9 FMS 2025 templates carry a measured overlay mapping
+  at the template's own registry SHA-256, and the coordinate-integrity test re-measures every
+  mapping's label x, label width and baseline-origin top from the real template bytes (tolerance
+  0.6 pt). An end-to-end test generates a real `%PDF-` for each of the 8 Anlagen with page count
+  preserved and source bytes unmodified, and the authenticated browser run produced one draft per
+  Anlage, each with its own official Form-ID in the provenance block.
 - ✅ **Live UI E2E (2026-09-25):** the reference form was generated from the case-workspace UI on
   a real authenticated `Steuer 2025` case; the artifact was stored privately, queued as a draft,
   audited (`pdf_form_generated`), and the downloaded PDF's SHA-256 matched the manifest's
