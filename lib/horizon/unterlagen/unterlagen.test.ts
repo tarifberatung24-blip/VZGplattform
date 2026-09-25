@@ -8,7 +8,7 @@ import {
   recommendNextAction,
   RISK_CAVEATS,
 } from "./classify"
-import { analyseDocumentText, DOCUMENT_KIND_FACT_KEY } from "./analysis"
+import { analyseDocumentText, combineAnalysisText, DOCUMENT_KIND_FACT_KEY } from "./analysis"
 import { unterlagenCopy, getUnterlagenCopy } from "./copy"
 
 describe("P16 deadline evidence", () => {
@@ -372,5 +372,44 @@ describe("P16 copy", () => {
   it("keeps official German documents in German in both languages", () => {
     expect(getUnterlagenCopy("de").languageNote).toContain("Original")
     expect(getUnterlagenCopy("bg").languageNote).toContain("оригинала")
+  })
+})
+
+describe("P16 analysis text composition", () => {
+  it("reads pasted text stored as a case message, not only document pages", () => {
+    // P6 stores pasted text as a message, so an explanation that reads only page
+    // text would report a pasted Bescheid as unanalysable.
+    const text = combineAnalysisText({
+      pages: [],
+      messages: [{ role: "user", content: "Bescheid über Einkommensteuer 2024" }],
+    })
+    expect(text).toContain("Bescheid über Einkommensteuer 2024")
+    expect(analyseDocumentText({ text }).kind).toBe("behoerdenbescheid")
+  })
+
+  it("omits assistant turns so an explanation never rests on prior output", () => {
+    const text = combineAnalysisText({
+      pages: [],
+      messages: [
+        { role: "user", content: "Der Text des Schreibens" },
+        { role: "assistant", content: "Ich denke, es ist ein Vertrag" },
+      ],
+    })
+    expect(text).toContain("Der Text des Schreibens")
+    expect(text).not.toContain("Ich denke")
+  })
+
+  it("returns an empty string for an empty case so it stays unanalysable", () => {
+    expect(combineAnalysisText({ pages: [], messages: [] })).toBe("")
+    expect(analyseDocumentText({ text: "" }).kind).toBe("unclear")
+    expect(analyseDocumentText({ text: "" }).deadline.kind).toBe("unknown")
+  })
+
+  it("drops blank parts instead of joining empty headings", () => {
+    const text = combineAnalysisText({
+      pages: ["   "],
+      messages: [{ role: "user", content: "Vertrag vom 01.02.2026" }],
+    })
+    expect(text).toBe("Vertrag vom 01.02.2026")
   })
 })

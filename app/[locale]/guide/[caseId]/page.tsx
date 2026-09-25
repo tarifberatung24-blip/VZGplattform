@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { requireGuideContext } from "@/lib/horizon/guide/guard"
 import { getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
+import { combineAnalysisText } from "@/lib/horizon/unterlagen/analysis"
 import { isLocale } from "@/lib/i18n/dictionaries"
 import { CaseWorkspace } from "@/components/guide/case-workspace"
 
@@ -21,21 +22,25 @@ export default async function GuideCasePage({
   // which keeps case existence from leaking across accounts.
   if (loaded.error || !loaded.data) notFound()
 
-  const [documents, facts, drafts, tasks, missing, approvals, audit, pages] = await Promise.all([
-    engine.repository!.listDocuments(caseId),
-    engine.repository!.listFacts(caseId),
-    engine.repository!.listDrafts(caseId),
-    engine.repository!.listTasks(caseId),
-    engine.repository!.getMissingInformation(caseId),
-    engine.repository!.listApprovals(caseId),
-    engine.repository!.listAudit(caseId),
-    engine.repository!.listDocumentPages(caseId),
-  ])
+  const [documents, facts, drafts, tasks, missing, approvals, audit, pages, messages] =
+    await Promise.all([
+      engine.repository!.listDocuments(caseId),
+      engine.repository!.listFacts(caseId),
+      engine.repository!.listDrafts(caseId),
+      engine.repository!.listTasks(caseId),
+      engine.repository!.getMissingInformation(caseId),
+      engine.repository!.listApprovals(caseId),
+      engine.repository!.listAudit(caseId),
+      engine.repository!.listDocumentPages(caseId),
+      engine.repository!.listMessages(caseId),
+    ])
 
-  // P16 reads the extracted page text the document stack already stored. A case
-  // with no extracted pages yields "", which the analysis reports as unanalysable
-  // rather than as a document with no deadline and no risk.
-  const documentText = (pages.data ?? []).map((page) => page.text).join("\n\n")
+  // P16 analyses everything the user supplied: extracted page text plus pasted
+  // text and email content, which P6 stores verbatim as user messages.
+  const documentText = combineAnalysisText({
+    pages: (pages.data ?? []).map((page) => page.text),
+    messages: messages.data ?? [],
+  })
 
   const copy = getGuideCopy(locale)
 

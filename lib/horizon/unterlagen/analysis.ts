@@ -18,6 +18,29 @@ import { findDeadlineEvidence } from "./deadline"
 /** The fact key under which a user's corrected document kind is stored. */
 export const DOCUMENT_KIND_FACT_KEY = "document_kind"
 
+/**
+ * The text a case's explanation is built from.
+ *
+ * Extracted page text and the user's own pasted/email messages are combined,
+ * because P6 stores pasted text as a message rather than a page and the
+ * explanation must cover everything the user supplied. Only user-role messages
+ * are read: assistant turns are never persisted, and reading them would let the
+ * explanation rest on prior output instead of on the user's material. Blank
+ * parts are dropped so an empty case still yields "" and is reported as
+ * unanalysable rather than as a document with no deadline and no risk.
+ */
+export function combineAnalysisText(input: {
+  pages: readonly string[]
+  messages: readonly { role: string; content: string }[]
+}): string {
+  return [
+    ...input.pages,
+    ...input.messages.filter((message) => message.role === "user").map((message) => message.content),
+  ]
+    .filter((part) => part.trim().length > 0)
+    .join("\n\n")
+}
+
 export type DocumentAnalysis = {
   kind: DocumentKind
   /** The printed phrase the kind rests on, quoted, or null when unclear. */

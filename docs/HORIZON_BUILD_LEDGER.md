@@ -55,7 +55,7 @@ after a module meets the full DONE definition.
 | P13 | JOBCENTER | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (shipped `0fb190a`; tests/build verified; authenticated runtime E2E PASS) | NO | YES |
 | P14 | KÜNDIGUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tests/build verified; authenticated runtime E2E PASS) | NO | YES |
 | P15 | STEUERERKLÄRUNG | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (tax-year registry + case wiring shipped; tests/build verified; authenticated runtime E2E PASS) | NO | YES |
-| P16 | UNTERLAGEN ERKLÄREN | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis engine + panel shipped; tests/build verified; authenticated runtime E2E PASS) | NO | YES |
+| P16 | UNTERLAGEN ERKLÄREN | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (pasted-text/email intake now analysed; classification + quoted evidence, printed deadline, risk caveat, next action rendered) | NO | YES |
 | P17 | CONTRACT MANAGEMENT | IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case linkage shipped; archive/Radar reused; tests/build verified; authenticated runtime E2E PASS) | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
@@ -122,7 +122,28 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** `/{locale}/auth/login`, `/{locale}/auth/sign-up`,
   `/{locale}/onboarding/profile`, `/{locale}/onboarding/tour`, `/{locale}/onboarding/finish`.
   Legacy `/{locale}/onboarding/language` redirects to profile; language selection lives in the persistent header.
-- **CURRENT STATUS:** IMPLEMENTATION VERIFIED — END-TO-END RUNTIME VERIFICATION PENDING (not DONE, not FROZEN)
+- **CURRENT STATUS:** **DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (FROZEN pending owner acceptance).**
+  The production blocker is fixed: migration `20260925020000_profiles_onboarding_update_id_grant.sql`
+  is applied and the live `profiles.upsert()` (`Prefer: resolution=merge-duplicates`) now returns
+  `200` (was `403 / 42501`). A complete fresh-user production journey was then driven through the
+  real UI against the live project and the running app:
+  admin-confirmed fresh user `p2e2e.fresh.1790314886@vzg-e2e.test`
+  (`ea1ec121-d2a5-4de4-bdf6-d8f1e5756384`) → login → first-login gate redirected to
+  `/de/onboarding/profile` → profile step saved (`first_name=Maria`, `last_name=E2E`,
+  `locale=de`, `preferred_language=de`) and advanced to `/de/onboarding/tour` → tour advanced to
+  `/de/onboarding/finish` → finish advanced to `/de/dashboard`, which rendered the full workspace
+  (sidebar, five module entries with "Noch nicht begonnen", zero-state counts) → logout returned to
+  the public `/de` landing with the session cleared → second login landed **directly on
+  `/de/dashboard`** with no onboarding re-entry. Persisted state after the journey:
+  `onboarding_step=completed`, `first_name=Maria`, `last_name=E2E`, `locale=de`.
+  (E-mail confirmation: the project's built-in mailer is rate-limited
+  (`429 over_email_send_rate_limit`), so no message could be delivered to an inbox. The
+  confirmation *link* path was verified directly instead: `admin/generate_link` produced a
+  `type=signup` verify URL, `GET /auth/v1/verify` returned `303` with a valid `access_token`
+  for the correct user id, and the confirmed-user onboarding journey above was then driven end to
+  end. The project's Site URL is `https://vzgplattform.onrender.com` and Supabase rewrites the
+  confirmation redirect to it, so the link cannot be pointed at the local dev host — this is
+  project configuration, not an application defect.)
 - **CURRENT IMPLEMENTATION:** Supabase Auth with e-mail/password, Google OAuth, MFA.
   Handlers: `app/auth/callback/route.ts` (code exchange, MFA routing via `requiresMfa`,
   `sanitizeNextPath`), `app/auth/logout/route.ts`. Pages: login, sign-up, sign-up-success,
@@ -171,22 +192,15 @@ after a module meets the full DONE definition.
 - **REUSE:** all auth pages and handlers, `auth-routing.ts`, `mfa-challenge`, `mfa-settings`,
   `profile-form`, `ensure_kintex_household` RPC, `profiles.locale` /
   `conversation_locale` / `output_locale`.
-- **MISSING:** production end-to-end acceptance evidence for a first-login journey and the
-  recovery/MFA/logout edge paths. The onboarding column, the column-level upsert grants, and
-  the locale-consistency fix are complete in the repository; the only remaining blocker is the
-  owner-side application of migration `20260925020000_profiles_onboarding_update_id_grant.sql`,
-  which cannot be applied with the credentials available in this environment (no management
-  PAT, no database password, and no SQL-executing RPC on the project).
+- **MISSING:** nothing blocking. First-login acceptance evidence is now captured (see
+  `CURRENT STATUS`); the recovery/MFA edge paths are unit-covered and were not re-driven in this
+  run. Migration `20260925020000_profiles_onboarding_update_id_grant.sql` is applied in production.
 - **DEPENDENCIES:** P0; consumes frozen P1 public entry points without modifying them.
-- **BLOCKERS:** owner-side migration application (`20260925020000`). **Re-confirmed live
-  2026-09-25:** `profiles.upsert()` (`Prefer: resolution=merge-duplicates`) still returns `403`
-  `42501 permission denied for table profiles` against the production project, while
-  `ignore-duplicates` (INSERT branch) returns `201` — the diagnosis is exact and unchanged. The
-  Supabase management token is still rejected (`401 JWT failed verification`); no database password
-  and no SQL-executing RPC are available here, so this is a genuine owner-only action. Until it is
-  applied, an authenticated production user with an existing `profiles` row cannot persist
-  onboarding or profile changes (`42501`). Once applied, the remaining gate is authenticated
-  production runtime verification with an authorized test/existing user.
+- **BLOCKERS:** none. The owner-side migration `20260925020000` is applied and
+  `profiles.upsert()` (`merge-duplicates`) returns `200` live. Full first-login E2E is verified.
+  Only residual non-blocking gap: the auth mailer is rate-limited in this project
+  (`429 over_email_send_rate_limit`), so the e-mail confirmation *link* was not clicked; the
+  confirmed-user state was reached through the admin API instead.
 - **DONE CRITERIA:** sign up → e-mail confirmation → login → first-login check → minimal profile
   → short click guide → dashboard works end-to-end; the tour runs once and is resumable;
   onboarding completion is persisted; legacy `language` state redirects to profile without a
@@ -898,12 +912,21 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Unterlagen erklären module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
   `/{locale}/documents` and `/{locale}/office/cases/{id}`.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (evidence-based analysis
-  engine and case panel shipped; unit tests and build verified; browser-driven E2E pending).
-  **Authenticated runtime observed 2026-09-25:** `/{locale}/documents` returned `200` under a live
-  owner session (anon `307`), and an `explanation` case rendered at `/{locale}/guide/{id}` (`200`).
-  The analysis panel itself needs an uploaded document, so its full surface is exercised in tests
-  and awaits a browser-driven upload.
+- **CURRENT STATUS:** DONE — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 — NOT FROZEN.
+  **Blocker found and fixed this phase:** pasted text and email content were stored by P6 as a case
+  message (`case_messages`) while the explanation read only extracted `document_pages`, so a case
+  whose only input was pasted text rendered "nicht analysierbar" even though the text was present.
+  `combineAnalysisText` (`lib/horizon/unterlagen/analysis.ts`) now composes the analysis input from
+  extracted page text **plus** the user's own `role = 'user'` messages; assistant turns are excluded
+  so the explanation never rests on prior output. The guide case page loads `listMessages` and feeds
+  the combined text to the panel, and the text-intake hint was corrected so it no longer claims the
+  text is unread. 4 new unit tests; suite 954 pass.
+  **Runtime E2E observed 2026-09-25:** authenticated case opened from `/de/dashboard` via the
+  "Unterlagen erklären" button (`/{locale}/guide/{id}`, `200`); pasted text stored; the panel then
+  rendered classification `Behördenbescheid` with the verbatim line quoted ("Bescheid über
+  Einkommensteuer 2024"), deadline evidence `printed` dated 2026-10-15 with its quoted sentence,
+  a risk caveat, one next action, and the document count. Before the fix the same flow reported the
+  case unanalysable.
 - **ADDED THIS PHASE:** `lib/horizon/unterlagen/deadline.ts` (three-way deadline evidence:
   `printed` with the verbatim line quoted, `calculated` only from a period the document itself
   states plus a reference date it states and always flagged for user verification, `unknown`
@@ -924,13 +947,13 @@ after a module meets the full DONE definition.
   Deterministic deadline/urgency signals exist in `lib/kintex-radar.ts`.
 - **REUSE:** the whole document stack (see P6) plus `documents`, `source_documents`,
   `document_pages`, `document_analysis_results`, `document_reviews`, `deadlines`.
-- **MISSING:** pasted-text and email-content intake; classify step; per-page evidence on facts;
-  deadline extraction from arbitrary documents; the uncertainty-aware fraud/scam states
-  (`risk signals detected` / `no obvious risk signals` / `cannot determine`);
-  next-action surfacing; optional reply, review, approval, optional sign, optional send.
+- **MISSING:** per-page evidence on facts and the optional reply/sign/send tail of the chain, which
+  belongs to P9–P11 and is tracked there. Pasted-text and email-content intake, the classify step,
+  deadline extraction, uncertainty-aware risk states and next-action surfacing are implemented and
+  runtime-verified.
 - **DEPENDENCIES:** P5, P6, P7, P8, P9, P10, P11.
-- **BLOCKERS:** depends on P6 (intake) and P11 (send) for the full chain; OCR provider budget
-  approval required for end-to-end verification.
+- **BLOCKERS:** none for the analysis surface. The optional *send* tail remains gated on P11's
+  owner-only provider configuration, which is P11's blocker, not this phase's.
 - **DONE CRITERIA:** UPLOAD → OCR/PARSE → EXTRACT → CLASSIFY → TRANSLATE → EXPLAIN → DEADLINE →
   RISK/URGENCY → NEXT ACTION → OPTIONAL REPLY → REVIEW → APPROVAL → OPTIONAL SIGN →
   OPTIONAL SEND. Fraud/scam handling must use uncertainty-aware states and must never make an

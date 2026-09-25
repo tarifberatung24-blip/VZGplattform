@@ -18,6 +18,9 @@ node_modules
 .next/
 .DS_Store
 
+# Tesseract language data downloaded at runtime by tesseract.js
+*.traineddata
+
 # Local agent skill installs (project-local, not vendored)
 .agents/
 .claude/skills/

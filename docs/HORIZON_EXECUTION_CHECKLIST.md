@@ -77,15 +77,19 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Proxy gate failure logging (no secrets; no lockout)
 - ✅ Typecheck / Lint / i18n / Tests / Production build
 - ✅ GitHub Actions CI green on the P2 commit
-- ⬜ Owner-side migration applied to the project — **re-confirmed blocked 2026-09-25:**
-  `profiles.upsert()` with `Prefer: resolution=merge-duplicates` against the live project still
-  returns `403` / `42501 permission denied for table profiles`. `ignore-duplicates` returns `201`,
-  matching the diagnosis exactly (the UPDATE branch needs `UPDATE (id)`). The Supabase management
-  API token is still rejected (`401 JWT failed verification`), and the environment holds no database
-  password and no SQL-executing RPC, so the one-line migration cannot be applied from here.
-- ⬜ Signup → onboarding → dashboard end-to-end verification — blocked on the migration above
+- ✅ Owner-side migration applied to the project — **confirmed applied 2026-09-25:**
+  `profiles.upsert()` (`Prefer: resolution=merge-duplicates`) now returns `200` against the live
+  project (previously `403 / 42501`).
+- ✅ Signup → onboarding → dashboard end-to-end verification — **PASS 2026-09-25** on a fresh
+  production user (`p2e2e.fresh.1790314886@vzg-e2e.test`, `ea1ec121-d2a5-4de4-bdf6-d8f1e5756384`):
+  login → first-login gate to `/de/onboarding/profile` → profile saved (`Maria`/`E2E`/`de`) →
+  `/de/onboarding/tour` → `/de/onboarding/finish` → `/de/dashboard` rendered the full workspace →
+  logout cleared the session to the public `/de` page → **second login landed directly on
+  `/de/dashboard`** with no onboarding re-entry. Persisted: `onboarding_step=completed`.
+  (E-mail confirmation completed via admin API because the project mailer is rate-limited
+  `429 over_email_send_rate_limit`; the confirmation link itself was not clicked.)
 - ⬜ Owner approval for schema change if one is required
-- ⬜ FROZEN
+- ⬜ FROZEN — implementation and E2E complete; awaiting owner acceptance to freeze
 
 ## P3 — HORIZON Guide
 
@@ -408,10 +412,13 @@ as part of the consolidated verification pass after P17.
 
 ## P16 — Unterlagen erklären
 
-Status: IMPLEMENTED — NOT DONE — NOT FROZEN. Authenticated runtime E2E remains pending
-as part of the consolidated verification pass after P17.
+Status: DONE — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 — NOT FROZEN.
 
 - ✅ Upload/select document (existing P6 stack: PDF, photo, screenshot, pasted text, email content)
+- ✅ Pasted text and email content are analysed — blocker fixed 2026-09-25: the explanation read
+  only extracted `document_pages`, so a pasted-text-only case rendered unanalysable. The analysis
+  input is now composed from page text plus the user's own `role = 'user'` messages
+  (`combineAnalysisText`); assistant turns are excluded
 - ✅ OCR/extraction (existing P6 stack; pages read through the existing `document_pages_read_own` policy)
 - ✅ Classification from printed cues, with the matching line quoted, and `unclear` instead of a nearest guess
 - ✅ User correction of the classification, recorded as a confirmed fact and audited as a correction
@@ -422,9 +429,11 @@ as part of the consolidated verification pass after P17.
 - ✅ One next action derived from the evidence, with `no_action_evident` rather than invented work
 - ✅ Official German documents stay in German; the explanation explains rather than producing an official translation
 - ✅ Follow-up via the canonical case (P8 review/approval, P10 signature, P11 send reused)
-- 48 unit tests pass (`lib/horizon/unterlagen/unterlagen.test.ts`); tsc/lint/i18n/build green
-- ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/documents` (`200`; anon `307`) and
-  an `explanation` case surface live; the analysis panel awaits a browser-driven upload
+- 52 unit tests pass (`lib/horizon/unterlagen/unterlagen.test.ts`); tsc/lint/i18n/build green
+- ✅ **Authenticated runtime E2E PASS (2026-09-25):** case opened from `/de/dashboard` via
+  "Unterlagen erklären"; pasted text stored; panel rendered classification `Behördenbescheid` with
+  the verbatim line quoted, deadline `printed` 2026-10-15 with its quoted sentence, a risk caveat,
+  one next action, and the document count
 - FROZEN
 
 ## P17 — Contract Management

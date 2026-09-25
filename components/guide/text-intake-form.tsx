@@ -21,7 +21,7 @@ export function TextIntakeForm({ caseId, locale }: { caseId: string; locale: str
   const copy = de
     ? {
         title: "Text oder E-Mail einfügen",
-        hint: "Der Text wird unverändert gespeichert. Es werden keine Fristen, Beträge oder Empfänger automatisch daraus abgeleitet.",
+        hint: "Der Text wird unverändert gespeichert. Für die Erklärung wird er gelesen; es werden keine Fakten, Fristen, Beträge oder Empfänger daraus als Falldaten angelegt.",
         kindLabel: "Art der Eingabe",
         pasted: "Eingefügter Text",
         email: "E-Mail-Inhalt",
@@ -35,7 +35,7 @@ export function TextIntakeForm({ caseId, locale }: { caseId: string; locale: str
       }
     : {
         title: "Постави текст или имейл",
-        hint: "Текстът се запазва непроменен. Никакви срокове, суми или получатели не се извличат автоматично от него.",
+        hint: "Текстът се запазва непроменен. Чете се за обяснението; от него не се създават факти, срокове, суми или получатели като данни по случая.",
         kindLabel: "Вид на въвеждането",
         pasted: "Поставен текст",
         email: "Съдържание на имейл",
