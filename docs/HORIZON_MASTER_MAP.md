@@ -281,8 +281,8 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | `/{locale}/protected` | PROTECTED | alias | — | redirect | proxy → `/dashboard` | none | LEGACY | Phase 4 | LEGACY |
 | `/{locale}/assistant` | AUTH | AI home-office chat | KintexBG | `bg`/`de` | `home-office-workspace` | `/api/chat` (Groq) | PARTIAL | Phase 7 (Context AI Assistant) | REUSE |
 | `/{locale}/protected/home-office` | AUTH | alias of assistant | KintexBG | `bg`/`de` | `home-office-workspace` | `/api/chat` (Groq) | PARTIAL | Phase 7 | LEGACY |
-| `/{locale}/security` | AUTH | account security / 2FA | BG copy only | BG-only text | `mfa-settings` | Supabase MFA | PARTIAL | Phase 2 (security) | KEEP |
-| `/{locale}/protected/security` | AUTH | alias of security | BG copy only | BG-only text | `mfa-settings` | Supabase MFA | PARTIAL | Phase 2 (security) | LEGACY |
+| `/{locale}/security` | PUBLIC | trust page (Layer 0) | HORIZON by VZG | `bg`/`de` | `public-layer-page` | none | ACTIVE | Phase 1 | KEEP |
+| `/{locale}/protected/security` | AUTH | interim MFA/security surface | HORIZON by VZG | `bg`/`de` | `mfa-settings` | Supabase MFA | PARTIAL | Phase 2 (security) | LEGACY |
 | `/{locale}/profil` | AUTH | financial profile form | mixed | `bg`/`de` | `profile-form` | `profiles`, `ensureHousehold` | PARTIAL | Phase 2 / 4 (Profile) | REUSE |
 | `/{locale}/finanzamt` | AUTH | Finanzamt requests | mixed DE copy | DE-only copy | `finanzamt-request-form` | `finanzamt_requests` | PARTIAL | Phase 15 | REUSE |
 | `/{locale}/steuer` | AUTH | tax questionnaire + registry | mixed | DE-only copy | `tax-questionnaire`, `tax-form-registry`, `tax-pipeline-review` | `tax_form_registry`, `tax_cases` | PARTIAL | Phase 15 | REUSE |
@@ -374,7 +374,7 @@ These are TARGET routes. They are not required to exist yet. Nothing is redirect
 - Public Layer 0 must be usable in every supported UI locale.
 - `/functions` replaces the current sprawl of separate product/marketing routes.
 - `/security` is a public trust page and is distinct from the authenticated
-  `/{locale}/security` account-security page.
+  `/{locale}/protected/security` account-security page. `/{locale}/security` itself is public.
 
 ### 3.2 LAYER 1 — FIRST LOGIN / ONBOARDING
 

@@ -1,6 +1,7 @@
 # HORIZON by VZG — Final Site Map
 
-Reconciled against `origin/main` @ `1d844a2a069a0119fdea8ebc40ffa110b97afcb3`.
+Reconciled against `origin/main` @ `56b0aa5` plus the N3/N4/N6 navigation changes present in the
+working tree at reconciliation time (those code changes were not yet committed).
 Documentation only. This file records what is reachable today and how it is gated; it does not
 redesign UI and does not authorize removal or redirect of any route.
 
@@ -8,6 +9,7 @@ Canonical architecture: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md).
 Phase status: [`HORIZON_BUILD_LEDGER.md`](./HORIZON_BUILD_LEDGER.md).
 Working list: [`HORIZON_EXECUTION_CHECKLIST.md`](./HORIZON_EXECUTION_CHECKLIST.md).
 Route/product detail: [`HORIZON_ROUTE_PRODUCT_MAP.md`](./HORIZON_ROUTE_PRODUCT_MAP.md).
+Navigation architecture: [`HORIZON_NAVIGATION_DESIGN.md`](./HORIZON_NAVIGATION_DESIGN.md).
 
 All localized routes exist for both `bg` and `de` (`/{locale}/...`). Root-level routes without a
 locale are forwarded to the locale-prefixed form by `proxy.ts`, except `/api/**`, `/_next/**`,
@@ -41,7 +43,8 @@ who may enter.
 
 Note: `/{locale}/security` is the public trust page (`PublicLayerPage`). The authenticated MFA
 surface is `/{locale}/protected/security` (legacy section below). `HORIZON_MASTER_MAP.md` §2.2
-labels `/{locale}/security` as `AUTH`; that label is stale and is superseded by this map.
+previously labeled `/{locale}/security` as `AUTH`; that label has been corrected to `PUBLIC` in
+the Master Map to match this map and `app/[locale]/security/page.tsx`.
 
 ## 2. Public — Affiliate / partner (HORIZON OPTIMIZE)
 
@@ -95,8 +98,8 @@ marked in the last column.
 | `/{locale}/vertraege` | AUTH | Contracts (P17) | IMPLEMENTED | Yes |
 | `/{locale}/documents` | AUTH | Documents (P6) | PARTIAL | Yes |
 | `/{locale}/steuer` | AUTH | Steuererklärung (P15) | IMPLEMENTED | Yes |
-| `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | via Steuern |
-| `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | via Steuern |
+| `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | via Steuern / SteuerTabs (N6) |
+| `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | via Steuern / SteuerTabs (N6) |
 | `/{locale}/profil` | AUTH | Profile | IMPLEMENTED | Yes |
 | `/{locale}/assistant` | AUTH | KintexBG-era home-office chat (P7 predecessor) | PARTIAL | No |
 | `/{locale}/finanzamt` | AUTH | Finanzamt surfaces | PARTIAL | No |
@@ -155,7 +158,7 @@ decision with compatibility risk and no evidence of zero use was gathered.
 | `/{locale}/protected` | REDIRECT | Forwards to `/{locale}/dashboard` (handled in `proxy.ts`) | LEGACY |
 | `/{locale}/protected/home-office` | AUTH | KintexBG-era home office workspace | LEGACY |
 | `/{locale}/protected/security` | AUTH | Legacy security surface (authenticated MFA) | LEGACY |
-| `/{locale}/office` | PUBLIC SHELL (client-only, no server guard) | KintexBG communication prototype | LEGACY |
+| `/{locale}/office` | PUBLIC SHELL (client-only, no server guard; self-chromed — N4 suppresses the public header/footer) | KintexBG communication prototype | LEGACY |
 | `/{locale}/office/cases/[id]` | AUTH | KintexBG-era office case | LEGACY |
 | `/check`, `/uslugi`, `/kindergeld`, `/produkte`, `/tarife`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces | LEGACY |
 | `/{locale}/anfrage`, `/{locale}/zayavka` | PUBLIC | Lead capture | LEGACY |
@@ -163,7 +166,9 @@ decision with compatibility risk and no evidence of zero use was gathered.
 ## 8. Legacy route candidates for later removal or redirect
 
 Report only. Nothing here is deleted or redirected by this document. Each candidate is a
-product/compatibility decision for the owner.
+product/compatibility decision for the owner. This list is the input to navigation item **N7**
+(`HORIZON_NAVIGATION_DESIGN.md`), which is still NOT STARTED. The **N4** change did not remove or
+redirect anything: `/{locale}/office` only stopped drawing the duplicate public chrome.
 
 | Candidate | Current role | Suggested later action | Risk |
 |---|---|---|---|

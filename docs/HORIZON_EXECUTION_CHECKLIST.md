@@ -42,6 +42,19 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   inserts `201`; cross-user reads `[]` for case/fact/profile; spoofed-owner fact insert `42501`;
   cross-owner profile PATCH 0 rows (row unchanged); anon `401`; owner positive control `200`
 - ✅ P12–P17 guide→case workspace re-confirmed 2026-09-25 for all five intents in an authenticated session
+- ✅ N0–N2 navigation architecture landed at `56b0aa5` (single nav model, desktop sidebar regroup,
+  mobile bottom bar + More sheet)
+- ✅ N3 dashboard de-duplication implemented and verified (`homeShortcuts` removed, duplicate status
+  card removed, "Vorgang starten" is the single primary CTA). Code changes uncommitted at
+  reconciliation time.
+- ✅ N4 `/{locale}/office` double-chrome fix implemented and verified (public Layer 0 header/footer
+  suppressed; route and functionality unchanged). Code changes uncommitted at reconciliation time.
+- ✅ N6 Steuer subpages surfaced implemented and verified (`SteuerTabs` on `/steuer`,
+  `/steuer/providers`, `/steuer/review`). Code changes uncommitted at reconciliation time.
+- ✅ Navigation verification: tests, typecheck, lint, i18n parity and production build all pass
+- ⬜ N5 Security workspace settings surface — owner decision
+- ⬜ N7 Legacy route redirect/removal — requires explicit owner approval (candidates in
+  `FINAL_SITE_MAP.md` §8)
 
 ---
 
@@ -117,7 +130,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Unit tests
 - ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/guide` returned `200` under a live
   owner session and rendered all five task entries; anon access redirects to login (`307`).
-- FROZEN (owner decision)
+- ⬜ FROZEN (owner decision)
 
 ## P4 — HORIZON Home + Five Entry Modules
 
@@ -133,7 +146,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Unit tests
 - ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/dashboard` returned `200` under a
   live owner session and rendered the five entry modules with live per-module case counts.
-- FROZEN (owner decision)
+- ⬜ FROZEN (owner decision)
 
 ## P5 — Shared Case Engine
 
@@ -154,7 +167,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   owner's own case/fact/draft/approval writes all succeeded. This is the runtime confirmation
   the earlier segment lacked (previously static-only).
 - Run `horizon_case_engine_isolation.sql` against a migrated disposable database
-- FROZEN
+- ⬜ FROZEN (owner decision pending)
 
 ## P6 — Document Intake / OCR / Explanation
 
@@ -239,7 +252,7 @@ The current HORIZON intake and legacy document flows coexist, but they now share
   ships the retired `kintex-draft` codename; it is now `HORIZON-by-VZG-draft-v{n}.txt`.
   Pinned by `lib/horizon/draft-export-branding.test.ts` and confirmed live on a real export.
 - End-to-end verification
-- FROZEN
+- ⬜ FROZEN (owner decision pending)
 
 ## P9 — Official PDF Form Engine
 
@@ -487,7 +500,7 @@ Status: DONE — AUTHENTICATED BROWSER E2E PASS 2026-09-25 — NOT FROZEN.
   module button (`200`); the panel rendered the tax-year selector with 2025 supported and reported
   2026 as "Amtlich noch nicht veröffentlicht"; no ELSTER transmission field or credential exists
   anywhere on the surface
-- FROZEN
+- ⬜ FROZEN (owner decision pending)
 
 ## P16 — Unterlagen erklären
 
@@ -517,7 +530,7 @@ Status: DONE — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 — NOT FROZEN.
   "Unterlagen erklären"; pasted text stored; panel rendered classification `Behördenbescheid` with
   the verbatim line quoted, deadline `printed` 2026-10-15 with its quoted sentence, a risk caveat,
   one next action, and the document count
-- FROZEN
+- ⬜ FROZEN (owner decision pending)
 
 ## P17 — Contract Management
 
@@ -544,7 +557,7 @@ remains reference-only.
   opened a real `kuendigung` case (`/{locale}/guide/{id}`, `200`) with its evidenced facts seeded
   and `contract_linked` audited — the same flow that then drives P14's letter to approval and
   download. `GET /api/contracts` correctly `405` (create/update/delete + page only).
-- FROZEN
+- ⬜ FROZEN (owner decision pending)
 
 ---
 

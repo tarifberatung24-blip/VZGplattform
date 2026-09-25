@@ -2,7 +2,9 @@
 
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
-Base: `origin/main` @ `1d844a2a069a0119fdea8ebc40ffa110b97afcb3`
+Base: `origin/main` @ `1d844a2a069a0119fdea8ebc40ffa110b97afcb3`; navigation N0–N2 landed at
+`56b0aa5`. N3/N4/N6 are implemented and verified but were uncommitted at reconciliation time, so
+the phase records below describe `main` unless a record says otherwise.
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -57,6 +59,7 @@ after a module meets the full DONE definition.
 | P15 | STEUERERKLÄRUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (tax-year panel, 2025 supported, 2026 unpublished notice, no ELSTER transmit) | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (pasted-text/email intake now analysed; classification + quoted evidence, printed deadline, risk caveat, next action rendered) | NO | YES |
 | P17 | CONTRACT MANAGEMENT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (archive render, Kündigung-vorbereiten link creates seeded `kuendigung` case, `contract_linked` audited); guide→case workspace re-confirmed 2026-09-25 for all five intents | NO | YES |
+| N0–N6 | HORIZON NAVIGATION ARCHITECTURE | N0–N2 DONE at `56b0aa5`; N3/N4/N6 implemented + verified, code uncommitted at reconciliation (tests, typecheck, lint, i18n, build). N5 and N7 NOT STARTED — owner decision | NO | YES for N5/N7 |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -269,7 +272,8 @@ after a module meets the full DONE definition.
 - **CURRENT STATUS:** VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (not DONE, not FROZEN).
   `/{locale}/dashboard` returned `200` under a live owner session and rendered the five HORIZON
   entry modules with live per-module case counts (e.g. "Agentur für Arbeit 2 Vorgänge"); each of
-  the five entries was clicked and created a real case. 12 registry unit tests pass.
+  the five entries was clicked and created a real case. Registry unit tests pass (11 after N3
+  removed the shortcut-restatement cases).
 - **CURRENT IMPLEMENTATION:** `/{locale}/dashboard` renders `VzgDashboard`, which reads
   `profiles`, `contracts`, `documents`, `deadlines` via `ensureHousehold` and composes
   `components/horizon/horizon-home.tsx`. That surface presents exactly the five HORIZON entry
@@ -278,12 +282,14 @@ after a module meets the full DONE definition.
   `lib/horizon/modules/actions.ts` into the shared P5 case engine — the same engine and the same
   destination as the guide, so the two surfaces cannot drift. Per-module case counts are resolved
   through `resolveCaseModule`, so pre-P5 rows are attributed by legacy intent rather than dropped.
-  Secondary destinations are My Cases (`/guide`), Documents, Profile and Security, all existing
-  pages. Module labels come from the guide vocabulary, so the two surfaces cannot disagree.
+  The sidebar owns the workspace destinations (`lib/navigation/horizon-nav.ts`); the dashboard no
+  longer restates them (N3 removed the registry's `homeShortcuts`), and its single primary CTA is
+  "Vorgang starten" → `/{locale}/guide`. Module labels come from the guide vocabulary, so the two
+  surfaces cannot disagree.
   Supporting components: `workplace-action-center`, `missing-information-interviewer`,
   `smart-dashboard-preview`, `dashboard-workspace`.
 - **REUSE:** `VzgDashboard`, `HorizonHome`, `workplace-action-center`,
-  `missing-information-interviewer`, `dashboard-layout`, `horizon-sidebar`, `module-page`,
+  `missing-information-interviewer`, `dashboard-workspace`, `horizon-sidebar`, `module-page`,
   `module-workspaces`, `smartDashboardRules`.
 - **MISSING:** the dashboard still renders legacy-era cards alongside the HORIZON module entry, and
   `lib/kintex-navigation.ts` retains 10 modules (several flagged `planned`) that are not part of
@@ -1183,6 +1189,48 @@ after a module meets the full DONE definition.
   case engine; no invented savings or prices; loading, error, and empty states complete;
   tests, build, real verification pass.
 - **FROZEN:** NO
+
+---
+
+## NAVIGATION ARCHITECTURE — N0–N6 (documentation + navigation UI)
+
+- **ID:** N0–N6 (not part of P0–P17; defined by `HORIZON_NAVIGATION_DESIGN.md`)
+- **SYSTEM:** HORIZON navigation architecture
+- **TARGET ROUTES:** no new routes. Existing surfaces: `/{locale}/dashboard`,
+  `/{locale}/office`, `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`.
+- **CURRENT STATUS:** N0–N2 DONE at `56b0aa5`; N3, N4 and N6 implemented and verified (tests,
+  typecheck, lint, i18n, build) but their code was uncommitted at reconciliation time. N5 and N7
+  NOT STARTED and require an explicit owner decision.
+- **CURRENT IMPLEMENTATION:**
+  - **N0** — `lib/navigation/horizon-nav.ts` is the single navigation model; the sidebar, mobile
+    bottom bar and More sheet derive from it (`lib/navigation/horizon-nav.test.ts` guards the
+    protection invariant).
+  - **N1** — four-group desktop sidebar including the interim Security entry
+    (`/{locale}/protected/security`).
+  - **N2** — 5-slot mobile bottom bar plus More sheet, on workspace routes only.
+  - **N3** — the dashboard no longer restates sidebar destinations: `homeShortcuts` was removed
+    from `lib/horizon/modules/registry.ts`, the duplicated status card was removed from
+    `components/dashboard/workplace-action-center.tsx`, and "Vorgang starten" is the single
+    primary CTA in `components/dashboard/vzg-dashboard.tsx`.
+  - **N4** — `isSelfChromedPath` in `lib/kintex-navigation.ts` suppresses the public Layer 0
+    header/footer on `/{locale}/office`, which renders its own header. Route, gating and
+    functionality unchanged.
+  - **N6** — `components/finance/steuer-tabs.tsx` renders in-page tabs on all three Steuer pages
+    from the unit-tested model `lib/navigation/steuer-tabs.ts`.
+- **REUSE:** `horizon-nav`, `horizon-sidebar`, `mobile-bottom-nav`, `kintex-navigation`,
+  `steuer-tabs`.
+- **MISSING:** N5 (workspace settings surface for Security/MFA) and N7 (legacy redirect/removal
+  candidates in `FINAL_SITE_MAP.md` §8). Dead navigation code (`SiteHeader`, `kintexModules`) is
+  still present and is N7 territory.
+- **DEPENDENCIES:** none on the phase sequence; navigation is presentation only and does not
+  change backend, Supabase, APIs, migrations, auth, document engines, approvals, signatures or SMTP.
+- **BLOCKERS:** N5 and N7 are owner decisions. Nothing else is blocked.
+- **DONE CRITERIA:** all seven N items resolved or explicitly deferred by the owner; navigation
+  surfaces derive from one model; no duplicate navigation restatement; every authenticated
+  navigation destination inside the protection boundary; tests, typecheck, lint, i18n and build
+  pass.
+- **FROZEN:** NO
+- **OWNER APPROVAL REQUIRED:** YES for N5 and N7.
 
 ---
 

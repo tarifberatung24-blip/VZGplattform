@@ -96,8 +96,8 @@ sets are not identical: two routes below are public, as noted.
 | `/{locale}/vertraege` | AUTH | Contracts (P17) | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/documents` | AUTH | Documents (P6) | PARTIAL | KEEP | Yes |
 | `/{locale}/steuer` | AUTH | Steuererklärung (P15) | IMPLEMENTED | KEEP | Yes |
-| `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | KEEP | via Steuern |
-| `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | KEEP | via Steuern |
+| `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | KEEP | via SteuerTabs (N6) |
+| `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | KEEP | via SteuerTabs (N6) |
 | `/{locale}/profil` | AUTH | Profile | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/assistant` | AUTH | AI home-office chat (P7, KintexBG-era surface) | PARTIAL | LEGACY | No |
 | `/{locale}/finanzamt` | AUTH | Finanzamt surfaces | PARTIAL | KEEP | No |
@@ -109,14 +109,16 @@ case-scoped assistant surface and is not in the primary navigation; the P7 work 
 workspace (`components/guide/case-assistant-panel.tsx`) reached through `/guide/{caseId}`.
 
 `/{locale}/security` is **PUBLIC** (the Layer 0 trust page) and is listed in the public table
-above. `HORIZON_MASTER_MAP.md` section 2.2 still labels it `AUTH`, which contradicts
-`app/[locale]/security/page.tsx` (it renders `PublicLayerPage`); the public classification here is
-the correct one. The authenticated MFA surface is `/{locale}/protected/security`, listed under
-legacy surfaces.
+above. `HORIZON_MASTER_MAP.md` section 2.2 previously labeled it `AUTH`, contradicting
+`app/[locale]/security/page.tsx` (it renders `PublicLayerPage`); that label has now been corrected
+to `PUBLIC` in the Master Map. The authenticated MFA surface is `/{locale}/protected/security`,
+listed under legacy surfaces.
 
 `/{locale}/dashboard` is `PARTIAL`: it still composites legacy-era blocks around the HORIZON
-module entry. Its data, chart and search behaviour is owned by TAR-10 and was not changed by
-TAR-7/TAR-8.
+module entry. N3 removed the dashboard's duplicate restatement of sidebar destinations and reduced
+it to one primary CTA ("Vorgang starten"); the remaining legacy-era blocks are a visual change that
+is out of scope until the owner authorizes it. The dashboard's data, chart and search behaviour was
+not changed.
 
 ## Public routes outside the workspace shell
 
@@ -155,7 +157,7 @@ product decision with compatibility risk and no evidence of zero use was gathere
 | `/{locale}/protected` | REDIRECT | Forwards to `/{locale}/dashboard` (308) | LEGACY | LEGACY |
 | `/{locale}/protected/home-office` | AUTH | KintexBG-era home office workspace | LEGACY | LEGACY |
 | `/{locale}/protected/security` | AUTH | Legacy security surface | LEGACY | LEGACY |
-| `/{locale}/office` | PUBLIC (client shell, no server guard) | KintexBG-era office workspace | LEGACY | LEGACY |
+| `/{locale}/office` | PUBLIC (client shell, no server guard; self-chromed, N4 suppresses the public header/footer) | KintexBG-era office workspace | LEGACY | LEGACY |
 | `/{locale}/office/cases/[id]` | AUTH | KintexBG-era office case | LEGACY | LEGACY |
 
 `/{locale}/protected` is handled in `proxy.ts` and never renders.
