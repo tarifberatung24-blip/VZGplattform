@@ -1,0 +1,25 @@
+-- TAR-14 / P2 — complete the first-login profile upsert grant.
+--
+-- The previous migration (20260925013000) added INSERT (onboarding_step), which
+-- covers only a brand-new user's very first save: with no existing row the
+-- upsert takes the INSERT branch.
+--
+-- Every later save takes the UPDATE branch. PostgREST compiles
+-- profiles.upsert() with `Prefer: resolution=merge-duplicates` into
+--   INSERT ... ON CONFLICT (id) DO UPDATE SET <every payload column>
+-- and the SET list includes the conflict target column `id` itself. A DO UPDATE
+-- therefore needs UPDATE privilege on `id`, not just on the payload columns.
+-- authenticated held INSERT and SELECT on `id` but never UPDATE, so the whole
+-- statement was rejected with 42501 while per-column PATCH kept working.
+--
+-- That made P2 onboarding fail on the tour/finish steps and on the profile form
+-- for every returning user. Verified on a disposable database: the identical
+-- statement is denied before this grant and succeeds after it.
+--
+-- Scope is deliberately narrow: column-level UPDATE on the primary key only.
+-- RLS still confines writes to the caller's own row through profiles_update_own
+-- (using and with check both require auth.uid() = id), so this grants no ability
+-- to touch another user's profile. No table-wide grant, no RLS change, and no
+-- destructive statement.
+
+grant update (id) on public.profiles to authenticated;

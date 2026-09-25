@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { VzgDashboard } from "@/components/dashboard/vzg-dashboard"
 import { createClient } from "@/lib/supabase/server"
 import { ensureHousehold } from "@/lib/supabase/household"
@@ -21,9 +21,15 @@ export default async function DashboardPage({
 
   // Re-applied here, not only in the proxy: a user who has not finished
   // first-login onboarding must not reach the dashboard.
-  const cookieStore = await cookies()
-  const storedLocale = cookieStore.get(LOCALE_COOKIE_KEY)?.value
-  const locale = isLocale(storedLocale) ? storedLocale : defaultLocale
+  //
+  // The locale comes from the resolved route segment (proxy.ts sets x-locale),
+  // not from the locale cookie. The cookie can be stale or reflect a previously
+  // visited locale, and using it here sent a German visitor to /bg/onboarding/...
+  // — a locale switch mid-flow. The route segment is what the user actually asked
+  // for; the cookie fallback only covers a direct internal render.
+  const routeLocale = (await headers()).get("x-locale")
+  const storedLocale = (await cookies()).get(LOCALE_COOKIE_KEY)?.value
+  const locale = isLocale(routeLocale) ? routeLocale : isLocale(storedLocale) ? storedLocale : defaultLocale
   const onboardingTarget = onboardingPath((await readOnboardingStep()).step, locale)
   if (onboardingTarget) redirect(onboardingTarget)
 

@@ -41,7 +41,7 @@ after a module meets the full DONE definition.
 | --- | --- | --- | --- | --- |
 | P0 | MASTER MAP + GOVERNANCE | IN_PROGRESS | NO | YES |
 | P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
-| P2 | AUTH + FIRST LOGIN + ONBOARDING | IMPLEMENTATION VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
+| P2 | AUTH + FIRST LOGIN + ONBOARDING | IMPLEMENTATION + LOCAL E2E VERIFIED — AWAITING OWNER MIGRATION APPLY | NO | YES |
 | P3 | HORIZON GUIDE | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | IMPLEMENTATION ADDED — RUNTIME VERIFICATION PENDING | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING | NO | YES |
@@ -146,6 +146,23 @@ after a module meets the full DONE definition.
     as version `20260919234220` / `profiles_onboarding_step`. Existing production profile
     verification on 2026-09-25 showed one profile at `completed`.
   - Column-level grants cover onboarding/profile writes; no P2 change weakens RLS.
+  - Second grant gap found and fixed on 2026-09-25 (migration
+    `20260925020000_profiles_onboarding_update_id_grant.sql`). The earlier
+    `insert (onboarding_step)` grant only covered a brand-new user's first save.
+    PostgREST compiles `profiles.upsert()` into `INSERT ... ON CONFLICT (id) DO UPDATE
+    SET <payload columns>`, and that SET list includes the conflict target column `id`.
+    `authenticated` held INSERT/SELECT on `id` but never UPDATE, so every save for a user
+    who already had a row was rejected with `42501` — the tour/finish steps and the profile
+    form. Per-column `PATCH` kept working, which masked the cause. One-line fix: column-level
+    `UPDATE (id)`. Verified on a disposable Postgres: the identical statement is denied
+    before the grant and succeeds after it, and RLS `profiles_update_own` still blocks
+    cross-user writes and `id` repointing.
+  - Locale-consistency defect found and fixed on 2026-09-25: `app/dashboard/page.tsx`
+    derived the redirect locale from the locale cookie instead of the resolved route
+    segment, so a visitor with a stale `bg` cookie hitting `/de/dashboard` was sent to
+    `/bg/onboarding/profile` — a silent locale switch mid-flow. It now prefers the
+    `x-locale` route header (the same pattern `app/za-nas/page.tsx` uses) with the cookie
+    as fallback.
 
   Defensive behaviour: an unreadable step is treated as the first step server-side, while the
   proxy gate is best-effort so a read failure can never lock a user out; the step is used to
@@ -155,11 +172,16 @@ after a module meets the full DONE definition.
   `profile-form`, `ensure_kintex_household` RPC, `profiles.locale` /
   `conversation_locale` / `output_locale`.
 - **MISSING:** production end-to-end acceptance evidence for a first-login journey and the
-  recovery/MFA/logout edge paths. The required onboarding column and production migration are
-  already present; no migration blocker remains.
+  recovery/MFA/logout edge paths. The onboarding column, the column-level upsert grants, and
+  the locale-consistency fix are complete in the repository; the only remaining blocker is the
+  owner-side application of migration `20260925020000_profiles_onboarding_update_id_grant.sql`,
+  which cannot be applied with the credentials available in this environment (no management
+  PAT, no database password, and no SQL-executing RPC on the project).
 - **DEPENDENCIES:** P0; consumes frozen P1 public entry points without modifying them.
-- **BLOCKERS:** no schema blocker. Remaining gate is authenticated production runtime
-  verification with an authorized test/existing user.
+- **BLOCKERS:** owner-side migration application (`20260925020000`). Until it is applied,
+  an authenticated production user with an existing `profiles` row cannot persist onboarding
+  or profile changes (`42501`). Once applied, the remaining gate is authenticated production
+  runtime verification with an authorized test/existing user.
 - **DONE CRITERIA:** sign up → e-mail confirmation → login → first-login check → minimal profile
   → short click guide → dashboard works end-to-end; the tour runs once and is resumable;
   onboarding completion is persisted; legacy `language` state redirects to profile without a

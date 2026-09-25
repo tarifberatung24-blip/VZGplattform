@@ -21,10 +21,12 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ P1 public/security routing implementation
 - ✅ GitHub Actions CI green on the P2 commit
 - ✅ P2 implementation (localization, routes, guard, proxy gate, migration file)
+- ✅ P2 runtime E2E: login, first-login gate, onboarding routes, locale consistency (local, migrated disposable DB)
+- ✅ P2 upsert grant gap fixed (`20260925020000_profiles_onboarding_update_id_grant.sql`; denied-before / allowed-after proven on disposable Postgres)
+- ✅ P2 locale-consistency defect fixed (`app/dashboard/page.tsx` prefers route locale over stale cookie)
 - P1 owner/legal acceptance
 - P1 FROZEN after explicit owner acceptance
 - P2 migration applied to the project (owner-side authorized channel)
-- P2 runtime end-to-end verification (blocked locally: no `.env`/anon key)
 - P2 explicit owner acceptance
 - ✅ P5 canonical model decision (`public.cases`; `platform_*` retained for compatibility)
 - ✅ P5 implementation (repository, lifecycle, approval, audit, and ownership guards)
