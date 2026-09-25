@@ -30,7 +30,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - P2 explicit owner acceptance
 - ✅ P5 canonical model decision (`public.cases`; `platform_*` retained for compatibility)
 - ✅ P5 implementation (repository, lifecycle, approval, audit, and ownership guards)
-- P5 runtime/RLS verification against a migrated database
+- ✅ P5 runtime/RLS verified against the live project (owner-scoped writes succeed; cross-user read/write/insert blocked)
 
 ---
 
@@ -121,7 +121,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Canonical module-to-case typing (seven modules)
 - ✅ Canonical tasks / audit / drafts / approvals relationship
 - ✅ Ownership enforcement in every repository operation
-- ✅ Cross-tenant isolation tests written (static coherence verified here; live DB run pending)
+- ✅ Cross-tenant isolation tests written and confirmed live (user B read `[]`, update `0 rows`, forged insert 403)
 - ✅ State-transition audit trail
 - ✅ Owner authorization for architecture/schema decision
 - ✅ Typecheck / Lint / i18n / Tests / Production build
@@ -455,8 +455,10 @@ remains reference-only.
 ### OpenHands
 
 - ✅ P2 implementation pushed to `main` (`fcc6ce6`); CI green
-- ✅ P5 implementation committed
-- Next: apply owner-side migrations, then runtime verification of P2 and P5
+- ✅ P5 live DB/RLS verified; P12–P17 authenticated runtime E2E PASS
+- ✅ Office Supabase clients accept `NEXT_PUBLIC_SUPABASE_ANON_KEY` (documented primary) — previously required only `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, silently degrading office surfaces to the preview repository (`503`)
+- ✅ Office case create no longer writes `cases.status` explicitly (DB default `NEW`); the write required an insert grant P5 deliberately withheld (`403 permission denied`)
+- Next: apply owner-side migrations to production, then production E2E acceptance
 
 ### ChatGPT
 
