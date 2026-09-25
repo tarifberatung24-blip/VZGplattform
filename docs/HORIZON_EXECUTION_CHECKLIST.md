@@ -187,6 +187,10 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 - ✅ **Live approval gate observed (2026-09-25):** missing/invalid hash refused with HTTP 400;
   correct `content_hash` approved (201) and released the draft; tax-form download `403
   not_approved` before approval and `200` after
+- ✅ **Browser E2E (2026-09-25):** in an authenticated session the required acknowledgement was
+  enforced server-side; "Entwurf freigeben" released the exact German draft
+  ("Dieser Entwurf ist freigegeben und unverändert."); the gated tax-form download was `403
+  not_approved` before approval and `200` after, so approval genuinely gates export
 - Canonical draft/approval model
 - Exact German draft + translation review
 - Confirmed-facts gate
@@ -201,9 +205,9 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 
 ## P9 — Official PDF Form Engine
 
-Status: PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE.
-End-to-end generation works for one verified reference form (Hauptvordruck
-ESt 1 A 2025, page 1). Breadth remains; mechanism is proven. 1 of 9 mappings verified.
+Status: PARTIAL / REFERENCE FORM VERIFIED — P9 mechanism, provenance, approval gate
+and download are browser-verified end-to-end (2026-09-25); breadth (1 of 9 mappings)
+means NOT DONE. Mechanism is proven.
 
 - ✅ Source-integrity verification: the template SHA-256 is recomputed from the
   file bytes and a mismatch refuses generation
@@ -246,16 +250,24 @@ ESt 1 A 2025, page 1). Breadth remains; mechanism is proven. 1 of 9 mappings ver
 - ⬜ Verified overlay mappings for the other 8 FMS templates — each needs its own
   measurement against its own hash. Populating them by guessing is prohibited
 - ⬜ Agentur fuer Arbeit and Jobcenter official templates
-- ⬜ Preview/download surface wiring for the stored artifact (engine writes and
-  audits it; the UI currently reports generation status)
-- ⬜ Runtime/E2E verification of the preparation surface (needs an authenticated session)
+- ✅ **Preview/download surface verified live (2026-09-25):** after approval the gated
+  `/api/horizon/cases/{id}/tax-form` route returned `200` and its signed URL served the stored
+  artifact as a real PDF (62,961 bytes, `%PDF-`); before approval the same route returned
+  `403 not_approved`, so download follows approval rather than bypassing it
+- ✅ **Runtime/E2E verification of the preparation surface (2026-09-25):** a browser-driven
+  authenticated session selected tax year 2025 (2026 shown disabled as "Amtlich noch nicht
+  veröffentlicht"), chose `fms-2025-est-1-a`, generated the form from 7 confirmed facts, and the
+  review panel displayed "Ausgefüllte Felder (7)" with all 7 values and "Leer gebliebene Felder
+  (0)" plus template/mapping/output SHA-256 provenance. A case with no confirmed facts is refused
+  by design (`nothing_to_fill`), not filled blank
 - ⬜ FROZEN
 
 ## P10 — Signature Engine
 
-Status: IN_PROGRESS — a VISUAL signature is applied end-to-end for one verified
-reference form (Hauptvordruck ESt 1 A 2025, page 2). Mechanism proven; breadth and
-the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
+Status: PARTIAL / REFERENCE FORM VERIFIED — a VISUAL signature is applied end-to-end for one
+verified reference form (Hauptvordruck ESt 1 A 2025, page 2), browser-verified 2026-09-25.
+Mechanism proven; breadth and the legal-strength/multi-signatory decisions remain. NOT DONE,
+NOT FROZEN.
 
 - ✅ Visual-signature scope stated plainly in code, record and UI
 - ✅ Cryptographic / PAdES / QES scope separated — the type vocabulary holds only
@@ -290,8 +302,13 @@ the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
 - ⬜ Measured signature placements for the other 8 FMS templates
 - ⬜ Owner decision: whether a legally stronger signature is required and, if so, which
 - ⬜ Multi-signatory support ("Unterschrift(en)" covers spouses; one signature drawn)
-- ✅ Runtime/E2E verification of the signing engine against the live approved artifact (2026-09-25);
-  browser-driven canvas signing surface still pending an interactive session
+- ✅ Runtime/E2E verification of the signing engine against the live approved artifact (2026-09-25)
+- ✅ **Browser-driven signing surface verified (2026-09-25):** an authenticated session signed the
+  approved generated form with a real PNG and date; a new `VISUAL` draft v2 appeared
+  (`Signiertes amtliches Formular Hauptvordruck ESt 1 A (VISUAL)`, Version 2) with distinct
+  unsigned/signed SHA-256, page 2, placement version `horizon-signature-placement-v1`, correct
+  signer id and timestamp. Approving v2 and downloading returned the signed artifact as a real
+  PDF (62,961 bytes, `%PDF-`); the download was refused (`403 not_approved`) before that approval
 - ⬜ FROZEN
 
 ## P11 — Email Connection + Send Engine

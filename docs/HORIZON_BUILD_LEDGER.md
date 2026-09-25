@@ -45,11 +45,11 @@ after a module meets the full DONE definition.
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/horizon`, `/de/dashboard`, `/de/profile`, `/de/contracts`, `/de/documents` all 200) | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS VERIFIED (owner-scoped write policies confirmed end-to-end) | NO | YES |
-| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | VERIFIED — ALL FIVE INPUT TYPES + REAL OCR RUN (tesseract deu+eng recognized a test image: CONF 77) | NO | YES |
-| P7 | CONTEXT AI ASSISTANT | VERIFIED — CAPABILITY RAILS + CONTEXT GUARD TESTED; LIVE CALL REFUSES CLEANLY (AI_PROVIDER_NOT_CONFIGURED, 503) | NO | YES |
-| P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — APPROVAL HASH/VALIDITY + REVIEW FLOW TESTS PASS (18) | NO | YES |
-| P9 | OFFICIAL PDF FORM ENGINE | VERIFIED — 35 FORM-ENGINE TESTS PASS ON REAL REFERENCE TEMPLATES; ROUTE GATES UNTIL A FORM IS GENERATED | NO | YES |
-| P10 | SIGNATURE ENGINE | VERIFIED — SIGNATURE TESTS PASS ON THE REAL GENERATED DOCUMENT (110 combined) | NO | YES |
+| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES + REAL OCR RUN 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence linkage + two-stack reconciliation remain open | NO | YES |
+| P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); end-to-end answer owner-blocked on provider key | NO | YES |
+| P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`) | NO | YES |
+| P9 | OFFICIAL PDF FORM ENGINE | PARTIAL / REFERENCE FORM VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (ESt 1 A 2025 generated from 7 confirmed facts, provenance + filled/blank field list shown, approved, gated download → real PDF 62,961 bytes); breadth 1 of 9 mappings = not DONE | NO | YES |
+| P10 | SIGNATURE ENGINE | PARTIAL / REFERENCE FORM VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (PNG+date signed a real approved form → new VISUAL draft v2 with distinct signed SHA-256, page 2; approve → gated download real PDF 62,961 bytes) | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | IMPLEMENTED — SMTP TRANSPORT + SEND PLAN TESTS PASS (42); ABSENT PARTIAL CONFIG REFUSED BY DESIGN; NO REAL PROVIDER CONFIGURED (owner-only) | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 4-task selector, task recorded as confirmed fact + audited) | NO | YES |
 | P13 | JOBCENTER | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 3-task selector, task recorded as case fact + audited) | NO | YES |
@@ -296,7 +296,14 @@ after a module meets the full DONE definition.
   → drafts → approvals → tasks → audit)
 - **TARGET ROUTES:** no new public routes; consumed by all modules. Existing consumer surfaces:
   `/{locale}/office`, `/{locale}/office/cases/{id}`, `/{locale}/dashboard`.
-- **CURRENT STATUS:** MODEL + REPOSITORY VERIFIED — RUNTIME VERIFICATION PENDING (not DONE, not FROZEN)
+- **CURRENT STATUS:** MODEL + REPOSITORY VERIFIED — LIVE DB/RLS VERIFIED 2026-09-25 (not DONE,
+  not FROZEN). Cross-user isolation was observed against the live project with real authenticated
+  identities: a second user received `[]` for the first user's case/drafts/profile, a cross-owner
+  `INSERT` into `extracted_facts` was rejected with `42501` (RLS policy) — re-confirmed live on
+  2026-09-25 with an authenticated session and a spoofed `owner_id` — a cross-owner profile
+  `PATCH` changed zero rows, and the owner's own case/fact/draft/approval writes all succeeded.
+  The remaining gate to DONE/FROZEN is the module-wide authenticated E2E in P12–P17, not the
+  isolation layer.
 - **CANONICAL MODEL (owner decision, on record):** `public.cases` is the canonical case model,
   and tenancy is **owner-scoped via `auth.uid()`**. The `platform_cases`, `platform_tasks`,
   `platform_correspondence_drafts`, `platform_approvals`, and `platform_audit_events` family is
@@ -487,7 +494,14 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** enhances `/{locale}/office/cases/{id}`; API
   `/api/office/cases/{id}/workflow`, `/api/office/drafts/{id}/approve`,
   `/api/office/drafts/{id}/export`.
-- **CURRENT STATUS:** AUDITED
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25. The review and
+  approval surface was driven in a real authenticated session on the live project: with a draft
+  present the required acknowledgement checkbox was enforced server-side and "Entwurf freigeben"
+  released the exact draft ("Dieser Entwurf ist freigegeben und unverändert."), after which the
+  gated tax-form download returned `200`; before approval the same route returned
+  `403 not_approved`. Hash-binding was confirmed at the API too: a missing hash was refused with
+  HTTP 400 `"A valid approved content hash is required"` and the recorded `content_hash` produced
+  an approval row (`201`) bound to that exact hash.
 - **CURRENT IMPLEMENTATION:** deterministic draft generator and safety reviewer
   (`lib/office/workflow/deterministic.ts`) with required fact keys `recipient`, `subject`,
   `request`; SHA-256 `content_hash` and `input_facts_hash`;
@@ -535,11 +549,16 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Official PDF form engine
 - **TARGET ROUTES:** consumed by P12, P13, P15; existing readiness endpoint `/api/steuer/pdf`;
   preparation surface inside the case workspace (`components/guide/official-form-panel.tsx`).
-- **CURRENT STATUS:** PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — NOT DONE.
-  End-to-end generation works for one verified reference form (Hauptvordruck ESt 1 A 2025, page 1).
-  A filled artifact is produced, stored privately and queued for review with full provenance.
-  Remaining work is breadth (further verified mappings), not mechanism. Not DONE, not FROZEN:
-  1 of 9 mappings is verified.
+- **CURRENT STATUS:** PARTIAL / IMPLEMENTATION VERIFIED FOR REFERENCE TEMPLATE — P9 VERIFIED
+  2026-09-25 (mechanism + provenance + approval gate + download all pass end-to-end), NOT DONE
+  because breadth is not met. A fully browser-driven authenticated run generated the reference
+  form (Hauptvordruck ESt 1 A 2025) from 7 confirmed user facts, the draft-review panel displayed
+  the complete provenance (template SHA-256, mapping version `horizon-pdf-mapping-v1`, output
+  SHA-256) and "Ausgefüllte Felder (7)" with all 7 values plus "Leer gebliebene Felder (0)",
+  approval released it, and the gated download returned `200` → a real signed artifact whose
+  signed URL serves a real PDF (62,961 bytes, magic `%PDF-`). A form with no confirmed facts is
+  refused by design (`nothing_to_fill`) rather than producing a blank-looking artifact. Remaining
+  work is breadth (further verified mappings), not mechanism. Still 1 of 9 mappings verified.
 - **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
   `registry.ts` holds the 9 official FMS 2025 templates with authority, official source, form
   name, Form-ID, version, tax year, retrieval date and source SHA-256, keyed by tax year with no
@@ -594,11 +613,17 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Signature engine
 - **TARGET ROUTES:** consumed by P14 and P15; signing surface inside the case workspace
   (`components/guide/signature-panel.tsx`, mounted in `components/guide/case-workspace.tsx`).
-- **CURRENT STATUS:** PARTIAL / VERIFIED FOR THE REFERENCE FORM — NOT DONE. A visual signature is
-  applied end-to-end to a real generated document for the one template whose signature area has
-  been measured (Hauptvordruck ESt 1 A 2025, page 2), producing a new signed artifact with its
-  own provenance and audit entry. The mechanism is proven; breadth and the remaining criteria
-  below are not met. This module is **NOT FROZEN** and must not be treated as complete.
+- **CURRENT STATUS:** PARTIAL / VERIFIED FOR THE REFERENCE FORM — P10 BROWSER E2E PASS
+  2026-09-25, NOT DONE. A visual signature was applied end-to-end through the real UI: an approved
+  generated form (Hauptvordruck ESt 1 A 2025) was signed in an authenticated session with a real
+  PNG and a date, producing a *new* draft (`Signiertes amtliches Formular … (VISUAL)`, Version 2)
+  with its own provenance: signed PDF SHA-256 `9235c44e…` distinct from the unsigned
+  `8a75b8c5…`, page 2, placement version `horizon-signature-placement-v1`, correct signer id and
+  timestamp. The signed artifact was then approved and downloaded through the gated route
+  (`200` → signed URL → 62,961 bytes, magic `%PDF-`), while the same route before approval
+  returned `403 not_approved`. Unapproved content cannot be signed or downloaded. The mechanism
+  is proven; breadth and the open owner decisions below mean P10 is not complete and is
+  **NOT FROZEN**.
 - **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
   `signature-map.ts` holds measured signature placements bound to the template SHA-256 and tax
   year, with the measured evidence recorded (`labelBox`, `areaBox`, identification method). It is
