@@ -697,6 +697,12 @@ after a module meets the full DONE definition.
   states notification/connector work requires a configured connector, consent model,
   retry/idempotency, audit logs, and a deployment environment. **Where SMTP is not configured, every
   send ends as `PROVIDER_UNAVAILABLE` with nothing transmitted — verified behaviour, not a defect.**
+  **Re-confirmed 2026-09-25:** no `HORIZON_SMTP_*` variable is present in the runtime environment;
+  `readSmtpConfig` on an empty environment refuses and names all five required keys
+  (`HORIZON_SMTP_HOST`, `_PORT`, `_USER`, `_PASSWORD`, `_FROM`) with `invalid: []`, a partial
+  environment refuses and names exactly the absent ones, and a complete environment yields a config
+  on the STARTTLS path (`secure: false`). This is a genuine owner-only action: supply real SMTP
+  credentials (or approve an OAuth provider) before end-to-end sending can be verified.
 - **DONE CRITERIA:** an approved mail channel is connected; sending requires a current approval;
   the recipient is recorded data confirmed per send and never derived; attachments the user sees
   are bound by SHA-256 to the bytes actually sent; every send is idempotent and audited; a
