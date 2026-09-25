@@ -23,33 +23,12 @@ export type StoredPage = {
 }
 
 /**
- * Pages below this confidence, and pages that produced no text at all, require a
- * human to look before anything is built on them. Kept as a named constant
- * because the number is a policy choice, not an implementation detail.
+ * The status rule lives in `lib/documents/extraction-contract.ts` so the HORIZON
+ * intake and the office workflow path cannot disagree about when a document is
+ * READY. Re-exported here because the intake action and its tests import it from
+ * this module; the single definition stays in the shared contract.
  */
-export const PAGE_CONFIDENCE_FLOOR = 0.75
-
-/**
- * The lifecycle status a document takes after extraction.
- *
- * A page that OCR could not read, or read with low confidence, is still stored —
- * dropping it would lose the fact that the page exists — but the document is
- * marked `NEEDS_CONFIRMATION` so the user is asked rather than the text being
- * treated as reliable.
- *
- * Zero pages is also `NEEDS_CONFIRMATION`: "nothing was read" is not "read
- * successfully", and reporting READY over an empty extraction would tell the user
- * a document was understood when no text exists to have understood.
- */
-export function documentStatusAfterExtraction(
-  pages: readonly { text: string; confidence: number }[],
-): "READY" | "NEEDS_CONFIRMATION" {
-  if (pages.length === 0) return "NEEDS_CONFIRMATION"
-  const uncertain = pages.some(
-    (page) => page.text.trim().length === 0 || page.confidence < PAGE_CONFIDENCE_FLOOR,
-  )
-  return uncertain ? "NEEDS_CONFIRMATION" : "READY"
-}
+export { PAGE_CONFIDENCE_FLOOR, documentStatusAfterExtraction } from "../../documents/extraction-contract"
 
 /**
  * Maps extracted pages to `document_pages` rows.

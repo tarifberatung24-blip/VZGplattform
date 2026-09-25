@@ -44,8 +44,8 @@ after a module meets the full DONE definition.
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (blocker migration applied + live `profiles.upsert` 200; fresh-user login/onboarding/second-login E2E pass; FROZEN pending owner acceptance) | NO | YES |
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; real account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`, `/de/security` respond) | NO | YES |
-| P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS VERIFIED (owner-scoped write policies confirmed end-to-end) | NO | YES |
-| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES + REAL OCR RUN 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); **page-level evidence now reachable on the HORIZON path** — authenticated browser E2E read a real uploaded PDF into `document_pages` (`UPLOADED → READY`) and the P16 explanation quoted its text; two-stack reconciliation remains open | NO | YES |
+| P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS RE-VERIFIED 2026-09-25 (two real authenticated users: owner case/fact writes 201; other user read `[]` for case, fact and profile; spoofed-owner fact insert `42501`; cross-owner profile PATCH returned 0 rows — row unchanged; anon denied `401`; owner positive control 200) | NO | YES |
+| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | DONE — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence reachable on the HORIZON path (authenticated browser E2E read a real uploaded PDF into `document_pages`, `UPLOADED → READY`, and the P16 explanation quoted its text); one shared READY rule now used by both stacks (`lib/documents/extraction-contract.ts`), closing the office path's empty-extraction `READY` bug (live: text-free PDF → `NEEDS_CONFIRMATION`) | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); end-to-end answer owner-blocked on provider key | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`) | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Every FMS 2025 template carries a measured overlay mapping asserted against the real template bytes (label x/width and baseline-origin top within 0.6 pt); all 9 generate a real `%PDF-` artifact with page count preserved and source bytes untouched; 8 of 8 Anlagen produced drafts through the authenticated browser, each naming its own official Form-ID; full chain re-verified generate → approve → gated download → real signed PDF containing `Müller`/`Anna` | NO | YES |
@@ -56,7 +56,7 @@ after a module meets the full DONE definition.
 | P14 | KÜNDIGUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (contract→case link, draft v1, approval, gated real-PDF download) | NO | YES |
 | P15 | STEUERERKLÄRUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (tax-year panel, 2025 supported, 2026 unpublished notice, no ELSTER transmit) | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (pasted-text/email intake now analysed; classification + quoted evidence, printed deadline, risk caveat, next action rendered) | NO | YES |
-| P17 | CONTRACT MANAGEMENT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (archive render, Kündigung-vorbereiten link creates seeded `kuendigung` case, `contract_linked` audited) | NO | YES |
+| P17 | CONTRACT MANAGEMENT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (archive render, Kündigung-vorbereiten link creates seeded `kuendigung` case, `contract_linked` audited); guide→case workspace re-confirmed 2026-09-25 for all five intents | NO | YES |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -313,6 +313,12 @@ after a module meets the full DONE definition.
   `PATCH` changed zero rows, and the owner's own case/fact/draft/approval writes all succeeded.
   The remaining gate to DONE/FROZEN is the module-wide authenticated E2E in P12–P17, not the
   isolation layer.
+  Re-verified independently on 2026-09-25 through the REST surface with two freshly created real
+  authenticated users: the owner's case and fact inserts returned `201`; the other user read `[]`
+  for the owner's case, facts and profile; a spoofed-owner fact insert was refused with `42501`
+  ("new row violates row-level security policy"); a cross-owner profile `PATCH` returned `200` with
+  zero rows and the row was confirmed unchanged; anonymous read of the case was refused with `401`;
+  and the owner's own positive-control reads returned the rows.
 - **CANONICAL MODEL (owner decision, on record):** `public.cases` is the canonical case model,
   and tenancy is **owner-scoped via `auth.uid()`**. The `platform_cases`, `platform_tasks`,
   `platform_correspondence_drafts`, `platform_approvals`, and `platform_audit_events` family is
@@ -416,8 +422,24 @@ after a module meets the full DONE definition.
   at 0.70 confidence, correctly reading the printed title ("Hauptvordruck ESt 1 A",
   "Einkommensteuererklärung", "Sparzulage"). Provider-level OCR is therefore exercised on real
   bytes; **page-level evidence is now reachable on the HORIZON path** (see the browser E2E above:
-  page text is persisted and the P16 explanation quotes it), while the two-stack reconciliation
-  remains open.
+  page text is persisted and the P16 explanation quotes it).
+  **Two-stack reconciliation closed 2026-09-25.** The two document stacks each carried a private
+  copy of the "when is a document READY" rule, and they had drifted: the HORIZON path refused to
+  label an empty extraction `READY`, while the older office path decided the status with a bare
+  `pages.some(...)`, which is `false` on zero pages and so reported `READY` for a document from
+  which nothing had been read. The rule now has one definition,
+  `lib/documents/extraction-contract.ts` (`documentStatusAfterExtraction`,
+  `pageNeedsConfirmation`, `extractionRouteFor`, `EXTRACTABLE_MIME_TYPES`); the HORIZON intake
+  re-exports it and the office workflow path (`lib/office/workflow/documents.ts`, both the PDF and
+  the image-OCR branches) consumes it, so the same file cannot be labelled differently by the two
+  stacks. Verified live: a real text-free PDF (`/tmp/e2e/no_text.pdf`) uploaded through the real
+  office API and extracted through `/api/office/documents/{id}/extract` returned `200` with an
+  explicit `needsOcr: true` page and the row settled at `NEEDS_CONFIRMATION`, and the HORIZON
+  "Auslesen" path on a real two-page signed document still moved it to `READY` with both pages
+  persisted at confidence `1.0`. Contract unit tests cover zero pages, below-floor confidence, and
+  whitespace-only text; static coherence tests assert both stacks import the shared rule and that
+  the office path's private `.some()` status rule is gone. 979 Vitest + 20 Node tests pass; `tsc`
+  clean.
   (commits `b708697`, `3bff5c0`).
 - **CURRENT IMPLEMENTATION:** validated upload with canonical-project guard
   (`lib/documents/validation.ts` + `app/api/documents/upload/route.ts`);

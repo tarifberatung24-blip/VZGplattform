@@ -38,6 +38,10 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ P5 canonical model decision (`public.cases`; `platform_*` retained for compatibility)
 - ✅ P5 implementation (repository, lifecycle, approval, audit, and ownership guards)
 - ✅ P5 runtime/RLS verified against the live project (owner-scoped writes succeed; cross-user read/write/insert blocked)
+- ✅ P5 live RLS re-verified 2026-09-25 with two fresh real authenticated users via REST: owner case/fact
+  inserts `201`; cross-user reads `[]` for case/fact/profile; spoofed-owner fact insert `42501`;
+  cross-owner profile PATCH 0 rows (row unchanged); anon `401`; owner positive control `200`
+- ✅ P12–P17 guide→case workspace re-confirmed 2026-09-25 for all five intents in an authenticated session
 
 ---
 
@@ -482,6 +486,10 @@ Status: DONE — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 — NOT FROZEN.
   input is now composed from page text plus the user's own `role = 'user'` messages
   (`combineAnalysisText`); assistant turns are excluded
 - ✅ OCR/extraction (existing P6 stack; pages read through the existing `document_pages_read_own` policy)
+- ✅ P6 two-stack reconciliation 2026-09-25: one shared READY rule
+  (`lib/documents/extraction-contract.ts`) now used by both the HORIZON intake and the office
+  workflow path; the office path's empty-extraction `READY` bug is closed and covered by tests;
+  a live text-free PDF through the real office API now settles at `NEEDS_CONFIRMATION`
 - ✅ Classification from printed cues, with the matching line quoted, and `unclear` instead of a nearest guess
 - ✅ User correction of the classification, recorded as a confirmed fact and audited as a correction
 - ✅ Three-way deadline evidence: `printed` (quoted), `calculated` (only from a period the document itself states, always flagged for verification), `unknown`

@@ -5,6 +5,7 @@ import { writeAuditEvent } from '../supabase/audit'
 import { extractPdfPages } from './pdf-extraction'
 import { ocrScannedPdfPages } from './pdf-ocr'
 import { TesseractOcrProvider } from './ocr-provider'
+import { documentStatusAfterExtraction, pageNeedsConfirmation } from '../../documents/extraction-contract'
 
 const BUCKET = 'source-documents'
 const MAX_BYTES = 10 * 1024 * 1024
@@ -46,10 +47,10 @@ export async function extractOwnedPdfDocument(documentId: string) {
     const pages = extractedPages.map((page) => ocrPages.find((ocrPage) => ocrPage.pageNo === page.pageNo) ?? page)
     const inserted = await admin.from('document_pages').upsert(pages.map((page) => ({ owner_id: user.id, case_id: document.case_id, document_id: document.id, page_no: page.pageNo, text_content: page.text, confidence: page.confidence })), { onConflict: 'document_id,page_no' })
     if (inserted.error) throw new Error(inserted.error.message)
-    const status = pages.some((page) => page.needsOcr || page.confidence < 0.75) ? 'NEEDS_CONFIRMATION' : 'READY'
+    const status = documentStatusAfterExtraction(pages)
     const updated = await admin.from('source_documents').update({ status }).eq('id', document.id).eq('owner_id', user.id)
     if (updated.error) throw new Error(updated.error.message)
-    await writeAuditEvent(admin, user.id, document.case_id, 'document_extracted', { document_id: document.id, pages: pages.length, needs_ocr: pages.some((page) => page.needsOcr) })
+    await writeAuditEvent(admin, user.id, document.case_id, 'document_extracted', { document_id: document.id, pages: pages.length, needs_ocr: pages.some((page) => page.needsOcr) || pages.length === 0 })
     return { documentId: document.id, pages, needsOcr: pages.some((page) => page.needsOcr) }
   } catch (error) {
     await admin.from('source_documents').update({ status: 'FAILED' }).eq('id', document.id).eq('owner_id', user.id)
@@ -72,10 +73,10 @@ export async function ocrOwnedImageDocument(documentId: string) {
     const confidence = result.text ? result.confidence : 0
     const inserted = await admin.from('document_pages').upsert({ owner_id: user.id, case_id: document.case_id, document_id: document.id, page_no: 1, text_content: result.text, confidence }, { onConflict: 'document_id,page_no' })
     if (inserted.error) throw new Error(inserted.error.message)
-    const status = confidence < 0.75 || !result.text ? 'NEEDS_CONFIRMATION' : 'READY'
+    const status = documentStatusAfterExtraction([{ text: result.text, confidence }])
     const updated = await admin.from('source_documents').update({ status }).eq('id', document.id).eq('owner_id', user.id)
     if (updated.error) throw new Error(updated.error.message)
-    await writeAuditEvent(admin, user.id, document.case_id, 'document_ocr_completed', { document_id: document.id, confidence, needs_confirmation: status === 'NEEDS_CONFIRMATION' })
+    await writeAuditEvent(admin, user.id, document.case_id, 'document_ocr_completed', { document_id: document.id, confidence, needs_confirmation: pageNeedsConfirmation({ text: result.text, confidence }) })
     return { documentId: document.id, pageNo: 1, text: result.text, confidence, needsConfirmation: status === 'NEEDS_CONFIRMATION' }
   } catch (error) {
     await admin.from('source_documents').update({ status: 'FAILED' }).eq('id', document.id).eq('owner_id', user.id)
