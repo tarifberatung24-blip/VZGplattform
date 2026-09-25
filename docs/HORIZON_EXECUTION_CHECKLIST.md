@@ -94,8 +94,9 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Route guide choices into the canonical case flow
 - ✅ Localization
 - ✅ Unit tests
-- Real verification
-- FROZEN
+- ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/guide` returned `200` under a live
+  owner session and rendered all five task entries; anon access redirects to login (`307`).
+- FROZEN (owner decision)
 
 ## P4 — HORIZON Home + Five Entry Modules
 
@@ -109,8 +110,9 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Profile
 - ✅ Settings / Security
 - ✅ Unit tests
-- Real verification
-- FROZEN
+- ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/dashboard` returned `200` under a
+  live owner session and rendered the five entry modules with live per-module case counts.
+- FROZEN (owner decision)
 
 ## P5 — Shared Case Engine
 
@@ -263,14 +265,19 @@ the legal-strength/multi-signatory decisions remain. NOT DONE, NOT FROZEN.
   hash, approval content hash, placement version and page
 - ✅ Signed artifact stored privately and owner-scoped, with rollback of object and
   row if a later write fails; the signed record is its own draft
-- ✅ **Real functional verification:** signed PDF produced from the real P9 artifact;
+- ✅ **Real functional verification (2026-09-25, live artifact):** the engine was run against the
+  live approved artifact downloaded from P15 (case `Steuer 2025`, SHA-256 `8850f70e…`, 2 pages);
+  `planSignature` accepted it and `applyVisualSignature` produced a distinct signed hash
+  (`11b36db6…`) on page 2 with the input bytes re-hashed unchanged after the write
+- ✅ **Real functional verification (2026-09-19):** signed PDF produced from the real P9 artifact;
   image and date extract inside the measured area; date clear of the image; the
   pre-existing QR untouched; page count unchanged; all page-1 values preserved
 - ✅ 31 dedicated signature tests; full suite 591 pass; TSC, lint, build pass
 - ⬜ Measured signature placements for the other 8 FMS templates
 - ⬜ Owner decision: whether a legally stronger signature is required and, if so, which
 - ⬜ Multi-signatory support ("Unterschrift(en)" covers spouses; one signature drawn)
-- ⬜ Runtime/E2E verification of the signing surface (needs an authenticated session)
+- ✅ Runtime/E2E verification of the signing engine against the live approved artifact (2026-09-25);
+  browser-driven canvas signing surface still pending an interactive session
 - ⬜ FROZEN
 
 ## P11 — Email Connection + Send Engine
@@ -310,12 +317,16 @@ Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated run
   fillable PDF and are shown as online-only with the authority's own link; no PDF was invented
 - ✅ No invented eligibility, deadline, amount, recipient, or form field; checkbox/radio widgets
   with no evidenced case fact are deliberately left blank and the UI states this
-- ⬜ Authenticated browser end-to-end verification
+- ✅ **Authenticated runtime observed (2026-09-25):** an `application` case rendered its Agentur
+  surface live at `/{locale}/guide/{id}` (`200`), including the task panel and the official
+  Veränderungsmitteilung form entry; browser-driven E2E still pending
 - ⬜ FROZEN
 
 ## P13 — Jobcenter
 
-Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (authenticated runtime E2E pending).
+Status: IMPLEMENTED — TESTS AND BUILD VERIFIED — NOT DONE (browser-driven E2E pending).
+**Authenticated runtime observed (2026-09-25):** a `horizon_module = jobcenter` case rendered its
+Jobcenter surface live at `/{locale}/guide/{id}` (`200`).
 
 Shipped in `0fb190a` (13 files, +1276 −9); CI green and live on Render at that revision.
 
@@ -333,7 +344,8 @@ Shipped in `0fb190a` (13 files, +1276 −9); CI green and live on Render at that
 - ✅ Official form generation for the fillable entry (Hauptantrag) through P9, with
   `lib/horizon/jobcenter/registry.test.ts` (39 tests) covering selection and refusal branches
 - ✅ No invented eligibility, deadline, benefit amount, authority, recipient or form field
-- ⬜ Authenticated browser end-to-end verification
+- ✅ **Authenticated runtime observed (2026-09-25):** module case creation and the live module
+  surface verified against the database; browser-driven E2E still pending
 - ⬜ FROZEN
 
 ## P14 — Kündigung
@@ -425,7 +437,10 @@ remains reference-only.
 - ✅ Neutral analysis kept separate from affiliate offers (stated in both UI languages)
 - ✅ Dashboard shortcut `/{locale}/vertraege` added to real HORIZON navigation
 - 18 unit tests pass (`lib/horizon/contracts/contracts.test.ts`); tsc/lint/i18n/build green
-- Authenticated runtime E2E (deferred to the consolidated pass)
+- ✅ **Authenticated runtime observed (2026-09-25):** contract creation via live `/api/contracts`
+  (`201`, household + audit event) and `/{locale}/vertraege` (`200`) under an owner session;
+  `GET /api/contracts` correctly `405` (create/update/delete + page only). Browser-driven link
+  flow still pending
 - FROZEN
 
 ---

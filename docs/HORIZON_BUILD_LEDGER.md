@@ -199,9 +199,12 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Persistent HORIZON Guide
 - **TARGET ROUTES:** `/{locale}/guide` with task tree: understand a document, reply to an
   authority, fill an official form, cancel a contract, I do not know what to do.
-- **CURRENT STATUS:** IMPLEMENTATION ADDED — 33 unit tests pass; runtime verification pending.
-  (Earlier ledger revisions recorded this as NOT_STARTED; that was stale. The route, task tree and
-  case-engine wiring exist and build.)
+- **CURRENT STATUS:** IMPLEMENTATION ADDED — 33 unit tests pass. **Authenticated runtime observed
+  2026-09-25:** `/{locale}/guide` returned `200` under a live owner session and rendered all five
+  task entries (understand a document, reply to an authority, fill an official form, cancel a
+  contract, I do not know what to do). Anon access redirects to login (`307`). (Earlier ledger
+  revisions recorded this as NOT_STARTED; that was stale. The route, task tree and case-engine
+  wiring exist and build.)
 - **CURRENT IMPLEMENTATION:** `/{locale}/guide` (`app/[locale]/guide/page.tsx`) renders
   `components/guide/guide-chooser.tsx`: the five task-shaped entries (understand a document,
   reply to an authority, fill an official form, cancel a contract, I do not know what to do)
@@ -233,8 +236,10 @@ after a module meets the full DONE definition.
 - **SYSTEM:** HORIZON Home and the five entry modules
 - **TARGET ROUTES:** `/{locale}/dashboard` with modules Agentur für Arbeit, Jobcenter,
   Kündigung, Steuererklärung, Unterlagen erklären, plus My Cases, Profile, Settings/Security.
-- **CURRENT STATUS:** IMPLEMENTATION ADDED — 12 registry unit tests pass; runtime verification
-  pending. (Earlier ledger revisions recorded this as AUDITED; the entries and both
+- **CURRENT STATUS:** IMPLEMENTATION ADDED — 12 registry unit tests pass. **Authenticated runtime
+  observed 2026-09-25:** `/{locale}/dashboard` returned `200` under a live owner session and
+  rendered the five HORIZON entry modules with live per-module case counts (e.g. "Agentur für
+  Arbeit 2 Vorgänge"). (Earlier ledger revisions recorded this as AUDITED; the entries and both
   `/{locale}/dashboard` and the case flows now exist and build.)
 - **CURRENT IMPLEMENTATION:** `/{locale}/dashboard` renders `VzgDashboard`, which reads
   `profiles`, `contracts`, `documents`, `deadlines` via `ensureHousehold` and composes
@@ -602,6 +607,13 @@ after a module meets the full DONE definition.
   presented as a signature; tests, build and real functional verification pass.
   **Met and verified for the reference form. The legal-strength question and the multi-signatory
   question remain open owner decisions, so P10 is NOT DONE.**
+- **VERIFICATION RECORDED (reference form, 2026-09-25, live artifact):** the P10 engine was run
+  against the *live* approved artifact downloaded from P15 (`…/tax-form`, case `Steuer 2025`):
+  approved SHA-256 `8850f70e…`, 62,971 bytes, 2 pages. `planSignature` accepted it
+  (`dateText` "25. September 2026", format `png`); `applyVisualSignature` drew onto a copy,
+  returned a distinct signed SHA-256 (`11b36db6…`) on page 2, page count stayed 2, and the input
+  bytes were unchanged after the write (re-hashed). This re-confirms the writer against
+  production bytes rather than a fixture.
 - **VERIFICATION RECORDED (reference form, 2026-09-19):** a real signed PDF was produced from the
   real P9 artifact. Unsigned SHA-256 `dc122a91…`, signed SHA-256 `45fe3737…` (distinct). The
   applied signature image and the drawn date both extract inside the measured area
@@ -699,7 +711,11 @@ after a module meets the full DONE definition.
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, running on the shared
   case engine.
 - **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (implementation, tests and
-  build verified; authenticated browser runtime E2E pending)
+  build verified; browser-driven E2E pending). **Authenticated runtime observed 2026-09-25:** an
+  `application` case (`Agentur Test`, institution `Agentur fuer Arbeit`) created through the live
+  API (`201`) rendered its Agentur surface live at `/{locale}/guide/{id}` (`200`), including the
+  task panel ("Arbeitsuchend", "Arbeitslos"), the official-source context and the official
+  Veränderungsmitteilung form entry.
 - **CURRENT IMPLEMENTATION:**
   - `lib/horizon/agentur/registry.ts` — four canonical BA tasks (`arbeitsuchend_melden`,
     `arbeitslos_melden`, `arbeitslosengeld_beantragen`, `veraenderungen_mitteilen`), each with the
@@ -737,7 +753,11 @@ after a module meets the full DONE definition.
 - **ID:** P13
 - **SYSTEM:** Jobcenter module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`, sharing the case engine.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE (authenticated runtime E2E pending).
+- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE (browser-driven E2E pending).
+  **Authenticated runtime observed 2026-09-25:** an `application` case created with
+  `horizon_module = jobcenter` rendered its module surface live at `/{locale}/guide/{id}` (`200`),
+  showing the Jobcenter task panel and the official German form context. Repository creation and
+  the rendering path both exercised against the live database.
 - **CURRENT IMPLEMENTATION:** shipped as a launch vertical slice on the existing engines:
   `lib/horizon/jobcenter/` (task registry, official-source citations, conditional Anlagen,
   copy, `selectJobcenterTask` action), `components/jobcenter/jobcenter-task-panel.tsx`, the
@@ -902,7 +922,10 @@ after a module meets the full DONE definition.
   `/api/contracts`, `/api/contracts/{id}`, `/api/radar`, `/api/optimize/*`.
 - **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN (contract-to-case
   linkage and dashboard entry shipped; archive, Radar and optimize surfaces reused; tests and build
-  verified; authenticated runtime E2E pending).
+  verified; browser-driven E2E pending). **Authenticated runtime observed 2026-09-25:** a contract
+  was created through the live `/api/contracts` (`201`) with a household and audit event, and
+  `/{locale}/vertraege` returned `200` under a live owner session. `GET /api/contracts` is not a
+  supported method (`405`), which is correct — the surface is create/update/delete plus the page.
 - **ADDED THIS PHASE:** `lib/horizon/contracts/linkage.ts` (evidenced-only `contractFactSeeds`
   under the P14 vocabulary; a field the archive does not hold is *absent* rather than empty, a
   malformed date is dropped rather than interpreted, a date from a `needs_review` contract is
