@@ -16,6 +16,32 @@ export async function confirmFacts(caseId: string, facts: ConfirmedFact[], docum
 }
 export async function generateDraft(caseId: string, outputLocale: Locale, documentIds: string[]) { const ctx = await context(caseId); if ('error' in ctx) return ctx; const { data: facts, error } = await ctx.admin.from('extracted_facts').select('key, value, evidence, page_no').eq('case_id', caseId).eq('owner_id', ctx.user.id).not('confirmed_at', 'is', null); if (error) return { error: error.message }; const confirmedFacts = facts ?? []; const missing = missingForDraft(confirmedFacts); if (missing.length) { await ctx.admin.from('cases').update({ status: 'NEEDS_INFO' }).eq('id', caseId).eq('owner_id', ctx.user.id); let questions = localQuestions(ctx.owned.conversation_locale, missing); if (process.env.GROQ_API_KEY && groqCircuitBreaker.allow()) { const quota = await consumeAiQuota(ctx.admin, ctx.user.id); if (!('error' in quota) && quota.quota.allowed) { try { questions = (await interviewWithGroq({ locale: ctx.owned.conversation_locale, missing, facts: confirmedFacts })).questions; groqCircuitBreaker.success() } catch { groqCircuitBreaker.failure() } } } return { needsInfo: true, questions, missing, draft: null }; } const useAi = Boolean(process.env.GROQ_API_KEY); if (useAi) { if (!groqCircuitBreaker.allow()) return { error: 'AI temporarily unavailable; please retry shortly' }; const quota = await consumeAiQuota(ctx.admin, ctx.user.id); if ('error' in quota) return { error: quota.error }; if (!quota.quota.allowed) return { error: 'AI quota exceeded', retryAfter: quota.quota.retry_after, dailyUsed: quota.quota.daily_used, monthlyUsed: quota.quota.monthly_used }; } const generator = useAi ? new GroqDraftGenerator() : new DeterministicDraftGenerator(); let draft; try { draft = await generator.generate({ caseRecord: ctx.owned, facts: confirmedFacts, outputLocale, documentIds }); if (useAi) groqCircuitBreaker.success() } catch (error) { if (useAi) groqCircuitBreaker.failure(); return { error: error instanceof Error ? error.message : 'Draft generation failed' } } const review = await new DeterministicSafetyReviewer().review({ draft, facts: confirmedFacts }); if (review.status === 'block') return { missing: review.missing, draft: null }; const { data: previous } = await ctx.admin.from('correspondence_drafts').select('version').eq('case_id', caseId).eq('owner_id', ctx.user.id).order('version', { ascending: false }).limit(1); const version = (previous?.[0]?.version ?? 0) + 1; const inserted = await ctx.admin.from('correspondence_drafts').insert({ owner_id: ctx.user.id, case_id: caseId, version, subject_de: draft.subject_de, body_de: draft.body_de, recipient: draft.recipient || null, attachments: draft.attachments, translation: draft.translation, translation_locale: draft.translation_locale, model: useAi ? 'groq/openai-gpt-oss-20b' : 'deterministic-rules-v1', prompt_version: useAi ? DRAFT_PROMPT_VERSION : 'rules-v1', input_facts_hash: draft.inputFactsHash, content_hash: draft.contentHash, review_status: 'pass' }).select('*').single(); return inserted.error ? { error: inserted.error.message } : { draft: inserted.data, missing: [] }
 }
-export async function approveDraft(draftId: string, approvedHash: string) { const { user } = await getAuthenticatedUser(); if (!user) return { error: 'Unauthorized' as const }; const admin = createAdminClient(); if (!admin) return { error: 'Supabase is not configured' as const }; const { data: draft } = await admin.from('correspondence_drafts').select('id, owner_id, content_hash').eq('id', draftId).eq('owner_id', user.id).maybeSingle(); if (!draft) return { error: 'Draft not found' as const }; if (!approvalMatches(draft.content_hash, approvedHash)) return { error: 'Draft content changed; approval rejected' as const }; const { data, error } = await admin.from('approvals').insert({ draft_id: draft.id, user_id: user.id, approved_hash: approvedHash }).select('*').single(); return error ? { error: error.message } : { approval: data }
+export async function approveDraft(draftId: string, approvedHash: string) {
+  const { user } = await getAuthenticatedUser()
+  if (!user) return { error: 'Unauthorized' as const }
+  const admin = createAdminClient()
+  if (!admin) return { error: 'Supabase is not configured' as const }
+  const { data: draft } = await admin.from('correspondence_drafts').select('id, owner_id, content_hash').eq('id', draftId).eq('owner_id', user.id).maybeSingle()
+  if (!draft) return { error: 'Draft not found' as const }
+  if (!approvalMatches(draft.content_hash, approvedHash)) return { error: 'Draft content changed; approval rejected' as const }
+  const { data, error } = await admin
+    .from('approvals')
+    .insert({ draft_id: draft.id, user_id: user.id, approved_hash: approvedHash })
+    .select('*')
+    .single()
+  if (!error) return { approval: data }
+  // unique(draft_id, approved_hash) makes an approval an identity rather than a log
+  // line, so approving the same unchanged draft twice is the intended idempotent case.
+  // Resolve it to the approval that already exists instead of surfacing the constraint.
+  if (error.code === '23505') {
+    const { data: existing } = await admin
+      .from('approvals')
+      .select('*')
+      .eq('draft_id', draft.id)
+      .eq('approved_hash', approvedHash)
+      .maybeSingle()
+    if (existing) return { approval: existing }
+  }
+  return { error: 'Approval could not be recorded' as const }
 }
 export async function listDrafts(caseId: string) { const ctx = await context(caseId); if ('error' in ctx) return ctx; const { data, error } = await ctx.admin.from('correspondence_drafts').select('*').eq('case_id', caseId).eq('owner_id', ctx.user.id).order('version', { ascending: false }); return error ? { error: error.message } : { drafts: data ?? [] } }

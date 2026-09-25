@@ -47,7 +47,7 @@ after a module meets the full DONE definition.
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS RE-VERIFIED 2026-09-25 (two real authenticated users: owner case/fact writes 201; other user read `[]` for case, fact and profile; spoofed-owner fact insert `42501`; cross-owner profile PATCH returned 0 rows — row unchanged; anon denied `401`; owner positive control 200) | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | DONE — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence reachable on the HORIZON path (authenticated browser E2E read a real uploaded PDF into `document_pages`, `UPLOADED → READY`, and the P16 explanation quoted its text); one shared READY rule now used by both stacks (`lib/documents/extraction-contract.ts`), closing the office path's empty-extraction `READY` bug (live: text-free PDF → `NEEDS_CONFIRMATION`) | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); rail ordering fixed so validation/ownership run before the provider gate (live: foreign case `404`, malformed body `400`, previously both `503`); end-to-end answer owner-blocked on provider key | NO | YES |
-| P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`) | NO | YES |
+| P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`); idempotent re-approval of unchanged content now returns the existing approval (`201`) instead of leaking the unique-constraint message | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Every FMS 2025 template carries a measured overlay mapping asserted against the real template bytes (label x/width and baseline-origin top within 0.6 pt); all 9 generate a real `%PDF-` artifact with page count preserved and source bytes untouched; 8 of 8 Anlagen produced drafts through the authenticated browser, each naming its own official Form-ID; full chain re-verified generate → approve → gated download → real signed PDF containing `Müller`/`Anna` | NO | YES |
 | P10 | SIGNATURE ENGINE | PARTIAL / REFERENCE FORM VERIFIED — OWNER DECISION PENDING. AUTHENTICATED BROWSER E2E PASS 2026-09-25 (PNG+date signed a real approved form → new VISUAL draft v2 with distinct signed SHA-256, page 2; approve → gated download real PDF 62,961 bytes). Breadth gap closed as INAPPLICABLE 2026-09-25: the 8 Anlagen carry no signature wording and are attachments, so only the declaration is signable (locked in by test). Remaining: owner decision on QES/PAdES and two-signature joint assessment | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | IMPLEMENTED — SMTP TRANSPORT + SEND PLAN TESTS PASS (42); ABSENT PARTIAL CONFIG REFUSED BY DESIGN; NO REAL PROVIDER CONFIGURED (owner-only) | NO | YES |
@@ -568,6 +568,18 @@ after a module meets the full DONE definition.
   `403 not_approved`. Hash-binding was confirmed at the API too: a missing hash was refused with
   HTTP 400 `"A valid approved content hash is required"` and the recorded `content_hash` produced
   an approval row (`201`) bound to that exact hash.
+  **Idempotent re-approval fixed 2026-09-25.** The `approvals` table carries a deliberate
+  `unique(draft_id, approved_hash)` — an approval is identified by the exact draft and the exact
+  bytes approved — so a second approval of the same unchanged draft violates it. That was returned
+  to the caller as the raw Postgres message (`duplicate key value violates unique constraint
+  "approvals_draft_id_approved_hash_key"`) with HTTP `400`, even though re-approving unchanged
+  content is the intended case. `approveDraft` now resolves a `23505` conflict to the approval that
+  already exists (`201`, same row id), and any other insert failure returns a neutral
+  `"Approval could not be recorded"` rather than a database string. Re-verified live: re-approving
+  the same draft returns `201` with the existing approval and the table still holds exactly one row
+  for it; the hash-mismatch rail still refuses with `"Draft content changed; approval rejected"`.
+  Locked by `lib/office/workflow/records.test.ts` (5 tests: unauthenticated, hash mismatch, happy
+  path, idempotent conflict, and no raw message leak).
 - **CURRENT IMPLEMENTATION:** deterministic draft generator and safety reviewer
   (`lib/office/workflow/deterministic.ts`) with required fact keys `recipient`, `subject`,
   `request`; SHA-256 `content_hash` and `input_facts_hash`;

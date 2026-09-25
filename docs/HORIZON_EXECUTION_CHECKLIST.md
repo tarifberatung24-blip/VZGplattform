@@ -217,6 +217,9 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 - ✅ **Live approval gate observed (2026-09-25):** missing/invalid hash refused with HTTP 400;
   correct `content_hash` approved (201) and released the draft; tax-form download `403
   not_approved` before approval and `200` after
+- ✅ Idempotent re-approval fixed 2026-09-25: re-approving the same unchanged draft returns the
+  existing approval (`201`, same row id) rather than the raw unique-constraint message; locked by
+  `lib/office/workflow/records.test.ts`
 - ✅ **Browser E2E (2026-09-25):** in an authenticated session the required acknowledgement was
   enforced server-side; "Entwurf freigeben" released the exact German draft
   ("Dieser Entwurf ist freigegeben und unverändert."); the gated tax-form download was `403
