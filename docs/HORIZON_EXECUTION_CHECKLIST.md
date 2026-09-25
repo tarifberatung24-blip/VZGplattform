@@ -44,13 +44,12 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ P12–P17 guide→case workspace re-confirmed 2026-09-25 for all five intents in an authenticated session
 - ✅ N0–N2 navigation architecture landed at `56b0aa5` (single nav model, desktop sidebar regroup,
   mobile bottom bar + More sheet)
-- ✅ N3 dashboard de-duplication implemented and verified (`homeShortcuts` removed, duplicate status
-  card removed, "Vorgang starten" is the single primary CTA). Code changes uncommitted at
-  reconciliation time.
-- ✅ N4 `/{locale}/office` double-chrome fix implemented and verified (public Layer 0 header/footer
-  suppressed; route and functionality unchanged). Code changes uncommitted at reconciliation time.
-- ✅ N6 Steuer subpages surfaced implemented and verified (`SteuerTabs` on `/steuer`,
-  `/steuer/providers`, `/steuer/review`). Code changes uncommitted at reconciliation time.
+- ✅ N3 dashboard de-duplication **IMPLEMENTED** at `015d606` (`homeShortcuts` removed, duplicate
+  status card removed, "Vorgang starten" is the single primary CTA)
+- ✅ N4 `/{locale}/office` double-chrome fix **IMPLEMENTED** at `015d606` (public Layer 0
+  header/footer suppressed; route and functionality unchanged)
+- ✅ N6 Steuer subpages surfaced **IMPLEMENTED** at `015d606` (`SteuerTabs` on `/steuer`,
+  `/steuer/providers`, `/steuer/review`)
 - ✅ Navigation verification: tests, typecheck, lint, i18n parity and production build all pass
 - ⬜ N5 Security workspace settings surface — owner decision
 - ⬜ N7 Legacy route redirect/removal — requires explicit owner approval (candidates in

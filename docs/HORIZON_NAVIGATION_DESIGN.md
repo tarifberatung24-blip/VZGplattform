@@ -10,11 +10,11 @@ This document defines the final navigation architecture. It does not change back
 Supabase, APIs, migrations, document engines, approval logic, signatures, SMTP, or any verified
 P2–P17 flow. All existing routes stay reachable; no route is deleted or redirected.
 
-N0–N2 landed on `main` at `56b0aa5`. N3, N4 and N6 are implemented and verified locally
-(tests, typecheck, lint, i18n, build) but their code changes were still uncommitted at the time of
-this documentation reconciliation, so they are not yet on `main`. N5 (security settings surface)
-and N7 (legacy redirect/removal) remain future work that requires an explicit owner decision, so
-the UX problems they address are still open below.
+N0–N2 landed on `main` at `56b0aa5`. N3, N4 and N6 are **IMPLEMENTED** and landed on `main` at
+`015d606` (`feat(nav): N3/N4/N6 dashboard de-duplication, office chrome, Steuer tabs`), verified by
+tests, typecheck, lint, i18n and build. N5 (security settings surface) and N7 (legacy
+redirect/removal) remain future work that requires an explicit owner decision, so the UX problems
+they address are still open below.
 
 ## Owner decisions (approved)
 
@@ -213,17 +213,18 @@ signature or SMTP change. All existing routes preserved. No deletions or redirec
 - **N2 — Mobile bottom navigation.** Add the 5-slot bar + More sheet on workspace routes only;
   keep the drawer as the full tree. *(implemented)*
 - **N3 — De-duplicate the dashboard.** Remove shortcuts that duplicate the sidebar; leave one
-  dominant CTA. *(implemented: `homeShortcuts` removed from the registry, the duplicated
-  status card removed from the action centre, and "Vorgang starten" is the single primary
-  action on `/{locale}/dashboard`)*
+  dominant CTA. **IMPLEMENTED** at `015d606` (`homeShortcuts` removed from the registry, the
+  duplicated status card removed from the action centre, and "Vorgang starten" is the single
+  primary action on `/{locale}/dashboard`).
 - **N4 — `/{locale}/office` chrome fix.** Remove the double header and divergent nav labels.
-  *(implemented: the public Layer 0 header/footer are suppressed on `/{locale}/office` via
-  `isSelfChromedPath`; the route, its own header and its functionality are unchanged)*
+  **IMPLEMENTED** at `015d606` (the public Layer 0 header/footer are suppressed on
+  `/{locale}/office` via `isSelfChromedPath`; the route, its own header and its functionality are
+  unchanged).
 - **N5 — Security surface.** Keep the interim `/protected/security` entry; plan a workspace
   settings surface. *(future; owner decision)*
-- **N6 — Steuer subpages.** Surface `/steuer/providers` and `/steuer/review`. *(implemented: a
-  `SteuerTabs` in-page navigation is rendered by all three Steuer pages; the sidebar still has
-  exactly one Steuer destination)*
+- **N6 — Steuer subpages.** Surface `/steuer/providers` and `/steuer/review`. **IMPLEMENTED** at
+  `015d606` (a `SteuerTabs` in-page navigation is rendered by all three Steuer pages; the sidebar
+  still has exactly one Steuer destination).
 - **N7 — Legacy cleanup.** Execute the redirect/removal candidates in `FINAL_SITE_MAP.md` §8.
   *(future; requires explicit owner approval)*
 

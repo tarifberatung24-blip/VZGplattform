@@ -1,7 +1,6 @@
 # HORIZON by VZG — Final Site Map
 
-Reconciled against `origin/main` @ `56b0aa5` plus the N3/N4/N6 navigation changes present in the
-working tree at reconciliation time (those code changes were not yet committed).
+Reconciled against `origin/main` @ `015d606` (which includes the N3/N4/N6 navigation changes).
 Documentation only. This file records what is reachable today and how it is gated; it does not
 redesign UI and does not authorize removal or redirect of any route.
 

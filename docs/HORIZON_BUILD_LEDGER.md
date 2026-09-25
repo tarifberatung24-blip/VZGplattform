@@ -3,8 +3,8 @@
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
 Base: `origin/main` @ `1d844a2a069a0119fdea8ebc40ffa110b97afcb3`; navigation N0–N2 landed at
-`56b0aa5`. N3/N4/N6 are implemented and verified but were uncommitted at reconciliation time, so
-the phase records below describe `main` unless a record says otherwise.
+`56b0aa5`, and N3/N4/N6 landed at `015d606`. Phase records below are unchanged by the navigation
+work unless a record says otherwise.
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -59,7 +59,7 @@ after a module meets the full DONE definition.
 | P15 | STEUERERKLÄRUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (tax-year panel, 2025 supported, 2026 unpublished notice, no ELSTER transmit) | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (pasted-text/email intake now analysed; classification + quoted evidence, printed deadline, risk caveat, next action rendered) | NO | YES |
 | P17 | CONTRACT MANAGEMENT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (archive render, Kündigung-vorbereiten link creates seeded `kuendigung` case, `contract_linked` audited); guide→case workspace re-confirmed 2026-09-25 for all five intents | NO | YES |
-| N0–N6 | HORIZON NAVIGATION ARCHITECTURE | N0–N2 DONE at `56b0aa5`; N3/N4/N6 implemented + verified, code uncommitted at reconciliation (tests, typecheck, lint, i18n, build). N5 and N7 NOT STARTED — owner decision | NO | YES for N5/N7 |
+| N0–N6 | HORIZON NAVIGATION ARCHITECTURE | N0–N2 DONE at `56b0aa5`; N3/N4/N6 DONE at `015d606` (verified: tests, typecheck, lint, i18n, build). N5 and N7 NOT STARTED — owner decision | NO | YES for N5/N7 |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -1198,9 +1198,8 @@ after a module meets the full DONE definition.
 - **SYSTEM:** HORIZON navigation architecture
 - **TARGET ROUTES:** no new routes. Existing surfaces: `/{locale}/dashboard`,
   `/{locale}/office`, `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`.
-- **CURRENT STATUS:** N0–N2 DONE at `56b0aa5`; N3, N4 and N6 implemented and verified (tests,
-  typecheck, lint, i18n, build) but their code was uncommitted at reconciliation time. N5 and N7
-  NOT STARTED and require an explicit owner decision.
+- **CURRENT STATUS:** N0–N2 DONE at `56b0aa5`; N3, N4 and N6 DONE at `015d606` (verified: tests,
+  typecheck, lint, i18n, build). N5 and N7 NOT STARTED and require an explicit owner decision.
 - **CURRENT IMPLEMENTATION:**
   - **N0** — `lib/navigation/horizon-nav.ts` is the single navigation model; the sidebar, mobile
     bottom bar and More sheet derive from it (`lib/navigation/horizon-nav.test.ts` guards the
