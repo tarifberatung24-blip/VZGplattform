@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 
 import { HorizonSidebar } from "@/components/layout/horizon-sidebar"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
@@ -59,7 +60,10 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             <LanguageSwitcher className="ml-auto shrink-0" />
           </header>
           <div className="min-w-0 flex-1">{children}</div>
+          {/* Space for the fixed bottom bar on mobile so content is not covered. */}
+          <div className="h-16 md:hidden" aria-hidden="true" />
         </SidebarInset>
+        <MobileBottomNav />
       </SidebarProvider>
     </TooltipProvider>
   )

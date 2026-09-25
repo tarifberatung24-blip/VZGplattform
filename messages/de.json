@@ -392,5 +392,25 @@
       "provider": "Anbieter",
       "monthly_amount": "monatlicher Betrag"
     }
+  },
+  "navGroups": {
+    "workspace": "Arbeitsbereich",
+    "finance": "Finanzen",
+    "account": "Konto",
+    "services": "Weitere Dienste"
+  },
+  "navItems": {
+    "dashboard": "Übersicht",
+    "guide": "Wegweiser",
+    "documents": "Dokumente",
+    "contracts": "Verträge",
+    "taxes": "Steuern",
+    "profile": "Profil",
+    "security": "Sicherheit",
+    "education": "Finanzbildung"
+  },
+  "mobileNav": {
+    "more": "Mehr",
+    "app": "App"
   }
 }

@@ -392,5 +392,25 @@
       "provider": "доставчик",
       "monthly_amount": "месечна сума"
     }
+  },
+  "navGroups": {
+    "workspace": "Работно пространство",
+    "finance": "Финанси",
+    "account": "Профил",
+    "services": "Други услуги"
+  },
+  "navItems": {
+    "dashboard": "Начало",
+    "guide": "Водач",
+    "documents": "Документи",
+    "contracts": "Договори",
+    "taxes": "Данъци",
+    "profile": "Профил",
+    "security": "Сигурност",
+    "education": "Обучение"
+  },
+  "mobileNav": {
+    "more": "Още",
+    "app": "Приложение"
   }
 }
