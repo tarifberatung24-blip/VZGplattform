@@ -206,6 +206,24 @@ export function renderSignatureBody(
   ].join("\n")
 }
 
+export const SIGNED_SHA_PREFIX = "Signierte PDF-SHA-256: "
+
+/**
+ * P10 — the artifact a signed draft stands for.
+ *
+ * A signed draft is derived from an approved unsigned one: its body embeds the
+ * unsigned body, which still carries the unsigned `Ausgabe-SHA-256` line. So the
+ * unsigned hash alone cannot distinguish the two, and a reader that stops at it
+ * will keep serving the unsigned bytes after a signature exists. The signed line
+ * is the discriminator, and it is read by value rather than by position.
+ */
+export function readSignedOutputSha(body: string): string | null {
+  const line = body.split("\n").find((candidate) => candidate.startsWith(SIGNED_SHA_PREFIX))
+  if (!line) return null
+  const value = line.slice(SIGNED_SHA_PREFIX.length).trim()
+  return /^[0-9a-f]{64}$/.test(value) ? value : null
+}
+
 export function renderSignatureSubject(formName: string): string {
   return `Signiertes amtliches Formular ${formName} (VISUAL)`
 }

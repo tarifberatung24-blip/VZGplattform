@@ -697,13 +697,16 @@ after a module meets the full DONE definition.
   2026-09-25, NOT DONE. A visual signature was applied end-to-end through the real UI: an approved
   generated form (Hauptvordruck ESt 1 A 2025) was signed in an authenticated session with a real
   PNG and a date, producing a *new* draft (`Signiertes amtliches Formular … (VISUAL)`, Version 2)
-  with its own provenance: signed PDF SHA-256 `9235c44e…` distinct from the unsigned
-  `8a75b8c5…`, page 2, placement version `horizon-signature-placement-v1`, correct signer id and
-  timestamp. The signed artifact was then approved and downloaded through the gated route
-  (`200` → signed URL → 62,961 bytes, magic `%PDF-`), while the same route before approval
-  returned `403 not_approved`. Unapproved content cannot be signed or downloaded. The mechanism
-  is proven; breadth and the open owner decisions below mean P10 is not complete and is
-  **NOT FROZEN**.
+  with its own provenance: signed PDF SHA-256 distinct from the unsigned one, page 2, placement
+  version `horizon-signature-placement-v1`, correct signer id and timestamp. Unapproved content
+  cannot be signed. An earlier run of this E2E reported a `200` download for the approved signed
+  draft and a byte length that was in fact the *unsigned* form — the signature was applied, but
+  the gated route was still serving the pre-signature object (see the gated-download defect and
+  its fix below). Re-verified live 2026-09-25 after the fix: the approved signed artifact downloads
+  as a distinct 63,284-byte `%PDF-` (SHA-256 `0d9f7599…`) versus the unsigned 62,662-byte object
+  (`5b4f83f4…`), and the stored unsigned object is re-hashed byte-identical to its recorded hash.
+  The mechanism is proven; breadth and the open owner decisions below mean P10 is not complete and
+  is **NOT FROZEN**.
 - **CURRENT IMPLEMENTATION:** `lib/horizon/pdf/`:
   `signature-map.ts` holds measured signature placements bound to the template SHA-256 and tax
   year, with the measured evidence recorded (`labelBox`, `areaBox`, identification method). It is
@@ -764,6 +767,21 @@ after a module meets the full DONE definition.
   count stays at 2, and every unsigned value on page 1 (`Müller-Öztürk`, `Anna`, `Berlin`) is
   still present after signing. The writer leaves the input bytes unchanged (verified by hashing
   the input after the write). 31 dedicated tests pass.
+- **GATED DOWNLOAD NOW SERVES THE SIGNED ARTIFACT (fixed 2026-09-25).** The signature writes a
+  new object under its own path, but the download route resolved the newest
+  `pdf_form_generated` audit event unconditionally, so an approved signed form still downloaded as
+  the *unsigned* bytes: the user signed the document and received the version without the
+  signature. The route now resolves the `pdf_signature_applied` event and, when that signed draft
+  is currently authorized (approved *and* its approval hash still matches its content), serves the
+  signed object; otherwise it falls back to the last approved unsigned generation, so a freshly
+  signed draft still pending review does not hide the previously approved form, and a stale
+  signature is never served. `readSignedOutputSha` in `manifest.ts` is the discriminator, because a
+  signed body embeds the unsigned body and therefore carries both hash lines. Verified live: after
+  signing and approving, the gated download returned a distinct `%PDF-` artifact (63,284 bytes,
+  SHA-256 `0d9f7599…`) different from the unsigned one (62,662 bytes, `5b4f83f4…`), while the stored
+  unsigned object was re-hashed and confirmed byte-identical to its recorded hash. Locked by
+  `app/api/horizon/cases/[id]/tax-form/route.test.ts` (9 tests) and the signed/unsigned
+  discriminator tests in `lib/horizon/pdf/signature.test.ts`.
 - **NOT A CRYPTOGRAPHIC SIGNATURE:** the hash chain proves *what* was signed, not *who* signed in
   any legal sense. No certificate, no PAdES, no cryptographic binding to the signer.
 - **FROZEN:** NO

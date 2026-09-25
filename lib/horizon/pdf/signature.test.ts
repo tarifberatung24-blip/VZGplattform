@@ -22,7 +22,7 @@ import {
   SIGNATURE_IMAGE_MAX_BYTES,
 } from "./signature-plan"
 import { applyVisualSignature } from "./signature-writer"
-import { renderSignatureBody, renderSignatureSubject } from "./manifest"
+import { readFormOutputSha, readSignedOutputSha, renderSignatureBody, renderSignatureSubject } from "./manifest"
 
 const template = findTemplateById("fms-2025-est-1-a")!
 const placement = SIGNATURE_PLACEMENTS["fms-2025-est-1-a"]
@@ -373,6 +373,43 @@ describe("writing a signature onto the real generated document", () => {
     expect(written.ok).toBe(false)
     if (!written.ok) expect(written.code).toBe("page_missing")
   }, 60_000)
+})
+
+describe("a signed draft is distinguishable from the unsigned one it embeds", () => {
+  const record = {
+    signatureType: "VISUAL" as const,
+    caseId: "case-1",
+    sourceDocumentId: "draft-1",
+    unsignedSha256: "a".repeat(64),
+    signedSha256: "b".repeat(64),
+    approvalContentHash: "c".repeat(64),
+    signerId: "user-1",
+    signedAt: "2026-03-04T10:00:00.000Z",
+    page: 2,
+    placementVersion: SIGNATURE_PLACEMENT_VERSION,
+    templateId: "fms-2025-est-1-a",
+    templateSourceSha256: template.sourceSha256,
+  }
+
+  /*
+   * The signed body embeds the unsigned body verbatim, so both carry the unsigned
+   * `Ausgabe-SHA-256` line. A reader that stops at that line cannot tell the two
+   * apart, which is exactly how an approved signed form used to download as the
+   * unsigned bytes. The signed line is the discriminator.
+   */
+  it("keeps both hashes readable, with the signed one as the discriminator", () => {
+    const unsignedBody = `Ausgabe-SHA-256: ${record.unsignedSha256}\n\nBrieftext`
+    const signedBody = renderSignatureBody(record, unsignedBody)
+    expect(readFormOutputSha(signedBody)).toBe(record.unsignedSha256)
+    expect(readSignedOutputSha(signedBody)).toBe(record.signedSha256)
+    expect(readSignedOutputSha(unsignedBody)).toBeNull()
+  })
+
+  it("rejects a malformed or absent signed hash rather than guessing", () => {
+    expect(readSignedOutputSha("Signierte PDF-SHA-256: nicht-hex")).toBeNull()
+    expect(readSignedOutputSha("Signierte PDF-SHA-256: ")).toBeNull()
+    expect(readSignedOutputSha("kein Signatur-Vermerk")).toBeNull()
+  })
 })
 
 describe("the signature record states plainly what kind of signature it is", () => {

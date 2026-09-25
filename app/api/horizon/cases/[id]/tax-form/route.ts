@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { createCaseEngine } from "@/lib/horizon/case"
 import { createAdminClient } from "@/lib/office/supabase/admin"
 import { computeSha256 } from "@/lib/horizon/pdf/source"
-import { readFormOutputSha } from "@/lib/horizon/pdf/manifest"
+import { readFormOutputSha, readSignedOutputSha } from "@/lib/horizon/pdf/manifest"
 
 export const runtime = "nodejs"
 
@@ -57,6 +57,38 @@ export async function GET(
   const generated = (audit.data ?? []).find((event) => event.action === "pdf_form_generated")
   if (!generated) return NextResponse.json({ error: "not_found" }, { status: 404 })
 
+  const drafts = await engine.repository.listDrafts(id)
+  if (drafts.error) return NextResponse.json({ error: "failed" }, { status: 500 })
+
+  const admin = createAdminClient()
+  if (!admin) return NextResponse.json({ error: "storage_unavailable" }, { status: 503 })
+  const storage = admin.storage
+
+  // A signature produces a new artifact from the approved one, and that signed
+  // artifact is what the user means by "the form". It is a different object under
+  // its own path, recorded on the `pdf_signature_applied` event, so the unsigned
+  // generation below is the fallback whenever no signed draft is *currently*
+  // authorized — a freshly signed draft is still pending review, and the previously
+  // approved unsigned form remains the last authorized output until it is released.
+  const signature = (audit.data ?? []).find((event) => event.action === "pdf_signature_applied")
+  const signedPath = signature?.metadata.storage_path
+  const signedSha = signature?.metadata.signed_sha256
+  const signedDraft =
+    typeof signedPath === "string" && typeof signedSha === "string"
+      ? (drafts.data ?? []).find((entry) => readSignedOutputSha(entry.body) === signedSha)
+      : undefined
+
+  if (signedDraft) {
+    const signedState = await engine.repository.getApprovalState(signedDraft.id)
+    if (signedState.error) return NextResponse.json({ error: "failed" }, { status: 500 })
+    const signedApprovals = await engine.repository.listApprovals(id)
+    if (signedApprovals.error) return NextResponse.json({ error: "failed" }, { status: 500 })
+    const signedApproval = (signedApprovals.data ?? []).find((entry) => entry.draftId === signedDraft.id)
+    const signedAuthorized =
+      Boolean(signedState.data?.approved) && signedApproval?.approvedHash === signedDraft.contentHash
+    if (signedAuthorized) return serveArtifact(signedPath as string, signedSha as string)
+  }
+
   const storagePath =
     typeof generated.metadata.storage_path === "string" ? generated.metadata.storage_path : null
   const recordedSha =
@@ -66,8 +98,6 @@ export async function GET(
   }
 
   // The draft that approved this exact artifact, located by the value it records.
-  const drafts = await engine.repository.listDrafts(id)
-  if (drafts.error) return NextResponse.json({ error: "failed" }, { status: 500 })
   const draft = (drafts.data ?? []).find((entry) => readFormOutputSha(entry.body) === recordedSha)
   if (!draft) return NextResponse.json({ error: "not_found" }, { status: 404 })
 
@@ -84,26 +114,32 @@ export async function GET(
     return NextResponse.json({ error: "approval_stale" }, { status: 403 })
   }
 
-  const admin = createAdminClient()
-  if (!admin) return NextResponse.json({ error: "storage_unavailable" }, { status: 503 })
+  return serveArtifact(storagePath, recordedSha)
 
-  const downloaded = await admin.storage.from(CASE_DOCUMENT_BUCKET).download(storagePath)
-  if (downloaded.error || !downloaded.data) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 })
+  /**
+   * Hand out a short-lived URL for the stored object, but only after re-hashing the
+   * bytes and confirming they still equal what was approved: a substituted or
+   * corrupted object is refused rather than served as if it were the approved form.
+   */
+  async function serveArtifact(path: string, expectedSha: string) {
+    const downloaded = await storage.from(CASE_DOCUMENT_BUCKET).download(path)
+    if (downloaded.error || !downloaded.data) {
+      return NextResponse.json({ error: "not_found" }, { status: 404 })
+    }
+
+    const bytes = new Uint8Array(await downloaded.data.arrayBuffer())
+    const actualSha = await computeSha256(bytes)
+    if (actualSha !== expectedSha) {
+      return NextResponse.json({ error: "integrity_failed" }, { status: 409 })
+    }
+
+    const signed = await storage
+      .from(CASE_DOCUMENT_BUCKET)
+      .createSignedUrl(path, 300, { download: "Steuerformular.pdf" })
+    if (signed.error || !signed.data) {
+      return NextResponse.json({ error: "failed" }, { status: 500 })
+    }
+
+    return NextResponse.json({ url: signed.data.signedUrl, expiresIn: 300 })
   }
-
-  const bytes = new Uint8Array(await downloaded.data.arrayBuffer())
-  const actualSha = await computeSha256(bytes)
-  if (actualSha !== recordedSha) {
-    return NextResponse.json({ error: "integrity_failed" }, { status: 409 })
-  }
-
-  const signed = await admin.storage
-    .from(CASE_DOCUMENT_BUCKET)
-    .createSignedUrl(storagePath, 300, { download: "Steuerformular.pdf" })
-  if (signed.error || !signed.data) {
-    return NextResponse.json({ error: "failed" }, { status: 500 })
-  }
-
-  return NextResponse.json({ url: signed.data.signedUrl, expiresIn: 300 })
 }
