@@ -15,6 +15,7 @@ import { SteuerPanel } from "@/components/steuer/steuer-panel"
 import { UnterlagenPanel } from "@/components/unterlagen/unterlagen-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
+import { pickSendableDraft } from "@/lib/horizon/send/marker"
 import {
   selectedAgenturTask,
   selectedJobcenterTask,
@@ -150,6 +151,13 @@ export function CaseWorkspace({
   // is being asked to approve.
   const latestDraft = drafts[0] ?? null
   const release = assessDraftRelease({ draft: latestDraft, missing, approvals })
+
+  // A send is itself stored as a draft (the send record), and always as a newer
+  // version than the message it records. Sending the newest draft would therefore
+  // offer the *record* for sending and hide the explicit-resend path the engine
+  // implements, so the send panel is pointed at the newest draft that is not a
+  // send record. `isSendRecordDraft` is the client-safe half of the marker check.
+  const sendableDraft = pickSendableDraft(drafts)
 
   return (
     <div className="mt-6 space-y-4">
@@ -293,7 +301,7 @@ export function CaseWorkspace({
       </Panel>
 
       <Panel title={copy.send} empty={copy.none}>
-        <SendPanel caseId={caseId} locale={locale} draftId={latestDraft?.id ?? null} />
+        <SendPanel caseId={caseId} locale={locale} draftId={sendableDraft?.id ?? null} />
       </Panel>
 
       <Panel title={copy.tasks} empty={copy.none}>

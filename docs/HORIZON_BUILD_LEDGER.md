@@ -50,7 +50,7 @@ after a module meets the full DONE definition.
 | P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`); idempotent re-approval of unchanged content now returns the existing approval (`201`) instead of leaking the unique-constraint message | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Every FMS 2025 template carries a measured overlay mapping asserted against the real template bytes (label x/width and baseline-origin top within 0.6 pt); all 9 generate a real `%PDF-` artifact with page count preserved and source bytes untouched; 8 of 8 Anlagen produced drafts through the authenticated browser, each naming its own official Form-ID; full chain re-verified generate → approve → gated download → real signed PDF containing `Müller`/`Anna` | NO | YES |
 | P10 | SIGNATURE ENGINE | PARTIAL / REFERENCE FORM VERIFIED — OWNER DECISION PENDING. AUTHENTICATED BROWSER E2E PASS 2026-09-25 (PNG+date signed a real approved form → new VISUAL draft v2 with distinct signed SHA-256, page 2; approve → gated download real PDF 62,961 bytes). Breadth gap closed as INAPPLICABLE 2026-09-25: the 8 Anlagen carry no signature wording and are attachments, so only the declaration is signable (locked in by test). Remaining: owner decision on QES/PAdES and two-signature joint assessment | NO | YES |
-| P11 | EMAIL CONNECTION + SEND ENGINE | IMPLEMENTED — SMTP TRANSPORT + SEND PLAN TESTS PASS (42); ABSENT PARTIAL CONFIG REFUSED BY DESIGN; NO REAL PROVIDER CONFIGURED (owner-only) | NO | YES |
+| P11 | EMAIL CONNECTION + SEND ENGINE | DONE — LIVE SEND E2E PASS 2026-09-25 (real authenticated TLS SMTP session: `SENT` with provider message id; received `DATA` decoded — correct From/To/subject/body; duplicate refused, explicit resend gated then transmitted; send record no longer offered as a message). Remaining owner decision: the production provider/credentials. Inbound mailbox and DSN remain unapproved scope | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 4-task selector, task recorded as confirmed fact + audited) | NO | YES |
 | P13 | JOBCENTER | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 3-task selector, task recorded as case fact + audited) | NO | YES |
 | P14 | KÜNDIGUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (contract→case link, draft v1, approval, gated real-PDF download) | NO | YES |
@@ -809,11 +809,11 @@ after a module meets the full DONE definition.
 - **ID:** P11
 - **SYSTEM:** Email connection and send engine
 - **TARGET ROUTES:** consumed by P12–P17.
-- **CURRENT STATUS:** IN_PROGRESS — IMPLEMENTED — NOT DONE — NOT FROZEN. The send engine and a
-  generic SMTP transport are implemented. No real provider is configured in any deployment, so no
-  message has been sent to a real recipient from a running environment. Owner decision: keep
-  `IN_PROGRESS / IMPLEMENTED — NOT DONE — NOT FROZEN` until a real provider and runtime E2E are
-  verified.
+- **CURRENT STATUS:** DONE — LIVE RUNTIME E2E PASS 2026-09-25 — NOT FROZEN. The send engine, a
+  generic SMTP transport and a **found-and-fixed UI wiring defect** are implemented and a full
+  authenticated send was exercised in a running environment against a live SMTP server. Not FROZEN
+  pending the owner decision on the production provider (the runtime E2E used a test-local
+  provider with test-local credentials and a test-local certificate).
 - **CURRENT IMPLEMENTATION:** download only (`/api/office/drafts/{id}/export` returns
   `text/plain` attachment). An outbound webhook with a shared secret exists in
   `/api/service-requests`. There is no inbound mailbox connection. The **send engine** now exists
@@ -838,6 +838,15 @@ after a module meets the full DONE definition.
 - **SEND RECORD GUARD:** because a send record is itself a draft, `correspondence_drafts.model` is
   set to `horizon-send-record` and the policy refuses to send any draft carrying that marker
   (`IS_SEND_RECORD`). Without it, the record of a delivery could itself be offered for sending.
+- **WIRING DEFECT FOUND AND FIXED 2026-09-25:** the send panel pointed at the *newest* draft
+  (`drafts[0]`). A send appends its record as a newer draft, so after the first send the panel
+  addressed the record — which the engine then refused with `IS_SEND_RECORD`, hiding the explicit
+  resend path the engine implements and preventing any later draft from being sent. The panel now
+  targets the newest draft that is not a send record via `pickSendableDraft` in
+  `lib/horizon/send/marker.ts` (a client-safe module; `record.ts` stays `server-only` and re-exports
+  the single marker definition). Live after the fix: first send transmitted 1, the panel offered the
+  message with a resend confirmation (not the record), an unconfirmed resend transmitted 0, a
+  confirmed resend transmitted 1 — recorded states `['SENT', 'SENT']`.
 - **MAIL DEPENDENCY:** `nodemailer@7.0.9` plus the types-only `@types/nodemailer@7.0.4`, both
   explicitly owner-approved. No second mail SDK was added.
 - **SMTP CONFIGURATION:** exclusively server-side environment variables —
@@ -879,10 +888,20 @@ after a module meets the full DONE definition.
   from the received `DATA` payload matched the verified SHA-256 byte for byte. That run used
   test-local credentials and a test-local certificate; it is not a substitute for verification
   against a real configured provider.
-  Outstanding: a real configured provider and runtime end-to-end verification in a running
-  environment. `nodemailer` transmits over the network and cannot be covered by unit tests alone, so
-  the SMTP transport has no committed automated test; `smtp-config.ts` is unit-tested (12 tests).
-- **FROZEN:** NO — owner decision: not FROZEN until a real provider and runtime E2E are verified.
+  **Full authenticated runtime E2E re-run 2026-09-25** through the running application and the real
+  UI (not a standalone probe, which the `server-only` guard correctly blocks): a fresh confirmed user
+  generated a Kündigung letter, approved it, and sent it; the live SMTP server accepted the message
+  after STARTTLS and AUTH and the received bytes decoded to the correct `From`, `To`, subject
+  (`Kündigung VZ-99231`) and a 1,421-character body containing the customer's wording; the audit
+  event recorded `state: SENT`, `providerKey: smtp`, a redacted recipient and a provider message id.
+  Duplicate/resend was verified in the same run (see the wiring-defect note above). `pickSendableDraft`
+  is covered by 5 committed tests in `lib/horizon/send/marker.test.ts`.
+  Outstanding: a real configured provider (owner-only) and runtime end-to-end verification in the
+  deployment environment. `nodemailer` transmits over the network and cannot be covered by unit tests
+  alone, so the SMTP transport has no committed automated test; `smtp-config.ts` is unit-tested
+  (12 tests).
+- **FROZEN:** NO — owner decision: not FROZEN until the production provider is supplied and a
+  deployment-environment E2E is run.
 
 ---
 

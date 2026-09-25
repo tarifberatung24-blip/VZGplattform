@@ -20,26 +20,11 @@
 
 import "server-only"
 
+import { SEND_RECORD_MODEL, isSendRecordDraft } from "./marker"
+
+export { SEND_RECORD_MODEL, isSendRecordDraft }
+
 export const SEND_EVENT_PREFIX = "email_send"
-
-/**
- * Marker written to `correspondence_drafts.model` for a send record.
- *
- * A send record is stored as a draft, which means it appears wherever drafts are
- * listed — and a draft is a thing the UI offers to send. Without a marker, the
- * record of a delivery could itself be sent as if it were the customer's message.
- * The marker is what lets the send engine refuse that, and it must stay stable:
- * changing it would make existing send records look sendable again.
- *
- * `model` is used because it is NOT NULL and no real model is involved in a send
- * record, so there is no value to collide with.
- */
-export const SEND_RECORD_MODEL = "horizon-send-record"
-
-/** Whether a draft is a send record rather than a message to be sent. */
-export function isSendRecordDraft(model: string | null | undefined): boolean {
-  return model === SEND_RECORD_MODEL
-}
 
 /**
  * The delivery states a send can be in.
