@@ -3,6 +3,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 import {
   CASE_DOCUMENT_KINDS,
+  CASE_DOCUMENT_MAX_BYTES,
   CASE_DOCUMENT_MIME_TYPES,
   caseDocumentStoragePath,
   documentDisplayName,
@@ -214,5 +215,18 @@ describe("P6 file intake stays non-destructive", () => {
     const action = read("lib/horizon/intake/document-actions.ts")
     expect(action).not.toMatch(/create\s+policy/i)
     expect(baseline).toContain("create policy kintex_documents_read_own on storage.objects for select")
+  })
+})
+
+describe("P6 upload transport accepts what the intake advertises", () => {
+  it("raises the server-action body limit to the document size the intake accepts", () => {
+    // A scanned official letter is routinely several MB. The intake admits files up
+    // to CASE_DOCUMENT_MAX_BYTES, but a server action body defaults to 1 MB, so a
+    // larger file was rejected by the framework before validation and surfaced as a
+    // raw 413/500 instead of a localized message. Observed live: a 3.87 MB scan
+    // failed until the limit was raised. The two must not drift apart again.
+    const config = read("next.config.mjs")
+    expect(config).toMatch(/serverActions:\s*\{\s*bodySizeLimit:\s*"10mb"\s*\}/)
+    expect(CASE_DOCUMENT_MAX_BYTES).toBe(10 * 1024 * 1024)
   })
 })

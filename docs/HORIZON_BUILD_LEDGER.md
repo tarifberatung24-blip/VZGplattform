@@ -423,6 +423,22 @@ after a module meets the full DONE definition.
   "Einkommensteuererklärung", "Sparzulage"). Provider-level OCR is therefore exercised on real
   bytes; **page-level evidence is now reachable on the HORIZON path** (see the browser E2E above:
   page text is persisted and the P16 explanation quotes it).
+  **Upload transport fixed 2026-09-25.** The intake advertises files up to 10 MB
+  (`CASE_DOCUMENT_MAX_BYTES`) because a scanned official letter routinely exceeds a
+  megabyte, but a Next.js server-action body defaults to 1 MB. A real 3.87 MB
+  image-only scan was therefore rejected by the framework *before* the action ran and
+  surfaced as a raw `413 Body exceeded 1 MB limit` / `500` instead of a localized
+  validation message — the advertised limit was unreachable. `next.config.mjs` now
+  sets `experimental.serverActions.bodySizeLimit` to `"10mb"`, matching the value the
+  action already enforces; the action still re-validates size, MIME and magic bytes.
+  Re-verified live after the fix: the 3.87 MB scan uploaded (`Angehängt.`), a
+  `3,872,163`-byte `source_documents` row appeared, and the per-document "Auslesen"
+  control took it `UPLOADED → READY` with page 1 persisted at `0.84` confidence and
+  2,354 characters of real OCR text ("Hauptvordruck ESt 1 A", "Einkommensteuererklärung",
+  "Arbeitnehmer-Sparzulage") plus a `document_text_extracted` audit entry. Because the
+  uploaded PDF has no text layer at all, that text can only have come from OCR.
+  Locked by `lib/horizon/intake/document.test.ts` (the body limit and the intake limit
+  must not drift apart again).
   **Two-stack reconciliation closed 2026-09-25.** The two document stacks each carried a private
   copy of the "when is a document READY" rule, and they had drifted: the HORIZON path refused to
   label an empty extraction `READY`, while the older office path decided the status with a bare
