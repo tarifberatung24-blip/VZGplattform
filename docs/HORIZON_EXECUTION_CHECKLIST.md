@@ -164,7 +164,16 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
   than the client-declared type. Extraction then returned `200` with both pages persisted to
   `document_pages` at confidence `1.0`, the row moving `UPLOADED → READY` with a
   `document_extracted` audit entry
-- ⬜ Page-level evidence for extracted facts
+- ✅ **HORIZON page text reachable (2026-09-25, authenticated browser E2E):** the blocker was that a
+  case document could be stored but never read, so `document_pages` stayed empty and page-level
+  evidence was unreachable. A per-document "Auslesen" control now reads the file on demand. Live
+  proof: a real 147,956-byte PDF (BA Veränderungsmitteilung) was uploaded on a fresh
+  `unterlagen_erklaeren` case, read through the UI, and moved `UPLOADED → READY` with its page text
+  persisted and a `document_text_extracted` audit entry written; the P16 explanation then quoted
+  that text and classified the letter "Behördenbescheid". A signed Hauptvordruck was read the same
+  way (`UPLOADED → READY`, pages 1–2). Cross-owner isolation re-verified (RLS)
+- ⬜ Persisting a `page_no`/evidence citation on facts created by the module actions (the schema and
+  page text now support it; the module fact writers still pass `pageNo: null`)
 - ⬜ Unified extraction contract
 - ⬜ Explicit OCR/extraction failure states
 - ⬜ Benchmark before adopting advanced OCR fallback

@@ -2,6 +2,7 @@
 
 import { TextIntakeForm } from "@/components/guide/text-intake-form"
 import { DocumentIntakeForm } from "@/components/guide/document-intake-form"
+import { DocumentExtractButton } from "@/components/guide/document-extract-button"
 import { CaseAssistantPanel } from "@/components/guide/case-assistant-panel"
 import { DraftReviewPanel } from "@/components/guide/draft-review-panel"
 import { OfficialFormPanel } from "@/components/guide/official-form-panel"
@@ -248,6 +249,12 @@ export function CaseWorkspace({
             <p className="mt-0.5 text-xs text-muted-foreground">
               {doc.mime} · {Math.round(doc.sizeBytes / 1024)} KB · {doc.status}
             </p>
+            <DocumentExtractButton
+              caseId={caseId}
+              documentId={doc.id}
+              locale={locale}
+              status={doc.status}
+            />
           </div>
         ))}
       </Panel>

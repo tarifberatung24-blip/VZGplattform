@@ -45,7 +45,7 @@ after a module meets the full DONE definition.
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/horizon`, `/de/dashboard`, `/de/profile`, `/de/contracts`, `/de/documents` all 200) | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS VERIFIED (owner-scoped write policies confirmed end-to-end) | NO | YES |
-| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES + REAL OCR RUN 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence linkage + two-stack reconciliation remain open | NO | YES |
+| P6 | DOCUMENT INTAKE / OCR / EXPLANATION | PARTIAL — ALL FIVE INPUT TYPES + REAL OCR RUN 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); **page-level evidence now reachable on the HORIZON path** — authenticated browser E2E read a real uploaded PDF into `document_pages` (`UPLOADED → READY`) and the P16 explanation quoted its text; two-stack reconciliation remains open | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); end-to-end answer owner-blocked on provider key | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`) | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Every FMS 2025 template carries a measured overlay mapping asserted against the real template bytes (label x/width and baseline-origin top within 0.6 pt); all 9 generate a real `%PDF-` artifact with page count preserved and source bytes untouched; 8 of 8 Anlagen produced drafts through the authenticated browser, each naming its own official Form-ID; full chain re-verified generate → approve → gated download → real signed PDF containing `Müller`/`Anna` | NO | YES |
@@ -396,11 +396,27 @@ after a module meets the full DONE definition.
   upload was then extracted through `/api/office/documents/{id}/extract` returning `200` with
   both pages persisted to `document_pages` at confidence `1.0`, the row moving `UPLOADED → READY`
   and a `document_extracted` audit entry written.
+  **Runtime HORIZON extraction observed 2026-09-25 (authenticated browser E2E):** the gap was that
+  a case document could be stored but never read — `document_pages` stayed empty on the HORIZON
+  path, so no page text existed and no fact could ever carry a `page_no`. A per-document
+  "Auslesen" control now reads the file on demand (`lib/horizon/intake/extract.ts`,
+  `extract-actions.ts`, `components/guide/document-extract-button.tsx`). Verified live:
+  a real 147,956-byte `application/pdf` (BA Veränderungsmitteilung) was uploaded through the real
+  file-intake form on a fresh `unterlagen_erklaeren` case, then read through the UI, moving
+  `UPLOADED → READY` with 1 page at confidence 1.0, its text persisted to `document_pages`, and a
+  `document_text_extracted` audit entry written. The P16 explanation then used that text: with
+  pages present it classified the letter as "Behördenbescheid" and quoted the printed evidence
+  ("GR 22 - 09/2020 … Veränderungsmitteilung"); with no pages it could only report "Nicht sicher
+  bestimmbar". A second (signed Hauptvordruck) document was read the same way, `UPLOADED → READY`
+  with pages 1–2. Cross-owner isolation re-verified: a second authenticated user reads none of the
+  case, document or pages (RLS). 971 unit tests pass; `tsc` clean.
   **Runtime OCR observed 2026-09-25:** the real Tesseract path (`ocrScannedPdfPages`) ran against
   a real official template (`public/forms/ESt_1_A_2025.pdf`, page 1) and returned 1,650 characters
   at 0.70 confidence, correctly reading the printed title ("Hauptvordruck ESt 1 A",
   "Einkommensteuererklärung", "Sparzulage"). Provider-level OCR is therefore exercised on real
-  bytes; page-level fact-evidence linkage and the two-stack reconciliation remain open.
+  bytes; **page-level evidence is now reachable on the HORIZON path** (see the browser E2E above:
+  page text is persisted and the P16 explanation quotes it), while the two-stack reconciliation
+  remains open.
   (commits `b708697`, `3bff5c0`).
 - **CURRENT IMPLEMENTATION:** validated upload with canonical-project guard
   (`lib/documents/validation.ts` + `app/api/documents/upload/route.ts`);
