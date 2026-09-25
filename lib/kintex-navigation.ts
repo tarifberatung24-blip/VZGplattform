@@ -34,3 +34,17 @@ export function activeKintexModule(pathname: string, module: string | null) {
   return kintexModules.find((item) => item.id !== "overview" && !item.href.includes("?") &&
     (path === item.href || path.startsWith(`${item.href}/`)))?.id ?? null
 }
+
+// Routes that render their own complete chrome (header and footer) and must therefore not also
+// receive the public Layer 0 chrome. `/office` ships its own header — brand, language select and
+// the toggle for its own sidebar — so the public header above it produced two stacked headers.
+//
+// This is deliberately NOT expressed through `isKintexWorkspacePath`: `/office` is not behind the
+// proxy's protection boundary, and `isKintexWorkspacePath` also drives the HORIZON shell, which
+// would put account controls on a route an anonymous visitor can open. Matching is exact, not
+// prefix-based: `/office/cases/[id]` has no header of its own and still needs the public one.
+const selfChromedPaths = ["/office"] as const
+
+export function isSelfChromedPath(pathname: string) {
+  return (selfChromedPaths as readonly string[]).includes(stripLocale(pathname))
+}

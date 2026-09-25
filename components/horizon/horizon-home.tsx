@@ -8,12 +8,11 @@ import {
   FileSearch,
   FileX2,
   Receipt,
-  WalletCards,
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
-import { homeModuleIcon, homeModules, homeShortcuts } from "@/lib/horizon/modules/registry"
+import { homeModuleIcon, homeModules } from "@/lib/horizon/modules/registry"
 import { startModuleCase } from "@/lib/horizon/modules/actions"
 import {
   caseCountNoun,
@@ -21,7 +20,6 @@ import {
   guideModuleLabel,
   notStartedLabel,
 } from "@/lib/horizon/guide/copy"
-import { getContractsCopy } from "@/lib/horizon/contracts/copy"
 
 const icons: Record<string, LucideIcon> = { Building2, Briefcase, FileX2, Receipt, FileSearch }
 
@@ -68,7 +66,6 @@ export function HorizonHome({
   const { locale } = useLanguage()
   const de = locale === "de"
   const copy = getGuideCopy(locale)
-  const contracts = getContractsCopy(locale)
 
   return (
     <section className="mt-8" aria-labelledby="horizon-modules">
@@ -120,34 +117,7 @@ export function HorizonHome({
             </form>
           )
         })}
-        <Link
-          href={`/${locale}/vertraege`}
-          className="flex min-h-20 w-full items-start gap-3 rounded-md border border-border bg-card px-4 py-4 text-left transition hover:border-primary/40 hover:bg-primary/5"
-        >
-          <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary/5 text-primary">
-            <WalletCards className="size-4" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-sm font-medium">{de ? "Vertragsverwaltung" : "Управление на договори"}</span>
-            <span className="mt-1 block text-xs text-muted-foreground">{contracts.intro}</span>
-          </span>
-        </Link>
       </div>
-
-      <nav
-        className="mt-6 flex flex-wrap gap-2"
-        aria-label={de ? "Weitere Bereiche" : "Други раздели"}
-      >
-        {homeShortcuts.map((item) => (
-          <Link
-            key={item.id}
-            href={`/${locale}${item.path}`}
-            className="rounded-md border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
-          >
-            {de ? item.labelDe : item.labelBg}
-          </Link>
-        ))}
-      </nav>
     </section>
   )
 }

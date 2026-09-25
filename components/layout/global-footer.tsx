@@ -2,14 +2,15 @@
 
 import Link from "next/link"
 import { localizedPath } from "@/lib/i18n/routing"
-import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
+import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { usePathname } from "next/navigation"
 
 export function GlobalFooter() {
   const pathname = usePathname() ?? "/"
   // Authenticated workspace routes render the HORIZON shell (see WorkspaceShell).
-  // The public Layer 0 footer must not appear inside the operational workspace.
-  if (isKintexWorkspacePath(pathname)) return null
+  // The public Layer 0 footer must not appear inside the operational workspace, nor
+  // under a route that owns its full chrome (`/office`, which renders its own header).
+  if (isKintexWorkspacePath(pathname) || isSelfChromedPath(pathname)) return null
   const locale = pathname.startsWith("/de") ? "de" : "bg"
   const isDe = locale === "de"
 

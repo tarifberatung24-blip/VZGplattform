@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { FinanceModulePage } from "@/components/finance/module-page"
+import { SteuerTabs } from "@/components/finance/steuer-tabs"
 import { TaxFormRegistry } from "@/components/finance/tax-form-registry"
 import { TaxQuestionnaire } from "@/components/finance/tax-questionnaire"
 import { createClient } from "@/lib/supabase/server"
@@ -30,5 +31,5 @@ export default async function Page() {
     : {}
 
   const canonical = buildCanonicalTaxReturn(initialAnswers)
-  return <main className="min-h-screen bg-background"><FinanceModulePage title="Steuererklärung" description="Sammle deine steuerrelevanten Informationen und erkenne fehlende Angaben." items={["Persönliche Situation und Steuerjahr erfassen", "Werbungskosten und abzugsfähige Ausgaben sammeln", "Belege sicher zuordnen", "Ergebnis vor dem Einreichen prüfen"]} /><div className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><TaxQuestionnaire initialCase={taxCase ? { id: taxCase.id, answers: initialAnswers, status: taxCase.status } : null} /><TaxPipelineReview canonical={canonical} /><TaxFormRegistry forms={forms ?? []} /></div></main>
+  return <main className="min-h-screen bg-background"><FinanceModulePage title="Steuererklärung" description="Sammle deine steuerrelevanten Informationen und erkenne fehlende Angaben." items={["Persönliche Situation und Steuerjahr erfassen", "Werbungskosten und abzugsfähige Ausgaben sammeln", "Belege sicher zuordnen", "Ergebnis vor dem Einreichen prüfen"]} /><SteuerTabs /><div className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><TaxQuestionnaire initialCase={taxCase ? { id: taxCase.id, answers: initialAnswers, status: taxCase.status } : null} /><TaxPipelineReview canonical={canonical} /><TaxFormRegistry forms={forms ?? []} /></div></main>
 }

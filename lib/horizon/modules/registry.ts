@@ -85,18 +85,7 @@ export const homeModules: readonly HomeModuleDefinition[] = HORIZON_HOME_MODULES
 }))
 
 /**
- * Secondary destinations. Every `path` below is an existing page; nothing here
- * may point at a route that does not render.
+ * Secondary destinations are no longer restated here. The sidebar already owns the workspace
+ * destinations (see lib/navigation/horizon-nav.ts), and repeating them on the dashboard produced
+ * two navigation surfaces that could disagree. The dashboard links to the guide for case work.
  */
-export const homeShortcuts = [
-  { id: "cases", path: "/guide", labelBg: "Моите случаи", labelDe: "Meine Vorgänge" },
-  { id: "documents", path: "/documents", labelBg: "Документи", labelDe: "Dokumente" },
-  { id: "profile", path: "/profil", labelBg: "Профил", labelDe: "Profil" },
-  { id: "security", path: "/protected/security", labelBg: "Сигурност", labelDe: "Sicherheit" },
-] as const
-
-export type HomeShortcutId = (typeof homeShortcuts)[number]["id"]
-
-export function isHomeShortcutId(value: unknown): value is HomeShortcutId {
-  return typeof value === "string" && homeShortcuts.some((item) => item.id === value)
-}

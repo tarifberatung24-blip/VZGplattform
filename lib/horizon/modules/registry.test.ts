@@ -2,14 +2,13 @@ import { describe, expect, it } from "vitest"
 import { readFileSync } from "node:fs"
 import { CASE_INTENTS, CASE_MODULES } from "../case/contract"
 import { GUIDE_INTENTS } from "../guide/intents"
+import * as registry from "./registry"
 import {
   HORIZON_HOME_MODULES,
   homeModuleCaseTitle,
   homeModuleGuideIntent,
   homeModuleIntent,
   homeModules,
-  homeShortcuts,
-  isHomeShortcutId,
   isHorizonHomeModule,
 } from "./registry"
 
@@ -78,23 +77,10 @@ describe("horizon home modules", () => {
     }
   })
 
-  it("points every shortcut at a path, never an external or empty target", () => {
-    for (const item of homeShortcuts) {
-      expect(item.path.startsWith("/")).toBe(true)
-      expect(item.path.startsWith("//")).toBe(false)
-      expect(item.labelBg.length).toBeGreaterThan(0)
-      expect(item.labelDe.length).toBeGreaterThan(0)
-    }
-    expect(isHomeShortcutId("cases")).toBe(true)
-    expect(isHomeShortcutId("nope")).toBe(false)
-  })
-
-  it("does not link to a route that has no page", () => {
-    // /settings was considered and deliberately excluded: no page exists, so a
-    // link to it would be a dead end.
-    for (const item of homeShortcuts) {
-      expect(item.path).not.toBe("/settings")
-    }
+  it("no longer restates sidebar destinations as dashboard shortcuts", () => {
+    // The dashboard used to repeat /guide, /documents and /profil, which the sidebar already
+    // owns. Re-adding them here would recreate the duplicate navigation surface.
+    expect("homeShortcuts" in registry).toBe(false)
   })
 })
 

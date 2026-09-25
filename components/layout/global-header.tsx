@@ -7,7 +7,7 @@ import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
-import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
+import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { authenticatedHomePath } from "@/lib/supabase/auth-routing"
@@ -43,7 +43,9 @@ export function GlobalHeader() {
 
   // Authenticated workspace routes render the HORIZON shell (see WorkspaceShell).
   // The public Layer 0 header must not appear inside the operational workspace.
-  if (isKintexWorkspacePath(pathname)) return null
+  // `/office` is not behind the workspace shell but renders its own header, so it
+  // must not receive this one either — otherwise the page shows two stacked headers.
+  if (isKintexWorkspacePath(pathname) || isSelfChromedPath(pathname)) return null
 
   const labels =
     locale === "de"

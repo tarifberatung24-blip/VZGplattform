@@ -55,7 +55,9 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
         {/* The header search was decorative: it had no state and no handler, and the only working
             filter is the one in ContractsTable. */}
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <Button asChild className="h-11 w-full sm:w-auto"><Link href="/vertraege"><Plus className="mr-2 size-4" />{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button>
+          {/* The single dominant action on this page. Every other entry point is secondary. */}
+          <Button asChild className="h-11 w-full sm:w-auto"><Link href={`/${locale}/guide`}><Plus className="mr-2 size-4" />{de ? "Vorgang starten" : "Започни случай"}</Link></Button>
+          <Button asChild variant="outline" className="h-11 w-full sm:w-auto"><Link href="/vertraege">{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button>
         </div>
       </header>
 
@@ -73,7 +75,7 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
       </section>
 
       <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} />
-      <WorkplaceActionCenter firstName={firstName} nextAction={nextAction} reviewCount={reviewCount} documentCount={documents.length} contractCount={contracts.length} reminderCount={reminders.length} />
+      <WorkplaceActionCenter firstName={firstName} nextAction={nextAction} />
       <MissingInformationInterviewer questions={questions} />
       <DocumentAnalyzer initialDocuments={documents} />
     </div>

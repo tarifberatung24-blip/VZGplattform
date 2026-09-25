@@ -320,10 +320,6 @@ function LiveSmartDashboardPreview({ firstName, profile, contracts = [], documen
         <WorkplaceActionCenter
           firstName={firstName}
           nextAction={nextAction}
-          reviewCount={reviewCount}
-          documentCount={documents.length}
-          contractCount={contracts.length}
-          reminderCount={reminders.length}
         />
         <MissingInformationInterviewer questions={missingInformationQuestions} />
 

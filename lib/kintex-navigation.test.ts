@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { activeKintexModule, isKintexWorkspacePath, kintexModules } from "./kintex-navigation"
+import { activeKintexModule, isKintexWorkspacePath, isSelfChromedPath, kintexModules } from "./kintex-navigation"
 import { isProtectedAppPath } from "./supabase/auth-routing"
 import { stripLocale } from "./i18n/routing"
 
@@ -64,6 +64,36 @@ describe("KintexBG workspace navigation", () => {
       if (isKintexWorkspacePath(path) && stripLocale(path) !== "/protected") {
         expect(isProtectedAppPath(path)).toBe(true)
       }
+    }
+  })
+})
+
+describe("self-chromed routes", () => {
+  it("matches the office landing page in every locale", () => {
+    for (const path of ["/office", "/bg/office", "/de/office"]) {
+      expect(isSelfChromedPath(path)).toBe(true)
+    }
+  })
+
+  it("does not match the office case detail, which has no header of its own", () => {
+    // `/office/cases/[id]` renders content only, so suppressing the public header there would
+    // leave the page with no chrome at all.
+    for (const path of ["/office/cases/abc", "/bg/office/cases/abc", "/de/office/cases/abc"]) {
+      expect(isSelfChromedPath(path)).toBe(false)
+    }
+  })
+
+  it("does not match the HORIZON workspace or public routes", () => {
+    for (const path of ["/dashboard", "/bg/dashboard", "/bg/steuer", "/", "/de/uslugi", "/bg/auth/login"]) {
+      expect(isSelfChromedPath(path)).toBe(false)
+    }
+  })
+
+  it("never overlaps the workspace shell", () => {
+    // Overlap would put HORIZON account controls on a route an anonymous visitor can open.
+    for (const path of ["/office", "/bg/office", "/de/office"]) {
+      expect(isKintexWorkspacePath(path)).toBe(false)
+      expect(isProtectedAppPath(path)).toBe(false)
     }
   })
 })
