@@ -360,7 +360,8 @@ signatures for a joint assessment. NOT DONE, NOT FROZEN.
 - ✅ Send engine (`lib/horizon/send/`: provider abstraction, registry, recipient, policy, record, actions)
 - ✅ Generic SMTP transport (`nodemailer@7.0.9`; server-side env only; all-or-nothing config; STARTTLS required; secure certificate verification not configurable)
 - ✅ SMTP configuration validation (12 unit tests; partial/malformed config refuses rather than transmits)
-- ⬜ A real provider configured in a running environment (none configured; without it every send ends `PROVIDER_UNAVAILABLE` with nothing transmitted) — **re-confirmed 2026-09-25:** no `HORIZON_SMTP_*` present; empty env refuses naming all five keys, partial env names the absent ones, complete env yields a STARTTLS config. Genuine owner-only action.
+- ⬜ A real production provider configured in a running deployment (none configured; without it every send ends `PROVIDER_UNAVAILABLE` with nothing transmitted) — **re-confirmed 2026-09-25:** no `HORIZON_SMTP_*` present; empty env refuses naming all five keys, partial env names the absent ones, complete env yields a STARTTLS config. Genuine owner-only action.
+- ✅ End-to-end runtime verification against a configured transport — **PASS 2026-09-25** through the running application and the real UI with a live STARTTLS+AUTH SMTP server: generation → approval → send produced `SENT` with a provider message id, the received `DATA` decoded to the correct From/To/subject/body, duplicate send transmitted nothing, and the explicit resend transmitted exactly one more. Send-record guard wiring defect found and fixed in the same run (`pickSendableDraft`; 5 tests in `lib/horizon/send/marker.test.ts`).
 - ⬜ Committed automated test for the SMTP transport (transmits over the network; covered so far by a local live-server STARTTLS check, not by unit tests)
 - Gmail OAuth adapter
 - Microsoft OAuth adapter
@@ -368,8 +369,7 @@ signatures for a joint assessment. NOT DONE, NOT FROZEN.
 - ✅ Recipient preview (recorded address only, never derived; explicit per-send confirmation)
 - ✅ Explicit user approval before send (current approval required; per-send confirmation separate from content approval)
 - ✅ Send result + audit (blocked / unavailable / failed / sent; no success without a provider message id)
-- ✅ Duplicate protection (explicit resend required) and send-record guard (`IS_SEND_RECORD`)
-- ⬜ End-to-end runtime verification against a configured transport
+- ✅ Duplicate protection (explicit resend required) and send-record guard (`IS_SEND_RECORD`; the panel now targets the newest non-record draft, so the guard's explicit-resend path is reachable)
 - ⬜ FROZEN
 
 ## P12 — Agentur für Arbeit
@@ -582,6 +582,9 @@ remains reference-only.
 
 - ✅ P2 implementation pushed to `main` (`fcc6ce6`); CI green
 - ✅ P5 live DB/RLS verified; P12–P17 authenticated runtime E2E PASS
+- ✅ P11 live send E2E PASS 2026-09-25 (running app + real UI + live STARTTLS/AUTH SMTP; `SENT` with message id; duplicate transmitted nothing; confirmed resend transmitted once); send-record wiring defect found and fixed (`4f3680c`)
+- ✅ P12–P17 re-verified 2026-09-25 in one authenticated session: all five home module entries create the right module; task selectors (Agentur 4 / Jobcenter 3), tax-year selector (2025 selectable, 2026 present but disabled), document-kind correction (3 controls), and Kündigung generation all render and persist; `/de/vertraege` (P17) 200
+- ✅ P7 context-assistant rails re-verified live 2026-09-25 (401 no session, 400 malformed, 404 foreign/non-uuid, 503 provider gate last); P10 signature chain re-verified (approve-gated download `403` → real 62,836-byte PDF → signed 63,460-byte PDF with the drawn 1×1 image XObject); P16 explanation re-verified (classification + quote, deadline, risk caveat, next step)
 - ✅ Office Supabase clients accept `NEXT_PUBLIC_SUPABASE_ANON_KEY` (documented primary) — previously required only `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, silently degrading office surfaces to the preview repository (`503`)
 - ✅ Office case create no longer writes `cases.status` explicitly (DB default `NEW`); the write required an insert grant P5 deliberately withheld (`403 permission denied`)
 - Next: apply owner-side migrations to production, then production E2E acceptance
