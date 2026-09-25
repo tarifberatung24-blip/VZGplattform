@@ -280,8 +280,10 @@ generated through the authenticated browser with per-template Form-ID provenance
 
 Status: PARTIAL / REFERENCE FORM VERIFIED — a VISUAL signature is applied end-to-end for one
 verified reference form (Hauptvordruck ESt 1 A 2025, page 2), browser-verified 2026-09-25.
-Mechanism proven; breadth and the legal-strength/multi-signatory decisions remain. NOT DONE,
-NOT FROZEN.
+Mechanism proven. The former breadth gap is closed as inapplicable: the 8 Anlagen carry no
+signature wording and are attachments, so only the declaration is signable (locked in by test).
+What remains is owner decision, not implementation: legal strength (QES/PAdES) and drawing two
+signatures for a joint assessment. NOT DONE, NOT FROZEN.
 
 - ✅ Visual-signature scope stated plainly in code, record and UI
 - ✅ Cryptographic / PAdES / QES scope separated — the type vocabulary holds only

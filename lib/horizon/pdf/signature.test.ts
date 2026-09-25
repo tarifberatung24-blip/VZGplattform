@@ -107,6 +107,31 @@ describe("signature placement is bound to the verified template", () => {
     ).toBeNull()
   })
 
+  it("does not offer a placement for the Anlagen, which have no signature area", () => {
+    // The Anlagen are attachments to the declaration: their own text carries no
+    // "Unterschrift"/"eigenhändig" wording and no signature band, so only the
+    // main declaration (ESt 1 A) can be signed. This test makes that conclusion
+    // executable — if a future Anlage revision adds a signature area, the
+    // wording check below fails and forces a measured placement to be added.
+    const anlagen = [
+      "Anlage_N_2025.pdf",
+      "Anlage_Vorsorgeaufwand_2025.pdf",
+      "Anlage_Kind_2025.pdf",
+      "Anlage_Sonderausgaben_2025.pdf",
+      "Anlage_Haushaltsnahe_Aufwendungen_2025.pdf",
+      "Anlage_N_Doppelte_Haushaltsfuehrung_2025.pdf",
+      "Anlage_Aussergewoehnliche_Belastungen_2025.pdf",
+      "Anlage_Unterhalt_2025.pdf",
+    ]
+    for (const file of anlagen) {
+      const bytes = readFileSync(resolve(process.cwd(), "public/forms", file))
+      const text = bytes.toString("latin1")
+      // Cheap byte-level proxy for the wording check: PDF content streams keep
+      // the drawn literals, so a signature caption would appear here.
+      expect(/Unterschrift|eigenh/i.test(text)).toBe(false)
+    }
+  })
+
   it("binds to the hash the registry publishes for this template", () => {
     expect(placement.templateSourceSha256).toBe(template.sourceSha256)
   })

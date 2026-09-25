@@ -49,7 +49,7 @@ after a module meets the full DONE definition.
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); end-to-end answer owner-blocked on provider key | NO | YES |
 | P8 | DRAFT / REVIEW / USER APPROVAL | VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (acknowledgement enforced, draft released, download `403 not_approved` before → `200` after approval; API hash-binding `400`/`201`) | NO | YES |
 | P9 | OFFICIAL PDF FORM ENGINE | DONE — 9 OF 9 MAPPINGS VERIFIED 2026-09-25. Every FMS 2025 template carries a measured overlay mapping asserted against the real template bytes (label x/width and baseline-origin top within 0.6 pt); all 9 generate a real `%PDF-` artifact with page count preserved and source bytes untouched; 8 of 8 Anlagen produced drafts through the authenticated browser, each naming its own official Form-ID; full chain re-verified generate → approve → gated download → real signed PDF containing `Müller`/`Anna` | NO | YES |
-| P10 | SIGNATURE ENGINE | PARTIAL / REFERENCE FORM VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25 (PNG+date signed a real approved form → new VISUAL draft v2 with distinct signed SHA-256, page 2; approve → gated download real PDF 62,961 bytes) | NO | YES |
+| P10 | SIGNATURE ENGINE | PARTIAL / REFERENCE FORM VERIFIED — OWNER DECISION PENDING. AUTHENTICATED BROWSER E2E PASS 2026-09-25 (PNG+date signed a real approved form → new VISUAL draft v2 with distinct signed SHA-256, page 2; approve → gated download real PDF 62,961 bytes). Breadth gap closed as INAPPLICABLE 2026-09-25: the 8 Anlagen carry no signature wording and are attachments, so only the declaration is signable (locked in by test). Remaining: owner decision on QES/PAdES and two-signature joint assessment | NO | YES |
 | P11 | EMAIL CONNECTION + SEND ENGINE | IMPLEMENTED — SMTP TRANSPORT + SEND PLAN TESTS PASS (42); ABSENT PARTIAL CONFIG REFUSED BY DESIGN; NO REAL PROVIDER CONFIGURED (owner-only) | NO | YES |
 | P12 | AGENTUR FÜR ARBEIT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 4-task selector, task recorded as confirmed fact + audited) | NO | YES |
 | P13 | JOBCENTER | VERIFIED — AUTHENTICATED BROWSER E2E PASS (module entry, 3-task selector, task recorded as case fact + audited) | NO | YES |
@@ -663,12 +663,19 @@ after a module meets the full DONE definition.
   private-storage convention is reused for the signed artifact, including rollback of the
   uploaded object and the attached row if a later write fails. `encoding.ts` guards the date
   before pdf-lib measures it.
-- **MISSING:** (1) measured signature placements for the other 8 FMS templates — none are
-  populated, and an unverified template is refused rather than guessed at; (2) a legally stronger
-  signature (qualified/advanced electronic, or a cryptographic/PAdES signature) — not attempted,
-  not approved, and out of scope for a visual signature; (3) multi-signatory support (the
-  reference area is captioned "Unterschrift(en)", i.e. plural for spouses, and only a single
-  signature is drawn); (4) signature of documents that are not engine-generated PDFs.
+- **MISSING:** (1) ~~measured signature placements for the other 8 FMS templates~~ **RESOLVED AS INAPPLICABLE 2026-09-25:** the 8 Anlagen carry no signature wording at all
+  (no `Unterschrift`, no `eigenhändig`, no signature band on any page — checked over the real
+  template bytes, and `ESt_1_A_2025.pdf` is the only one of the 9 that does). Anlagen are
+  attachments to the declaration and are not separately signed, so a placement for them must not
+  be invented; `signature.test.ts` now locks this in, failing if a future revision adds such
+  wording. (2) a legally stronger signature (qualified/advanced electronic, or a
+  cryptographic/PAdES signature) — not attempted, not approved, and out of scope for a visual
+  signature; **owner decision**. (3) multi-signatory support (the reference area is captioned
+  "Unterschrift(en)", i.e. plural for spouses): the engine draws exactly one signature and
+  refuses a confirmed joint assessment with `multiple_signatures_required` rather than
+  under-signing, and refuses an unconfirmed joint-assessment fact with
+  `joint_assessment_unconfirmed`; drawing two signatures is a **product scope decision** left to
+  the owner. (4) signature of documents that are not engine-generated PDFs.
 - **DEPENDENCIES:** P8 (satisfied, reused), P9 (satisfied for the reference form), `pdf-lib`
   1.17.1 (owner-approved; `embedPng`/`embedJpg` used, no new dependency).
 - **BLOCKERS:** none technical for the reference form. The remaining DONE criteria below depend
