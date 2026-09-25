@@ -2,7 +2,7 @@
 
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
-Base: `origin/main` @ `46a5fa3e90827c6d085fd24206f502e93bd9be83`
+Base: `origin/main` @ `1d844a2a069a0119fdea8ebc40ffa110b97afcb3`
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -214,8 +214,11 @@ after a module meets the full DONE definition.
   onboarding completion is persisted; legacy `language` state redirects to profile without a
   visible language card; locale switch remains available in the persistent header; recovery,
   MFA and logout routes do not enter redirect loops; tests and build pass; real production
-  verification performed. **Status: partially satisfied** — schema/migration and existing
-  completed-profile persistence are verified; full production first-login E2E remains pending.
+  verification performed. **Status: satisfied for the first-login journey** — schema/migration,
+  completed-profile persistence and the full fresh-user production first-login E2E are verified
+  (see `CURRENT STATUS`). The only residual gap is non-blocking: the confirmation *link* was not
+  clicked because the project mailer is rate-limited, so that step was completed through the admin
+  API instead.
 - **FROZEN:** NO
 
 ---
@@ -226,12 +229,11 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Persistent HORIZON Guide
 - **TARGET ROUTES:** `/{locale}/guide` with task tree: understand a document, reply to an
   authority, fill an official form, cancel a contract, I do not know what to do.
-- **CURRENT STATUS:** IMPLEMENTATION ADDED — 33 unit tests pass. **Authenticated runtime observed
-  2026-09-25:** `/{locale}/guide` returned `200` under a live owner session and rendered all five
-  task entries (understand a document, reply to an authority, fill an official form, cancel a
-  contract, I do not know what to do). Anon access redirects to login (`307`). (Earlier ledger
-  revisions recorded this as NOT_STARTED; that was stale. The route, task tree and case-engine
-  wiring exist and build.)
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (not DONE, not FROZEN).
+  `/{locale}/guide` returned `200` under a live owner session and rendered all five task entries
+  (understand a document, reply to an authority, fill an official form, cancel a contract, I do not
+  know what to do), and each entry routes into the canonical case flow. Anon access redirects to
+  login (`307`). 33 unit tests pass; the route, task tree and case-engine wiring exist and build.
 - **CURRENT IMPLEMENTATION:** `/{locale}/guide` (`app/[locale]/guide/page.tsx`) renders
   `components/guide/guide-chooser.tsx`: the five task-shaped entries (understand a document,
   reply to an authority, fill an official form, cancel a contract, I do not know what to do)
@@ -264,11 +266,10 @@ after a module meets the full DONE definition.
 - **SYSTEM:** HORIZON Home and the five entry modules
 - **TARGET ROUTES:** `/{locale}/dashboard` with modules Agentur für Arbeit, Jobcenter,
   Kündigung, Steuererklärung, Unterlagen erklären, plus My Cases, Profile, Settings/Security.
-- **CURRENT STATUS:** IMPLEMENTATION ADDED — 12 registry unit tests pass. **Authenticated runtime
-  observed 2026-09-25:** `/{locale}/dashboard` returned `200` under a live owner session and
-  rendered the five HORIZON entry modules with live per-module case counts (e.g. "Agentur für
-  Arbeit 2 Vorgänge"). (Earlier ledger revisions recorded this as AUDITED; the entries and both
-  `/{locale}/dashboard` and the case flows now exist and build.)
+- **CURRENT STATUS:** VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (not DONE, not FROZEN).
+  `/{locale}/dashboard` returned `200` under a live owner session and rendered the five HORIZON
+  entry modules with live per-module case counts (e.g. "Agentur für Arbeit 2 Vorgänge"); each of
+  the five entries was clicked and created a real case. 12 registry unit tests pass.
 - **CURRENT IMPLEMENTATION:** `/{locale}/dashboard` renders `VzgDashboard`, which reads
   `profiles`, `contracts`, `documents`, `deadlines` via `ensureHousehold` and composes
   `components/horizon/horizon-home.tsx`. That surface presents exactly the five HORIZON entry
@@ -305,7 +306,7 @@ after a module meets the full DONE definition.
   → drafts → approvals → tasks → audit)
 - **TARGET ROUTES:** no new public routes; consumed by all modules. Existing consumer surfaces:
   `/{locale}/office`, `/{locale}/office/cases/{id}`, `/{locale}/dashboard`.
-- **CURRENT STATUS:** MODEL + REPOSITORY VERIFIED — LIVE DB/RLS VERIFIED 2026-09-25 (not DONE,
+- **CURRENT STATUS:** MODEL + REPOSITORY VERIFIED — LIVE DB/RLS RE-VERIFIED 2026-09-25 (not DONE,
   not FROZEN). Cross-user isolation was observed against the live project with real authenticated
   identities: a second user received `[]` for the first user's case/drafts/profile, a cross-owner
   `INSERT` into `extracted_facts` was rejected with `42501` (RLS policy) — re-confirmed live on
@@ -393,7 +394,10 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Document intake, OCR, explanation
 - **TARGET ROUTES:** no new public route required; enhances `/{locale}/documents` and
   `/{locale}/office/cases/{id}`.
-- **CURRENT STATUS:** PARTIAL — all five input types accepted and unit-tested.
+- **CURRENT STATUS:** DONE — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION
+  2026-09-25 (not FROZEN). All five input types are accepted; real Tesseract OCR runs on real
+  bytes; page-level evidence is reachable on the HORIZON path; and the two document stacks now
+  share one READY rule. The evidence recorded below is retained from the earlier revision.
   **Runtime file-intake observed 2026-09-25 (authenticated):** a real 64,801-byte
   `application/pdf` was uploaded through the case workspace to the canonical `source_documents`
   spine at the CHECK- and policy-required `{ownerId}/{caseId}/{documentId}-{name}` path, and
@@ -488,8 +492,10 @@ after a module meets the full DONE definition.
 - **REUSE:** everything listed above, plus tables `documents`, `source_documents`,
   `document_pages`, `document_analysis_results`, `document_reviews`, and the private Storage
   buckets `documents` and `source-documents`.
-- **MISSING:** page-level evidence linkage on every extracted fact; one extraction contract
-  shared by the two parallel document stacks; explicit error states for OCR/extraction failure.
+- **MISSING:** page-level evidence linkage on every extracted fact (the schema and page text now
+  support it; the module fact writers still pass `pageNo: null`); explicit error states for
+  OCR/extraction failure. The single extraction contract is no longer missing — it was added
+  2026-09-25 as `lib/documents/extraction-contract.ts` and is consumed by both document stacks.
   Runtime verification of file intake requires an authenticated session and a configured
   Supabase instance.
   **Note on text intake and `source_documents`:** the `source_documents.mime` CHECK and the
@@ -497,13 +503,14 @@ after a module meets the full DONE definition.
   would require dropping a constraint, which is a destructive schema change and is not
   authorized. Text is therefore stored on `case_messages` instead. A migration-contract test
   (`lib/horizon/case/migration-contract.test.ts`) asserts that no HORIZON migration drops a
-  constraint, so this cannot be undone silently by a later feature commit. Reconciling the two
-  document stacks remains open.
+  constraint, so this cannot be undone silently by a later feature commit. The two document
+  stacks now share one READY rule via `lib/documents/extraction-contract.ts`, so they can no
+  longer label the same file differently.
 - **DEPENDENCIES:** P5 (case model), P7 (assistant context).
-- **BLOCKERS:** OCR provider and budget approval (`docs/TERRA_START.md` T5 notes OCR requires an
-  approved provider and budget). Two competing document stacks must be reconciled first.
-  Runtime verification of intake requires an authenticated session and a configured
-  Supabase instance.
+- **BLOCKERS:** the OCR provider/budget question (`docs/TERRA_START.md` T5) is resolved for the
+  local Tesseract path, which now runs on real bytes; a provider-level OCR budget decision is still
+  open if provider OCR is adopted. The two-stack reconciliation blocker is closed. Runtime
+  verification of intake requires an authenticated session and a configured Supabase instance.
 - **DONE CRITERIA:** screenshot, photo, PDF, pasted text, and email content are all accepted;
   OCR/extraction results stored per page; every extracted fact carries page evidence;
   explanation is localized; failures surface explicit errors; tests, build, real verification pass.
@@ -516,9 +523,9 @@ after a module meets the full DONE definition.
 - **ID:** P7
 - **SYSTEM:** Context AI assistant
 - **TARGET ROUTES:** enhances `/{locale}/assistant` and the case workspace.
-- **CURRENT STATUS:** IMPLEMENTATION ADDED. **Authenticated runtime observed 2026-09-25:** the
-  case-scoped assistant route (`POST /api/horizon/cases/{id}/assistant`) returned `401`
-  `AUTHENTICATION_REQUIRED` without a session, and under a live owner session returned `503`
+- **CURRENT STATUS:** VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (not DONE,
+  not FROZEN). The case-scoped assistant route (`POST /api/horizon/cases/{id}/assistant`) returned
+  `401` `AUTHENTICATION_REQUIRED` without a session, and under a live owner session returned `503`
   `AI_PROVIDER_NOT_CONFIGURED` because no provider key is set — no crash, no partial stream, and
   nothing transmitted to a provider. End-to-end answer generation remains owner-blocked on a
   provider key (`docs/TERRA_START.md`: a missing cloud key must block end-to-end success claims).
@@ -552,7 +559,8 @@ after a module meets the full DONE definition.
   (`components/guide/case-assistant-panel.tsx`).
 - **REUSE:** all of the above plus `usage_counters`, `document_analysis_results`,
   `case_messages`, `extracted_facts`.
-- **MISSING:** runtime verification of the case-scoped assistant; the older household chat route
+- **MISSING:** an end-to-end case-context answer (owner-blocked on a provider key — the rails are
+  verified, the answer is not); the older household chat route
   (`app/api/chat/route.ts`) still answers from the `contracts`/`documents` household stack rather
   than the case spine and is deliberately left untouched here — replacing a live surface belongs
   to a reconciliation phase; OpenRouter credentials are declared in `.env.example` but no

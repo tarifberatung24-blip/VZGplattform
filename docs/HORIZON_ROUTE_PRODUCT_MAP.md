@@ -46,10 +46,10 @@ navigation and are not part of the current product.
 
 The insurance hub and the two partner landings are classified by North Star stage, not by an
 implementation phase. `HORIZON_MASTER_MAP.md` places contract comparison and partner handoff in
-`DISCOVER ã TRACK ã WARN ã COMPARE ã OPTIMIZE ã RENEW` and in `STAGE B ã HORIZON OPTIMIZE`, which
+`DISCOVER → TRACK → WARN → COMPARE → OPTIMIZE → RENEW` and in `STAGE B — HORIZON OPTIMIZE`, which
 names vehicle and business insurance among the examples. No phase in the approved P0 to P17
 sequence covers insurance partner surfaces, so none is assigned. `P13` is Jobcenter and `P14` is
-Kû¥ndigung.
+Kündigung.
 
 ## Authentication
 
@@ -95,12 +95,24 @@ sets are not identical: two routes below are public, as noted.
 | `/{locale}/guide/[caseId]` | AUTH | Guide case detail (P3) | IMPLEMENTED | KEEP | via Guide |
 | `/{locale}/vertraege` | AUTH | Contracts (P17) | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/documents` | AUTH | Documents (P6) | PARTIAL | KEEP | Yes |
-| `/{locale}/steuer` | AUTH | SteuererklûÊrung (P15) | IMPLEMENTED | KEEP | Yes |
+| `/{locale}/steuer` | AUTH | Steuererklärung (P15) | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | KEEP | via Steuern |
 | `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | KEEP | via Steuern |
 | `/{locale}/profil` | AUTH | Profile | IMPLEMENTED | KEEP | Yes |
+| `/{locale}/assistant` | AUTH | AI home-office chat (P7, KintexBG-era surface) | PARTIAL | LEGACY | No |
 | `/{locale}/finanzamt` | AUTH | Finanzamt surfaces | PARTIAL | KEEP | No |
 | `/{locale}/finanzbildung` | AUTH (proxy) | Financial education | PARTIAL | LEGACY | No |
+
+`/{locale}/assistant` renders `home-office-workspace` and is matched by `isKintexWorkspacePath()`
+and by `protectedPrefixes` (`/assistant`), so it draws the authenticated shell. It predates the
+case-scoped assistant surface and is not in the primary navigation; the P7 work lives in the case
+workspace (`components/guide/case-assistant-panel.tsx`) reached through `/guide/{caseId}`.
+
+`/{locale}/security` is **PUBLIC** (the Layer 0 trust page) and is listed in the public table
+above. `HORIZON_MASTER_MAP.md` section 2.2 still labels it `AUTH`, which contradicts
+`app/[locale]/security/page.tsx` (it renders `PublicLayerPage`); the public classification here is
+the correct one. The authenticated MFA surface is `/{locale}/protected/security`, listed under
+legacy surfaces.
 
 `/{locale}/dashboard` is `PARTIAL`: it still composites legacy-era blocks around the HORIZON
 module entry. Its data, chart and search behaviour is owned by TAR-10 and was not changed by
@@ -143,7 +155,7 @@ product decision with compatibility risk and no evidence of zero use was gathere
 | `/{locale}/protected` | REDIRECT | Forwards to `/{locale}/dashboard` (308) | LEGACY | LEGACY |
 | `/{locale}/protected/home-office` | AUTH | KintexBG-era home office workspace | LEGACY | LEGACY |
 | `/{locale}/protected/security` | AUTH | Legacy security surface | LEGACY | LEGACY |
-| `/{locale}/office` | AUTH | KintexBG-era office workspace | LEGACY | LEGACY |
+| `/{locale}/office` | PUBLIC (client shell, no server guard) | KintexBG-era office workspace | LEGACY | LEGACY |
 | `/{locale}/office/cases/[id]` | AUTH | KintexBG-era office case | LEGACY | LEGACY |
 
 `/{locale}/protected` is handled in `proxy.ts` and never renders.

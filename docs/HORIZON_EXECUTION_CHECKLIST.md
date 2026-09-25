@@ -31,9 +31,9 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ P4 five entry modules re-verified 2026-09-25: all five dashboard entries were clicked in a live
   session and each created a real case; account routes corrected to the ones that exist
   (`/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`, `/de/security`)
-- P1 owner/legal acceptance
-- P1 FROZEN after explicit owner acceptance
-- P2 migration applied to the project (owner-side authorized channel)
+- ✅ P1 owner/legal acceptance — recorded in the Build Ledger as DONE/FROZEN by owner acceptance 2026-09-25
+- ✅ P1 FROZEN after explicit owner acceptance
+- ✅ P2 migration applied to the project (owner-side authorized channel) — `20260925020000` applied; live `profiles.upsert()` returns `200`
 - P2 explicit owner acceptance
 - ✅ P5 canonical model decision (`public.cases`; `platform_*` retained for compatibility)
 - ✅ P5 implementation (repository, lifecycle, approval, audit, and ownership guards)
@@ -70,9 +70,9 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Production build
 - ✅ Tests
 - ✅ GitHub Actions CI green
-- Owner/legal review
-- Explicit owner acceptance
-- FROZEN
+- ✅ Owner/legal review — recorded in the Build Ledger as accepted with the P1 freeze
+- ✅ Explicit owner acceptance
+- ✅ FROZEN (owner accepted 2026-09-25)
 
 ## P2 — Auth + First Login + Onboarding
 
@@ -99,7 +99,8 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   `/de/dashboard`** with no onboarding re-entry. Persisted: `onboarding_step=completed`.
   (E-mail confirmation completed via admin API because the project mailer is rate-limited
   `429 over_email_send_rate_limit`; the confirmation link itself was not clicked.)
-- ⬜ Owner approval for schema change if one is required
+- ✅ Owner-side schema change applied to the project through the authorized channel
+  (`20260925020000_profiles_onboarding_update_id_grant.sql`); live `profiles.upsert()` `200`
 - ⬜ FROZEN — implementation and E2E complete; awaiting owner acceptance to freeze
 
 ## P3 — HORIZON Guide
@@ -157,12 +158,15 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 
 ## P6 — Document Intake / OCR / Explanation
 
-Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
+Status: DONE 2026-09-25 — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION — NOT FROZEN.
+The current HORIZON intake and legacy document flows coexist, but they now share one READY rule.
 
 - ✅ PDF/image upload capabilities exist
 - ✅ PDF.js/Tesseract capabilities exist
 - ✅ Document analysis/review components exist
-- Reconcile parallel document stacks
+- ✅ Reconcile parallel document stacks — closed 2026-09-25: one shared READY rule
+  (`lib/documents/extraction-contract.ts`) now used by both the HORIZON intake and the office
+  workflow path; a live text-free PDF through the real office API settles at `NEEDS_CONFIRMATION`
 - ✅ Pasted-text intake
 - ✅ Email-content intake
 - ✅ **Runtime OCR observed (2026-09-25):** real Tesseract over a real official template
@@ -185,7 +189,8 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
   way (`UPLOADED → READY`, pages 1–2). Cross-owner isolation re-verified (RLS)
 - ⬜ Persisting a `page_no`/evidence citation on facts created by the module actions (the schema and
   page text now support it; the module fact writers still pass `pageNo: null`)
-- ⬜ Unified extraction contract
+- ✅ Unified extraction contract — `lib/documents/extraction-contract.ts` (added with the
+  two-stack reconciliation 2026-09-25)
 - ⬜ Explicit OCR/extraction failure states
 - ⬜ Benchmark before adopting advanced OCR fallback
 - ⬜ FROZEN
@@ -287,8 +292,8 @@ generated through the authenticated browser with per-template Form-ID provenance
   `source-documents` bucket under `{ownerId}/{caseId}/...`, and is removed again if
   the draft or audit write fails, so storage and records never disagree
 - ✅ 70 PDF tests (27 new overlay tests); full suite now 591 pass; TSC, lint, build pass
-- ⬜ Verified overlay mappings for the other 8 FMS templates — each needs its own
-  measurement against its own hash. Populating them by guessing is prohibited
+- ✅ Verified overlay mappings for all 9 FMS 2025 templates — closed 2026-09-25: each mapping was
+  measured against its own template hash and re-measured by the coordinate-integrity test
 - ⬜ Agentur fuer Arbeit and Jobcenter official templates
 - ✅ **Preview/download surface verified live (2026-09-25):** after approval the gated
   `/api/horizon/cases/{id}/tax-form` route returned `200` and its signed URL served the stored
@@ -341,7 +346,9 @@ signatures for a joint assessment. NOT DONE, NOT FROZEN.
   image and date extract inside the measured area; date clear of the image; the
   pre-existing QR untouched; page count unchanged; all page-1 values preserved
 - ✅ 31 dedicated signature tests; full suite 591 pass; TSC, lint, build pass
-- ⬜ Measured signature placements for the other 8 FMS templates
+- ✅ Measured signature placements for the other 8 FMS templates — closed as INAPPLICABLE
+  2026-09-25: the 8 Anlagen carry no signature wording and are attachments, so only the
+  declaration is signable; locked in by `lib/horizon/pdf/signature.test.ts`
 - ⬜ Owner decision: whether a legally stronger signature is required and, if so, which
 - ⬜ Multi-signatory support ("Unterschrift(en)" covers spouses; one signature drawn)
 - ✅ Runtime/E2E verification of the signing engine against the live approved artifact (2026-09-25)
@@ -543,32 +550,40 @@ remains reference-only.
 
 ## Shared Engines
 
-- ✅ E1 Case Engine — existing implementations audited
-- ✅ E2 Document Intake/OCR — existing capabilities identified
-- ✅ E1 canonical case model (`lib/horizon/case`, owner-scoped `public.cases`)
-- E1 runtime/RLS verification against a migrated database
-- E2 reconciliation/completion
-- E3 Translation Layer
-- E4 Risk/Urgency Engine
-- E5 Context AI Assistant orchestration
-- E6 Draft → Review → Approval canonical flow
-- E7 Official PDF Form Engine
-- E8 Signature Engine
-- E9 Email Connection & Send
-- E10 Audit / Tasks / Deadlines canonical integration
+These engines are now delivered inside the phase records above; this list tracks them as engines
+rather than as phases.
+
+- ✅ E1 Case Engine — canonical owner-scoped `public.cases`; runtime/RLS verification done
+  (two real authenticated users, 2026-09-25); `platform_*` preserved as legacy
+- ✅ E2 Document Intake/OCR — five input types, real Tesseract OCR, one shared READY rule
+  (`lib/documents/extraction-contract.ts`); two-stack reconciliation closed 2026-09-25 (P6)
+- ⬜ E3 Translation Layer — the deterministic translator does not yet produce a real translation
+  for non-`de` locales
+- ⬜ E4 Risk/Urgency Engine — risk indication exists in P16; a shared risk/urgency engine is not
+  yet extracted
+- ✅ E5 Context AI Assistant orchestration — rails/context verified live; end-to-end answer
+  owner-blocked on a provider key (P7)
+- ✅ E6 Draft → Review → Approval canonical flow — authenticated browser E2E pass (P8)
+- ✅ E7 Official PDF Form Engine — 9 of 9 FMS 2025 mappings verified (P9)
+- ◐ E8 Signature Engine — visual signature verified for the reference form; owner decision pending
+  on legal strength and multi-signatory support (P10)
+- ✅ E9 Email Connection & Send — live send E2E pass; production provider is an owner action (P11)
+- ◐ E10 Audit / Tasks / Deadlines canonical integration — audit and task spines are in use across
+  P3–P17; deadlines hang off case facts (P16); no dedicated extraction into a shared engine yet
 
 ## Research
 
-- Official Agentur für Arbeit forms/source catalog
-- Official Jobcenter forms/source catalog
-- Official Kindergeld/Kurzarbeitergeld sources where relevant
-- Official FMS/BMF/Finanzamt forms/source catalog
-- PDF library decision record
-- Signature decision record
-- OCR fallback benchmark/research
-- Product-tour decision
-- Email/OAuth provider decision
-- Workflow/state-machine decision
+- ✅ Official Agentur für Arbeit forms/source catalog — implemented in P12 (verified live)
+- ✅ Official Jobcenter forms/source catalog — `docs/research/P13_JOBCENTER_OFFICIAL_SOURCES.md`
+- ⬜ Official Kindergeld/Kurzarbeitergeld sources where relevant
+- ✅ Official FMS/BMF/Finanzamt forms/source catalog — `docs/research/P15_STEUER_OFFICIAL_SOURCES.md`
+- ✅ PDF library decision record — `pdf-lib` 1.17.1 approved as the single writer (P9)
+- ⬜ Signature decision record — owner decision on QES/PAdES and multi-signatory (P10)
+- ⬜ OCR fallback benchmark/research
+- ⬜ Product-tour decision
+- ⬜ Email/OAuth provider decision — generic SMTP shipped; production provider is an owner action (P11)
+- ◐ Workflow/state-machine decision — the 14-state workplace machine and the HORIZON case lifecycle
+  are implemented; a single documented decision record is still owed
 
 ## Agent Queue
 
@@ -582,9 +597,11 @@ remains reference-only.
 
 - ✅ P2 implementation pushed to `main` (`fcc6ce6`); CI green
 - ✅ P5 live DB/RLS verified; P12–P17 authenticated runtime E2E PASS
+- ✅ P7 context-assistant rails re-verified live 2026-09-25 (401 no session, 400 malformed, 404 foreign/non-uuid, 503 provider gate last); P10 signature chain re-verified (approve-gated download `403` → real 62,836-byte PDF → signed 63,460-byte PDF with the drawn 1×1 image XObject); P16 explanation re-verified (classification + quote, deadline, risk caveat, next step)
+- ✅ P8 draft/review/approval E2E PASS 2026-09-25 (acknowledgement enforced, draft released, gated download `403 not_approved` before → `200` after; API hash-binding `400`/`201`); idempotent re-approval of unchanged content fixed (`c24090a`)
+- ✅ P9 9-of-9 FMS 2025 mappings verified 2026-09-25 (each mapping asserted against its own template bytes; all 9 generate a real `%PDF-`)
 - ✅ P11 live send E2E PASS 2026-09-25 (running app + real UI + live STARTTLS/AUTH SMTP; `SENT` with message id; duplicate transmitted nothing; confirmed resend transmitted once); send-record wiring defect found and fixed (`4f3680c`)
 - ✅ P12–P17 re-verified 2026-09-25 in one authenticated session: all five home module entries create the right module; task selectors (Agentur 4 / Jobcenter 3), tax-year selector (2025 selectable, 2026 present but disabled), document-kind correction (3 controls), and Kündigung generation all render and persist; `/de/vertraege` (P17) 200
-- ✅ P7 context-assistant rails re-verified live 2026-09-25 (401 no session, 400 malformed, 404 foreign/non-uuid, 503 provider gate last); P10 signature chain re-verified (approve-gated download `403` → real 62,836-byte PDF → signed 63,460-byte PDF with the drawn 1×1 image XObject); P16 explanation re-verified (classification + quote, deadline, risk caveat, next step)
 - ✅ P14 Kündigung chain re-verified 2026-09-25 (letter `404` before generation, `403 not_approved` before approval, real `%PDF-` after; text carries the customer's wording and "zum nächstmöglichen Zeitpunkt" — no invented notice period); P15 tax year 2025 persisted as a confirmed case fact with 2026 present-but-disabled; P17 contract→case link re-verified 2026-09-25 (audited `case_created`/`contract_linked`/`facts_added`, facts confirmed only for a `confirmed` contract, unconfirmed for `needs_review`)
 - ✅ Office Supabase clients accept `NEXT_PUBLIC_SUPABASE_ANON_KEY` (documented primary) — previously required only `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, silently degrading office surfaces to the preview repository (`503`)
 - ✅ Office case create no longer writes `cases.status` explicitly (DB default `NEW`); the write required an insert grant P5 deliberately withheld (`403 permission denied`)
