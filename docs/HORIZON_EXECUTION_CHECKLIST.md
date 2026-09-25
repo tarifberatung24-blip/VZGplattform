@@ -77,10 +77,15 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Proxy gate failure logging (no secrets; no lockout)
 - ✅ Typecheck / Lint / i18n / Tests / Production build
 - ✅ GitHub Actions CI green on the P2 commit
-- Owner-side migration applied to the project
-- Signup → onboarding → dashboard end-to-end verification
-- Owner approval for schema change if one is required
-- FROZEN
+- ⬜ Owner-side migration applied to the project — **re-confirmed blocked 2026-09-25:**
+  `profiles.upsert()` with `Prefer: resolution=merge-duplicates` against the live project still
+  returns `403` / `42501 permission denied for table profiles`. `ignore-duplicates` returns `201`,
+  matching the diagnosis exactly (the UPDATE branch needs `UPDATE (id)`). The Supabase management
+  API token is still rejected (`401 JWT failed verification`), and the environment holds no database
+  password and no SQL-executing RPC, so the one-line migration cannot be applied from here.
+- ⬜ Signup → onboarding → dashboard end-to-end verification — blocked on the migration above
+- ⬜ Owner approval for schema change if one is required
+- ⬜ FROZEN
 
 ## P3 — HORIZON Guide
 
@@ -145,11 +150,14 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 - Reconcile parallel document stacks
 - ✅ Pasted-text intake
 - ✅ Email-content intake
-- Page-level evidence for extracted facts
-- Unified extraction contract
-- Explicit OCR/extraction failure states
-- Benchmark before adopting advanced OCR fallback
-- FROZEN
+- ✅ **Runtime OCR observed (2026-09-25):** real Tesseract over a real official template
+  (`ESt_1_A_2025.pdf`, page 1) returned 1,650 chars at 0.70 confidence, correctly reading the
+  printed title and section labels
+- ⬜ Page-level evidence for extracted facts
+- ⬜ Unified extraction contract
+- ⬜ Explicit OCR/extraction failure states
+- ⬜ Benchmark before adopting advanced OCR fallback
+- ⬜ FROZEN
 
 ## P7 — Context AI Assistant
 
@@ -157,14 +165,16 @@ Status: PARTIAL. The current HORIZON intake and legacy document flows coexist.
 - ✅ Cerebras integration exists
 - ✅ Rate-limit / quota / circuit-breaker pieces exist
 - ✅ Intent / missing-information components exist
-- Canonical case-context persistence
-- Orchestrator/tool boundary
-- Model routing/fallback policy
-- Prompt/model version registry
-- Per-module guard rails
-- Provenance on AI outputs
-- End-to-end case-context verification
-- FROZEN
+- ✅ Canonical case-context persistence
+- ⬜ Orchestrator/tool boundary
+- ⬜ Model routing/fallback policy
+- ✅ Prompt/model version registry
+- ✅ Per-module guard rails
+- ✅ Provenance on AI outputs
+- ✅ **Authenticated runtime observed (2026-09-25):** case assistant route `401` anon, `503`
+  `AI_PROVIDER_NOT_CONFIGURED` under a live session — no crash, nothing transmitted
+- ⬜ End-to-end case-context answer generation — blocked on an owner-provided provider key
+- ⬜ FROZEN
 
 ## P8 — Draft / Review / User Approval
 

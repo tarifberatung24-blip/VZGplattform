@@ -178,10 +178,15 @@ after a module meets the full DONE definition.
   which cannot be applied with the credentials available in this environment (no management
   PAT, no database password, and no SQL-executing RPC on the project).
 - **DEPENDENCIES:** P0; consumes frozen P1 public entry points without modifying them.
-- **BLOCKERS:** owner-side migration application (`20260925020000`). Until it is applied,
-  an authenticated production user with an existing `profiles` row cannot persist onboarding
-  or profile changes (`42501`). Once applied, the remaining gate is authenticated production
-  runtime verification with an authorized test/existing user.
+- **BLOCKERS:** owner-side migration application (`20260925020000`). **Re-confirmed live
+  2026-09-25:** `profiles.upsert()` (`Prefer: resolution=merge-duplicates`) still returns `403`
+  `42501 permission denied for table profiles` against the production project, while
+  `ignore-duplicates` (INSERT branch) returns `201` — the diagnosis is exact and unchanged. The
+  Supabase management token is still rejected (`401 JWT failed verification`); no database password
+  and no SQL-executing RPC are available here, so this is a genuine owner-only action. Until it is
+  applied, an authenticated production user with an existing `profiles` row cannot persist
+  onboarding or profile changes (`42501`). Once applied, the remaining gate is authenticated
+  production runtime verification with an authorized test/existing user.
 - **DONE CRITERIA:** sign up → e-mail confirmation → login → first-login check → minimal profile
   → short click guide → dashboard works end-to-end; the tour runs once and is resumable;
   onboarding completion is persisted; legacy `language` state redirects to profile without a
@@ -352,8 +357,13 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Document intake, OCR, explanation
 - **TARGET ROUTES:** no new public route required; enhances `/{locale}/documents` and
   `/{locale}/office/cases/{id}`.
-- **CURRENT STATUS:** PARTIAL — all five input types accepted and unit-tested; runtime verification
-  pending (commits `b708697`, `3bff5c0`).
+- **CURRENT STATUS:** PARTIAL — all five input types accepted and unit-tested.
+  **Runtime OCR observed 2026-09-25:** the real Tesseract path (`ocrScannedPdfPages`) ran against
+  a real official template (`public/forms/ESt_1_A_2025.pdf`, page 1) and returned 1,650 characters
+  at 0.70 confidence, correctly reading the printed title ("Hauptvordruck ESt 1 A",
+  "Einkommensteuererklärung", "Sparzulage"). Provider-level OCR is therefore exercised on real
+  bytes; page-level evidence linkage and the two-stack reconciliation remain open.
+  (commits `b708697`, `3bff5c0`).
 - **CURRENT IMPLEMENTATION:** validated upload with canonical-project guard
   (`lib/documents/validation.ts` + `app/api/documents/upload/route.ts`);
   text extraction (`lib/documents/extraction.ts`); contract extraction
@@ -413,7 +423,13 @@ after a module meets the full DONE definition.
 - **ID:** P7
 - **SYSTEM:** Context AI assistant
 - **TARGET ROUTES:** enhances `/{locale}/assistant` and the case workspace.
-- **CURRENT STATUS:** IMPLEMENTATION ADDED — runtime verification pending (commit `f6ec2d6`).
+- **CURRENT STATUS:** IMPLEMENTATION ADDED. **Authenticated runtime observed 2026-09-25:** the
+  case-scoped assistant route (`POST /api/horizon/cases/{id}/assistant`) returned `401`
+  `AUTHENTICATION_REQUIRED` without a session, and under a live owner session returned `503`
+  `AI_PROVIDER_NOT_CONFIGURED` because no provider key is set — no crash, no partial stream, and
+  nothing transmitted to a provider. End-to-end answer generation remains owner-blocked on a
+  provider key (`docs/TERRA_START.md`: a missing cloud key must block end-to-end success claims).
+  (commit `f6ec2d6`).
 - **CURRENT IMPLEMENTATION:** `/{locale}/assistant` renders `home-office-workspace`;
   `app/api/chat/route.ts` streams via `@ai-sdk/groq` with rate limiting;
   case-message routing (`lib/office/ai/routing.ts`, prompt version `language-router-intent-v1`);
