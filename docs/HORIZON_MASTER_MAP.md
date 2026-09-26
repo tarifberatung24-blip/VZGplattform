@@ -233,13 +233,15 @@ Facts only. Nothing here is deleted, redirected, or renamed. Branding drift is r
   page components as the non-localized files.
 - `proxy.ts` redirects every non-localized, non-API path to `/{locale}{path}`, using the
   `finanzbg_locale` cookie or the default locale (`bg`). It also:
+  - applies the N7 legacy redirects from `lib/navigation/legacy-redirects.ts` before the localized
+    catch-all renders (see §2.4);
   - redirects `/{locale}/auth/callback` and `/{locale}/auth/logout` to the unlocalized handler (307);
   - redirects `/protected` (and `/{locale}/protected`) to `/dashboard`;
   - preserves `/api`, `/_next`, and `/favicon.ico` untouched.
 - Two i18n systems coexist: `i18n/routing.ts` (`next-intl`, locales `bg`+`de`, default `bg`)
   and `lib/i18n/routing.ts` + `lib/i18n/dictionaries.ts` (custom `bg`+`de`, cookie `finanzbg_locale`).
-- The catch-all key `emailGenerator` (camelCase) resolves `/{locale}/emailGenerator`, while
-  `app/[locale]/email-generator/page.tsx` serves `/{locale}/email-generator`. Both exist.
+- The catch-all key `emailGenerator` (camelCase) was removed by N7; `/{locale}/email-generator` is
+  served by `app/[locale]/email-generator/page.tsx`.
 
 ### 2.2 Page routes
 
@@ -251,12 +253,12 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `/` | PUBLIC | root, redirects to locale | VZGplattform (metadata) | redirect → cookie/default `bg` | — (proxy) | none | ACTIVE | Phase 1 | REPLACE LATER |
 | `/{locale}` | PUBLIC | marketing home | mixed HAMMAL / VZG CONSULT | `bg`/`de` via catch-all | `app/page.tsx` `Hero`, `OpportunityCheck`, `FinancialOsOverview` | none | ACTIVE | Phase 1 | REPLACE LATER |
-| `/{locale}/check` | PUBLIC | opportunity check entry | KintexBG-era | `bg`/`de` | `app/check/page.tsx` | client-only | PARTIAL | Phase 1 | LEGACY |
-| `/{locale}/uslugi` | PUBLIC | services (BG slug) | mixed | `bg`/`de` | `app/uslugi/page.tsx` | `module-workspaces` | ACTIVE | Phase 1 | LEGACY |
+| `/{locale}/check` | REDIRECT | opportunity check entry | KintexBG-era | redirect → `/{locale}/dashboard` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
+| `/{locale}/uslugi` | REDIRECT | services (BG slug) | mixed | redirect → `/{locale}/functions` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
 | `/{locale}/anspruch` | PUBLIC | entitlement navigator | mixed, DE copy | `bg`/`de` | `app/anspruch/page.tsx` | `EntitlementNavigator` | PARTIAL | Phase 4 / 12–13 | REUSE |
 | `/{locale}/kindergeld` | PUBLIC | Kindergeld navigator | `KintexBG` in title | `bg`/`de` | `app/kindergeld/page.tsx` | `/api/kindergeld/draft`, `kindergeld_cases` | PARTIAL | Phase 4 (social module) | REUSE |
-| `/{locale}/produkte` | PUBLIC | product overview | mixed | `bg`/`de` | `app/produkte/page.tsx` | static | ACTIVE | Phase 1 | LEGACY |
-| `/{locale}/tarife` | PUBLIC | tariffs | KintexBG-era | `bg`/`de` | `app/tarife/page.tsx` | `affiliate-offers` | ACTIVE | Phase 17 (partner) | LEGACY |
+| `/{locale}/produkte` | REDIRECT | product overview | mixed | redirect → `/{locale}/functions` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
+| `/{locale}/tarife` | REDIRECT | tariffs | KintexBG-era | redirect → `/{locale}/versicherungen` (N7) | — | none | LEGACY | Phase 17 (partner) | LEGACY |
 | `/{locale}/za-nas` | PUBLIC | about (BG slug) | HAMMAL in messages | `bg`/`de` | `app/za-nas/page.tsx` | static | ACTIVE | Phase 1 | LEGACY |
 | `/{locale}/zayavka` | PUBLIC | service request (BG) | mixed | `bg`/`de` | `app/zayavka/page.tsx` | `/api/service-requests` → n8n | PARTIAL | Phase 1 / 17 | LEGACY |
 | `/{locale}/anfrage` | PUBLIC | service request (DE) | mixed | `bg`/`de` | re-export of `zayavka` | `/api/service-requests` → n8n | PARTIAL | Phase 1 / 17 | LEGACY |
@@ -280,9 +282,10 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | `/{locale}/dashboard` | PROTECTED | main dashboard | VZGplattform / mixed | `bg`/`de` | `VzgDashboard` | `profiles`, `contracts`, `documents`, `deadlines`, `ensureHousehold` | PARTIAL | Phase 4 (HORIZON HOME) | REPLACE LATER |
 | `/{locale}/protected` | PROTECTED | alias | — | redirect | proxy → `/dashboard` | none | LEGACY | Phase 4 | LEGACY |
 | `/{locale}/assistant` | AUTH | AI home-office chat | KintexBG | `bg`/`de` | `home-office-workspace` | `/api/chat` (Groq) | PARTIAL | Phase 7 (Context AI Assistant) | REUSE |
-| `/{locale}/protected/home-office` | AUTH | alias of assistant | KintexBG | `bg`/`de` | `home-office-workspace` | `/api/chat` (Groq) | PARTIAL | Phase 7 | LEGACY |
+| `/{locale}/protected/home-office` | REDIRECT | alias of assistant | KintexBG | redirect → `/{locale}/assistant` (N7) | — | none | LEGACY | Phase 7 | LEGACY |
 | `/{locale}/security` | PUBLIC | trust page (Layer 0) | HORIZON by VZG | `bg`/`de` | `public-layer-page` | none | ACTIVE | Phase 1 | KEEP |
-| `/{locale}/protected/security` | AUTH | interim MFA/security surface | HORIZON by VZG | `bg`/`de` | `mfa-settings` | Supabase MFA | PARTIAL | Phase 2 (security) | LEGACY |
+| `/{locale}/konto/sicherheit` | AUTH | account security / MFA | HORIZON by VZG | `bg`/`de` | `mfa-settings` | Supabase MFA | ACTIVE | Phase 2 (security) | REUSE |
+| `/{locale}/protected/security` | REDIRECT | legacy security surface | HORIZON by VZG | redirect → `/{locale}/konto/sicherheit` (N7) | — | none | LEGACY | Phase 2 (security) | LEGACY |
 | `/{locale}/profil` | AUTH | financial profile form | mixed | `bg`/`de` | `profile-form` | `profiles`, `ensureHousehold` | PARTIAL | Phase 2 / 4 (Profile) | REUSE |
 | `/{locale}/finanzamt` | AUTH | Finanzamt requests | mixed DE copy | DE-only copy | `finanzamt-request-form` | `finanzamt_requests` | PARTIAL | Phase 15 | REUSE |
 | `/{locale}/steuer` | AUTH | tax questionnaire + registry | mixed | DE-only copy | `tax-questionnaire`, `tax-form-registry`, `tax-pipeline-review` | `tax_form_registry`, `tax_cases` | PARTIAL | Phase 15 | REUSE |
@@ -291,11 +294,14 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | `/{locale}/vertraege` | AUTH | contracts workspace | mixed | DE-only copy | `contracts-workspace`, `contract-center-workspace` | `contracts`, `ensureHousehold` | PARTIAL | Phase 17 | REUSE |
 | `/{locale}/documents` | AUTH | documents workspace | mixed | `bg`/`de` | `documents-workspace`, `document-intake`, `document-facts-review` | `documents`, `/api/documents/*` | PARTIAL | Phase 6 / 16 | REUSE |
 | `/{locale}/finanzbildung` | AUTH | financial education | mixed | `bg`/`de` | `financial-education-page` | `financial_education_lessons` | PARTIAL | Phase 4 (secondary) | REUSE |
-| `/{locale}/office` | PUBLIC SHELL (no server guard) | KintexBG communication prototype | `KintexBG` | `bg`/`de`/`ru`/`pl`/`sr`/`ro` (inline) | `app/[locale]/office/page.tsx`, `CaseWorkspace` | `/api/office/*` | PARTIAL | Phase 5 (shared case engine) | REUSE |
-| `/{locale}/office/cases/{id}` | AUTH | case detail | KintexBG | `bg`/`de` | `app/[locale]/office/cases/[id]/page.tsx` | `getCaseDetail`, `cases`, `source_documents` | PARTIAL | Phase 5 | REUSE |
+| `/{locale}/office` | REDIRECT | KintexBG communication prototype | `KintexBG` | redirect → `/{locale}/guide` (N7) | — | none | LEGACY | Phase 5 (shared case engine) | LEGACY |
+| `/{locale}/office/cases/{id}` | REDIRECT | KintexBG case detail | `KintexBG` | redirect → `/{locale}/guide/{caseId}` (N7) | — | none | LEGACY | Phase 5 | LEGACY |
 
-Distinct page URL patterns: **43** (28 public, 15 authenticated).
-`page.tsx` files: **48** (38 non-localized + 10 localized-only).
+Reachable route set: enumerated in [`FINAL_SITE_MAP.md`](./FINAL_SITE_MAP.md) §1–§10, which is the
+source of truth for which patterns are reachable after N7.
+`page.tsx` files: **52** (34 non-localized + 18 localized-only; the localized count includes the
+`app/[locale]/[[...slug]]` catch-all). `route.ts` files: **37** (including the localized
+`/{locale}/go/[offer]` mirror).
 
 ### 2.3 Route handlers (`route.ts`)
 
@@ -335,21 +341,38 @@ Distinct page URL patterns: **43** (28 public, 15 authenticated).
 | `/auth/logout` | PUBLIC | sign out | Supabase Auth | ACTIVE | Phase 2 |
 | `/go/{offer}` | PUBLIC | affiliate redirect | `lib/affiliate-offers` | ACTIVE | Phase 17 |
 
-Route handler files: **33** — 30 under `/api/*`, 2 auth handlers (`/auth/callback`, `/auth/logout`),
-and 1 public redirect (`/go/{offer}`).
+Route handler files: **37** — 33 under `/api/*`, 2 auth handlers (`/auth/callback`, `/auth/logout`),
+and 2 public affiliate redirects (`/go/{offer}` and its `/{locale}/go/{offer}` mirror).
 
-### 2.4 Legacy inventory (report only — do not delete yet)
+### 2.4 Legacy inventory (disposition recorded; N7 executed the approved subset)
 
-Legacy / pre-HORIZON route patterns (approx. **12**): `/{locale}/check`, `/{locale}/uslugi`,
-`/{locale}/produkte`, `/{locale}/za-nas`, `/{locale}/tarife`, `/{locale}/zayavka`,
-`/{locale}/anfrage`, `/{locale}/angebote/{offer}`, `/{locale}/email-generator`,
-`/{locale}/office`, `/{locale}/affiliate-hinweis`, `/{locale}/protected`.
+Legacy / pre-HORIZON route patterns. N7 redirected the approved candidates to canonical
+destinations; the rest stay reachable. See `FINAL_SITE_MAP.md` §7–§8 for the per-route disposition.
+
+| Pattern | N7 disposition |
+|---|---|
+| `/{locale}/check` | REDIRECT → `/{locale}/dashboard` |
+| `/{locale}/uslugi` | REDIRECT → `/{locale}/functions` |
+| `/{locale}/produkte` | REDIRECT → `/{locale}/functions` |
+| `/{locale}/tarife` | REDIRECT → `/{locale}/versicherungen` |
+| `/{locale}/office` | REDIRECT → `/{locale}/guide` |
+| `/{locale}/office/cases/{id}` | REDIRECT → `/{locale}/guide/{caseId}` |
+| `/{locale}/protected/home-office` | REDIRECT → `/{locale}/assistant` |
+| `/{locale}/protected/security` | REDIRECT → `/{locale}/konto/sicherheit` |
+| `/{locale}/onboarding/language` | REDIRECT → `/{locale}/onboarding/profile` |
+| `/{locale}/emailGenerator` (catch-all key) | REMOVED |
+| `/{locale}/za-nas`, `/{locale}/app`, `/{locale}/kindergeld` | KEEP |
+| `/{locale}/zayavka`, `/{locale}/anfrage` | KEEP (live lead channel) |
+| `/{locale}/angebote/{offer}`, `/{locale}/email-generator` | KEEP |
+| `/{locale}/affiliate-hinweis`, `/{locale}/protected` | KEEP (redirect already in place) |
 
 Legacy platform references (report only — do not delete yet):
 `KintexBG` (~77 occurrences), `HAMMAL` (~26 occurrences),
 Supabase project refs `ambhlmdrfsgdbbljjsic` (`kintex-assistant-eu`) and
 `numyqalfphyrnedlfzfs` (`ai-home-office-v1-eu`), `finanzberaterbg.de` `metadataBase`,
-`lib/kintex-*.ts`, `lib/office/**` naming, `source-documents` bucket.
+`lib/kintex-*.ts`, `lib/office/**` naming, `source-documents` bucket. N7 removed only the dead
+navigation/UI consumers; `/api/office/**` and `lib/office/**` are retained because the guide uses
+the shared case engine.
 
 ---
 
@@ -373,14 +396,14 @@ These are TARGET routes. They are not required to exist yet. Nothing is redirect
 
 - Public Layer 0 must be usable in every supported UI locale.
 - `/functions` replaces the current sprawl of separate product/marketing routes.
-- `/security` is a public trust page and is distinct from the authenticated
-  `/{locale}/protected/security` account-security page. `/{locale}/security` itself is public.
+- `/security` is a public trust page and is distinct from the authenticated account-security
+  surface `/{locale}/konto/sicherheit`. `/{locale}/security` itself is public.
 
 ### 3.2 LAYER 1 — FIRST LOGIN / ONBOARDING
 
 ```text
 /{locale}/onboarding
-├── /language
+├── /language   (legacy step; redirects to /profile)
 ├── /profile
 ├── /tour
 └── /finish
@@ -393,7 +416,6 @@ SIGN UP
 → EMAIL CONFIRMATION
 → LOGIN
 → FIRST-LOGIN CHECK
-→ LANGUAGE
 → MINIMAL PROFILE
 → SHORT CLICK GUIDE
 → DASHBOARD
@@ -401,7 +423,8 @@ SIGN UP
 
 - Onboarding is a short first-login tour, aligned with the feasibility audit; not seven mandatory screens.
 - First-login state must be persisted (profile-level), so the tour runs once and is resumable.
-- No onboarding route exists today.
+- Implemented by P2: `/{locale}/onboarding/{profile,tour,finish}` exist and are gated; the legacy
+  `/language` step redirects to `/profile`, and language selection lives in the persistent header.
 
 ### 3.3 PERSISTENT HORIZON GUIDE
 

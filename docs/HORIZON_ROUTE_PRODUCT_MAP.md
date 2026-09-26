@@ -10,6 +10,8 @@ This file does not override either, and it is not a competing master plan.
 
 Locale prefix: every localized route exists for both `bg` and `de` (`/{locale}/...`).
 Root-level routes without a locale are redirected to the locale-prefixed form by `proxy.ts`.
+`proxy.ts` also applies the N7 legacy redirects (`lib/navigation/legacy-redirects.ts`) before the
+localized catch-all renders; rows marked `REDIRECT` are not destinations.
 
 ## Legend
 
@@ -38,11 +40,13 @@ body has no session check and relies on the middleware gate.
 | `/{locale}/angebote/[offer]` | PUBLIC | Generic affiliate landing | IMPLEMENTED | REUSE |
 | `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis` | PUBLIC | Legal | IMPLEMENTED | KEEP |
 | `/{locale}/anfrage`, `/{locale}/zayavka`, `/anfrage`, `/zayavka` | PUBLIC | Lead capture | IMPLEMENTED | LEGACY |
-| `/check`, `/uslugi`, `/kindergeld`, `/produkte`, `/tarife`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces | LEGACY | LEGACY |
+| `/check`, `/uslugi`, `/produkte`, `/tarife` | REDIRECT | Pre-HORIZON marketing surfaces | LEGACY | LEGACY |
+| `/kindergeld`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces | LEGACY | LEGACY |
 
-`/check`, `/uslugi`, `/kindergeld`, `/produkte`, `/tarife`, `/za-nas` and `/app` are reachable
-only through the legacy marketing tree. They are not linked from the HORIZON workspace
-navigation and are not part of the current product.
+`/check` → `/{locale}/dashboard`, `/uslugi` and `/produkte` → `/{locale}/functions`, `/tarife` →
+`/{locale}/versicherungen`; the redirects live in `lib/navigation/legacy-redirects.ts` and are
+applied by `proxy.ts`. `/kindergeld`, `/za-nas` and `/app` stay reachable. None of them is linked
+from the HORIZON workspace navigation and none is part of the current product.
 
 The insurance hub and the two partner landings are classified by North Star stage, not by an
 implementation phase. `HORIZON_MASTER_MAP.md` places contract comparison and partner handoff in
@@ -71,10 +75,12 @@ back to the unprefixed handler.
 
 | Route | Access | Product area | Status | Disposition |
 |---|---|---|---|---|
-| `/{locale}/onboarding/language` | AUTH | Legacy language step | REDIRECT → `/{locale}/onboarding/profile` | REMOVE FROM UI |
+| `/{locale}/onboarding/language` | REDIRECT | Legacy language step | REDIRECT → `/{locale}/onboarding/profile` | REMOVED FROM UI |
 | `/{locale}/onboarding/profile` | AUTH | First login (P2) | IMPLEMENTED | KEEP |
 | `/{locale}/onboarding/tour` | AUTH | First login (P2) | IMPLEMENTED | KEEP |
 | `/{locale}/onboarding/finish` | AUTH | First login (P2) | IMPLEMENTED | KEEP |
+
+The legacy `/language` page was deleted by N7; `proxy.ts` redirects the path to `/profile`.
 
 ## Authenticated HORIZON workspace
 
@@ -103,6 +109,7 @@ shell" section, not in this table.
 | `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | KEEP | via SteuerTabs (N6) |
 | `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | KEEP | via SteuerTabs (N6) |
 | `/{locale}/profil` | AUTH | Profile | IMPLEMENTED | KEEP | Yes |
+| `/{locale}/konto/sicherheit` | AUTH | Account security / MFA (N5) | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/assistant` | AUTH | AI home-office chat (P7, KintexBG-era surface) | PARTIAL | LEGACY | No |
 | `/{locale}/finanzamt` | AUTH | Finanzamt surfaces | PARTIAL | KEEP | No |
 | `/{locale}/finanzbildung` | AUTH | Financial education | PARTIAL | LEGACY | No |
@@ -115,8 +122,8 @@ workspace (`components/guide/case-assistant-panel.tsx`) reached through `/guide/
 `/{locale}/security` is **PUBLIC** (the Layer 0 trust page) and is listed in the public table
 above. `HORIZON_MASTER_MAP.md` section 2.2 previously labeled it `AUTH`, contradicting
 `app/[locale]/security/page.tsx` (it renders `PublicLayerPage`); that label has now been corrected
-to `PUBLIC` in the Master Map. The authenticated MFA surface is `/{locale}/protected/security`,
-listed under legacy surfaces.
+to `PUBLIC` in the Master Map. The authenticated MFA surface is `/{locale}/konto/sicherheit`
+(N5), and the legacy `/{locale}/protected/security` route redirects there.
 
 `/{locale}/dashboard` is `PARTIAL`: it still composites legacy-era blocks around the HORIZON
 module entry. N3 removed the dashboard's duplicate restatement of sidebar destinations and reduced
@@ -152,19 +159,25 @@ routes inside the protection boundary. Verify any change to that list against
 
 ## Legacy and compatibility surfaces
 
-Reachable, but not part of the HORIZON workspace navigation. Left technically reachable
-deliberately: no redirect or deletion was performed, because removing a legacy route is a
-product decision with compatibility risk and no evidence of zero use was gathered.
+Reachable, but not part of the HORIZON workspace navigation. N7 redirected the approved candidates
+to a canonical destination and kept the rest reachable, because removing them is a product decision
+with compatibility risk and no evidence of zero use was gathered. Redirects live in
+`lib/navigation/legacy-redirects.ts` and are applied by `proxy.ts`.
 
 | Route | Access | Product area | Status | Disposition |
 |---|---|---|---|---|
 | `/{locale}/protected` | REDIRECT | Forwards to `/{locale}/dashboard` (308) | LEGACY | LEGACY |
-| `/{locale}/protected/home-office` | AUTH | KintexBG-era home office workspace | LEGACY | LEGACY |
-| `/{locale}/protected/security` | AUTH | Legacy security surface | LEGACY | LEGACY |
-| `/{locale}/office` | PUBLIC (client shell, no server guard; self-chromed, N4 suppresses the public header/footer) | KintexBG-era office workspace | LEGACY | LEGACY |
-| `/{locale}/office/cases/[id]` | AUTH | KintexBG-era office case | LEGACY | LEGACY |
+| `/{locale}/protected/home-office` | REDIRECT | → `/{locale}/assistant` | LEGACY | LEGACY |
+| `/{locale}/protected/security` | REDIRECT | → `/{locale}/konto/sicherheit` | LEGACY | LEGACY |
+| `/{locale}/office` | REDIRECT | → `/{locale}/guide` (KintexBG-era office workspace) | LEGACY | LEGACY |
+| `/{locale}/office/cases/[id]` | REDIRECT | → `/{locale}/guide/{caseId}` | LEGACY | LEGACY |
+| `/check`, `/uslugi`, `/produkte`, `/tarife` | REDIRECT | Pre-HORIZON marketing surfaces | LEGACY | LEGACY |
 
-`/{locale}/protected` is handled in `proxy.ts` and never renders.
+`/{locale}/protected` is handled in `proxy.ts` and never renders. The N4 `isSelfChromedPath`
+suppression on `/{locale}/office` is now inert because N7 redirects the route, but it is retained
+as a tested guard. The full per-route disposition, including the kept surfaces
+(`/kindergeld`, `/za-nas`, `/app`, the lead-capture pair, `/email-generator`), is in
+[`FINAL_SITE_MAP.md`](./FINAL_SITE_MAP.md) §7–§8.
 
 ## Affiliate deeplinks
 

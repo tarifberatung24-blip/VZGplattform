@@ -1,9 +1,10 @@
 # HORIZON by VZG — Final Site Map
 
-Reconciled against `origin/main` @ `09fb4be` (which includes the N3/N4/N6 navigation changes at
-`015d606` and the documentation reconciliation at `09fb4be`).
+Reconciled against `main` @ `f0bc24f` (which includes the N3/N4/N6 navigation changes at
+`015d606` and the N5/N7 cleanup).
 Documentation only. This file records what is reachable today and how it is gated; it does not
-redesign UI and does not authorize removal or redirect of any route.
+redesign UI. The removal/redirect candidates in §8 were executed by N7 after owner approval, and
+§7 records the resulting disposition of each legacy surface.
 
 Canonical architecture: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md).
 Phase status: [`HORIZON_BUILD_LEDGER.md`](./HORIZON_BUILD_LEDGER.md).
@@ -37,13 +38,14 @@ checklist. A route appears in exactly one class.
 |---|---|---|
 | Public — Layer 0 | §1 | `/{locale}`, `/{locale}/how-it-works`, `/{locale}/functions`, `/{locale}/security`, `/{locale}/contact`, `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis` |
 | Public — affiliate / partner | §2 | `/{locale}/versicherungen`, `/{locale}/angebote/business-insurance`, `/{locale}/angebote/kfz`, `/{locale}/angebote/[offer]`, `/go/[offer]`, `/{locale}/go/[offer]` |
-| Auth + onboarding | §3 | `/auth/login`, `/auth/sign-up`, `/auth/sign-up-success`, `/auth/forgot-password`, `/auth/update-password`, `/auth/mfa-verify`, `/auth/error`, `/auth/callback`, `/auth/logout`, `/{locale}/onboarding/{profile,tour,finish}`, `/{locale}/onboarding/language` (REDIRECT), `/{locale}/onboarding` (REDIRECT) |
-| Authenticated workspace | §4 | `/{locale}/dashboard`, `/{locale}/guide`, `/{locale}/guide/[caseId]`, `/{locale}/vertraege`, `/{locale}/documents`, `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`, `/{locale}/profil`, `/{locale}/assistant`, `/{locale}/finanzamt`, `/{locale}/finanzbildung` |
+| Auth + onboarding | §3 | `/auth/login`, `/auth/sign-up`, `/auth/sign-up-success`, `/auth/forgot-password`, `/auth/update-password`, `/auth/mfa-verify`, `/auth/error`, `/auth/callback`, `/auth/logout`, `/{locale}/onboarding/{profile,tour,finish}`, `/{locale}/onboarding` (REDIRECT), `/{locale}/onboarding/language` (REDIRECT) |
+| Authenticated workspace | §4 | `/{locale}/dashboard`, `/{locale}/guide`, `/{locale}/guide/[caseId]`, `/{locale}/vertraege`, `/{locale}/documents`, `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`, `/{locale}/profil`, `/{locale}/konto/sicherheit`, `/{locale}/assistant`, `/{locale}/finanzamt`, `/{locale}/finanzbildung` |
 | Service modules (no routes of their own) | §5 | P12–P17 + P7/P10/P11 panels inside `/{locale}/guide/[caseId]` |
-| Public outside the workspace shell | §6 | `/{locale}/anspruch`, `/{locale}/email-generator`, `/{locale}/emailGenerator` |
-| Legacy / compatibility | §7 | `/{locale}/protected`, `/{locale}/protected/home-office`, `/{locale}/protected/security`, `/{locale}/office`, `/{locale}/office/cases/[id]`, `/check`, `/uslugi`, `/kindergeld`, `/produkte`, `/tarife`, `/za-nas`, `/app`, `/{locale}/anfrage`, `/{locale}/zayavka` |
+| Public outside the workspace shell | §6 | `/{locale}/anspruch`, `/{locale}/email-generator` |
+| Legacy / compatibility (reachable; redirects noted) | §7 | `/{locale}/protected`, `/{locale}/protected/home-office` (REDIRECT), `/{locale}/protected/security` (REDIRECT), `/{locale}/office` (REDIRECT), `/{locale}/office/cases/[id]` (REDIRECT), `/check` (REDIRECT), `/uslugi` (REDIRECT), `/produkte` (REDIRECT), `/tarife` (REDIRECT), `/kindergeld`, `/za-nas`, `/app`, `/{locale}/anfrage`, `/{locale}/zayavka` |
 
-Removal/redirect candidates are listed in §8; API route handlers in §9; Capital in §10.
+Removal/redirect candidates and their executed disposition are in §8; API route handlers in §9;
+Capital in §10.
 
 ---
 
@@ -59,7 +61,7 @@ Removal/redirect candidates are listed in §8; API route handlers in §9; Capita
 | `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis` | PUBLIC | Legal | IMPLEMENTED |
 
 Note: `/{locale}/security` is the public trust page (`PublicLayerPage`). The authenticated MFA
-surface is `/{locale}/protected/security` (legacy section below). `HORIZON_MASTER_MAP.md` §2.2
+surface is `/{locale}/konto/sicherheit` (legacy section below). `HORIZON_MASTER_MAP.md` §2.2
 previously labeled `/{locale}/security` as `AUTH`; that label has been corrected to `PUBLIC` in
 the Master Map to match this map and `app/[locale]/security/page.tsx`.
 
@@ -92,7 +94,7 @@ implementation phase; no P0–P17 phase owns them.
 | `/auth/mfa-verify` | AUTH | MFA challenge | IMPLEMENTED |
 | `/auth/error` | PUBLIC | Auth error surface | IMPLEMENTED |
 | `/auth/callback`, `/auth/logout` | route handlers | Code exchange; sign out | IMPLEMENTED |
-| `/{locale}/onboarding/language` | REDIRECT | Legacy step → `/{locale}/onboarding/profile` | REDIRECT |
+| `/{locale}/onboarding/language` | REDIRECT | Legacy step → `/{locale}/onboarding/profile` (308 in `proxy.ts`) | REDIRECT |
 | `/{locale}/onboarding/profile` | AUTH | First login (P2) | IMPLEMENTED |
 | `/{locale}/onboarding/tour` | AUTH | First login (P2) | IMPLEMENTED |
 | `/{locale}/onboarding/finish` | AUTH | First login (P2) | IMPLEMENTED |
@@ -118,9 +120,15 @@ marked in the last column.
 | `/{locale}/steuer/providers` | AUTH | Steuer providers (P15) | IMPLEMENTED | via Steuern / SteuerTabs (N6) |
 | `/{locale}/steuer/review` | AUTH | Steuer review (P15) | IMPLEMENTED | via Steuern / SteuerTabs (N6) |
 | `/{locale}/profil` | AUTH | Profile | IMPLEMENTED | Yes |
+| `/{locale}/konto/sicherheit` | AUTH | Account security / MFA (N5) | IMPLEMENTED | Yes |
 | `/{locale}/assistant` | AUTH | KintexBG-era home-office chat (P7 predecessor) | PARTIAL | No |
 | `/{locale}/finanzamt` | AUTH | Finanzamt surfaces | PARTIAL | No |
 | `/{locale}/finanzbildung` | AUTH | Financial education | PARTIAL | No |
+
+`/{locale}/konto/sicherheit` renders the existing `MfaSettings` component behind a session check
+and is the `security` destination in `lib/navigation/horizon-nav.ts`. It is the canonical
+account-security surface; the legacy `/{locale}/protected/security` route redirects here (N5/N7).
+No authentication logic, Supabase behaviour, API or schema changed.
 
 `/{locale}/dashboard` is `PARTIAL`: it still composites legacy-era blocks around the HORIZON
 module entry; visual cleanup is out of scope until the owner authorizes it.
@@ -159,57 +167,75 @@ the public Layer 0 header and footer, and none appears in `protectedPrefixes`.
 |---|---|---|---|---|
 | `/{locale}/anspruch` | PUBLIC | Entitlement navigator (P4, touched by P12–P13) | PARTIAL | REUSE |
 | `/{locale}/email-generator` | PUBLIC | AI letter generator, KintexBG-era (superseded by Draft/Review) | LEGACY | KEEP |
-| `/{locale}/emailGenerator` | PUBLIC | Duplicate camelCase catch-all key resolving the same `EmailGeneratorPage` | LEGACY | REMOVE LATER |
 
 TAR-7/TAR-8 briefly wrapped these in the workspace shell and listed them in the authenticated
 navigation; both the shell match and the navigation entries were removed. Whether they deserve
 protected workspace versions is a future product decision.
 
+The duplicate camelCase catch-all key `/{locale}/emailGenerator`, which resolved the same
+`EmailGeneratorPage`, was removed by N7. The hyphenated `/{locale}/email-generator` route is
+unchanged.
+
 ## 7. Legacy and compatibility surfaces
 
-Reachable, but not part of the HORIZON workspace navigation. Left technically reachable
-deliberately: no redirect or deletion was performed, because removing a legacy route is a product
-decision with compatibility risk and no evidence of zero use was gathered.
+Reachable, but not part of the HORIZON workspace navigation. N7 redirected the approved candidates
+to a canonical destination; the remaining surfaces were kept reachable because removing them is a
+product decision with compatibility risk and no evidence of zero use was gathered. Redirects live
+in `lib/navigation/legacy-redirects.ts` and are applied by `proxy.ts` before the localized
+catch-all renders.
 
 | Route | Access | Product area | Disposition |
 |---|---|---|---|
 | `/{locale}/protected` | REDIRECT | Forwards to `/{locale}/dashboard` (handled in `proxy.ts`) | LEGACY |
-| `/{locale}/protected/home-office` | AUTH | KintexBG-era home office workspace | LEGACY |
-| `/{locale}/protected/security` | AUTH | Legacy security surface (authenticated MFA) | LEGACY |
-| `/{locale}/office` | PUBLIC SHELL (client-only, no server guard; self-chromed — N4 suppresses the public header/footer) | KintexBG communication prototype | LEGACY |
-| `/{locale}/office/cases/[id]` | AUTH | KintexBG-era office case | LEGACY |
-| `/check`, `/uslugi`, `/kindergeld`, `/produkte`, `/tarife`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces | LEGACY |
-| `/{locale}/anfrage`, `/{locale}/zayavka` | PUBLIC | Lead capture | LEGACY |
+| `/{locale}/protected/home-office` | REDIRECT | → `/{locale}/assistant` | LEGACY |
+| `/{locale}/protected/security` | REDIRECT | → `/{locale}/konto/sicherheit` | LEGACY |
+| `/{locale}/office` | REDIRECT | → `/{locale}/guide` (KintexBG communication prototype, superseded by the guide case workspace) | LEGACY |
+| `/{locale}/office/cases/[id]` | REDIRECT | → `/{locale}/guide/{caseId}` (case id carried; handled by its own page) | LEGACY |
+| `/check` | REDIRECT | → `/{locale}/dashboard` | LEGACY |
+| `/uslugi` | REDIRECT | → `/{locale}/functions` | LEGACY |
+| `/produkte` | REDIRECT | → `/{locale}/functions` | LEGACY |
+| `/tarife` | REDIRECT | → `/{locale}/versicherungen` | LEGACY |
+| `/{locale}/onboarding/language` | REDIRECT | → `/{locale}/onboarding/profile` | LEGACY |
+| `/kindergeld`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces, kept reachable | LEGACY |
+| `/{locale}/anfrage`, `/{locale}/zayavka` | PUBLIC | Lead capture → n8n, kept reachable (live lead channel) | LEGACY |
+
+N7 deleted the superseded pages rather than leaving unreachable code: `/{locale}/office`,
+`/{locale}/office/cases/[id]`, `/{locale}/onboarding/language`, `/check`, `/produkte`, `/tarife`,
+`/uslugi` and `/{locale}/protected/home-office`. `/{locale}/protected/security` was deleted and
+re-created as `/{locale}/konto/sicherheit`. Every one of those paths redirects per the table above.
+Dead components removed in the same pass: `components/marketing/site-header.tsx`,
+`components/dashboard/smart-dashboard-preview.tsx`, `components/finance/personal-dashboard.tsx` and
+the `components/office/**` set. `/api/office/**` handlers were kept.
 
 ## 8. Legacy route candidates for later removal or redirect
 
-Report only. Nothing here is deleted or redirected by this document. Each candidate is a
-product/compatibility decision for the owner. This list is the input to navigation item **N7**
-(`HORIZON_NAVIGATION_DESIGN.md`), which is still NOT STARTED. The **N4** change did not remove or
-redirect anything: `/{locale}/office` only stopped drawing the duplicate public chrome.
+Executed by N7 after owner approval. Each row records the current disposition; KEEP rows remain
+open product decisions, not pending work. `/api/office/**` handlers were deliberately **not**
+touched: the HORIZON guide and office share the case engine, so those APIs still serve live
+surfaces.
 
-| Candidate | Current role | Suggested later action | Risk |
+| Candidate | Current role | Disposition | Notes / risk |
 |---|---|---|---|
-| `/{locale}/office` | KintexBG communication prototype; superseded by the guide case workspace | REDIRECT → `/{locale}/guide` | Client-only shell (no server guard) with its own 6-locale copy; `/api/office/**` still serves other surfaces |
-| `/{locale}/office/cases/[id]` | KintexBG case detail | REDIRECT → `/{locale}/guide/{caseId}` | Legacy `cases` display; check no bookmarks rely on it |
-| `/{locale}/protected` | Alias | REDIRECT already in place; keep permanently | None |
-| `/{locale}/protected/home-office` | Alias of `/{locale}/assistant` | REDIRECT → `/{locale}/assistant` | KintexBG-era copy |
-| `/{locale}/protected/security` | Authenticated MFA | REPLACE by a workspace settings surface, then REDIRECT | `/{locale}/security` is the public page; a settings target must exist first |
-| `/{locale}/check` | Opportunity-check entry | REDIRECT → `/{locale}/dashboard` or an approved Layer 0 route | None identified |
-| `/{locale}/uslugi` | BG-slug services page | REDIRECT → `/{locale}/functions` | BG SEO only |
-| `/{locale}/kindergeld` | Kindergeld navigator | KEEP for now | Backed by `/api/kindergeld/draft`; P4 social module not yet delivered |
-| `/{locale}/produkte` | Product overview | REDIRECT → `/{locale}/functions` | None identified |
-| `/{locale}/tarife` | Tariffs | REDIRECT → `/{locale}/versicherungen` | Uses `affiliate-offers`; must keep its disclosure |
-| `/{locale}/za-nas` | BG about page | KEEP | BG copy |
-| `/{locale}/app` | PWA install help | KEEP | None identified |
-| `/{locale}/anfrage`, `/{locale}/zayavka` | Lead capture → n8n | KEEP | Live lead channel; `/{locale}/contact` overlaps but is a different pipeline |
-| `/{locale}/email-generator` | KintexBG letter generator | RETIRE once a workspace replacement is approved | Public and reachable; superseded by P8 draft/review |
-| `/{locale}/onboarding/language` | Legacy onboarding step | REMOVE once no persisted `language` step remains | Already a pure redirect; low risk |
-| `/{locale}/emailGenerator` | Duplicate camelCase catch-all key for the same `EmailGeneratorPage` as `/{locale}/email-generator` | REMOVE the catch-all key (keep the hyphenated route until P8 retirement) | None identified; no navigation links to the camelCase form |
+| `/{locale}/office` | KintexBG communication prototype; superseded by the guide case workspace | **REDIRECTED** → `/{locale}/guide` | Client-only shell (no server guard) with its own 6-locale copy; `/api/office/**` still serves the guide |
+| `/{locale}/office/cases/[id]` | KintexBG case detail | **REDIRECTED** → `/{locale}/guide/{caseId}` | Office and HORIZON share the `cases` table (both keyed on `owner_id`); case-id compat verified |
+| `/{locale}/protected` | Alias | **KEPT** (redirect already in place) | None |
+| `/{locale}/protected/home-office` | Alias of `/{locale}/assistant` | **REDIRECTED** → `/{locale}/assistant` | KintexBG-era copy |
+| `/{locale}/protected/security` | Authenticated MFA | **REDIRECTED** → `/{locale}/konto/sicherheit` | Replaced by the N5 workspace settings surface |
+| `/{locale}/check` | Opportunity-check entry | **REDIRECTED** → `/{locale}/dashboard` | None identified |
+| `/{locale}/uslugi` | BG-slug services page | **REDIRECTED** → `/{locale}/functions` | BG SEO only |
+| `/{locale}/produkte` | Product overview | **REDIRECTED** → `/{locale}/functions` | None identified |
+| `/{locale}/tarife` | Tariffs | **REDIRECTED** → `/{locale}/versicherungen` | `affiliate-offers` disclosure preserved on the target |
+| `/{locale}/onboarding/language` | Legacy onboarding step | **REDIRECTED** → `/{locale}/onboarding/profile` | Was already a pure redirect; low risk |
+| `/{locale}/emailGenerator` | Duplicate camelCase catch-all key for the same `EmailGeneratorPage` | **REMOVED** | No navigation linked the camelCase form |
+| `/{locale}/kindergeld` | Kindergeld navigator | **KEEP** | Backed by `/api/kindergeld/draft`; P4 social module not yet delivered |
+| `/{locale}/za-nas` | BG about page | **KEEP** | BG copy |
+| `/{locale}/app` | PWA install help | **KEEP** | None identified |
+| `/{locale}/anfrage`, `/{locale}/zayavka` | Lead capture → n8n | **KEEP** | Live lead channel; `/{locale}/contact` overlaps but is a different pipeline |
+| `/{locale}/email-generator` | KintexBG letter generator | **KEEP (RETIRE on approval)** | Public and reachable; superseded by P8 draft/review |
 
-The public/authenticated security naming collision is already resolved: `HORIZON_MASTER_MAP.md` §2.2
-labels `/{locale}/security` `PUBLIC`, matching `app/[locale]/security/page.tsx`. No further
-documentation correction is outstanding for it, so it is not a §8 candidate.
+The public/authenticated security naming collision is resolved: `HORIZON_MASTER_MAP.md` §2.2 labels
+`/{locale}/security` `PUBLIC`, matching `app/[locale]/security/page.tsx`, and the authenticated
+surface is now `/{locale}/konto/sicherheit`.
 
 ## 9. API route handlers
 

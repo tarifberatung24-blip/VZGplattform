@@ -2,9 +2,9 @@
 
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
-Base: `origin/main` @ `09fb4be` (docs reconciliation). Navigation N0–N2 landed at `56b0aa5`; N3/N4/N6
-landed at `015d606`. Phase records below are unchanged by the navigation work unless a record says
-otherwise.
+Base: `main` @ `f0bc24f`. Navigation N0–N2 landed at `56b0aa5`; N3/N4/N6 landed at `015d606`;
+N5/N7 landed at `f0bc24f`. Phase records below are unchanged by the navigation work unless a
+record says otherwise.
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -45,7 +45,7 @@ after a module meets the full DONE definition.
 | P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (blocker migration applied + live `profiles.upsert` 200; fresh-user login/onboarding/second-login E2E pass; FROZEN pending owner acceptance) | NO | YES |
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
-| P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents` respond, and the interim security surface is `/de/protected/security` — `/de/security` is the public trust page, not an account route) | NO | YES |
+| P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents` respond; at verification time the interim security surface was `/de/protected/security` — since N5 the canonical surface is `/de/konto/sicherheit`, and `/de/security` is the public trust page, not an account route) | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS RE-VERIFIED 2026-09-25 (two real authenticated users: owner case/fact writes 201; other user read `[]` for case, fact and profile; spoofed-owner fact insert `42501`; cross-owner profile PATCH returned 0 rows — row unchanged; anon denied `401`; owner positive control 200) | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | DONE — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence reachable on the HORIZON path (authenticated browser E2E read a real uploaded PDF into `document_pages`, `UPLOADED → READY`, and the P16 explanation quoted its text); one shared READY rule now used by both stacks (`lib/documents/extraction-contract.ts`), closing the office path's empty-extraction `READY` bug (live: text-free PDF → `NEEDS_CONFIRMATION`) | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); rail ordering fixed so validation/ownership run before the provider gate (live: foreign case `404`, malformed body `400`, previously both `503`); end-to-end answer owner-blocked on provider key | NO | YES |
@@ -59,7 +59,7 @@ after a module meets the full DONE definition.
 | P15 | STEUERERKLÄRUNG | VERIFIED — AUTHENTICATED BROWSER E2E PASS (tax-year panel, 2025 supported, 2026 unpublished notice, no ELSTER transmit) | NO | YES |
 | P16 | UNTERLAGEN ERKLÄREN | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (pasted-text/email intake now analysed; classification + quoted evidence, printed deadline, risk caveat, next action rendered) | NO | YES |
 | P17 | CONTRACT MANAGEMENT | VERIFIED — AUTHENTICATED BROWSER E2E PASS (archive render, Kündigung-vorbereiten link creates seeded `kuendigung` case, `contract_linked` audited); guide→case workspace re-confirmed 2026-09-25 for all five intents | NO | YES |
-| N0–N6 | HORIZON NAVIGATION ARCHITECTURE | N0–N2 DONE at `56b0aa5`; N3/N4/N6 DONE at `015d606` (verified: tests, typecheck, lint, i18n, build). N5 and N7 NOT STARTED — owner decision | NO | YES for N5/N7 |
+| N0–N7 | HORIZON NAVIGATION ARCHITECTURE | N0–N2 DONE at `56b0aa5`; N3/N4/N6 DONE at `015d606`; N5/N7 DONE after owner approval (verified: tests, typecheck, lint, i18n, build) | NO | YES (granted) |
 | — | CAPITAL (PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE) | PRESERVED — NOT IN ACTIVE SEQUENCE | NO | YES (to resume) |
 
 ---
@@ -106,7 +106,8 @@ after a module meets the full DONE definition.
 - **CURRENT STATUS:** FROZEN — OWNER ACCEPTED 2026-09-25
 - **CURRENT IMPLEMENTATION:** public marketing and legal surfaces are available in BG/DE with
   HORIZON by VZG customer-facing branding. Public `/security` is a trust page; account/MFA
-  security remains protected at `/protected/security`.
+  security is protected at `/{locale}/konto/sicherheit` (canonical since N5; the legacy
+  `/{locale}/protected/security` route redirects there).
   Existing: `/{locale}` home, `/{locale}/how-it-works`, `/{locale}/contact`,
   `/{locale}/auth/login`, `/{locale}/auth/sign-up`, `/{locale}/impressum`,
   `/{locale}/datenschutz`, `/{locale}/agb`, `/{locale}/widerruf`, `/{locale}/affiliate-hinweis`.
@@ -114,10 +115,13 @@ after a module meets the full DONE definition.
   `/zayavka`, `/anfrage`, `/angebote/{offer}`, `/email-generator`.
 - **REUSE:** `GlobalHeader`, `GlobalFooter`, `legal-page`, `animated-hero`, `LanguageSwitcher`,
   `legal-profile.ts`, `/api/leads`, `lead-submit.ts`, PWA install pages.
-  Note: `components/marketing/hero.tsx` and `components/marketing/site-header.tsx` are dead code
-  (no importer); the home page renders `animated-hero`, and the public chrome is `GlobalHeader` /
-  `GlobalFooter`. `site-footer` survives only on the legacy `/{locale}/produkte` page. Dead-code
-  removal is N7 territory; this record no longer lists them as reusable P1 assets.
+  Note: `components/marketing/hero.tsx` is dead code (no importer); the home page renders
+  `animated-hero`, and the public chrome is `GlobalHeader` / `GlobalFooter`. N7 deleted the dead
+  `components/marketing/site-header.tsx` and the legacy `/{locale}/produkte` page, which was the
+  last consumer of `site-footer`. `components/marketing/site-footer.tsx` and
+  `components/marketing/product-opportunity-board.tsx` are now orphaned too; both are dead code and
+  were left in place, so no further P1 asset is reusable. This record no longer lists them as
+  reusable P1 assets.
 - **MISSING:** none for the accepted P1 scope. Legacy marketing routes that remain are treated as preserved public compatibility surfaces; changing or removing them requires an explicit P1 reopen.
 - **DEPENDENCIES:** P0.
 - **BLOCKERS:** none. Final live legal re-audit passed on production commit `46a5fa3e90827c6d085fd24206f502e93bd9be83`.
@@ -291,14 +295,16 @@ after a module meets the full DONE definition.
   "Vorgang starten" → `/{locale}/guide`. Module labels come from the guide vocabulary, so the two
   surfaces cannot disagree.
   Supporting components: `workplace-action-center`, `missing-information-interviewer`,
-  `smart-dashboard-preview`, `dashboard-workspace`.
+  `dashboard-workspace`. N7 deleted the unused `smart-dashboard-preview`.
 - **REUSE:** `VzgDashboard`, `HorizonHome`, `workplace-action-center`,
   `missing-information-interviewer`, `dashboard-workspace`, `horizon-sidebar`, `module-page`,
   `module-workspaces`, `smartDashboardRules`.
-- **MISSING:** the dashboard still renders legacy-era cards alongside the HORIZON module entry, and
-  `lib/kintex-navigation.ts` retains 10 modules (several flagged `planned`) that are not part of
-  the HORIZON five; no route-level automated test of the dashboard (runtime behaviour was verified
-  in an authenticated session on 2026-09-25).
+- **MISSING:** the dashboard still renders legacy-era cards alongside the HORIZON module entry
+  (a visual change, out of scope until the owner authorizes it); no route-level automated test of
+  the dashboard (runtime behaviour was verified in an authenticated session on 2026-09-25).
+  `lib/kintex-navigation.ts` still carries its 10-module list, but N7 removed its last
+  navigation consumers (`personal-dashboard`, `smart-dashboard-preview`); it now backs only
+  `isKintexWorkspacePath()`, which the workspace shell needs.
 - **DEPENDENCIES:** P0, P2 (onboarding), P5 (case engine).
 - **BLOCKERS:** none known; runtime verification needs a configured Supabase instance. Removing
   the legacy cards is a visual/behaviour change and is out of scope until the owner authorizes it.
@@ -315,7 +321,8 @@ after a module meets the full DONE definition.
 - **SYSTEM:** Shared case engine (spine: case → source documents → extracted facts → messages
   → drafts → approvals → tasks → audit)
 - **TARGET ROUTES:** no new public routes; consumed by all modules. Existing consumer surfaces:
-  `/{locale}/office`, `/{locale}/office/cases/{id}`, `/{locale}/dashboard`.
+  `/{locale}/dashboard` and `/{locale}/guide/{caseId}`. The KintexBG `/{locale}/office` and
+  `/{locale}/office/cases/{id}` surfaces were consumers before N7 redirected them to the guide.
 - **CURRENT STATUS:** MODEL + REPOSITORY VERIFIED — LIVE DB/RLS RE-VERIFIED 2026-09-25 (not DONE,
   not FROZEN). Cross-user isolation was observed against the live project with real authenticated
   identities: a second user received `[]` for the first user's case/drafts/profile, a cross-owner
@@ -403,7 +410,8 @@ after a module meets the full DONE definition.
 - **ID:** P6
 - **SYSTEM:** Document intake, OCR, explanation
 - **TARGET ROUTES:** no new public route required; enhances `/{locale}/documents` and
-  `/{locale}/office/cases/{id}`.
+  `/{locale}/guide/{caseId}` (the KintexBG `/{locale}/office/cases/{id}` consumer was redirected
+  by N7).
 - **CURRENT STATUS:** DONE — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION
   2026-09-25 (not FROZEN). All five input types are accepted; real Tesseract OCR runs on real
   bytes; page-level evidence is reachable on the HORIZON path; and the two document stacks now
@@ -591,7 +599,7 @@ after a module meets the full DONE definition.
 
 - **ID:** P8
 - **SYSTEM:** Draft → review → user approval
-- **TARGET ROUTES:** enhances `/{locale}/office/cases/{id}`; API
+- **TARGET ROUTES:** enhances `/{locale}/guide/{caseId}`; API
   `/api/office/cases/{id}/workflow`, `/api/office/drafts/{id}/approve`,
   `/api/office/drafts/{id}/export`.
 - **CURRENT STATUS:** VERIFIED — AUTHENTICATED BROWSER E2E PASS 2026-09-25. The review and
@@ -1099,7 +1107,7 @@ after a module meets the full DONE definition.
 - **ID:** P16
 - **SYSTEM:** Unterlagen erklären module
 - **TARGET ROUTES:** a HORIZON module entered from `/{locale}/dashboard`; existing surfaces
-  `/{locale}/documents` and `/{locale}/office/cases/{id}`.
+  `/{locale}/documents` and `/{locale}/guide/{caseId}`.
 - **CURRENT STATUS:** DONE — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 — NOT FROZEN.
   **Blocker found and fixed this phase:** pasted text and email content were stored by P6 as a case
   message (`case_messages`) while the explanation read only extracted `document_pages`, so a case
@@ -1196,44 +1204,53 @@ after a module meets the full DONE definition.
 
 ---
 
-## NAVIGATION ARCHITECTURE — N0–N6 (documentation + navigation UI)
+## NAVIGATION ARCHITECTURE — N0–N7 (documentation + navigation UI)
 
-- **ID:** N0–N6 (not part of P0–P17; defined by `HORIZON_NAVIGATION_DESIGN.md`)
+- **ID:** N0–N7 (not part of P0–P17; defined by `HORIZON_NAVIGATION_DESIGN.md`)
 - **SYSTEM:** HORIZON navigation architecture
-- **TARGET ROUTES:** no new routes. Existing surfaces: `/{locale}/dashboard`,
-  `/{locale}/office`, `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`.
-- **CURRENT STATUS:** N0–N2 DONE at `56b0aa5`; N3, N4 and N6 DONE at `015d606` (verified: tests,
-  typecheck, lint, i18n, build). N5 and N7 NOT STARTED and require an explicit owner decision.
+- **TARGET ROUTES:** one new route: `/{locale}/konto/sicherheit` (N5, authenticated account
+  security). N7 retires legacy routes by redirect; the resulting reachable set is in
+  `FINAL_SITE_MAP.md`.
+- **CURRENT STATUS:** N0–N2 DONE at `56b0aa5`; N3, N4 and N6 DONE at `015d606`; N5 and N7 DONE
+  after explicit owner approval. Verified: tests, typecheck, lint, i18n, build.
 - **CURRENT IMPLEMENTATION:**
   - **N0** — `lib/navigation/horizon-nav.ts` is the single navigation model; the sidebar, mobile
     bottom bar and More sheet derive from it (`lib/navigation/horizon-nav.test.ts` guards the
-    protection invariant).
-  - **N1** — four-group desktop sidebar including the interim Security entry
-    (`/{locale}/protected/security`).
+    protection invariant and that every destination resolves at its localized path).
+  - **N1** — four-group desktop sidebar including the Security entry, whose target N5 moved to
+    `/{locale}/konto/sicherheit`.
   - **N2** — 5-slot mobile bottom bar plus More sheet, on workspace routes only.
   - **N3** — the dashboard no longer restates sidebar destinations: `homeShortcuts` was removed
     from `lib/horizon/modules/registry.ts`, the duplicated status card was removed from
     `components/dashboard/workplace-action-center.tsx`, and "Vorgang starten" is the single
     primary CTA in `components/dashboard/vzg-dashboard.tsx`.
-  - **N4** — `isSelfChromedPath` in `lib/kintex-navigation.ts` suppresses the public Layer 0
-    header/footer on `/{locale}/office`, which renders its own header. Route, gating and
-    functionality unchanged.
+  - **N4** — `isSelfChromedPath` in `lib/kintex-navigation.ts` suppressed the public Layer 0
+    header/footer on `/{locale}/office`, which rendered its own header. N7 then redirected that
+    route, so the predicate no longer suppresses chrome on a rendered page.
+  - **N5** — `app/konto/sicherheit/page.tsx` renders the existing `MfaSettings` component behind a
+    session check. It is the `security` navigation destination. `/{locale}/protected/security`
+    redirects there. No authentication logic, Supabase behaviour, API or schema changed.
   - **N6** — `components/finance/steuer-tabs.tsx` renders in-page tabs on all three Steuer pages
     from the unit-tested model `lib/navigation/steuer-tabs.ts`.
+  - **N7** — `lib/navigation/legacy-redirects.ts` maps each approved §8 candidate to its canonical
+    destination; `proxy.ts` applies it before the localized catch-all, so a bookmarked legacy URL
+    lands on the canonical route. The superseded pages and their dead components are deleted.
 - **REUSE:** `horizon-nav`, `horizon-sidebar`, `mobile-bottom-nav`, `kintex-navigation`,
-  `steuer-tabs`.
-- **MISSING:** N5 (workspace settings surface for Security/MFA) and N7 (legacy redirect/removal
-  candidates in `FINAL_SITE_MAP.md` §8). Dead navigation code (`SiteHeader`, `kintexModules`) is
-  still present and is N7 territory.
-- **DEPENDENCIES:** none on the phase sequence; navigation is presentation only and does not
-  change backend, Supabase, APIs, migrations, auth, document engines, approvals, signatures or SMTP.
-- **BLOCKERS:** N5 and N7 are owner decisions. Nothing else is blocked.
-- **DONE CRITERIA:** all seven N items resolved or explicitly deferred by the owner; navigation
+  `steuer-tabs`, `legacy-redirects`.
+- **MISSING:** nothing outstanding in N0–N7. Several §8 candidates were deliberately kept and
+  remain product decisions: `/{locale}/email-generator` (until an approved workspace replacement
+  exists), `/{locale}/kindergeld`, `/{locale}/za-nas`, `/{locale}/app` and the lead-capture routes
+  `/{locale}/anfrage` / `/{locale}/zayavka`.
+- **DEPENDENCIES:** none on the phase sequence. Navigation is presentation only; N7 adds a proxy
+  redirect layer and N5 relocates the existing MFA component. Neither changes backend, Supabase
+  behaviour, APIs, migrations, document engines, approvals, signatures or SMTP.
+- **BLOCKERS:** none. The N5/N7 owner decision has been granted.
+- **DONE CRITERIA:** all eight N items resolved or explicitly deferred by the owner; navigation
   surfaces derive from one model; no duplicate navigation restatement; every authenticated
   navigation destination inside the protection boundary; tests, typecheck, lint, i18n and build
   pass.
 - **FROZEN:** NO
-- **OWNER APPROVAL REQUIRED:** YES for N5 and N7.
+- **OWNER APPROVAL REQUIRED:** YES for N5 and N7 — granted.
 
 ---
 

@@ -30,8 +30,9 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   did not re-run onboarding
 - ✅ P4 five entry modules re-verified 2026-09-25: all five dashboard entries were clicked in a live
   session and each created a real case; account routes corrected to the ones that exist
-  (`/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`); the interim security surface is
-  `/de/protected/security` (`/de/security` is the public Layer 0 trust page, not an account route)
+  (`/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`); at verification time the interim
+  security surface was `/de/protected/security` (`/de/security` is the public Layer 0 trust page,
+  not an account route). Since N5 the canonical account-security surface is `/de/konto/sicherheit`.
 - ✅ P1 owner/legal acceptance — recorded in the Build Ledger as DONE/FROZEN by owner acceptance 2026-09-25
 - ✅ P1 FROZEN after explicit owner acceptance
 - ✅ P2 migration applied to the project (owner-side authorized channel) — `20260925020000` applied; live `profiles.upsert()` returns `200`
@@ -48,13 +49,16 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ N3 dashboard de-duplication **IMPLEMENTED** at `015d606` (`homeShortcuts` removed, duplicate
   status card removed, "Vorgang starten" is the single primary CTA)
 - ✅ N4 `/{locale}/office` double-chrome fix **IMPLEMENTED** at `015d606` (public Layer 0
-  header/footer suppressed; route and functionality unchanged)
+  header/footer suppressed). Superseded by N7, which redirected the route to `/{locale}/guide`
 - ✅ N6 Steuer subpages surfaced **IMPLEMENTED** at `015d606` (`SteuerTabs` on `/steuer`,
   `/steuer/providers`, `/steuer/review`)
+- ✅ N5 Security workspace settings surface **IMPLEMENTED** — canonical surface
+  `/{locale}/konto/sicherheit` renders the existing `MfaSettings` component; the legacy
+  `/{locale}/protected/security` route redirects there
+- ✅ N7 Legacy route redirect/removal **IMPLEMENTED** after owner approval — redirects in
+  `lib/navigation/legacy-redirects.ts` applied by `proxy.ts`; superseded pages and dead components
+  deleted (see `FINAL_SITE_MAP.md` §7–§8)
 - ✅ Navigation verification: tests, typecheck, lint, i18n parity and production build all pass
-- ⬜ N5 Security workspace settings surface — owner decision
-- ⬜ N7 Legacy route redirect/removal — requires explicit owner approval (candidates in
-  `FINAL_SITE_MAP.md` §8)
 
 ---
 
@@ -75,7 +79,8 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ BG/DE public routes
 - ✅ `/bg/security` public trust page
 - ✅ `/de/security` public trust page
-- ✅ `/{locale}/protected/security` remains protected
+- ✅ `/{locale}/protected/security` remains protected and redirects to the canonical
+  `/{locale}/konto/sicherheit` (N5/N7)
 - ✅ HORIZON branding on active public/auth surfaces
 - ✅ Typecheck
 - ✅ Lint
@@ -142,8 +147,9 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Unterlagen erklären
 - ✅ My Cases
 - ✅ Profile
-- ✅ Security — interim surface at `/{locale}/protected/security` (sidebar entry). A dedicated
-  workspace settings surface is N5, still owner-gated; this is not a claim that N5 is done.
+- ✅ Security — canonical workspace surface at `/{locale}/konto/sicherheit` (sidebar entry, N5),
+  rendering the existing `MfaSettings` component. The interim `/{locale}/protected/security`
+  surface redirects there.
 - ✅ Unit tests
 - ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/dashboard` returned `200` under a
   live owner session and rendered the five entry modules with live per-module case counts.
