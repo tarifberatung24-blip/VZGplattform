@@ -333,6 +333,63 @@ before update on public.negotiation_preferences
 for each row execute function public.set_negotiation_updated_at();
 
 -- ---------------------------------------------------------------------------
+-- 8b. Ownership-coupled foreign keys
+-- ---------------------------------------------------------------------------
+-- Every negotiation table is owner-scoped, and each child row carries the same
+-- `owner_id` as its session. A plain foreign key on `session_id` alone would let
+-- one customer attach a child row to another customer's session while setting
+-- `owner_id` to themselves: RLS would then happily accept the insert, because the
+-- row is theirs, and the child would silently reference a foreign session.
+--
+-- Each `unique (id, owner_id)` declared above exists for this purpose. The
+-- composite foreign keys below make the parent lookup carry the owner, so a
+-- cross-customer link cannot satisfy the constraint.
+--
+-- A session reaches its contract through the household rather than an `owner_id`
+-- column, because `contracts` is owned by its household, not directly by a user.
+-- The pair of keys below is therefore chained: `(household_id, owner_id)` proves
+-- the household belongs to the session's owner, and `(contract_id, household_id)`
+-- proves the contract belongs to that same household. Together they make a
+-- cross-customer contract reference unsatisfiable.
+--
+-- `on delete cascade` is preserved on `owner_id`, which the composite key also
+-- covers, so deleting a user still removes their negotiation rows.
+
+alter table public.households
+  add constraint households_id_owner_key unique (id, owner_id);
+alter table public.contracts
+  add constraint contracts_id_household_key unique (id, household_id);
+
+alter table public.negotiation_sessions
+  add constraint negotiation_sessions_household_owner_fkey
+    foreign key (household_id, owner_id) references public.households (id, owner_id)
+    on delete cascade,
+  add constraint negotiation_sessions_contract_household_fkey
+    foreign key (contract_id, household_id) references public.contracts (id, household_id)
+    on delete cascade;
+
+alter table public.negotiation_preferences
+  add constraint negotiation_preferences_session_owner_fkey
+    foreign key (session_id, owner_id) references public.negotiation_sessions (id, owner_id)
+    on delete cascade;
+alter table public.negotiation_offers
+  add constraint negotiation_offers_session_owner_fkey
+    foreign key (session_id, owner_id) references public.negotiation_sessions (id, owner_id)
+    on delete cascade;
+alter table public.negotiation_authorizations
+  add constraint negotiation_authorizations_session_owner_fkey
+    foreign key (session_id, owner_id) references public.negotiation_sessions (id, owner_id)
+    on delete cascade;
+alter table public.negotiation_verifications
+  add constraint negotiation_verifications_session_owner_fkey
+    foreign key (session_id, owner_id) references public.negotiation_sessions (id, owner_id)
+    on delete cascade;
+alter table public.negotiation_events
+  add constraint negotiation_events_session_owner_fkey
+    foreign key (session_id, owner_id) references public.negotiation_sessions (id, owner_id)
+    on delete cascade;
+
+-- ---------------------------------------------------------------------------
 -- 9. Column-scoped grants for the request-scoped session client
 -- ---------------------------------------------------------------------------
 -- The session client is RLS-constrained and holds per-column privileges. Every

@@ -10,13 +10,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "vitest run --exclude scripts/horizon-context.test.mjs && node --test scripts/horizon-context.test.mjs",
+    "test": "vitest run --exclude scripts/horizon-context.test.mjs && node --test scripts/horizon-context.test.mjs && node scripts/rls-integration.mjs",
     "supabase:check": "node scripts/supabase-check.mjs",
     "i18n:check": "node scripts/i18n-check.mjs",
     "i18n:unused": "node scripts/i18n-unused.mjs",
     "i18n:hardcoded": "node scripts/i18n-hardcoded.mjs",
     "i18n:verify": "pnpm i18n:check && pnpm i18n:unused && pnpm i18n:hardcoded",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:rls": "node scripts/rls-integration.mjs"
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.37",

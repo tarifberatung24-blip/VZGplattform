@@ -58,6 +58,32 @@ describe("negotiation migration — owner isolation", () => {
       expect(migration).toContain(`revoke all on public.${table} from anon`)
     }
   })
+
+  it("couples every child foreign key to the owner, not the session id alone", () => {
+    // A plain `references negotiation_sessions(id)` would let one customer attach
+    // a child row to another customer's session while owning the row themselves,
+    // which RLS cannot see. The composite keys close that.
+    expect(migration).toContain(
+      "foreign key (session_id, owner_id) references public.negotiation_sessions (id, owner_id)",
+    )
+    expect(migration).toContain(
+      "foreign key (household_id, owner_id) references public.households (id, owner_id)",
+    )
+    expect(migration).toContain(
+      "foreign key (contract_id, household_id) references public.contracts (id, household_id)",
+    )
+    // Every child table carries the composite key.
+    for (const table of [
+      "negotiation_preferences",
+      "negotiation_offers",
+      "negotiation_authorizations",
+      "negotiation_verifications",
+      "negotiation_events",
+    ]) {
+      expect(migration).toContain(`alter table public.${table}`)
+      expect(migration).toContain(`${table}_session_owner_fkey`)
+    }
+  })
 })
 
 describe("negotiation migration — immutable timeline and offers", () => {
