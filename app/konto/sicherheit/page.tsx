@@ -4,10 +4,20 @@ import { ArrowLeft } from "lucide-react"
 import { MfaSettings } from "@/components/auth/mfa-settings"
 import { createClient } from "@/lib/supabase/server"
 
-export default async function SecurityPage() {
+/**
+ * The canonical authenticated Account Security surface, under the Konto/Профил group next to
+ * Profil. It is the destination of the `security` navigation entry.
+ *
+ * The MFA functionality is the existing `MfaSettings` client component; no authentication logic,
+ * Supabase behaviour, API or schema is changed. The legacy `/{locale}/protected/security` route
+ * redirects here (see `lib/navigation/legacy-redirects.ts`).
+ *
+ * The public trust page stays at `/{locale}/security` and is a different surface.
+ */
+export default async function AccountSecurityPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/login?next=/dashboard")
+  if (!user) redirect("/auth/login?next=/konto/sicherheit")
 
   return (
     <main className="min-h-screen bg-background">

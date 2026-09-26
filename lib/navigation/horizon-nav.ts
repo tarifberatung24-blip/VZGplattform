@@ -6,8 +6,8 @@
  * visitor inside the authenticated shell. `lib/navigation/horizon-nav.test.ts` enforces this
  * against `isProtectedAppPath` (the `protectedPrefixes` source of truth).
  *
- * `/security` is the public Layer 0 trust page and must not be listed; the authenticated surface
- * is `/protected/security`. `/anspruch` and `/email-generator` are public too.
+ * `/security` is the public Layer 0 trust page and must not be listed; the authenticated Account
+ * Security surface is `/konto/sicherheit`. `/anspruch` and `/email-generator` are public too.
  *
  * Desktop sidebar, mobile bottom bar and the mobile "More" sheet all derive from this file, so the
  * three surfaces cannot drift. See docs/HORIZON_NAVIGATION_DESIGN.md.
@@ -62,7 +62,7 @@ export const navGroups: readonly NavGroup[] = [
     labelKey: "account",
     items: [
       { id: "profile", href: "/profil", labelKey: "profile" },
-      { id: "security", href: "/protected/security", labelKey: "security" },
+      { id: "security", href: "/konto/sicherheit", labelKey: "security" },
     ],
   },
   {
@@ -96,7 +96,7 @@ export function findDestination(id: NavDestinationId): NavDestination {
 
 /**
  * A destination is active when the path is the destination itself or a nested route under it.
- * `/protected/security` is matched directly; it is not under the `/protected` alias prefix.
+ * `/konto/sicherheit` is matched directly; it is not under the `/protected` alias prefix.
  */
 export function isDestinationActive(path: string, href: string): boolean {
   return path === href || path.startsWith(`${href}/`)

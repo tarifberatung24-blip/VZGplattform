@@ -5,11 +5,14 @@ import path from "node:path"
 const root = process.cwd()
 const read = (relativePath: string) => readFileSync(path.join(root, relativePath), "utf8")
 
+/**
+ * N7 removed the VZGoffice *pages* (`/{locale}/office`, its case detail) and their client
+ * workspace, redirecting the routes to the HORIZON guide. The namespaced API surface is backend,
+ * not navigation, so it stays: other HORIZON surfaces read and write through it.
+ */
 describe("VZGoffice module integration", () => {
-  it("exposes localized Office pages and namespaced API routes", () => {
+  it("keeps the namespaced Office API routes", () => {
     const routes = [
-      "app/[locale]/office/page.tsx",
-      "app/[locale]/office/cases/[id]/page.tsx",
       "app/api/office/cases/route.ts",
       "app/api/office/cases/[id]/workflow/route.ts",
       "app/api/office/documents/[id]/signed-url/route.ts",
@@ -19,16 +22,18 @@ describe("VZGoffice module integration", () => {
   })
 
   it("keeps Office API calls isolated from platform API paths", () => {
-    const page = read("app/[locale]/office/page.tsx")
-    const workspace = read("components/office/case-workspace.tsx")
-    expect(page).toContain("@/components/office/case-workspace")
-    expect(workspace).toContain("/api/office/cases")
-    expect(workspace).toContain("/api/office/drafts")
-    expect(workspace).not.toContain("/api/cases")
+    const cases = read("app/api/office/cases/route.ts")
+    expect(cases).toContain("@/lib/office/repositories/cases")
+    expect(cases).not.toContain("@/lib/horizon/")
   })
 
-  it("links the module from the authenticated Dashboard and externalizes native OCR packages", () => {
-    expect(read("components/dashboard/smart-dashboard-preview.tsx")).toContain("href={`/${locale}/office`}")
+  it("no longer ships the Office pages that N7 redirected", () => {
+    for (const route of ["app/[locale]/office/page.tsx", "app/[locale]/office/cases/[id]/page.tsx", "components/office/case-workspace.tsx"]) {
+      expect(existsSync(path.join(root, route))).toBe(false)
+    }
+  })
+
+  it("externalizes native OCR packages", () => {
     expect(read("next.config.mjs")).toContain('"@napi-rs/canvas"')
   })
 })

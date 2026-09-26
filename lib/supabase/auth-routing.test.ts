@@ -31,6 +31,8 @@ describe("auth routing", () => {
     expect(isProtectedAppPath("/de/security")).toBe(false)
     expect(isProtectedAppPath("/protected")).toBe(false)
     expect(isProtectedAppPath("/protected/security")).toBe(true)
+    expect(isProtectedAppPath("/konto/sicherheit")).toBe(true)
+    expect(isProtectedAppPath("/bg/konto/sicherheit")).toBe(true)
     expect(isProtectedAppPath("/dashboard")).toBe(true)
     expect(isProtectedAppPath("/bg/dashboard")).toBe(true)
     expect(isProtectedAppPath("/bg/protected/security")).toBe(true)
@@ -86,7 +88,7 @@ describe("first-login onboarding routing", () => {
     expect(isAuthFlowPath("/bg/auth/update-password")).toBe(true)
     expect(isAuthFlowPath("/auth/mfa-verify")).toBe(true)
     expect(isAuthFlowPath("/bg/dashboard")).toBe(false)
-    expect(isAuthFlowPath("/protected/security")).toBe(false)
+    expect(isAuthFlowPath("/konto/sicherheit")).toBe(false)
   })
 
   it("extracts the locale prefix and defaults to bg", () => {

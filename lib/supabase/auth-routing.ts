@@ -6,6 +6,7 @@ const protectedPrefixes = [
   "/assistant",
   "/protected",
   "/profil",
+  "/konto",
   "/finanzamt",
   "/steuer",
   "/vertraege",

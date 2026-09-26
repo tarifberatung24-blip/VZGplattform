@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest"
+import { existsSync, readFileSync } from "node:fs"
+import path from "node:path"
 import {
   findDestination,
   isDestinationActive,
@@ -21,14 +23,14 @@ describe("HORIZON navigation model", () => {
   it("never points at a public or alias route", () => {
     // `/security` is the public trust page; `/protected` is a redirect alias; the rest are
     // public or legacy. Listing any of them would open the authenticated shell to anon visitors.
-    const forbidden = ["/security", "/protected", "/anspruch", "/email-generator", "/assistant", "/finanzamt", "/office"]
+    const forbidden = ["/security", "/protected", "/protected/security", "/anspruch", "/email-generator", "/assistant", "/finanzamt", "/office"]
     for (const item of navDestinations) {
       expect(forbidden).not.toContain(item.href)
     }
   })
 
-  it("uses the authenticated MFA route for the security entry", () => {
-    expect(findDestination("security").href).toBe("/protected/security")
+  it("uses the canonical authenticated security route for the security entry", () => {
+    expect(findDestination("security").href).toBe("/konto/sicherheit")
   })
 
   it("has unique destination ids and unique hrefs", () => {
@@ -70,6 +72,26 @@ describe("HORIZON navigation model", () => {
     expect(isDestinationActive("/dashboard", "/dashboard")).toBe(true)
     expect(isDestinationActive("/steuer/review", "/steuer")).toBe(true)
     expect(isDestinationActive("/guide/case-1", "/guide")).toBe(true)
-    expect(isDestinationActive("/protected", "/protected/security")).toBe(false)
+    expect(isDestinationActive("/protected", "/konto/sicherheit")).toBe(false)
+  })
+
+  it("resolves every destination at the localized path the navigation links to", () => {
+    // The sidebar and mobile bar link to `/{locale}{href}`. Destinations without a dedicated
+    // `app/[locale]/<href>` directory are served by the localized catch-all, so a missing key
+    // there silently 404s a primary navigation entry. Guard the whole set, not a sample.
+    const catchAll = readFileSync(
+      path.join(process.cwd(), "app/[locale]/[[...slug]]/page.tsx"),
+      "utf8",
+    )
+    const keys = new Set(
+      [...catchAll.matchAll(/"?([A-Za-z0-9/\-]+)"?\s*:\s*[A-Z][A-Za-z]*Page/g)].map((m) => m[1]),
+    )
+    for (const item of navDestinations) {
+      const slug = item.href.slice(1)
+      const dedicated = existsSync(path.join(process.cwd(), "app/[locale]", slug, "page.tsx"))
+      if (!dedicated) {
+        expect(keys, `/${slug} must be a catch-all key or have a dedicated page`).toContain(slug)
+      }
+    }
   })
 })

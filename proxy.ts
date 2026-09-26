@@ -1,6 +1,7 @@
 import { updateSession } from "./lib/supabase/proxy"
 import { NextRequest, NextResponse } from "next/server"
 import { defaultLocale, isLocale, LOCALE_COOKIE_KEY, stripLocale } from "./lib/i18n/routing"
+import { legacyRedirectTarget } from "./lib/navigation/legacy-redirects"
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -21,6 +22,18 @@ export async function proxy(request: NextRequest) {
   if (authPath === "/protected") {
     const url = request.nextUrl.clone()
     url.pathname = isLocale(segment) ? `/${segment}/dashboard` : "/dashboard"
+    url.search = ""
+    return NextResponse.redirect(url, 308)
+  }
+
+  // N7 legacy redirects. Applied before the localized catch-all can render the obsolete surface,
+  // so a bookmarked legacy URL lands on its canonical destination instead of the legacy page. The
+  // target is re-prefixed with the resolved locale, and any query string is dropped because the
+  // legacy surfaces used it for view state that the canonical route does not accept.
+  const legacyTarget = legacyRedirectTarget(pathname)
+  if (legacyTarget) {
+    const url = request.nextUrl.clone()
+    url.pathname = isLocale(segment) ? `/${segment}${legacyTarget}` : legacyTarget
     url.search = ""
     return NextResponse.redirect(url, 308)
   }

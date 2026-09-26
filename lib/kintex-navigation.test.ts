@@ -24,7 +24,7 @@ describe("KintexBG workspace navigation", () => {
     expect(activeKintexModule("/bg/protected/home-office", null)).toBe("assistant")
     expect(activeKintexModule("/de/vertraege", "credits")).toBe("contracts")
     expect(activeKintexModule("/bg/profil", null)).toBe("profile")
-    expect(activeKintexModule("/protected/security", null)).toBeNull()
+    expect(activeKintexModule("/konto/sicherheit", null)).toBeNull()
   })
 
   it("preserves public pages and authentication screens", () => {
@@ -44,7 +44,7 @@ describe("KintexBG workspace navigation", () => {
   })
 
   it("keeps representative authenticated routes inside the workspace", () => {
-    for (const path of ["/bg/dashboard", "/bg/vertraege", "/bg/documents", "/bg/steuer", "/bg/guide"]) {
+    for (const path of ["/bg/dashboard", "/bg/vertraege", "/bg/documents", "/bg/steuer", "/bg/guide", "/bg/konto/sicherheit"]) {
       expect(isKintexWorkspacePath(path)).toBe(true)
       expect(isProtectedAppPath(path)).toBe(true)
     }
@@ -56,7 +56,7 @@ describe("KintexBG workspace navigation", () => {
     // isProtectedAppPath excludes it while its children (/protected/home-office) are protected.
     const probes = [
       "/bg/dashboard", "/bg/vertraege", "/bg/documents", "/bg/steuer", "/bg/steuer/review",
-      "/bg/guide", "/bg/guide/case-1", "/bg/profil", "/bg/assistant", "/bg/finanzbildung",
+      "/bg/guide", "/bg/guide/case-1", "/bg/profil", "/bg/konto/sicherheit", "/bg/assistant", "/bg/finanzbildung",
       "/bg/finanzamt", "/bg/protected/home-office", "/bg/anspruch", "/bg/email-generator",
       "/bg/uslugi", "/bg/tarife", "/bg/auth/login", "/bg/kindergeld",
     ]

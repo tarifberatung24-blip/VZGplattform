@@ -1,15 +1,11 @@
 import {notFound, redirect} from "next/navigation"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
 import HomePage from "@/app/page"
-import CheckPage from "@/app/check/page"
-import UslugiPage from "@/app/uslugi/page"
 import AnspruchPage from "@/app/anspruch/page"
 import KindergeldPage from "@/app/kindergeld/page"
-import ProduktePage from "@/app/produkte/page"
-import TarifePage from "@/app/tarife/page"
+import ZaNasPage from "@/app/za-nas/page"
 import VertraegePage from "@/app/vertraege/page"
 import DocumentsPage from "@/app/documents/page"
-import ZaNasPage from "@/app/za-nas/page"
 import LoginPage from "@/app/auth/login/page"
 import SignUpPage from "@/app/auth/sign-up/page"
 import SignUpSuccessPage from "@/app/auth/sign-up-success/page"
@@ -20,8 +16,8 @@ import MfaVerifyPage from "@/app/auth/mfa-verify/page"
 import FinanzamtPage from "@/app/finanzamt/page"
 import ProfilPage from "@/app/profil/page"
 import ProtectedPage from "@/app/protected/page"
-import HomeOfficePage from "@/app/protected/home-office/page"
-import SecurityPage from "@/app/protected/security/page"
+import AssistantPage from "@/app/assistant/page"
+import AccountSecurityPage from "@/app/konto/sicherheit/page"
 import SteuerPage from "@/app/steuer/page"
 import ProvidersPage from "@/app/steuer/providers/page"
 import ReviewPage from "@/app/steuer/review/page"
@@ -33,7 +29,6 @@ import AffiliateNoticePage from "@/app/affiliate-hinweis/page"
 import WithdrawalPage from "@/app/widerruf/page"
 import AppInstallPage from "@/app/app/page"
 import FinanzbildungPage from "@/app/finanzbildung/page"
-import EmailGeneratorPage from "@/app/[locale]/email-generator/page"
 import HowItWorksPage from "@/app/[locale]/how-it-works/page"
 import { FunctionsPage } from "@/components/marketing/public-layer-page"
 import type { Locale } from "@/lib/i18n/dictionaries"
@@ -53,12 +48,12 @@ async function OnboardingOutlet({ locale }: { locale: string; step?: string }): 
 }
 
 const pages: Record<string, React.ComponentType> = {
-  "": HomePage, check: CheckPage, uslugi: UslugiPage, anspruch: AnspruchPage, kindergeld: KindergeldPage,
-  produkte: ProduktePage, tarife: TarifePage, vertraege: VertraegePage, documents: DocumentsPage, "za-nas": ZaNasPage,
+  "": HomePage, anspruch: AnspruchPage, kindergeld: KindergeldPage, "za-nas": ZaNasPage,
+  vertraege: VertraegePage, documents: DocumentsPage,
   "auth/login": LoginPage, "auth/sign-up": SignUpPage, "auth/sign-up-success": SignUpSuccessPage, "auth/error": AuthErrorPage,
   "auth/forgot-password": ForgotPasswordPage, "auth/update-password": UpdatePasswordPage, "auth/mfa-verify": MfaVerifyPage,
-  finanzamt: FinanzamtPage, profil: ProfilPage, dashboard: ProtectedPage, protected: ProtectedPage, assistant: HomeOfficePage, "protected/home-office": HomeOfficePage, "protected/security": SecurityPage,
-  steuer: SteuerPage, "steuer/providers": ProvidersPage, "steuer/review": ReviewPage, finanzbildung: FinanzbildungPage, datenschutz: DatenschutzPage, agb: AgbPage, impressum: ImpressumPage, contact: ContactPage, emailGenerator: EmailGeneratorPage, "how-it-works": HowItWorksPage, "affiliate-hinweis": AffiliateNoticePage, widerruf: WithdrawalPage, app: AppInstallPage,
+  finanzamt: FinanzamtPage, profil: ProfilPage, dashboard: ProtectedPage, protected: ProtectedPage, assistant: AssistantPage, "konto/sicherheit": AccountSecurityPage,
+  steuer: SteuerPage, "steuer/providers": ProvidersPage, "steuer/review": ReviewPage, finanzbildung: FinanzbildungPage, datenschutz: DatenschutzPage, agb: AgbPage, impressum: ImpressumPage, contact: ContactPage, "how-it-works": HowItWorksPage, "affiliate-hinweis": AffiliateNoticePage, widerruf: WithdrawalPage, app: AppInstallPage,
 }
 
 export async function generateMetadata({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
