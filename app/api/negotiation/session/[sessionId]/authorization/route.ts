@@ -59,7 +59,9 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
         sessionId,
         eventType: "negotiation.authorization_requested",
         summary: "Representation authorization recorded as pending",
-        metadata: { scope: parsed.data.scope, granted: false },
+        // The scope text itself stays in negotiation_authorizations; the audit
+        // line records only that one was requested, never the free-text value.
+        metadata: { scope_length: parsed.data.scope.length, granted: false },
       })
       return NextResponse.json({ status: "pending" }, { status: 201 })
     }
@@ -90,7 +92,7 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       sessionId,
       eventType: "negotiation.authorization_granted",
       summary: "Representation authorization granted",
-      metadata: { scope: parsed.data.scope, state },
+      metadata: { scope_length: parsed.data.scope.length, state },
     })
 
     return NextResponse.json({ status: "granted", state }, { status: 201 })
