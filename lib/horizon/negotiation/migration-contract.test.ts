@@ -14,6 +14,11 @@ const migration = readFileSync(
   "utf8",
 ).toLowerCase()
 
+const atomicityMigration = readFileSync(
+  join(process.cwd(), "supabase/migrations/20260927090000_horizon_negotiation_handoff_atomicity.sql"),
+  "utf8",
+).toLowerCase()
+
 const OWNER_SCOPED_TABLES = [
   "negotiation_sessions",
   "negotiation_preferences",
@@ -124,6 +129,63 @@ describe("negotiation migration — MODE B operator queue state", () => {
   it("makes the queue key unique so a callback lookup cannot match two sessions", () => {
     expect(migration).toContain("create unique index if not exists negotiation_sessions_mode_b_request_id_key")
     expect(migration).toContain("where mode_b_request_id is not null")
+  })
+})
+
+describe("negotiation handoff atomicity migration", () => {
+  it("is additive only — no table or data change", () => {
+    expect(atomicityMigration).not.toMatch(/drop table/)
+    expect(atomicityMigration).not.toMatch(/alter table .* rename/)
+    expect(atomicityMigration).not.toMatch(/create table/)
+  })
+
+  it("adds the delivery-state column with a bounded vocabulary", () => {
+    expect(atomicityMigration).toContain("add column if not exists mode_b_delivery_status")
+    for (const state of ["IN_FLIGHT", "DELIVERED", "FAILED"]) {
+      expect(atomicityMigration).toContain(`'${state.toLowerCase()}'`)
+    }
+  })
+
+  it("declares security invoker, so row level security still applies", () => {
+    // A `security definer` function would run with the definer's privileges and
+    // bypass the owner policies; every function here must stay invoker. Count only
+    // the declarations, not the prose in the header comment.
+    const functions = atomicityMigration.match(/^create or replace function/gm) ?? []
+    const invoker = atomicityMigration.match(/^security invoker$/gm) ?? []
+    expect(functions.length).toBe(3)
+    expect(invoker.length).toBe(functions.length)
+    expect(atomicityMigration).not.toContain("security definer")
+  })
+
+  it("exposes no write function to anon or the public role", () => {
+    for (const fn of [
+      "reserve_negotiation_handoff(uuid, uuid, text)",
+      "finalize_negotiation_handoff_delivery(uuid, uuid, text, boolean)",
+      "apply_negotiation_handoff_status(uuid, uuid, text, text)",
+    ]) {
+      expect(atomicityMigration).toContain(`revoke all on function public.${fn} from anon`)
+      expect(atomicityMigration).toContain(`revoke all on function public.${fn} from public`)
+    }
+  })
+
+  it("lets only the service role apply an operator callback status", () => {
+    expect(atomicityMigration).toContain(
+      "revoke all on function public.apply_negotiation_handoff_status(uuid, uuid, text, text) from authenticated",
+    )
+    expect(atomicityMigration).toContain(
+      "grant execute on function public.apply_negotiation_handoff_status(uuid, uuid, text, text) to service_role",
+    )
+  })
+
+  it("makes the status move and its event one transaction", () => {
+    // The event insert must live inside the same function as the status update,
+    // so the timeline cannot omit a move that was recorded.
+    const fn = atomicityMigration.slice(
+      atomicityMigration.indexOf("create or replace function public.apply_negotiation_handoff_status"),
+      atomicityMigration.indexOf("grant execute on function public.apply_negotiation_handoff_status"),
+    )
+    expect(fn).toContain("update public.negotiation_sessions")
+    expect(fn).toContain("insert into public.negotiation_events")
   })
 })
 

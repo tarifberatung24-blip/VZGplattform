@@ -505,19 +505,94 @@ export class NegotiationRepository {
     return ok((data as { id: string; scope: string } | null) ?? null)
   }
 
-  /** Records a queued operator handoff. `mode_b_request_id` is the queue key. */
-  async queueAssistedHandoff(input: {
+  /**
+   * Atomically reserves the operator handoff and decides whether to deliver it.
+   *
+   * The reservation must exist before anything leaves the process, so it cannot be
+   * a read-then-write from here: two concurrent submits would both read "no active
+   * handoff" and both send a job. `reserve_negotiation_handoff` is a single
+   * compare-and-set that also returns whether this caller owns the delivery, so a
+   * concurrent double-submit resolves to one sender and one no-op.
+   *
+   * `deliver: false` means another caller holds the delivery (or the receiver
+   * already has it); the caller must reuse `requestId` and must not send.
+   */
+  async reserveAssistedHandoff(input: {
     sessionId: string
     requestId: string
-  }): Promise<RepoResult<NegotiationSessionRow>> {
-    const now = new Date().toISOString()
-    return this.updateSession(input.sessionId, {
-      execution_mode: "ASSISTED",
-      mode_b_request_id: input.requestId,
-      mode_b_status: "QUEUED",
-      mode_b_queued_at: now,
-      mode_b_updated_at: now,
+  }): Promise<
+    RepoResult<{
+      requestId: string
+      deliver: boolean
+      status: AssistedRequestStatus
+      reason: string
+    }>
+  > {
+    const { data, error } = await this.client.rpc("reserve_negotiation_handoff", {
+      p_session_id: input.sessionId,
+      p_owner_id: this.ownerId,
+      p_request_id: input.requestId,
     })
+    if (error) return fail("NEGOTIATION_HANDOFF_RESERVE_FAILED")
+    const row = (Array.isArray(data) ? data[0] : data) as
+      | { request_id: string; deliver: boolean; status: string | null; reason: string }
+      | undefined
+    if (!row?.request_id) return fail("NEGOTIATION_SESSION_NOT_FOUND")
+    return ok({
+      requestId: row.request_id,
+      deliver: Boolean(row.deliver),
+      status: (row.status ?? "QUEUED") as AssistedRequestStatus,
+      reason: row.reason,
+    })
+  }
+
+  /**
+   * Records the outcome of an outbound delivery attempt. `FAILED` is what permits
+   * a later retry with the same request id; `DELIVERED` retires the handoff from
+   * re-sending. Keyed by request id, so a stale finalization is a no-op rather
+   * than a corruption of a newer handoff.
+   */
+  async finalizeAssistedHandoffDelivery(input: {
+    sessionId: string
+    requestId: string
+    delivered: boolean
+  }): Promise<RepoResult<boolean>> {
+    const { data, error } = await this.client.rpc("finalize_negotiation_handoff_delivery", {
+      p_session_id: input.sessionId,
+      p_owner_id: this.ownerId,
+      p_request_id: input.requestId,
+      p_delivered: input.delivered,
+    })
+    if (error) return fail("NEGOTIATION_HANDOFF_FINALIZE_FAILED")
+    return ok(Boolean(data))
+  }
+
+  /**
+   * Applies a callback status move and its timeline event in one transaction.
+   *
+   * Doing the two writes separately would let the status change while the event
+   * that explains it is lost, so the route could not honestly claim an
+   * append-only record of every move. `apply_negotiation_handoff_status` commits
+   * both or neither, and its own compare-and-set on `from` makes two racing
+   * callbacks resolve to one applied move and one replay.
+   *
+   * Returns `data: true` when applied, `data: false` when the row was absent, not
+   * owned, or no longer in `from`.
+   */
+  async applyAssistedStatus(input: {
+    sessionId: string
+    from: AssistedRequestStatus
+    status: AssistedRequestStatus
+  }): Promise<RepoResult<boolean>> {
+    if (!isAssistedRequestStatus(input.status)) return fail("NEGOTIATION_MODE_B_INVALID_STATUS")
+    const { data, error } = await this.client.rpc("apply_negotiation_handoff_status", {
+      p_session_id: input.sessionId,
+      p_owner_id: this.ownerId,
+      p_from: input.from,
+      p_status: input.status,
+    })
+    if (error) return fail("NEGOTIATION_ASSISTED_STATUS_APPLY_FAILED")
+    return ok(Boolean(data))
   }
 
   /**

@@ -68,25 +68,6 @@ export function nextAssistedStatuses(from: AssistedRequestStatus): AssistedReque
   return [...ASSISTED_TRANSITIONS[from]]
 }
 
-/**
- * True while a handoff is already in the queue and not yet finished. A second
- * handoff of the same session must not mint a second request id: the queue would
- * then hold two entries for one negotiation, and a callback naming either one
- * would be ambiguous. `COMPLETED` and `CANCELLED` are terminal, so they are not
- * active and a fresh handoff may follow.
- */
-export function isActiveAssistedRequest(input: {
-  requestId: string | null
-  status: unknown
-}): boolean {
-  if (!input.requestId) return false
-  return (
-    isAssistedRequestStatus(input.status) &&
-    input.status !== "COMPLETED" &&
-    input.status !== "CANCELLED"
-  )
-}
-
 export const ASSISTED_HANDOFF_REFUSED_CODE = "NEGOTIATION_ASSISTED_AUTHORIZATION_REQUIRED"
 
 /**

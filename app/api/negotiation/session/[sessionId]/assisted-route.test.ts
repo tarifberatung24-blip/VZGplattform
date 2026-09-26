@@ -18,6 +18,14 @@ const state = vi.hoisted(() => ({
   audit: [] as Array<Record<string, unknown>>,
   fetchCalls: [] as Array<{ url: string; body: string; headers: Record<string, string> }>,
   fetchOk: true,
+  /** Order of external side effects, so a test can prove reserve precedes send. */
+  order: [] as string[],
+  rpcCalls: [] as Array<{ fn: string; args: Record<string, unknown> }>,
+  finalizeCalls: [] as Array<Record<string, unknown>>,
+  auditFails: false,
+  /** When set, the reservation RPC returns this instead of the derived result. */
+  reserveOverride: null as Array<Record<string, unknown>> | null,
+  reserveError: null as string | null,
 }))
 
 vi.mock("server-only", () => ({}))
@@ -26,6 +34,39 @@ vi.mock("@/lib/supabase/household", () => ({ ensureHousehold: async () => "home-
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: state.signedIn ? { id: "user-1" } : null } }) },
+    rpc: async (fn: string, args: Record<string, unknown>) => {
+      state.rpcCalls.push({ fn, args })
+      state.order.push(`rpc:${fn}`)
+      if (fn === "reserve_negotiation_handoff") {
+        if (state.reserveError) return { data: null, error: { message: state.reserveError } }
+        if (state.reserveOverride) return { data: state.reserveOverride, error: null }
+        const current = state.session as { mode_b_status?: string | null; mode_b_request_id?: string | null } | null
+        const status = current?.mode_b_status ?? null
+        const active = status !== null && !["COMPLETED", "CANCELLED"].includes(status)
+        if (active) {
+          return {
+            data: [
+              {
+                request_id: current?.mode_b_request_id,
+                deliver: false,
+                status,
+                reason: "active",
+              },
+            ],
+            error: null,
+          }
+        }
+        return {
+          data: [{ request_id: args.p_request_id, deliver: true, status: "QUEUED", reason: "reserved" }],
+          error: null,
+        }
+      }
+      if (fn === "finalize_negotiation_handoff_delivery") {
+        state.finalizeCalls.push(args)
+        return { data: true, error: null }
+      }
+      return { data: null, error: null }
+    },
     from: (table: string) => {
       const query: Record<string, unknown> = {}
       const self = () => query
@@ -50,8 +91,14 @@ vi.mock("@/lib/supabase/server", () => ({
           if (table === "negotiation_sessions") state.sessionUpdate = patch
           return query
         },
-        then: (resolve: (value: { data: unknown; error: null }) => unknown) =>
-          Promise.resolve({ data: [], error: null }).then(resolve),
+        then: (resolve: (value: { data: unknown; error: unknown }) => unknown) =>
+          Promise.resolve({
+            data: [],
+            error:
+              state.auditFails && table === "platform_audit_events"
+                ? { message: "audit down" }
+                : null,
+          }).then(resolve),
       })
       return query
     },
@@ -114,8 +161,15 @@ beforeEach(() => {
   state.audit = []
   state.fetchCalls = []
   state.fetchOk = true
+  state.order = []
+  state.rpcCalls = []
+  state.finalizeCalls = []
+  state.auditFails = false
+  state.reserveOverride = null
+  state.reserveError = null
   vi.stubGlobal("fetch", async (url: string, init?: { body?: string; headers?: Record<string, string> }) => {
     state.fetchCalls.push({ url: String(url), body: init?.body ?? "", headers: init?.headers ?? {} })
+    state.order.push("fetch")
     return { ok: state.fetchOk } as Response
   })
 })
@@ -164,7 +218,7 @@ describe("assisted handoff — authorization is mandatory", () => {
 })
 
 describe("assisted handoff — queue transport", () => {
-  it("queues the handoff and records the queue state separately from the lifecycle", async () => {
+  it("reserves the handoff before it sends, and records the queue state separately from the lifecycle", async () => {
     const response = await assistedPost(
       new Request("http://localhost", { method: "POST", body: JSON.stringify({ locale: "de" }) }),
       context,
@@ -174,12 +228,61 @@ describe("assisted handoff — queue transport", () => {
     expect(payload.status).toBe("QUEUED")
     expect(payload.requestId).toMatch(/^hzn_/)
 
+    // The reservation must precede the send, or a fast callback could name a key
+    // that does not exist yet.
+    expect(state.order[0]).toBe("rpc:reserve_negotiation_handoff")
+    expect(state.order).toContain("fetch")
+    expect(state.order.indexOf("rpc:reserve_negotiation_handoff")).toBeLessThan(state.order.indexOf("fetch"))
+
     expect(state.fetchCalls).toHaveLength(1)
-    expect(state.sessionUpdate).toMatchObject({ mode_b_status: "QUEUED", execution_mode: "ASSISTED" })
+    // The queue columns are written atomically by the reservation RPC, never by a
+    // separate session update, so the handoff cannot be half-recorded.
+    expect(state.rpcCalls[0].fn).toBe("reserve_negotiation_handoff")
+    expect(state.sessionUpdate).toBeNull()
     expect(state.audit.some((row) => row.event_type === "negotiation.assisted_handoff_queued")).toBe(true)
   })
 
-  it("reports a queue failure and does not mark the request queued", async () => {
+  it("does not mint a second request id or send for a concurrent double-submit", async () => {
+    // Two submits race; the database hands the loser `deliver: false`. The loser
+    // must reuse the winner's id and must not create a second external job.
+    state.reserveOverride = [
+      { request_id: "hzn_winner", deliver: false, status: "QUEUED", reason: "in_flight" },
+    ]
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(202)
+    expect((await response.json()).requestId).toBe("hzn_winner")
+    expect(state.fetchCalls).toHaveLength(0)
+    expect(state.finalizeCalls).toHaveLength(0)
+  })
+
+  it("retries a previously failed delivery with the same id rather than a new one", async () => {
+    state.reserveOverride = [
+      { request_id: "hzn_failed", deliver: true, status: "QUEUED", reason: "retry" },
+    ]
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(202)
+    expect((await response.json()).requestId).toBe("hzn_failed")
+    expect(JSON.parse(state.fetchCalls[0].body).requestId).toBe("hzn_failed")
+  })
+
+  it("does not re-send a handoff the receiver already has", async () => {
+    state.session = sessionRow({ mode_b_request_id: "hzn_existing", mode_b_status: "IN_PROGRESS" })
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(202)
+    expect((await response.json()).requestId).toBe("hzn_existing")
+    expect(state.fetchCalls).toHaveLength(0)
+  })
+
+  it("reports a queue failure and does not advance the lifecycle", async () => {
     state.fetchOk = false
     const response = await assistedPost(
       new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
@@ -187,7 +290,42 @@ describe("assisted handoff — queue transport", () => {
     )
     expect(response.status).toBe(502)
     expect((await response.json()).code).toBe("NEGOTIATION_ASSISTED_QUEUE_FAILED")
+    // The failed attempt is recorded so a retry may reuse the same id...
+    expect(state.finalizeCalls).toHaveLength(1)
+    expect(state.finalizeCalls[0]).toMatchObject({ p_delivered: false })
+    // ...and the lifecycle did not move on a failed send.
     expect(state.sessionUpdate).toBeNull()
+  })
+
+  it("records a successful delivery so it is not re-sent", async () => {
+    await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(state.finalizeCalls).toHaveLength(1)
+    expect(state.finalizeCalls[0]).toMatchObject({ p_delivered: true })
+  })
+
+  it("surfaces a failed reservation as an upstream error and sends nothing", async () => {
+    state.reserveError = "deadlock detected"
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(502)
+    expect(state.fetchCalls).toHaveLength(0)
+  })
+
+  it("reports an audit failure on the response instead of swallowing it", async () => {
+    state.auditFails = true
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(202)
+    expect((await response.json()).auditError).toBe(true)
+    // The handoff still happened; only the platform audit line is missing.
+    expect(state.fetchCalls).toHaveLength(1)
   })
 
   it("refuses when the queue is not configured", async () => {
@@ -201,7 +339,19 @@ describe("assisted handoff — queue transport", () => {
     expect((await response.json()).code).toBe("NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED")
   })
 
-  it("still works through the legacy N8N_* names when the neutral ones are unset", async () => {
+  it("refuses a neutral url with no neutral secret rather than borrowing the legacy one", async () => {
+    // Half-migrated configuration must disable the handoff, not blend families.
+    vi.stubEnv("HORIZON_AUTOMATION_WEBHOOK_SECRET", "")
+    vi.stubEnv("N8N_WEBHOOK_SECRET", "legacy-secret")
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(503)
+    expect(state.fetchCalls).toHaveLength(0)
+  })
+
+  it("still works through the complete legacy N8N_* pair", async () => {
     // Backwards compatibility: an existing n8n deployment keeps working after the
     // rename, so switching transports is not a flag day.
     vi.stubEnv("HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL", "")
@@ -214,6 +364,8 @@ describe("assisted handoff — queue transport", () => {
     )
     expect(response.status).toBe(202)
     expect(state.fetchCalls).toHaveLength(1)
+    // The legacy header is sent only in this family.
+    expect(state.fetchCalls[0].headers["X-FinanzBG-Webhook-Secret"]).toBe("legacy-secret")
   })
 
   it("sends the provider-neutral secret header and a correlation id", async () => {
@@ -227,19 +379,9 @@ describe("assisted handoff — queue transport", () => {
     const headers = state.fetchCalls[0].headers
     expect(headers["X-Horizon-Automation-Secret"]).toBe("test-secret")
     expect(headers["X-Horizon-Request-Id"]).toMatch(/^hzn_/)
+    // A neutral receiver is not told the legacy header name exists.
+    expect(headers["X-FinanzBG-Webhook-Secret"]).toBeUndefined()
     expect(JSON.stringify(headers).toLowerCase()).not.toContain("n8n")
-  })
-
-  it("reuses the in-flight request id instead of queuing a second one", async () => {
-    // A double-submit must not create a second queue entry for one negotiation.
-    state.session = sessionRow({ mode_b_request_id: "hzn_existing", mode_b_status: "IN_PROGRESS" })
-    const response = await assistedPost(
-      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
-      context,
-    )
-    expect(response.status).toBe(202)
-    expect((await response.json()).requestId).toBe("hzn_existing")
-    expect(JSON.parse(state.fetchCalls[0].body).requestId).toBe("hzn_existing")
   })
 
   it("mints a new request id once the previous request is terminal", async () => {

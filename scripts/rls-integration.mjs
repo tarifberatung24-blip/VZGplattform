@@ -65,6 +65,10 @@ const steps = [
     label: "negotiation migration",
     file: "supabase/migrations/20260926090000_horizon_negotiation_engine.sql",
   },
+  {
+    label: "negotiation handoff atomicity",
+    file: "supabase/migrations/20260927090000_horizon_negotiation_handoff_atomicity.sql",
+  },
   { label: "rls isolation test", file: "supabase/tests/rls/horizon_negotiation_isolation.sql" },
 ]
 

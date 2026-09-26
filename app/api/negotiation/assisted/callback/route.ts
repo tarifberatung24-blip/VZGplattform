@@ -169,26 +169,34 @@ export async function POST(request: Request) {
   // The repository is bound to the session's own owner, read from the row, so the
   // write below is owner-scoped even though the read used the service role.
   const repository = new NegotiationRepository(admin, session.owner_id)
-  const updated = await repository.updateAssistedStatus({
+  // The status move and its timeline event are applied in one transaction, so the
+  // timeline cannot omit a move that the database recorded. The function's own
+  // compare-and-set on `decision.from` means two identical callbacks racing
+  // resolve to one applied move and one no-op rather than two moves.
+  const applied = await repository.applyAssistedStatus({
     sessionId: session.id,
+    from: decision.from,
     status: decision.status,
   })
-  if (updated.error) {
+  if (applied.error) {
     return NextResponse.json({ code: "NEGOTIATION_ASSISTED_CALLBACK_FAILED" }, { status: 502 })
   }
+  if (!applied.data) {
+    // The stored status moved between our read and our write — a concurrent
+    // callback got there first. Nothing was written here; a retry will then see a
+    // replay. Reported as not-applied rather than as an error, because the request
+    // itself was valid.
+    return NextResponse.json(
+      { status: decision.status, applied: false, concurrent: true },
+      { status: 200 },
+    )
+  }
 
-  await repository.appendEvents(session.id, [
-    {
-      eventType: "operator_status_changed",
-      detail: {
-        from: decision.from,
-        to: decision.status,
-        source: "operator_callback",
-      },
-    },
-  ])
-
-  await writeNegotiationAudit(admin, {
+  // The platform-wide audit line lives in another subsystem's table, so it is
+  // written best-effort after the atomic move. A failure is reported explicitly
+  // rather than swallowed: the response carries `auditError: true`, so a silent
+  // gap in the platform audit trail is observable instead of assumed away.
+  const auditError = await writeNegotiationAudit(admin, {
     householdId: session.household_id,
     actorUserId: null,
     sessionId: session.id,
@@ -198,7 +206,12 @@ export async function POST(request: Request) {
   })
 
   return NextResponse.json(
-    { status: decision.status, applied: true, state: session.state },
+    {
+      status: decision.status,
+      applied: true,
+      state: session.state,
+      ...(auditError ? { auditError: true } : {}),
+    },
     { status: 200 },
   )
 }

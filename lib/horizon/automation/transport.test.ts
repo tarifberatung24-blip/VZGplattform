@@ -19,45 +19,76 @@ const NEUTRAL_URL = "https://automation.example/webhook/negotiation"
 const LEGACY_URL = "https://n8n.example/webhook/assisted"
 
 describe("transport — environment resolution", () => {
-  it("prefers the neutral names", () => {
+  it("uses the neutral pair when both neutral names are present", () => {
     const config = resolveAutomationTransport({
       HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL: NEUTRAL_URL,
       HORIZON_AUTOMATION_WEBHOOK_SECRET: "neutral-secret",
+      // Legacy values are present too, and must be ignored entirely.
       N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL: LEGACY_URL,
       N8N_WEBHOOK_SECRET: "legacy-secret",
     })
     expect(config).toMatchObject({ url: NEUTRAL_URL, secret: "neutral-secret" })
-    expect(config!.source).toEqual({ url: "neutral", secret: "neutral" })
+    expect(config!.source).toEqual({ family: "neutral" })
   })
 
-  it("falls back to the legacy names when the neutral ones are unset", () => {
+  it("falls back to the legacy pair only when both neutral names are absent", () => {
     const config = resolveAutomationTransport({
       N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL: LEGACY_URL,
       N8N_WEBHOOK_SECRET: "legacy-secret",
     })
     expect(config).toMatchObject({ url: LEGACY_URL, secret: "legacy-secret" })
-    expect(config!.source).toEqual({ url: "legacy", secret: "legacy" })
+    expect(config!.source).toEqual({ family: "legacy" })
   })
 
-  it("mixes a neutral url with a legacy secret", () => {
-    const config = resolveAutomationTransport({
-      HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL: NEUTRAL_URL,
-      N8N_WEBHOOK_SECRET: "legacy-secret",
-    })
-    expect(config).toMatchObject({ url: NEUTRAL_URL, secret: "legacy-secret" })
-    expect(config!.source).toEqual({ url: "neutral", secret: "legacy" })
-  })
-
-  it("returns null when either half is missing", () => {
-    expect(resolveAutomationTransport({})).toBeNull()
+  it("refuses a neutral url with a legacy secret rather than blending families", () => {
+    // Half-migrated config: borrowing the legacy secret would send one receiver's
+    // secret to another. Disabling the handoff surfaces the mistake.
     expect(
       resolveAutomationTransport({
         HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL: NEUTRAL_URL,
+        N8N_WEBHOOK_SECRET: "legacy-secret",
+      }),
+    ).toBeNull()
+  })
+
+  it("refuses a legacy url with a neutral secret", () => {
+    expect(
+      resolveAutomationTransport({
+        HORIZON_AUTOMATION_WEBHOOK_SECRET: "neutral-secret",
+        N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL: LEGACY_URL,
+      }),
+    ).toBeNull()
+  })
+
+  it("refuses a partial neutral pair even when the legacy pair is complete", () => {
+    // The neutral url alone means the operator intended neutral configuration;
+    // silently falling back to legacy would send to a receiver they are moving off.
+    expect(
+      resolveAutomationTransport({
+        HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL: NEUTRAL_URL,
+        N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL: LEGACY_URL,
+        N8N_WEBHOOK_SECRET: "legacy-secret",
       }),
     ).toBeNull()
     expect(
-      resolveAutomationTransport({ HORIZON_AUTOMATION_WEBHOOK_SECRET: "s" }),
+      resolveAutomationTransport({
+        HORIZON_AUTOMATION_WEBHOOK_SECRET: "neutral-secret",
+        N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL: LEGACY_URL,
+        N8N_WEBHOOK_SECRET: "legacy-secret",
+      }),
     ).toBeNull()
+  })
+
+  it("refuses a partial legacy pair", () => {
+    expect(
+      resolveAutomationTransport({ N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL: LEGACY_URL }),
+    ).toBeNull()
+    expect(resolveAutomationTransport({ N8N_WEBHOOK_SECRET: "legacy-secret" })).toBeNull()
+  })
+
+  it("returns null when nothing is set", () => {
+    expect(resolveAutomationTransport({})).toBeNull()
+    expect(resolveAutomationTransport()).toBeNull()
   })
 
   it("treats a blank value as unset", () => {
@@ -112,7 +143,7 @@ describe("transport — request ids", () => {
 })
 
 describe("transport — delivery", () => {
-  const config = { url: NEUTRAL_URL, secret: "s3cret", source: { url: "neutral", secret: "neutral" } } as const
+  const config = { url: NEUTRAL_URL, secret: "s3cret", source: { family: "neutral" } } as const
 
   it("posts JSON with the neutral secret header and a correlation id", async () => {
     const calls: Array<{ url: string; init: RequestInit }> = []
@@ -132,13 +163,45 @@ describe("transport — delivery", () => {
     expect(calls[0].init.method).toBe("POST")
     const headers = calls[0].init.headers as Record<string, string>
     expect(headers[AUTOMATION_SECRET_HEADER]).toBe("s3cret")
-    expect(headers[LEGACY_SECRET_HEADER]).toBe("s3cret")
     expect(headers["X-Horizon-Request-Id"]).toBe("hzn_1")
     expect(headers["Content-Type"]).toBe("application/json")
     expect(JSON.parse(String(calls[0].init.body))).toEqual({
       requestId: "hzn_1",
       negotiation: { category: "internet" },
     })
+  })
+
+  it("does not send the legacy secret header for a neutral configuration", async () => {
+    // A neutral receiver (e.g. Activepieces) is not told the legacy name exists.
+    let headers: Record<string, string> = {}
+    await deliverToAutomation({
+      config,
+      payload: { requestId: "hzn_1" },
+      requestId: "hzn_1",
+      fetchImpl: (async (_url: string, init: RequestInit) => {
+        headers = init.headers as Record<string, string>
+        return { ok: true, status: 200 } as Response
+      }) as unknown as typeof fetch,
+    })
+    expect(headers[AUTOMATION_SECRET_HEADER]).toBe("s3cret")
+    expect(headers[LEGACY_SECRET_HEADER]).toBeUndefined()
+    expect(JSON.stringify(headers).toLowerCase()).not.toContain("finanzbg")
+  })
+
+  it("still sends the legacy header for a legacy configuration", async () => {
+    // An existing n8n receiver keeps working without reconfiguration.
+    let headers: Record<string, string> = {}
+    await deliverToAutomation({
+      config: { url: LEGACY_URL, secret: "legacy-secret", source: { family: "legacy" } },
+      payload: { requestId: "hzn_1" },
+      requestId: "hzn_1",
+      fetchImpl: (async (_url: string, init: RequestInit) => {
+        headers = init.headers as Record<string, string>
+        return { ok: true, status: 200 } as Response
+      }) as unknown as typeof fetch,
+    })
+    expect(headers[AUTOMATION_SECRET_HEADER]).toBe("legacy-secret")
+    expect(headers[LEGACY_SECRET_HEADER]).toBe("legacy-secret")
   })
 
   it("strips a credential-shaped field from the body even if a caller assembled one", async () => {

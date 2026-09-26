@@ -6,7 +6,6 @@ import {
   canHandOffToOperator,
   canTransitionAssistedRequest,
   isAssistedRequestStatus,
-  isActiveAssistedRequest,
   nextAssistedStatuses,
 } from "./assisted"
 import { emptyPackage } from "./execution"
@@ -94,26 +93,6 @@ describe("assisted mode — operator queue state machine", () => {
   it("refuses to skip from AWAITING_CUSTOMER straight to COMPLETED", () => {
     // Work cannot finish while a customer answer is still outstanding.
     expect(canTransitionAssistedRequest("AWAITING_CUSTOMER", "COMPLETED")).toBe(false)
-  })
-})
-
-describe("assisted mode — an in-flight request is not queued twice", () => {
-  it("treats every non-terminal status as active", () => {
-    for (const status of ["QUEUED", "IN_PROGRESS", "AWAITING_CUSTOMER", "AWAITING_PROVIDER"] as const) {
-      expect(isActiveAssistedRequest({ requestId: "hzn_1", status })).toBe(true)
-    }
-  })
-
-  it("treats a terminal request as finished, so a new handoff may follow", () => {
-    expect(isActiveAssistedRequest({ requestId: "hzn_1", status: "COMPLETED" })).toBe(false)
-    expect(isActiveAssistedRequest({ requestId: "hzn_1", status: "CANCELLED" })).toBe(false)
-  })
-
-  it("is inactive when nothing was queued, or the status is unrecognised", () => {
-    expect(isActiveAssistedRequest({ requestId: null, status: null })).toBe(false)
-    expect(isActiveAssistedRequest({ requestId: null, status: "QUEUED" })).toBe(false)
-    expect(isActiveAssistedRequest({ requestId: "hzn_1", status: null })).toBe(false)
-    expect(isActiveAssistedRequest({ requestId: "hzn_1", status: "GARBAGE" })).toBe(false)
   })
 })
 

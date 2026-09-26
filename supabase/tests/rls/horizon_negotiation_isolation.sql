@@ -417,6 +417,202 @@ begin
 end;
 $$;
 
+-- ---------------------------------------------------------------------------
+-- Atomic handoff reservation and status application (as customer A).
+--
+-- The concurrency guarantee is a compare-and-set inside the function; these
+-- assertions drive every branch sequentially, which a single connection can do
+-- deterministically, and prove the owner filter and RLS still bind through the
+-- function (it is `security invoker`).
+-- ---------------------------------------------------------------------------
+select set_config('request.jwt.claim.sub', 'a1000000-0000-4000-8000-000000000001', true);
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"a1000000-0000-4000-8000-000000000001","role":"authenticated"}',
+  true
+);
+set local role authenticated;
+
+do $$
+declare
+  v_request_id text;
+  v_deliver boolean;
+  v_status text;
+  v_reason text;
+  v_applied boolean;
+  v_store text;
+  v_delivery text;
+  v_events integer;
+begin
+  -- A fresh reservation wins and is told to deliver.
+  select r.request_id, r.deliver, r.status, r.reason
+    into v_request_id, v_deliver, v_status, v_reason
+    from public.reserve_negotiation_handoff(
+      'a1000000-0000-4000-8000-00000000aa01',
+      'a1000000-0000-4000-8000-000000000001',
+      'hzn_rls_1'
+    ) r;
+  if v_request_id <> 'hzn_rls_1' or not v_deliver or v_reason <> 'reserved' then
+    raise exception 'RLS_TEST_FAILED: reserve did not win (% / % / %)', v_request_id, v_deliver, v_reason;
+  end if;
+
+  select mode_b_request_id, mode_b_status, mode_b_delivery_status
+    into v_store, v_status, v_delivery
+    from public.negotiation_sessions
+   where id = 'a1000000-0000-4000-8000-00000000aa01';
+  if v_store <> 'hzn_rls_1' or v_status <> 'QUEUED' or v_delivery <> 'IN_FLIGHT' then
+    raise exception 'RLS_TEST_FAILED: reservation not persisted (% / % / %)', v_store, v_status, v_delivery;
+  end if;
+
+  -- A second reserve while the first is in flight loses: same id, no deliver.
+  select r.request_id, r.deliver, r.reason
+    into v_request_id, v_deliver, v_reason
+    from public.reserve_negotiation_handoff(
+      'a1000000-0000-4000-8000-00000000aa01',
+      'a1000000-0000-4000-8000-000000000001',
+      'hzn_rls_2'
+    ) r;
+  if v_request_id <> 'hzn_rls_1' or v_deliver or v_reason <> 'in_flight' then
+    raise exception 'RLS_TEST_FAILED: concurrent reserve was not refused (% / % / %)', v_request_id, v_deliver, v_reason;
+  end if;
+
+  -- A failed delivery may be retried, with the SAME id.
+  v_applied := public.finalize_negotiation_handoff_delivery(
+    'a1000000-0000-4000-8000-00000000aa01',
+    'a1000000-0000-4000-8000-000000000001',
+    'hzn_rls_1', false
+  );
+  if not v_applied then
+    raise exception 'RLS_TEST_FAILED: finalize(failed) did not match';
+  end if;
+
+  select r.request_id, r.deliver, r.reason
+    into v_request_id, v_deliver, v_reason
+    from public.reserve_negotiation_handoff(
+      'a1000000-0000-4000-8000-00000000aa01',
+      'a1000000-0000-4000-8000-000000000001',
+      'hzn_rls_3'
+    ) r;
+  if v_request_id <> 'hzn_rls_1' or not v_deliver or v_reason <> 'retry' then
+    raise exception 'RLS_TEST_FAILED: retry did not reuse id (% / % / %)', v_request_id, v_deliver, v_reason;
+  end if;
+
+  -- Once delivered, the handoff is retired from re-sending.
+  perform public.finalize_negotiation_handoff_delivery(
+    'a1000000-0000-4000-8000-00000000aa01',
+    'a1000000-0000-4000-8000-000000000001',
+    'hzn_rls_1', true
+  );
+
+  select r.request_id, r.deliver, r.reason
+    into v_request_id, v_deliver, v_reason
+    from public.reserve_negotiation_handoff(
+      'a1000000-0000-4000-8000-00000000aa01',
+      'a1000000-0000-4000-8000-000000000001',
+      'hzn_rls_4'
+    ) r;
+  if v_request_id <> 'hzn_rls_1' or v_deliver or v_reason <> 'delivered' then
+    raise exception 'RLS_TEST_FAILED: delivered handoff was re-sent (% / % / %)', v_request_id, v_deliver, v_reason;
+  end if;
+
+  -- A stale finalization (wrong request id) must not touch the row.
+  v_applied := public.finalize_negotiation_handoff_delivery(
+    'a1000000-0000-4000-8000-00000000aa01',
+    'a1000000-0000-4000-8000-000000000001',
+    'hzn_stale', false
+  );
+  if v_applied then
+    raise exception 'RLS_TEST_FAILED: a stale finalization matched';
+  end if;
+
+  -- Cross-tenant: A cannot reserve against B's session, even naming B as the
+  -- owner, because RLS hides the row from the invoker.
+  select count(*) into v_events
+    from public.reserve_negotiation_handoff(
+      'b2000000-0000-4000-8000-00000000bb02',
+      'b2000000-0000-4000-8000-000000000002',
+      'hzn_cross'
+    );
+  if v_events <> 0 then
+    raise exception 'RLS_TEST_FAILED: A reserved a handoff on B session';
+  end if;
+end;
+$$;
+
+reset role;
+
+-- ---------------------------------------------------------------------------
+-- The operator callback path, as the service role it actually runs under.
+--
+-- `apply_negotiation_handoff_status` is execute-granted to service_role only, so
+-- it cannot be driven from the customer client. The owner filter inside the
+-- function is what scopes it: the route derives the owner from the row it read,
+-- so an id/owner mismatch must apply nothing.
+-- ---------------------------------------------------------------------------
+set local role service_role;
+
+do $$
+declare
+  v_applied boolean;
+  v_events integer;
+  v_status text;
+begin
+  v_applied := public.apply_negotiation_handoff_status(
+    'a1000000-0000-4000-8000-00000000aa01',
+    'a1000000-0000-4000-8000-000000000001',
+    'QUEUED', 'IN_PROGRESS'
+  );
+  if not v_applied then
+    raise exception 'RLS_TEST_FAILED: apply from the observed status did not apply';
+  end if;
+
+  select mode_b_status into v_status
+    from public.negotiation_sessions
+   where id = 'a1000000-0000-4000-8000-00000000aa01';
+  if v_status <> 'IN_PROGRESS' then
+    raise exception 'RLS_TEST_FAILED: apply did not store the status (%)', v_status;
+  end if;
+
+  select count(*) into v_events
+    from public.negotiation_events
+   where session_id = 'a1000000-0000-4000-8000-00000000aa01'
+     and event_type = 'operator_status_changed';
+  if v_events <> 1 then
+    raise exception 'RLS_TEST_FAILED: apply did not write exactly one event (%)', v_events;
+  end if;
+
+  -- Re-applying from the same `from` (the concurrent-callback case) matches no
+  -- row and writes nothing, so a race cannot append a second move.
+  v_applied := public.apply_negotiation_handoff_status(
+    'a1000000-0000-4000-8000-00000000aa01',
+    'a1000000-0000-4000-8000-000000000001',
+    'QUEUED', 'IN_PROGRESS'
+  );
+  if v_applied then
+    raise exception 'RLS_TEST_FAILED: a replayed apply double-applied';
+  end if;
+
+  select count(*) into v_events
+    from public.negotiation_events
+   where session_id = 'a1000000-0000-4000-8000-00000000aa01'
+     and event_type = 'operator_status_changed';
+  if v_events <> 1 then
+    raise exception 'RLS_TEST_FAILED: a replayed apply appended a second event (%)', v_events;
+  end if;
+
+  -- Owner mismatch: the row id is A's but the owner passed is B's, so nothing
+  -- applies. This is how the route refuses a callback bound to the wrong owner.
+  v_applied := public.apply_negotiation_handoff_status(
+    'a1000000-0000-4000-8000-00000000aa01',
+    'b2000000-0000-4000-8000-000000000002',
+    'IN_PROGRESS', 'AWAITING_PROVIDER'
+  );
+  if v_applied then
+    raise exception 'RLS_TEST_FAILED: apply ignored the owner filter';
+  end if;
+end;
+$$;
+
 reset role;
 
 -- ---------------------------------------------------------------------------

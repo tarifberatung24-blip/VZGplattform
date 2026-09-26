@@ -9,7 +9,6 @@ import {
   buildAssistedQueuePayload,
   canHandOffToOperator,
   canTransitionAssistedRequest,
-  isActiveAssistedRequest,
 } from "@/lib/horizon/negotiation/assisted"
 import type { NegotiationDossier } from "@/lib/horizon/negotiation/dossier"
 import {
@@ -98,33 +97,52 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       negotiationPackage,
     })
 
-    // A handoff already in flight is the same logical request. Reusing its id makes
-    // a double-submit (or a retry) idempotent for a receiver that deduplicates on
-    // `requestId`, instead of queuing the same negotiation twice. Only a terminal
-    // request allows a genuinely new one.
-    const active = isActiveAssistedRequest({
-      requestId: session.mode_b_request_id,
-      status: session.mode_b_status,
+    // Reserve the handoff *before* anything leaves the process.
+    //
+    // A read-then-write here would race: two concurrent submits would both see
+    // "no active handoff", both mint a key, and the queue would hold two jobs for
+    // one negotiation — or a fast operator callback could name a key that had not
+    // been persisted yet. `reserveAssistedHandoff` is a single compare-and-set, so
+    // exactly one caller creates the reservation and a loser is handed the
+    // winner's key. The candidate id is therefore only used when we win; when an
+    // active handoff exists the stored key is returned and the candidate ignored.
+    const reservation = await engine.repository!.reserveAssistedHandoff({
+      sessionId,
+      requestId: newAutomationRequestId(),
     })
-    const requestId = active ? session.mode_b_request_id! : newAutomationRequestId()
-    const receivedAt = new Date().toISOString()
-    const payload = buildAssistedQueuePayload({
-      requestId,
-      locale: parsed.data.locale,
-      handoff,
-      receivedAt,
-    })
+    if (reservation.error) return upstreamFailed(reservation.error).response
+    const { requestId, deliver } = reservation.data!
 
-    const delivery = await deliverToAutomation({ config: transport, payload, requestId })
-    if (!delivery.ok) {
-      return NextResponse.json({ code: "NEGOTIATION_ASSISTED_QUEUE_FAILED" }, { status: 502 })
+    // Deliver only when this caller owns the delivery: a fresh reservation, or a
+    // retry of a previously failed one. A concurrent double-submit is told
+    // `deliver: false` and skips the send, so one negotiation yields one job; a
+    // handoff the receiver already has is likewise not re-sent. The id is never
+    // re-minted after an ambiguous timeout — a retry reuses the stored one.
+    if (deliver) {
+      const payload = buildAssistedQueuePayload({
+        requestId,
+        locale: parsed.data.locale,
+        handoff,
+        receivedAt: new Date().toISOString(),
+      })
+      const delivery = await deliverToAutomation({ config: transport, payload, requestId })
+      // Record the outcome so a failure permits a retry with the same id and a
+      // success retires the handoff from re-sending. A failure to record is logged
+      // as a failed attempt, which is the safe direction: the worst case is a
+      // re-send to a receiver that deduplicates on the request id.
+      await engine.repository!.finalizeAssistedHandoffDelivery({
+        sessionId,
+        requestId,
+        delivered: delivery.ok,
+      })
+      if (!delivery.ok) {
+        return NextResponse.json({ code: "NEGOTIATION_ASSISTED_QUEUE_FAILED" }, { status: 502 })
+      }
     }
 
-    const queued = await engine.repository!.queueAssistedHandoff({ sessionId, requestId })
-    if (queued.error) return upstreamFailed(queued.error).response
-
     // Move the lifecycle only along the declared edge; an already-negotiating
-    // session keeps its state.
+    // session keeps its state. The queue status was already written by the
+    // reservation, so this is the only lifecycle write here.
     let state = session.state
     const applied = applyTransition(state, "start_negotiation")
     if (applied && session.state === "AUTHORIZATION") {
@@ -133,8 +151,12 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       await engine.repository!.updateSession(sessionId, { state })
     }
 
+    // The platform audit line is best-effort: the handoff is already reserved and
+    // delivered, so a failed audit write must not reject the user's action. The
+    // failure is reported on the response rather than swallowed, so a silent
+    // audit gap is visible to the caller and to monitoring.
     const supabase = await createClient()
-    await writeNegotiationAudit(supabase, {
+    const auditError = await writeNegotiationAudit(supabase, {
       householdId: await ensureHousehold(supabase),
       actorUserId: engine.userId!,
       sessionId,
@@ -143,7 +165,10 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       metadata: { request_id: requestId, category: session.category, state },
     })
 
-    return NextResponse.json({ status: "QUEUED", requestId, state }, { status: 202 })
+    return NextResponse.json(
+      { status: "QUEUED", requestId, state, ...(auditError ? { auditError: true } : {}) },
+      { status: 202 },
+    )
   } catch {
     return upstreamFailed("NEGOTIATION_ASSISTED_HANDOFF_FAILED").response
   }

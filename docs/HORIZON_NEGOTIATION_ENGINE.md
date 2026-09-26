@@ -241,13 +241,33 @@ are refused by both the API and the UI.
   leak which orchestrator is configured. An Activepieces wiring example is in
   §15.
 
-  **Retry-safe request ids.** The id is minted once per logical handoff and reused
-  while that handoff is still in flight, so a double-submit or a retry carries the
+  **Retry-safe, single-sender handoffs.** The id is minted once per logical handoff
+  and reused for that handoff's whole life, so a double-submit or a retry carries the
   same `requestId` and a receiver that deduplicates on it will not queue the same
   negotiation twice. Only a terminal request (`COMPLETED`/`CANCELLED`) allows a
-  genuinely new id. The transport is stateless and therefore safe to retry for the
-  same reason: the body is built from the caller's payload and nothing is recorded
-  on the way out.
+  genuinely new id.
+
+  The reservation is a single compare-and-set in `reserve_negotiation_handoff`, not a
+  read-then-write from the route, so two concurrent submits cannot both decide they
+  are the sender. The function also decides who may deliver:
+
+  - `reserved` — a fresh handoff; this caller sends.
+  - `retry` — a previous send failed (`mode_b_delivery_status = FAILED`); this caller
+    sends again **with the same id**.
+  - `in_flight` — another caller is sending right now; this caller sends nothing.
+  - `delivered` — the receiver already has it; nothing is re-sent.
+  - `active` — a live handoff past `QUEUED`; a callback proved receipt, so it is not
+    re-sent.
+
+  `finalize_negotiation_handoff_delivery` records the outcome (`DELIVERED`/`FAILED`).
+  A crash between sending and marking `DELIVERED` leaves `IN_FLIGHT`, which errs
+  toward not double-sending; `FAILED` is what permits the retry. The id is never
+  re-minted after an ambiguous timeout.
+
+  The transport is stateless and safe to retry for the same reason: the body is built
+  from the caller's payload and nothing is recorded on the way out. Configuration is
+  resolved pairwise (neutral pair *or* legacy pair, never blended), so a half-migrated
+  setup disables the handoff rather than mixing secrets across receivers.
 
   **Inbound callback.** `POST /api/negotiation/assisted/callback` is how the queue
   reports back. It is a separate endpoint from the customer route because the caller
@@ -265,11 +285,18 @@ are refused by both the API and the UI.
   - **Bounded.** Only `mode_b_status` changes, and only along the declared edges.
     The negotiation lifecycle (`state`) is never advanced from here — an operator
     finishing queue work is not the same fact as a provider confirming terms.
+  - **Atomic.** The status move and its `operator_status_changed` event are written by
+    one function (`apply_negotiation_handoff_status`) in one transaction, so the
+    timeline cannot omit a move that was stored. Its own compare-and-set on the status
+    the caller observed means two racing callbacks resolve to one applied move.
   - **Idempotent.** A repeat of the stored status returns `applied: false` and writes
     nothing, so a retrying queue cannot duplicate a timeline event.
   - **Append-only.** A move appends one `operator_status_changed` negotiation event
     and one `negotiation.assisted_status_changed` audit line, attributed to a system
-    actor (`actor_user_id` null) rather than misattributed to the customer.
+    actor (`actor_user_id` null) rather than misattributed to the customer. The
+    platform audit line lives in another subsystem's table and is written after the
+    atomic move; a failure is reported on the response as `auditError: true` rather
+    than swallowed, so a gap in the platform audit trail is observable.
   - **Credential-free.** The body shape is closed and has **no free-text field**.
     A note would be the one place a secret could ride in, and prose cannot be reliably
     scanned for one, so the callback simply has nowhere to put one.
@@ -357,9 +384,22 @@ tables were created instead, all owner-scoped:
 `negotiation_authorizations`, `negotiation_verifications`, `negotiation_events`.
 
 `negotiation_sessions` also carries the MODE B operator-queue columns
-(`mode_b_status`, `mode_b_queued_at`, `mode_b_updated_at`) alongside the existing
-`mode_b_request_id`. The queue state is kept in its own column so it is never
-inferred from the negotiation lifecycle.
+(`mode_b_status`, `mode_b_queued_at`, `mode_b_updated_at`, `mode_b_delivery_status`)
+alongside the existing `mode_b_request_id`. The queue state is kept in its own column
+so it is never inferred from the negotiation lifecycle, and `mode_b_delivery_status`
+(`IN_FLIGHT`/`DELIVERED`/`FAILED`) keeps the outbound send decision separate from the
+queue state so a double-submit cannot create two jobs.
+
+**Atomicity.** A second additive migration,
+`20260927090000_horizon_negotiation_handoff_atomicity.sql`, adds that column and three
+`security invoker` functions: `reserve_negotiation_handoff`,
+`finalize_negotiation_handoff_delivery`, and `apply_negotiation_handoff_status`. They
+close two read-then-write races — the outbound handoff reservation (which must exist
+before anything is sent) and the callback status-plus-event write (which must not
+diverge). `security invoker` is deliberate: the functions run with the caller's
+privileges and stay subject to row level security, so adding them widens no access.
+`apply_negotiation_handoff_status` is execute-granted to `service_role` only; the
+other two are available to the authenticated owner.
 
 Every child table is coupled to the owner by a composite foreign key
 (`(session_id, owner_id) references negotiation_sessions (id, owner_id)` and the

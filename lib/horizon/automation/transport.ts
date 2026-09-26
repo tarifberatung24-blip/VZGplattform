@@ -45,8 +45,12 @@ export type AutomationEnv = Record<string, string | undefined>
 export type AutomationTransportConfig = {
   url: string
   secret: string
-  /** Where the resolved values came from, for diagnostics. Never the values. */
-  source: { url: "neutral" | "legacy"; secret: "neutral" | "legacy" }
+  /**
+   * Which configuration family resolved. `neutral` means both neutral variables
+   * were present; `legacy` means both neutral ones were absent and the legacy pair
+   * was used instead. The two are never blended — see `resolveAutomationTransport`.
+   */
+  source: { family: "neutral" | "legacy" }
 }
 
 export type AutomationDelivery =
@@ -59,28 +63,37 @@ export type AutomationDelivery =
  * development. A malformed or insecure URL is treated as not configured rather
  * than as a hard error, so a typo in an env var disables the handoff instead of
  * sending a payload somewhere unintended.
+ *
+ * Configuration is resolved pairwise, never blended. A neutral URL with a legacy
+ * secret (or the reverse) is a half-finished migration, and silently borrowing the
+ * other family's value would send the secret of one receiver to another. So:
+ *
+ *   - if either neutral variable is present, BOTH neutral variables are required
+ *     and a legacy value is never borrowed;
+ *   - only when BOTH neutral variables are absent is the legacy pair used, and
+ *     then BOTH legacy variables are required.
+ *
+ * A partial neutral pair therefore resolves to null (handoff disabled) rather
+ * than quietly falling back, which surfaces the misconfiguration instead of
+ * hiding it.
  */
 export function resolveAutomationTransport(
   env: AutomationEnv = process.env,
 ): AutomationTransportConfig | null {
   const neutralUrl = env.HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL?.trim()
-  const legacyUrl = env.N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL?.trim()
   const neutralSecret = env.HORIZON_AUTOMATION_WEBHOOK_SECRET?.trim()
+  const legacyUrl = env.N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL?.trim()
   const legacySecret = env.N8N_WEBHOOK_SECRET?.trim()
 
-  const url = neutralUrl || legacyUrl
-  const secret = neutralSecret || legacySecret
-  if (!url || !secret) return null
-  if (!isSafeWebhookUrl(url)) return null
-
-  return {
-    url,
-    secret,
-    source: {
-      url: neutralUrl ? "neutral" : "legacy",
-      secret: neutralSecret ? "neutral" : "legacy",
-    },
+  if (neutralUrl || neutralSecret) {
+    if (!neutralUrl || !neutralSecret) return null
+    if (!isSafeWebhookUrl(neutralUrl)) return null
+    return { url: neutralUrl, secret: neutralSecret, source: { family: "neutral" } }
   }
+
+  if (!legacyUrl || !legacySecret) return null
+  if (!isSafeWebhookUrl(legacyUrl)) return null
+  return { url: legacyUrl, secret: legacySecret, source: { family: "legacy" } }
 }
 
 function isSafeWebhookUrl(raw: string): boolean {
@@ -128,11 +141,16 @@ export async function deliverToAutomation(input: {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     [AUTOMATION_SECRET_HEADER]: input.config.secret,
-    // Alias for a receiver still expecting the legacy header name.
-    [LEGACY_SECRET_HEADER]: input.config.secret,
     // A stable correlation id, so the receiver can echo it back on the callback
     // and a retry of the same handoff is recognisable as the same request.
     "X-Horizon-Request-Id": input.requestId,
+  }
+  // The legacy header is sent only when the legacy configuration family is in
+  // use — that is the one case where the receiver is an existing n8n deployment
+  // that may still expect it. A neutral (e.g. Activepieces) receiver gets the
+  // neutral header alone, so the legacy name is not leaked into a newer setup.
+  if (input.config.source.family === "legacy") {
+    headers[LEGACY_SECRET_HEADER] = input.config.secret
   }
 
   try {

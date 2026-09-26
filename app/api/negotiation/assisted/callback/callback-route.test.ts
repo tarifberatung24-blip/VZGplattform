@@ -17,6 +17,11 @@ const state = vi.hoisted(() => ({
   audit: [] as Array<Record<string, unknown>>,
   /** Every `eq` filter the read applied, so a test can assert the lookup key. */
   eqCalls: [] as Array<[string, unknown]>,
+  rpcCalls: [] as Array<{ fn: string; args: Record<string, unknown> }>,
+  applyCalls: [] as Array<Record<string, unknown>>,
+  auditFails: false,
+  /** When true, the atomic apply reports the stored status already moved on. */
+  applyConflict: false,
   adminAvailable: true,
 }))
 
@@ -26,6 +31,36 @@ vi.mock("@/lib/office/supabase/admin", () => ({
   createAdminClient: () => {
     if (!state.adminAvailable) return null
     return {
+      rpc: async (fn: string, args: Record<string, unknown>) => {
+        state.rpcCalls.push({ fn, args })
+        if (fn === "apply_negotiation_handoff_status") {
+          state.applyCalls.push(args)
+          // A simulated race: another callback moved the row between our read and
+          // our write, so the compare-and-set matches no row.
+          if (state.applyConflict) return { data: false, error: null }
+          const current = state.session as { mode_b_status?: string | null } | null
+          // The database function's compare-and-set: apply only when the stored
+          // status still matches the one the caller observed.
+          if (!current || current.mode_b_status !== args.p_from) return { data: false, error: null }
+          // It writes the status and its timeline event in one transaction.
+          state.sessionUpdate = {
+            mode_b_status: args.p_status,
+            mode_b_updated_at: "2026-09-26T00:00:00.000Z",
+          }
+          state.events.push({
+            owner_id: args.p_owner_id,
+            session_id: args.p_session_id,
+            event_type: "operator_status_changed",
+            detail: {
+              from: args.p_from,
+              to: args.p_status,
+              source: "operator_callback",
+            },
+          })
+          return { data: true, error: null }
+        }
+        return { data: null, error: null }
+      },
       from: (table: string) => {
         const query: Record<string, unknown> = {}
         const self = () => query
@@ -47,8 +82,14 @@ vi.mock("@/lib/office/supabase/admin", () => ({
             if (table === "negotiation_sessions") state.sessionUpdate = patch
             return query
           },
-          then: (resolve: (value: { data: unknown; error: null }) => unknown) =>
-            Promise.resolve({ data: [], error: null }).then(resolve),
+          then: (resolve: (value: { data: unknown; error: unknown }) => unknown) =>
+            Promise.resolve({
+              data: [],
+              error:
+                state.auditFails && table === "platform_audit_events"
+                  ? { message: "audit down" }
+                  : null,
+            }).then(resolve),
         })
         return query
       },
@@ -100,6 +141,10 @@ beforeEach(() => {
   state.events = []
   state.audit = []
   state.eqCalls = []
+  state.rpcCalls = []
+  state.applyCalls = []
+  state.auditFails = false
+  state.applyConflict = false
   state.adminAvailable = true
 })
 
@@ -222,6 +267,46 @@ describe("assisted callback — valid transitions", () => {
     await callbackPost(authed({ requestId: "hzn_1", status: "IN_PROGRESS" }))
     const detail = state.events[0].detail as Record<string, unknown>
     expect(detail).toEqual({ from: "QUEUED", to: "IN_PROGRESS", source: "operator_callback" })
+  })
+})
+
+describe("assisted callback — atomic write and audit guarantee", () => {
+  it("applies the status and its event through one atomic call", async () => {
+    // One RPC means the status and the event cannot diverge: no separate event
+    // insert is issued.
+    await callbackPost(authed({ requestId: "hzn_1", status: "IN_PROGRESS" }))
+    expect(state.rpcCalls.filter((c) => c.fn === "apply_negotiation_handoff_status")).toHaveLength(1)
+    expect(state.applyCalls[0]).toMatchObject({
+      p_from: "QUEUED",
+      p_status: "IN_PROGRESS",
+      p_owner_id: "owner-1",
+    })
+  })
+
+  it("reports a concurrent move as not-applied rather than duplicating it", async () => {
+    // Another callback moved the row between our read and our write, so the
+    // compare-and-set matches nothing. Nothing is written and the caller is told
+    // it was not applied, rather than a second move being appended.
+    state.applyConflict = true
+    const response = await callbackPost(authed({ requestId: "hzn_1", status: "IN_PROGRESS" }))
+    expect(response.status).toBe(200)
+    const body = await response.json()
+    expect(body).toMatchObject({ applied: false, concurrent: true })
+    expect(state.sessionUpdate).toBeNull()
+    expect(state.events).toHaveLength(0)
+    expect(state.audit).toHaveLength(0)
+  })
+
+  it("surfaces an audit failure on the response instead of swallowing it", async () => {
+    state.auditFails = true
+    const response = await callbackPost(authed({ requestId: "hzn_1", status: "IN_PROGRESS" }))
+    expect(response.status).toBe(200)
+    const body = await response.json()
+    expect(body.applied).toBe(true)
+    expect(body.auditError).toBe(true)
+    // The move itself is still applied; only the platform audit line is missing.
+    expect(state.sessionUpdate).toMatchObject({ mode_b_status: "IN_PROGRESS" })
+    expect(state.events).toHaveLength(1)
   })
 })
 
