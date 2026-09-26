@@ -1,6 +1,12 @@
 # VZGplattform coding-agent entry point
 
-Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, and `docs/TERRA_START.md` before work.
+Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, `SOUL.md`, and `docs/TERRA_START.md` before work.
+
+`SOUL.md` is the agent's working disposition for this repository: the hard product
+rules (never request provider passwords or authentication secrets, never manufacture a
+saving, never auto-accept an offer), how to work (measure before claiming, reuse the
+existing models, state scope first), how to speak to the owner, and the current
+environment limits. Read it with this file, not instead of it.
 
 Canonical identity: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HORIZON by VZG`, CODEBASE `VZGplattform`. Keep these four names distinct; do not use them interchangeably.
 
