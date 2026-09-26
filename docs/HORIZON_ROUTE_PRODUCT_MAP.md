@@ -85,8 +85,12 @@ The routes the shell wraps are those matched by `isKintexWorkspacePath()` in
 
 That predicate is presentation only. It decides whether the HORIZON shell draws; it does not grant
 or deny access. Actual protection comes from `protectedPrefixes` in
-`lib/supabase/auth-routing.ts`, applied by `updateSession()` in `lib/supabase/proxy.ts`. The two
-sets are not identical: two routes below are public, as noted.
+`lib/supabase/auth-routing.ts`, applied by `updateSession()` in `lib/supabase/proxy.ts`. Every
+route in the workspace table below is inside the protection boundary. The two sets differ only at
+the edges: `/protected` is matched by the shell but excluded from protection (it redirects), and
+`/auth/update-password` and `/onboarding` are protected but outside the workspace shell. The
+public routes that the shell must not wrap are in the separate "Public routes outside the workspace
+shell" section, not in this table.
 
 | Route | Access | Product area | Status | Disposition | In primary nav |
 |---|---|---|---|---|---|
@@ -101,7 +105,7 @@ sets are not identical: two routes below are public, as noted.
 | `/{locale}/profil` | AUTH | Profile | IMPLEMENTED | KEEP | Yes |
 | `/{locale}/assistant` | AUTH | AI home-office chat (P7, KintexBG-era surface) | PARTIAL | LEGACY | No |
 | `/{locale}/finanzamt` | AUTH | Finanzamt surfaces | PARTIAL | KEEP | No |
-| `/{locale}/finanzbildung` | AUTH (proxy) | Financial education | PARTIAL | LEGACY | No |
+| `/{locale}/finanzbildung` | AUTH | Financial education | PARTIAL | LEGACY | No |
 
 `/{locale}/assistant` renders `home-office-workspace` and is matched by `isKintexWorkspacePath()`
 and by `protectedPrefixes` (`/assistant`), so it draws the authenticated shell. It predates the

@@ -30,7 +30,8 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   did not re-run onboarding
 - ✅ P4 five entry modules re-verified 2026-09-25: all five dashboard entries were clicked in a live
   session and each created a real case; account routes corrected to the ones that exist
-  (`/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`, `/de/security`)
+  (`/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`); the interim security surface is
+  `/de/protected/security` (`/de/security` is the public Layer 0 trust page, not an account route)
 - ✅ P1 owner/legal acceptance — recorded in the Build Ledger as DONE/FROZEN by owner acceptance 2026-09-25
 - ✅ P1 FROZEN after explicit owner acceptance
 - ✅ P2 migration applied to the project (owner-side authorized channel) — `20260925020000` applied; live `profiles.upsert()` returns `200`
@@ -141,7 +142,8 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Unterlagen erklären
 - ✅ My Cases
 - ✅ Profile
-- ✅ Settings / Security
+- ✅ Security — interim surface at `/{locale}/protected/security` (sidebar entry). A dedicated
+  workspace settings surface is N5, still owner-gated; this is not a claim that N5 is done.
 - ✅ Unit tests
 - ✅ **Authenticated runtime observed (2026-09-25):** `/{locale}/dashboard` returned `200` under a
   live owner session and rendered the five entry modules with live per-module case counts.

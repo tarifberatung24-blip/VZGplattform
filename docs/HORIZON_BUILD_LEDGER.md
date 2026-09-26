@@ -2,9 +2,9 @@
 
 Status: **IMPLEMENTATION STATUS LEDGER** (documentation only)
 Companion to: [`HORIZON_MASTER_MAP.md`](./HORIZON_MASTER_MAP.md)
-Base: `origin/main` @ `1d844a2a069a0119fdea8ebc40ffa110b97afcb3`; navigation N0–N2 landed at
-`56b0aa5`, and N3/N4/N6 landed at `015d606`. Phase records below are unchanged by the navigation
-work unless a record says otherwise.
+Base: `origin/main` @ `09fb4be` (docs reconciliation). Navigation N0–N2 landed at `56b0aa5`; N3/N4/N6
+landed at `015d606`. Phase records below are unchanged by the navigation work unless a record says
+otherwise.
 
 This ledger tracks implementation status per phase. It is evidence-based only.
 Nothing is marked DONE because code exists. If a flow has not been verified end-to-end,
@@ -45,7 +45,7 @@ after a module meets the full DONE definition.
 | P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (blocker migration applied + live `profiles.upsert` 200; fresh-user login/onboarding/second-login E2E pass; FROZEN pending owner acceptance) | NO | YES |
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
-| P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; real account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`, `/de/security` respond) | NO | YES |
+| P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents` respond, and the interim security surface is `/de/protected/security` — `/de/security` is the public trust page, not an account route) | NO | YES |
 | P5 | SHARED CASE ENGINE | MODEL + REPOSITORY VERIFIED — LIVE DB + RLS RE-VERIFIED 2026-09-25 (two real authenticated users: owner case/fact writes 201; other user read `[]` for case, fact and profile; spoofed-owner fact insert `42501`; cross-owner profile PATCH returned 0 rows — row unchanged; anon denied `401`; owner positive control 200) | NO | YES |
 | P6 | DOCUMENT INTAKE / OCR / EXPLANATION | DONE — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION 2026-09-25 (`ocrScannedPdfPages` on the real official `ESt_1_A_2025.pdf` page 1: 1,650 chars, 0.70 confidence, correctly read printed title); page-level evidence reachable on the HORIZON path (authenticated browser E2E read a real uploaded PDF into `document_pages`, `UPLOADED → READY`, and the P16 explanation quoted its text); one shared READY rule now used by both stacks (`lib/documents/extraction-contract.ts`), closing the office path's empty-extraction `READY` bug (live: text-free PDF → `NEEDS_CONFIRMATION`) | NO | YES |
 | P7 | CONTEXT AI ASSISTANT | VERIFIED (RAILS/CONTEXT) — LIVE CALL REFUSES CLEANLY 2026-09-25 (`POST /api/horizon/cases/{id}/assistant` → `401 AUTHENTICATION_REQUIRED` without session, `503 AI_PROVIDER_NOT_CONFIGURED` with session; no crash, no partial stream); rail ordering fixed so validation/ownership run before the provider gate (live: foreign case `404`, malformed body `400`, previously both `503`); end-to-end answer owner-blocked on provider key | NO | YES |
@@ -112,8 +112,12 @@ after a module meets the full DONE definition.
   `/{locale}/datenschutz`, `/{locale}/agb`, `/{locale}/widerruf`, `/{locale}/affiliate-hinweis`.
   Additional legacy marketing routes: `/check`, `/uslugi`, `/produkte`, `/za-nas`, `/tarife`,
   `/zayavka`, `/anfrage`, `/angebote/{offer}`, `/email-generator`.
-- **REUSE:** `GlobalHeader`, `GlobalFooter`, `legal-page`, `hero`, `site-header`, `site-footer`,
-  `LanguageSwitcher`, `legal-profile.ts`, `/api/leads`, `lead-submit.ts`, PWA install pages.
+- **REUSE:** `GlobalHeader`, `GlobalFooter`, `legal-page`, `animated-hero`, `LanguageSwitcher`,
+  `legal-profile.ts`, `/api/leads`, `lead-submit.ts`, PWA install pages.
+  Note: `components/marketing/hero.tsx` and `components/marketing/site-header.tsx` are dead code
+  (no importer); the home page renders `animated-hero`, and the public chrome is `GlobalHeader` /
+  `GlobalFooter`. `site-footer` survives only on the legacy `/{locale}/produkte` page. Dead-code
+  removal is N7 territory; this record no longer lists them as reusable P1 assets.
 - **MISSING:** none for the accepted P1 scope. Legacy marketing routes that remain are treated as preserved public compatibility surfaces; changing or removing them requires an explicit P1 reopen.
 - **DEPENDENCIES:** P0.
 - **BLOCKERS:** none. Final live legal re-audit passed on production commit `46a5fa3e90827c6d085fd24206f502e93bd9be83`.

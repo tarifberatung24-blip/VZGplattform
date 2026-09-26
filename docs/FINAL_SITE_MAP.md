@@ -1,6 +1,7 @@
 # HORIZON by VZG — Final Site Map
 
-Reconciled against `origin/main` @ `015d606` (which includes the N3/N4/N6 navigation changes).
+Reconciled against `origin/main` @ `09fb4be` (which includes the N3/N4/N6 navigation changes at
+`015d606` and the documentation reconciliation at `09fb4be`).
 Documentation only. This file records what is reachable today and how it is gated; it does not
 redesign UI and does not authorize removal or redirect of any route.
 
@@ -26,6 +27,23 @@ Protection source of truth: `protectedPrefixes` in `lib/supabase/auth-routing.ts
 `updateSession()` in `lib/supabase/proxy.ts`. `isKintexWorkspacePath()` in
 `lib/kintex-navigation.ts` is presentation only — it decides whether the HORIZON shell draws, not
 who may enter.
+
+## Route classification index
+
+Every reachable route, grouped by class. Sections 1–10 below are the detail; this index is the
+checklist. A route appears in exactly one class.
+
+| Class | Section | Routes |
+|---|---|---|
+| Public — Layer 0 | §1 | `/{locale}`, `/{locale}/how-it-works`, `/{locale}/functions`, `/{locale}/security`, `/{locale}/contact`, `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis` |
+| Public — affiliate / partner | §2 | `/{locale}/versicherungen`, `/{locale}/angebote/business-insurance`, `/{locale}/angebote/kfz`, `/{locale}/angebote/[offer]`, `/go/[offer]`, `/{locale}/go/[offer]` |
+| Auth + onboarding | §3 | `/auth/login`, `/auth/sign-up`, `/auth/sign-up-success`, `/auth/forgot-password`, `/auth/update-password`, `/auth/mfa-verify`, `/auth/error`, `/auth/callback`, `/auth/logout`, `/{locale}/onboarding/{profile,tour,finish}`, `/{locale}/onboarding/language` (REDIRECT), `/{locale}/onboarding` (REDIRECT) |
+| Authenticated workspace | §4 | `/{locale}/dashboard`, `/{locale}/guide`, `/{locale}/guide/[caseId]`, `/{locale}/vertraege`, `/{locale}/documents`, `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`, `/{locale}/profil`, `/{locale}/assistant`, `/{locale}/finanzamt`, `/{locale}/finanzbildung` |
+| Service modules (no routes of their own) | §5 | P12–P17 + P7/P10/P11 panels inside `/{locale}/guide/[caseId]` |
+| Public outside the workspace shell | §6 | `/{locale}/anspruch`, `/{locale}/email-generator`, `/{locale}/emailGenerator` |
+| Legacy / compatibility | §7 | `/{locale}/protected`, `/{locale}/protected/home-office`, `/{locale}/protected/security`, `/{locale}/office`, `/{locale}/office/cases/[id]`, `/check`, `/uslugi`, `/kindergeld`, `/produkte`, `/tarife`, `/za-nas`, `/app`, `/{locale}/anfrage`, `/{locale}/zayavka` |
+
+Removal/redirect candidates are listed in §8; API route handlers in §9; Capital in §10.
 
 ---
 
@@ -135,12 +153,13 @@ are shared; see the Shared Engines list in `HORIZON_EXECUTION_CHECKLIST.md`.
 ## 6. Public routes outside the workspace shell
 
 Reachable without a session. They are **not** matched by `isKintexWorkspacePath()`, so they draw
-the public Layer 0 header and footer. Neither appears in `protectedPrefixes`.
+the public Layer 0 header and footer, and none appears in `protectedPrefixes`.
 
 | Route | Access | Product area | Status | Disposition |
 |---|---|---|---|---|
 | `/{locale}/anspruch` | PUBLIC | Entitlement navigator (P4, touched by P12–P13) | PARTIAL | REUSE |
 | `/{locale}/email-generator` | PUBLIC | AI letter generator, KintexBG-era (superseded by Draft/Review) | LEGACY | KEEP |
+| `/{locale}/emailGenerator` | PUBLIC | Duplicate camelCase catch-all key resolving the same `EmailGeneratorPage` | LEGACY | REMOVE LATER |
 
 TAR-7/TAR-8 briefly wrapped these in the workspace shell and listed them in the authenticated
 navigation; both the shell match and the navigation entries were removed. Whether they deserve
@@ -186,7 +205,11 @@ redirect anything: `/{locale}/office` only stopped drawing the duplicate public 
 | `/{locale}/anfrage`, `/{locale}/zayavka` | Lead capture → n8n | KEEP | Live lead channel; `/{locale}/contact` overlaps but is a different pipeline |
 | `/{locale}/email-generator` | KintexBG letter generator | RETIRE once a workspace replacement is approved | Public and reachable; superseded by P8 draft/review |
 | `/{locale}/onboarding/language` | Legacy onboarding step | REMOVE once no persisted `language` step remains | Already a pure redirect; low risk |
-| `/{locale}/security` (as `AUTH`) | Mislabeled in the Master Map | Correct the Master Map label to PUBLIC | Documentation only |
+| `/{locale}/emailGenerator` | Duplicate camelCase catch-all key for the same `EmailGeneratorPage` as `/{locale}/email-generator` | REMOVE the catch-all key (keep the hyphenated route until P8 retirement) | None identified; no navigation links to the camelCase form |
+
+The public/authenticated security naming collision is already resolved: `HORIZON_MASTER_MAP.md` §2.2
+labels `/{locale}/security` `PUBLIC`, matching `app/[locale]/security/page.tsx`. No further
+documentation correction is outstanding for it, so it is not a §8 candidate.
 
 ## 9. API route handlers
 
