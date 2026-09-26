@@ -1,7 +1,7 @@
 /**
  * HORIZON NEGOTIATION — MODE B operator callback decision.
  *
- * An operator or the n8n workflow moves the queue forward by calling back into
+ * An operator or the automation workflow moves the queue forward by calling back into
  * the platform. That caller is not a signed-in customer, so none of the session
  * route's guarantees apply to it and every one of them has to be re-established
  * here, in a pure function that a test can drive without a database or a network.
@@ -30,7 +30,7 @@ import {
   type AssistedRequestStatus,
 } from "./assisted"
 
-/** The statuses an operator/n8n callback is allowed to set. */
+/** The statuses an operator/automation callback is allowed to set. */
 export const ASSISTED_CALLBACK_STATUSES = [
   "IN_PROGRESS",
   "AWAITING_PROVIDER",

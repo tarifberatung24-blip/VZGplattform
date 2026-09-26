@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 /**
- * Route tests for the MODE B operator/n8n callback.
+ * Route tests for the MODE B operator/automation callback.
  *
  * This endpoint is reachable without a session cookie, so its guarantees cannot
  * rest on the customer route's auth. Each test drives one of them directly: the
@@ -73,7 +73,7 @@ function request(
 }
 
 function authed(body: unknown) {
-  return request(body, { "x-horizon-negotiation-callback-secret": SECRET })
+  return request(body, { "x-horizon-automation-secret": SECRET })
 }
 
 function queuedSession(overrides: Record<string, unknown> = {}) {
@@ -92,7 +92,7 @@ function queuedSession(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   vi.unstubAllEnvs()
   vi.stubEnv("HORIZON_NEGOTIATION_ENABLED", "1")
-  vi.stubEnv("HORIZON_NEGOTIATION_CALLBACK_SECRET", SECRET)
+  vi.stubEnv("HORIZON_AUTOMATION_CALLBACK_SECRET", SECRET)
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co")
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test")
   state.session = queuedSession()
@@ -114,7 +114,7 @@ describe("assisted callback — authentication", () => {
     const response = await callbackPost(
       request(
         { requestId: "hzn_1", status: "IN_PROGRESS" },
-        { "x-horizon-negotiation-callback-secret": "wrong" },
+        { "x-horizon-automation-secret": "wrong" },
       ),
     )
     expect(response.status).toBe(401)
@@ -123,7 +123,7 @@ describe("assisted callback — authentication", () => {
   it("refuses a secret that is a prefix of the real one", async () => {
     // A prefix must not authenticate; the length check makes this a plain refusal.
     const response = await callbackPost(
-      request({ requestId: "hzn_1", status: "IN_PROGRESS" }, { "x-horizon-negotiation-callback-secret": SECRET.slice(0, 5) }),
+      request({ requestId: "hzn_1", status: "IN_PROGRESS" }, { "x-horizon-automation-secret": SECRET.slice(0, 5) }),
     )
     expect(response.status).toBe(401)
   })
@@ -135,6 +135,24 @@ describe("assisted callback — authentication", () => {
     expect(response.status).toBe(200)
   })
 
+  it("accepts the earlier callback header name as an alias", async () => {
+    // A receiver still sending the pre-neutral header keeps working.
+    const response = await callbackPost(
+      request(
+        { requestId: "hzn_1", status: "IN_PROGRESS" },
+        { "x-horizon-negotiation-callback-secret": SECRET },
+      ),
+    )
+    expect(response.status).toBe(200)
+  })
+
+  it("accepts the earlier secret env name as a fallback", async () => {
+    vi.stubEnv("HORIZON_AUTOMATION_CALLBACK_SECRET", "")
+    vi.stubEnv("HORIZON_NEGOTIATION_CALLBACK_SECRET", SECRET)
+    const response = await callbackPost(authed({ requestId: "hzn_1", status: "IN_PROGRESS" }))
+    expect(response.status).toBe(200)
+  })
+
   it("writes nothing when the secret is refused", async () => {
     await callbackPost(request({ requestId: "hzn_1", status: "IN_PROGRESS" }))
     expect(state.sessionUpdate).toBeNull()
@@ -143,7 +161,7 @@ describe("assisted callback — authentication", () => {
   })
 
   it("reports not-configured rather than authenticating when no secret is set", async () => {
-    vi.stubEnv("HORIZON_NEGOTIATION_CALLBACK_SECRET", "")
+    vi.stubEnv("HORIZON_AUTOMATION_CALLBACK_SECRET", "")
     const response = await callbackPost(authed({ requestId: "hzn_1", status: "IN_PROGRESS" }))
     expect(response.status).toBe(503)
   })
@@ -354,7 +372,7 @@ describe("assisted callback — credential-shaped payloads", () => {
 
   it("refuses a body that is a bare string", async () => {
     const response = await callbackPost(
-      request(null, { "x-horizon-negotiation-callback-secret": SECRET }, JSON.stringify("password")),
+      request(null, { "x-horizon-automation-secret": SECRET }, JSON.stringify("password")),
     )
     expect(response.status).toBe(400)
   })
@@ -368,7 +386,7 @@ describe("assisted callback — payload shape", () => {
 
   it("refuses a body that is not JSON", async () => {
     const response = await callbackPost(
-      request(null, { "x-horizon-negotiation-callback-secret": SECRET }, "not json"),
+      request(null, { "x-horizon-automation-secret": SECRET }, "not json"),
     )
     expect(response.status).toBe(400)
   })

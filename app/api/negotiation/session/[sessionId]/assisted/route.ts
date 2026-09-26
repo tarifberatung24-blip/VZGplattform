@@ -9,8 +9,14 @@ import {
   buildAssistedQueuePayload,
   canHandOffToOperator,
   canTransitionAssistedRequest,
+  isActiveAssistedRequest,
 } from "@/lib/horizon/negotiation/assisted"
 import type { NegotiationDossier } from "@/lib/horizon/negotiation/dossier"
+import {
+  deliverToAutomation,
+  newAutomationRequestId,
+  resolveAutomationTransport,
+} from "@/lib/horizon/automation/transport"
 import { ensureHousehold } from "@/lib/supabase/household"
 import { createClient } from "@/lib/supabase/server"
 import {
@@ -22,20 +28,6 @@ import {
 } from "@/lib/horizon/negotiation/route-support"
 
 const schema = z.object({ locale: z.enum(["bg", "de"]).default("de") }).strict()
-
-/** The n8n endpoint, validated exactly as the existing service-request route does. */
-function getWebhookUrl() {
-  const raw = process.env.N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL?.trim()
-  if (!raw) return null
-  try {
-    const url = new URL(raw)
-    const local = url.hostname === "localhost" || url.hostname === "127.0.0.1"
-    if (url.protocol !== "https:" && !local) return null
-    return raw
-  } catch {
-    return null
-  }
-}
 
 /**
  * Hands a prepared negotiation to the VZG operator queue (MODE B).
@@ -81,9 +73,8 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       return NextResponse.json({ code: ASSISTED_HANDOFF_REFUSED_CODE }, { status: 409 })
     }
 
-    const webhookUrl = getWebhookUrl()
-    const secret = process.env.N8N_WEBHOOK_SECRET?.trim()
-    if (!webhookUrl || !secret) {
+    const transport = resolveAutomationTransport()
+    if (!transport) {
       return NextResponse.json({ code: "NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED" }, { status: 503 })
     }
 
@@ -107,7 +98,15 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       negotiationPackage,
     })
 
-    const requestId = `hzn_${crypto.randomUUID()}`
+    // A handoff already in flight is the same logical request. Reusing its id makes
+    // a double-submit (or a retry) idempotent for a receiver that deduplicates on
+    // `requestId`, instead of queuing the same negotiation twice. Only a terminal
+    // request allows a genuinely new one.
+    const active = isActiveAssistedRequest({
+      requestId: session.mode_b_request_id,
+      status: session.mode_b_status,
+    })
+    const requestId = active ? session.mode_b_request_id! : newAutomationRequestId()
     const receivedAt = new Date().toISOString()
     const payload = buildAssistedQueuePayload({
       requestId,
@@ -116,17 +115,8 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       receivedAt,
     })
 
-    try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-FinanzBG-Webhook-Secret": secret },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(10_000),
-      })
-      if (!response.ok) {
-        return NextResponse.json({ code: "NEGOTIATION_ASSISTED_QUEUE_FAILED" }, { status: 502 })
-      }
-    } catch {
+    const delivery = await deliverToAutomation({ config: transport, payload, requestId })
+    if (!delivery.ok) {
       return NextResponse.json({ code: "NEGOTIATION_ASSISTED_QUEUE_FAILED" }, { status: 502 })
     }
 

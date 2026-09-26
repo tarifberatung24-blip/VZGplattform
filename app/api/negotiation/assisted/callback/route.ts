@@ -11,15 +11,20 @@ import {
 } from "@/lib/horizon/negotiation/callback"
 import { CREDENTIAL_FIELD_REFUSED_CODE, findForbiddenFields } from "@/lib/horizon/negotiation/guard"
 import { isNegotiationEnabled, NEGOTIATION_DISABLED_CODE } from "@/lib/horizon/negotiation/flag"
+import {
+  AUTOMATION_SECRET_HEADER,
+  resolveCallbackSecret,
+} from "@/lib/horizon/automation/transport"
 import { timingSafeEqual } from "node:crypto"
 
 /**
- * MODE B operator/n8n callback — the inbound half of the assisted queue.
+ * MODE B operator/automation callback — the inbound half of the assisted queue.
  *
- * The outbound handoff posts a package to n8n; this is how the queue reports
- * back. It is a separate endpoint from the customer's assisted route because the
- * caller is a different principal with different powers, and conflating the two
- * would mean the operator path inherits the customer path's auth (or vice versa).
+ * The outbound handoff posts a package to the automation orchestrator (Activepieces,
+ * n8n, Windmill, …); this is how the queue reports back. It is a separate endpoint
+ * from the customer's assisted route because the caller is a different principal
+ * with different powers, and conflating the two would mean the operator path
+ * inherits the customer path's auth (or vice versa).
  *
  * What this route guarantees:
  *
@@ -63,8 +68,11 @@ function secretMatches(provided: string | null, expected: string): boolean {
 }
 
 function readSecret(request: Request): string | null {
-  const header = request.headers.get("x-horizon-negotiation-callback-secret")
+  const header = request.headers.get(AUTOMATION_SECRET_HEADER)
   if (header) return header
+  // Alias so a receiver still sending the earlier header name keeps working.
+  const legacy = request.headers.get("x-horizon-negotiation-callback-secret")
+  if (legacy) return legacy
   const bearer = request.headers.get("authorization")
   if (bearer?.toLowerCase().startsWith("bearer ")) return bearer.slice(7).trim()
   return null
@@ -77,7 +85,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ code: NEGOTIATION_DISABLED_CODE }, { status: 404 })
   }
 
-  const expected = process.env.HORIZON_NEGOTIATION_CALLBACK_SECRET?.trim()
+  const expected = resolveCallbackSecret()
   if (!expected) {
     return NextResponse.json({ code: "NEGOTIATION_ASSISTED_CALLBACK_NOT_CONFIGURED" }, { status: 503 })
   }

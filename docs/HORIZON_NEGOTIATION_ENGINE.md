@@ -211,20 +211,53 @@ are refused by both the API and the UI.
   `CANCELLED`; an operator-driven move arrives through the authenticated callback,
   not the session client. The payload handed to the queue is stripped of any
   credential-shaped field before it leaves the process, and it carries the reviewed
-  dossier and plan as they were recorded rather than a recomputation. The queue
-  transport is the existing n8n webhook pattern (`N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL`),
-  reusing the `N8N_WEBHOOK_SECRET` header the service-request route already uses.
-  When it is not configured the handoff reports
+  dossier and plan as they were recorded rather than a recomputation. When the
+  transport is not configured the handoff reports
   `NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED` and sends nothing.
+
+  **Transport is provider-neutral.** The queue receiver is not part of the business
+  logic. `lib/horizon/automation/transport.ts` owns the only two things that differ
+  between orchestrators — where the endpoint is and what secret authenticates the
+  call — so HORIZON can point at Activepieces Cloud today and another provider later
+  without changing the queue machine, the payload builder or the lifecycle rules:
+
+  - `HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL` — outbound endpoint. https only,
+    except `localhost`/`127.0.0.1` during local development. A malformed or insecure
+    value is treated as *not configured*, so a typo disables the handoff rather than
+    sending a payload somewhere unintended.
+  - `HORIZON_AUTOMATION_WEBHOOK_SECRET` — shared secret on the outbound POST, sent in
+    the provider-neutral `X-Horizon-Automation-Secret` header (with the legacy
+    `X-FinanzBG-Webhook-Secret` as an alias) plus an `X-Horizon-Request-Id`
+    correlation header.
+  - `HORIZON_AUTOMATION_CALLBACK_SECRET` — shared secret the receiver must present on
+    the inbound callback. Deliberately a *different* value from the outbound secret,
+    so knowing one does not grant the other.
+
+  The legacy `N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL` / `N8N_WEBHOOK_SECRET` names are
+  still read as a fallback when the neutral ones are unset, so an existing n8n
+  receiver keeps working through the rename. Delivery failures collapse to one
+  provider-neutral `HORIZON_AUTOMATION_DELIVERY_FAILED`: a non-2xx and a network
+  error are indistinguishable to the caller, and a provider-specific message would
+  leak which orchestrator is configured. An Activepieces wiring example is in
+  §15.
+
+  **Retry-safe request ids.** The id is minted once per logical handoff and reused
+  while that handoff is still in flight, so a double-submit or a retry carries the
+  same `requestId` and a receiver that deduplicates on it will not queue the same
+  negotiation twice. Only a terminal request (`COMPLETED`/`CANCELLED`) allows a
+  genuinely new id. The transport is stateless and therefore safe to retry for the
+  same reason: the body is built from the caller's payload and nothing is recorded
+  on the way out.
 
   **Inbound callback.** `POST /api/negotiation/assisted/callback` is how the queue
   reports back. It is a separate endpoint from the customer route because the caller
   is a different principal with different powers:
 
-  - **Authenticated by shared secret.** `HORIZON_NEGOTIATION_CALLBACK_SECRET`, read
-    from `x-horizon-negotiation-callback-secret` or a bearer token and compared in
-    constant time. No session cookie is involved, so being logged in neither grants
-    nor denies access.
+  - **Authenticated by shared secret.** `HORIZON_AUTOMATION_CALLBACK_SECRET` (with
+    the earlier `HORIZON_NEGOTIATION_CALLBACK_SECRET` name still read as a fallback),
+    taken from `X-Horizon-Automation-Secret`, the earlier callback header name, or a
+    bearer token, and compared in constant time. No session cookie is involved, so
+    being logged in neither grants nor denies access.
   - **Ownership by queue key.** The body names a `requestId`; the session is resolved
     by that key only (`negotiation_sessions_mode_b_request_id_key` is a partial unique
     index, so the lookup cannot match two sessions). A callback cannot name a session
@@ -349,7 +382,91 @@ production database**.
 - Automated execution carries legal exposure if enabled without explicit
   authorization; it stays disabled by default.
 
-## 15. Validation
+## 15. Automation transport wiring (Activepieces example)
 
-`vitest` (1178 tests), `node --test scripts/horizon-context.test.mjs` (20 tests),
+HORIZON talks to a generic webhook orchestrator. Nothing below is provider-locked;
+Activepieces is used here only as the concrete example because it is the current
+target. No real secrets appear in this document — replace the placeholders with
+long random values supplied out of band.
+
+### Outbound — HORIZON → orchestrator
+
+HORIZON POSTs a JSON body to `HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL` when a
+customer hands a prepared negotiation to the assisted queue.
+
+```
+POST https://cloud.activepieces.com/api/v1/webhooks/{{flow-id}}
+Content-Type: application/json
+X-Horizon-Automation-Secret: {{HORIZON_AUTOMATION_WEBHOOK_SECRET}}
+X-Horizon-Request-Id: hzn_<uuid>
+
+{
+  "requestId": "hzn_<uuid>",
+  "locale": "de",
+  "receivedAt": "<iso-8601>",
+  "handoff": { "...reviewed dossier and plan as recorded..." }
+}
+```
+
+The orchestrator should:
+
+1. reject the call unless `X-Horizon-Automation-Secret` matches its stored copy of
+   the shared secret (compare in constant time);
+2. treat `requestId` as the idempotency key — a repeat of the same id is the same
+   logical handoff and must not be processed twice;
+3. retain `requestId` so the callback below can name it.
+
+The outbound body is built by HORIZON and contains no credential-shaped field;
+HORIZON strips any such field again inside the transport as belt-and-braces. The
+orchestrator must not expect, request or store a provider password, PIN, TAN or OTP
+— HORIZON never sends one, and a payload asking for one is a sign of a
+misconfigured or hostile receiver.
+
+### Inbound — orchestrator → HORIZON
+
+The orchestrator reports queue progress back with:
+
+```
+POST https://<horizon-host>/api/negotiation/assisted/callback
+Content-Type: application/json
+X-Horizon-Automation-Secret: {{HORIZON_AUTOMATION_CALLBACK_SECRET}}
+
+{ "requestId": "hzn_<uuid>", "status": "IN_PROGRESS" }
+```
+
+`status` is one of `IN_PROGRESS`, `AWAITING_CUSTOMER`, `AWAITING_PROVIDER`,
+`COMPLETED`. The body is closed and has no free-text field, so a note cannot be
+attached — this is deliberate. Responses:
+
+| Situation | HTTP | Meaning |
+| --- | --- | --- |
+| Applied | 200 | status moved; `applied: true` |
+| Already in that status | 200 | acknowledged, `applied: false` — a safe retry |
+| Unknown `requestId`, or not queued | 404 | no such queued handoff |
+| Illegal edge | 409 | transition not permitted from the stored status |
+| Bad or missing secret | 401 | not authenticated |
+| Flag off | 404 | feature disabled; indistinguishable from absent |
+| Secret not configured | 503 | server-side misconfiguration |
+
+A `429` or `5xx` from HORIZON should be retried with the **same** `requestId`; a
+`4xx` should not, because the request is wrong rather than unlucky.
+
+### Environment
+
+```dotenv
+HORIZON_NEGOTIATION_ENABLED=true
+HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL=https://cloud.activepieces.com/api/v1/webhooks/your-flow-id
+HORIZON_AUTOMATION_WEBHOOK_SECRET=your-long-random-webhook-secret
+HORIZON_AUTOMATION_CALLBACK_SECRET=your-long-random-callback-secret
+```
+
+The two secrets must differ: the outbound secret authenticates HORIZON to the
+orchestrator, the callback secret authenticates the orchestrator to HORIZON.
+Neither is exposed to the browser. Legacy `N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL`
+and `N8N_WEBHOOK_SECRET` are read as a fallback when the neutral names are unset.
+
+## 16. Validation
+
+`vitest` (full suite), `node --test scripts/horizon-context.test.mjs` (20 tests),
 `tsc --noEmit`, `eslint`, `i18n:check` and `next build` all pass on the branch.
+

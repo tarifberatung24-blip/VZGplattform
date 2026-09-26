@@ -16,7 +16,7 @@ const state = vi.hoisted(() => ({
   events: [] as Array<Record<string, unknown>>,
   sessionUpdate: null as Record<string, unknown> | null,
   audit: [] as Array<Record<string, unknown>>,
-  fetchCalls: [] as Array<{ url: string; body: string }>,
+  fetchCalls: [] as Array<{ url: string; body: string; headers: Record<string, string> }>,
   fetchOk: true,
 }))
 
@@ -104,8 +104,8 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co")
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "sb_publishable_test-only")
   vi.stubEnv("HORIZON_NEGOTIATION_ENABLED", "1")
-  vi.stubEnv("N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL", "https://n8n.example.invalid/webhook/assisted")
-  vi.stubEnv("N8N_WEBHOOK_SECRET", "test-secret")
+  vi.stubEnv("HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL", "https://automation.example.invalid/webhook/assisted")
+  vi.stubEnv("HORIZON_AUTOMATION_WEBHOOK_SECRET", "test-secret")
   state.signedIn = true
   state.session = sessionRow()
   state.authorization = { id: "auth-1", scope: "representation", status: "granted" }
@@ -114,8 +114,8 @@ beforeEach(() => {
   state.audit = []
   state.fetchCalls = []
   state.fetchOk = true
-  vi.stubGlobal("fetch", async (url: string, init?: { body?: string }) => {
-    state.fetchCalls.push({ url: String(url), body: init?.body ?? "" })
+  vi.stubGlobal("fetch", async (url: string, init?: { body?: string; headers?: Record<string, string> }) => {
+    state.fetchCalls.push({ url: String(url), body: init?.body ?? "", headers: init?.headers ?? {} })
     return { ok: state.fetchOk } as Response
   })
 })
@@ -191,6 +191,7 @@ describe("assisted handoff — queue transport", () => {
   })
 
   it("refuses when the queue is not configured", async () => {
+    vi.stubEnv("HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL", "")
     vi.stubEnv("N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL", "")
     const response = await assistedPost(
       new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
@@ -198,6 +199,59 @@ describe("assisted handoff — queue transport", () => {
     )
     expect(response.status).toBe(503)
     expect((await response.json()).code).toBe("NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED")
+  })
+
+  it("still works through the legacy N8N_* names when the neutral ones are unset", async () => {
+    // Backwards compatibility: an existing n8n deployment keeps working after the
+    // rename, so switching transports is not a flag day.
+    vi.stubEnv("HORIZON_AUTOMATION_NEGOTIATION_WEBHOOK_URL", "")
+    vi.stubEnv("HORIZON_AUTOMATION_WEBHOOK_SECRET", "")
+    vi.stubEnv("N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL", "https://legacy.example.invalid/webhook/assisted")
+    vi.stubEnv("N8N_WEBHOOK_SECRET", "legacy-secret")
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(202)
+    expect(state.fetchCalls).toHaveLength(1)
+  })
+
+  it("sends the provider-neutral secret header and a correlation id", async () => {
+    // The receiver maps the header to its own secret check; nothing about the
+    // receiving orchestrator appears in the request.
+    await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(state.fetchCalls).toHaveLength(1)
+    const headers = state.fetchCalls[0].headers
+    expect(headers["X-Horizon-Automation-Secret"]).toBe("test-secret")
+    expect(headers["X-Horizon-Request-Id"]).toMatch(/^hzn_/)
+    expect(JSON.stringify(headers).toLowerCase()).not.toContain("n8n")
+  })
+
+  it("reuses the in-flight request id instead of queuing a second one", async () => {
+    // A double-submit must not create a second queue entry for one negotiation.
+    state.session = sessionRow({ mode_b_request_id: "hzn_existing", mode_b_status: "IN_PROGRESS" })
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(202)
+    expect((await response.json()).requestId).toBe("hzn_existing")
+    expect(JSON.parse(state.fetchCalls[0].body).requestId).toBe("hzn_existing")
+  })
+
+  it("mints a new request id once the previous request is terminal", async () => {
+    state.session = sessionRow({ mode_b_request_id: "hzn_done", mode_b_status: "COMPLETED" })
+    const response = await assistedPost(
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      context,
+    )
+    expect(response.status).toBe(202)
+    const requestId = (await response.json()).requestId
+    expect(requestId).toMatch(/^hzn_/)
+    expect(requestId).not.toBe("hzn_done")
   })
 
   it("sends no credential-shaped field to the operator queue", async () => {
