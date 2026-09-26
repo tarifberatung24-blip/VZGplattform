@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest"
+import { createServer } from "node:http"
+import type { AddressInfo } from "node:net"
 import {
   AUTOMATION_DELIVERY_FAILED_CODE,
   AUTOMATION_SECRET_HEADER,
@@ -252,5 +254,117 @@ describe("transport — delivery", () => {
       }) as unknown as typeof fetch,
     })
     expect(JSON.stringify(result)).not.toContain("Activepieces")
+  })
+})
+
+/**
+ * The tests above inject `fetchImpl`, which pins the request shape but not that
+ * the shape survives a real socket. These drive the transport against a real HTTP
+ * server on a loopback port, so the header names, the body, the credential strip
+ * and the timeout are exercised end to end. No orchestrator is involved — the
+ * point is that the transport behaves identically regardless of what answers.
+ */
+describe("transport — against a real HTTP server", () => {
+  async function withServer(
+    handler: Parameters<typeof createServer>[1],
+    run: (url: string) => Promise<void>,
+  ) {
+    const server = createServer(handler)
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
+    const { port } = server.address() as AddressInfo
+    try {
+      await run(`http://127.0.0.1:${port}/webhook`)
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()))
+    }
+  }
+
+  it("sends the neutral secret header, the correlation id and the stripped body", async () => {
+    const received: { headers: Record<string, string>; body: string }[] = []
+    await withServer(
+      (req, res) => {
+        let body = ""
+        req.on("data", (chunk) => (body += chunk))
+        req.on("end", () => {
+          received.push({ headers: req.headers as Record<string, string>, body })
+          res.writeHead(200).end("ok")
+        })
+      },
+      async (url) => {
+        const result = await deliverToAutomation({
+          config: { url, secret: "real-secret", source: { family: "neutral" } },
+          payload: {
+            requestId: "hzn_real_1",
+            plan: { primaryAsk: "match 29.99" },
+            // A caller that mistakenly assembled a credential must not reach the wire.
+            nested: { providerPassword: "hunter2" },
+          },
+          requestId: "hzn_real_1",
+        })
+
+        expect(result).toEqual({ ok: true, status: 200, requestId: "hzn_real_1" })
+        expect(received).toHaveLength(1)
+        expect(received[0].headers[AUTOMATION_SECRET_HEADER.toLowerCase()]).toBe("real-secret")
+        expect(received[0].headers["x-horizon-request-id"]).toBe("hzn_real_1")
+        // The neutral family must not carry the legacy header onto a newer receiver.
+        expect(received[0].headers[LEGACY_SECRET_HEADER.toLowerCase()]).toBeUndefined()
+        // The credential never left the process.
+        expect(received[0].body).not.toContain("hunter2")
+        expect(received[0].body).toContain("match 29.99")
+      },
+    )
+  })
+
+  it("adds the legacy header only for a legacy receiver", async () => {
+    const headers: Record<string, string>[] = []
+    await withServer(
+      (req, res) => {
+        headers.push(req.headers as Record<string, string>)
+        res.writeHead(200).end("ok")
+      },
+      async (url) => {
+        await deliverToAutomation({
+          config: { url, secret: "legacy-secret", source: { family: "legacy" } },
+          payload: { requestId: "hzn_real_2" },
+          requestId: "hzn_real_2",
+        })
+        expect(headers[0][LEGACY_SECRET_HEADER.toLowerCase()]).toBe("legacy-secret")
+      },
+    )
+  })
+
+  it("maps a real 500 to the provider-neutral failure code", async () => {
+    await withServer(
+      (_req, res) => {
+        // A provider-specific message that must not survive into the result.
+        res.writeHead(500, { "Content-Type": "text/plain" }).end("Activepieces: invalid flow token")
+      },
+      async (url) => {
+        const result = await deliverToAutomation({
+          config: { url, secret: "s", source: { family: "neutral" } },
+          payload: {},
+          requestId: "hzn_real_3",
+        })
+        expect(result).toEqual({ ok: false, code: AUTOMATION_DELIVERY_FAILED_CODE, requestId: "hzn_real_3" })
+        expect(JSON.stringify(result)).not.toContain("Activepieces")
+      },
+    )
+  })
+
+  it("times out a server that never answers, as a neutral failure", async () => {
+    await withServer(
+      () => {
+        // Deliberately never respond.
+      },
+      async (url) => {
+        const result = await deliverToAutomation({
+          config: { url, secret: "s", source: { family: "neutral" } },
+          payload: {},
+          requestId: "hzn_real_4",
+          timeoutMs: 300,
+        })
+        expect(result).toEqual({ ok: false, code: AUTOMATION_DELIVERY_FAILED_CODE, requestId: "hzn_real_4" })
+      },
+    )
   })
 })

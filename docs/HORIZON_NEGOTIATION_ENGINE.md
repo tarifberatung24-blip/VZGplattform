@@ -408,6 +408,23 @@ if RLS were bypassed. This is asserted in
 `supabase/tests/rls/horizon_negotiation_isolation.sql`, run by
 `scripts/rls-integration.mjs`.
 
+**Concurrency is proven, not just reasoned.** The SQL test drives every branch of
+`reserve_negotiation_handoff` sequentially, which shows the logic but not the
+compare-and-set. `scripts/rls-integration.mjs` therefore adds a second phase that
+runs two *real* PostgreSQL connections against the same row: one holds the
+reservation across a sleep while the other calls reserve. In READ COMMITTED the
+second `UPDATE` blocks, re-evaluates after the first commits, finds no row, and is
+told `in_flight` — exactly one caller wins. The same shape proves the callback
+compare-and-set: two concurrent applies of one move resolve to one applied move and
+one no-op, and the timeline carries exactly one event. This is what makes
+"single-sender" a measured property rather than a claim.
+
+The transport is likewise tested against a **real loopback HTTP server**, not only an
+injected `fetch`: the header names, the credential strip and the timeout are checked
+over a real socket. The transport is deliberately indifferent to what answers, so no
+orchestrator account is needed to prove it — a paid Activepieces plan would not add
+evidence here.
+
 Migration: `supabase/migrations/20260926090000_horizon_negotiation_engine.sql`.
 It is additive only — no drops, no renames — and **has not been applied to any
 production database**.
