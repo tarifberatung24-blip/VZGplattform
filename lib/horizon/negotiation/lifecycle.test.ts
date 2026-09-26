@@ -11,12 +11,13 @@ import {
   NEGOTIATION_EVENTS,
   NEGOTIATION_STATES,
   nextNegotiationState,
+  type NegotiationState,
 } from "./contract"
 import { applyTransition, eventsForTransition } from "./timeline"
 
 describe("negotiation state machine", () => {
   it("walks the full happy path", () => {
-    let state = "CONTRACT" as const
+    let state: NegotiationState = "CONTRACT"
     const path = [
       "start_analysis",
       "determine_opportunity",

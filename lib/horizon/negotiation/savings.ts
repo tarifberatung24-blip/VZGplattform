@@ -91,6 +91,35 @@ function nonNegative(value: number | null | undefined): number | null {
 }
 
 /**
+ * Fills a partial terms object out to the full shape.
+ *
+ * Stored offer facts can predate a field or be written by an operator, so a
+ * missing array must read as empty and a missing number as null rather than
+ * crashing the calculation. An absent value stays absent — nothing is defaulted
+ * to a number.
+ */
+export function normalizeOfferTerms(terms: Partial<OfferTerms> | null | undefined): OfferTerms {
+  const source = terms ?? {}
+  const strings = (value: unknown): string[] =>
+    Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
+  return {
+    newMonthly: source.newMonthly ?? null,
+    oneTimeCredit: source.oneTimeCredit ?? null,
+    activationFee: source.activationFee ?? null,
+    hardwareFee: source.hardwareFee ?? null,
+    promotionDurationMonths: source.promotionDurationMonths ?? null,
+    postPromotionMonthly: source.postPromotionMonthly ?? null,
+    newContractDurationMonths: source.newContractDurationMonths ?? null,
+    includedServices: strings(source.includedServices),
+    removedServices: strings(source.removedServices),
+    addedServices: strings(source.addedServices),
+    effectiveDate: source.effectiveDate ?? null,
+    expiryDate: source.expiryDate ?? null,
+    specialConditions: strings(source.specialConditions),
+  }
+}
+
+/**
  * The state a saving is currently in. Derived from what actually happened rather
  * than stored twice: a bill result outranks a provider confirmation, which
  * outranks a mere proposal.

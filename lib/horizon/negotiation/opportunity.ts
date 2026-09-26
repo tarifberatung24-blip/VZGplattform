@@ -106,6 +106,20 @@ export function daysBetween(fromIso: string, toIso: string): number | null {
   return Math.round((to.getTime() - from.getTime()) / 86_400_000)
 }
 
+/**
+ * Whole months remaining until a contract's end date, or null when the end date
+ * is absent or already past. Used to expose how much extra binding time an offer
+ * buys; a past end date yields null rather than a negative number.
+ */
+export function remainingMonths(endIso: string | null, todayIso: string): number | null {
+  const end = parseIsoDate(endIso)
+  const today = parseIsoDate(todayIso)
+  if (!end || !today) return null
+  const months =
+    (end.getUTCFullYear() - today.getUTCFullYear()) * 12 + (end.getUTCMonth() - today.getUTCMonth())
+  return months > 0 ? months : null
+}
+
 export function addDays(iso: string, days: number): string {
   const base = parseIsoDate(iso)
   if (!base) return iso

@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n/dictionaries"
 import type { DecisionAction, NegotiationState, SavingsState, VerificationResult } from "./contract"
+import type { PreferenceItem } from "./preferences"
 
 /**
  * HORIZON NEGOTIATION copy, in both active UI languages.
@@ -57,6 +58,8 @@ export type NegotiationCopy = {
   mustKeep: string
   mayAccept: string
   mustNeverAccept: string
+  /** Human labels for each preference vocabulary item. */
+  preferenceItems: Record<PreferenceItem, string>
   maxExtension: string
   minSaving: string
   allowPlanChange: string
@@ -228,6 +231,23 @@ export const negotiationCopy: Record<Locale, NegotiationCopy> = {
     mustKeep: "Muss bleiben",
     mayAccept: "Darf akzeptiert werden",
     mustNeverAccept: "Darf nie akzeptiert werden",
+    preferenceItems: {
+      same_speed: "Gleiche Geschwindigkeit",
+      same_data_volume: "Gleiches Datenvolumen",
+      same_phone_number: "Bestehende Rufnummer",
+      existing_hardware: "Vorhandene Hardware",
+      existing_tv_option: "Vorhandene TV-Option",
+      new_minimum_term: "Neue Mindestlaufzeit",
+      provider_credit: "Gutschrift des Anbieters",
+      temporary_promotion: "Zeitlich begrenzte Aktion",
+      permanent_lower_fee: "Dauerhaft niedrigerer Preis",
+      plan_upgrade: "Tarif-Upgrade",
+      added_service: "Zusätzliche Leistung",
+      longer_contract: "Längere Vertragslaufzeit",
+      reduced_service: "Reduzierte Leistung",
+      activation_fee: "Aktivierungsgebühr",
+      hardware_charge: "Hardwarekosten",
+    },
     maxExtension: "Maximale Vertragsverlängerung (Monate)",
     minSaving: "Mindestersparnis pro Monat (€)",
     allowPlanChange: "Tarifwechsel erlaubt",
@@ -403,6 +423,23 @@ export const negotiationCopy: Record<Locale, NegotiationCopy> = {
     mustKeep: "Трябва да остане",
     mayAccept: "Може да се приеме",
     mustNeverAccept: "Никога не се приема",
+    preferenceItems: {
+      same_speed: "Същата скорост",
+      same_data_volume: "Същият обем данни",
+      same_phone_number: "Същият телефонен номер",
+      existing_hardware: "Наличен хардуер",
+      existing_tv_option: "Налична TV опция",
+      new_minimum_term: "Нов минимален срок",
+      provider_credit: "Кредит от доставчика",
+      temporary_promotion: "Временна промоция",
+      permanent_lower_fee: "Трайно по-ниска такса",
+      plan_upgrade: "Ъпгрейд на тарифа",
+      added_service: "Добавена услуга",
+      longer_contract: "По-дълъг договор",
+      reduced_service: "Намалена услуга",
+      activation_fee: "Такса активиране",
+      hardware_charge: "Такса хардуер",
+    },
     maxExtension: "Максимално удължаване (месеци)",
     minSaving: "Минимална икономия на месец (€)",
     allowPlanChange: "Смяна на тарифа е позволена",
