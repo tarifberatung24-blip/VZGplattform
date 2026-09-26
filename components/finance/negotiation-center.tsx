@@ -109,7 +109,82 @@ export function NegotiationCenter({ contractId }: { contractId: string }) {
   const [billMonthly, setBillMonthly] = useState("")
   const [verification, setVerification] = useState<VerificationOutcome | null>(null)
 
+  const [authorizationScope, setAuthorizationScope] = useState("")
+  const [authorizationStatus, setAuthorizationStatus] = useState<string | null>(null)
+  const [modeBStatus, setModeBStatus] = useState<string | null>(null)
+
   const value = (key: string) => copy.missing[key] ?? key
+
+  /** Reads back the server's own authorization and queue state, never a guess. */
+  async function refreshSession() {
+    if (!sessionId) return
+    try {
+      const response = await fetch(`/api/negotiation/session/${sessionId}`)
+      if (!response.ok) return
+      const payload = (await response.json()) as {
+        session?: { authorization_status?: string; mode_b_status?: string | null }
+      }
+      setAuthorizationStatus(payload.session?.authorization_status ?? null)
+      setModeBStatus(payload.session?.mode_b_status ?? null)
+    } catch {
+      // A read-back failure leaves the last known state; it never fabricates one.
+    }
+  }
+
+  async function grantAuthorization() {
+    if (!sessionId || !authorizationScope.trim()) return
+    setBusy(true); setError(""); setMessage("")
+    try {
+      const response = await fetch(`/api/negotiation/session/${sessionId}/authorization`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scope: authorizationScope.trim(), granted: true }),
+      })
+      if (!response.ok) { setError(copy.assistedQueueFailed); return }
+      setAuthorizationStatus("granted")
+      setMessage(copy.assistedQueued)
+    } catch { setError(copy.assistedQueueFailed) } finally { setBusy(false) }
+  }
+
+  async function handOffToOperator() {
+    if (!sessionId) return
+    setBusy(true); setError(""); setMessage("")
+    try {
+      const response = await fetch(`/api/negotiation/session/${sessionId}/assisted`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale }),
+      })
+      const payload = (await response.json()) as { status?: string; code?: string }
+      if (!response.ok) {
+        setError(
+          payload.code === "NEGOTIATION_ASSISTED_AUTHORIZATION_REQUIRED"
+            ? copy.assistedAuthorizationRequired
+            : payload.code === "NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED"
+              ? copy.assistedNotConfigured
+              : copy.assistedQueueFailed,
+        )
+        return
+      }
+      setModeBStatus(payload.status ?? "QUEUED")
+      setMessage(copy.assistedQueued)
+    } catch { setError(copy.assistedQueueFailed) } finally { setBusy(false) }
+  }
+
+  async function cancelHandoff() {
+    if (!sessionId) return
+    setBusy(true); setError(""); setMessage("")
+    try {
+      const response = await fetch(`/api/negotiation/session/${sessionId}/assisted`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      })
+      if (!response.ok) { setError(copy.assistedCancelFailed); return }
+      setModeBStatus("CANCELLED")
+      setMessage(copy.assistedCancelled)
+    } catch { setError(copy.assistedCancelFailed) } finally { setBusy(false) }
+  }
 
   async function analyze() {
     setBusy(true); setError(""); setMessage("")
@@ -127,6 +202,7 @@ export function NegotiationCenter({ contractId }: { contractId: string }) {
       setSessionId(payload.session.id)
       setState(payload.session.state)
       setDecision(payload.decision ?? null)
+      void refreshSession()
     } catch { setError(copy.analysisFailed) } finally { setBusy(false) }
   }
 
@@ -311,6 +387,50 @@ export function NegotiationCenter({ contractId }: { contractId: string }) {
         <Button size="sm" onClick={() => void savePreferences()} disabled={busy || preferencesSaved}>
           {preferencesSaved ? <><CheckCircle2 className="mr-2 size-4" />{copy.preferencesSaved}</> : copy.save}
         </Button>
+      </div>
+
+      {/* MODE B — assisted handoff to a VZG operator. The handoff is refused
+          without a granted authorization, so the control mirrors that rule. */}
+      <div className="space-y-3 border border-border bg-background/60 p-3">
+        <div>
+          <p className="font-medium">{copy.assistedHandoffTitle}</p>
+          <p className="text-xs text-muted-foreground">{copy.assistedHandoffIntro}</p>
+        </div>
+
+        {authorizationStatus !== "granted" ? (
+          <>
+            <Input
+              aria-label={copy.assistedHandoffTitle}
+              value={authorizationScope}
+              onChange={(event) => setAuthorizationScope(event.target.value)}
+              placeholder={copy.assistedIntro}
+            />
+            <Button size="sm" onClick={() => void grantAuthorization()} disabled={busy || !authorizationScope.trim()}>
+              {copy.assistedStart}
+            </Button>
+          </>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">{copy.assistedQueueStatus}:</span>
+              <span className="font-medium">
+                {modeBStatus ? copy.assistedStatuses[modeBStatus] ?? modeBStatus : copy.assistedStatuses.QUEUED}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {modeBStatus == null || modeBStatus === "CANCELLED" ? (
+                <Button size="sm" onClick={() => void handOffToOperator()} disabled={busy}>
+                  {busy ? <><Loader2 className="mr-2 size-4 animate-spin" />{copy.assistedStarting}</> : copy.assistedStart}
+                </Button>
+              ) : null}
+              {modeBStatus != null && modeBStatus !== "COMPLETED" && modeBStatus !== "CANCELLED" ? (
+                <Button size="sm" variant="outline" onClick={() => void cancelHandoff()} disabled={busy}>
+                  {copy.assistedCancel}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Provider response inbox. */}

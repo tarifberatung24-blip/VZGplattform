@@ -67,6 +67,14 @@ create table if not exists public.negotiation_sessions (
   analysis jsonb not null default '{}'::jsonb,
   execution_mode text not null default 'SELF' check (execution_mode in ('SELF','ASSISTED','AUTOMATED')),
   mode_b_request_id text,
+  -- Operator queue state for assisted mode. Null until a handoff is queued; kept
+  -- separate from `state` so the negotiation lifecycle and the operator queue
+  -- progress independently and neither is inferred from the other.
+  mode_b_status text check (mode_b_status is null or mode_b_status in (
+    'QUEUED','IN_PROGRESS','AWAITING_CUSTOMER','AWAITING_PROVIDER','COMPLETED','CANCELLED'
+  )),
+  mode_b_queued_at timestamptz,
+  mode_b_updated_at timestamptz,
   authorization_status text not null default 'not_required' check (authorization_status in (
     'not_required','pending','granted','revoked'
   )),
@@ -411,7 +419,8 @@ grant insert (owner_id, household_id, contract_id, category, state, decision_act
   on public.negotiation_sessions to authenticated;
 grant update (state, decision_action, reason_codes, missing_information,
               opportunity_confidence, next_review_date, analysis, execution_mode,
-              mode_b_request_id, authorization_status, current_monthly_cost,
+              mode_b_request_id, mode_b_status, mode_b_queued_at, mode_b_updated_at,
+              authorization_status, current_monthly_cost,
               target_monthly_cost, potential_monthly_saving, potential_annual_saving,
               promotion_expiry, verification_due_at, verified_at, closed_at)
   on public.negotiation_sessions to authenticated;

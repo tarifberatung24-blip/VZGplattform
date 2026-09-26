@@ -91,7 +91,8 @@ export function canSendProviderMessage(input: {
 /**
  * Redacts a metadata object before it reaches an audit row, mirroring the
  * existing provider-audit redaction so negotiation events never persist a secret
- * even if one were somehow supplied.
+ * even if one were somehow supplied. The offending key is kept with a placeholder
+ * value, because an audit trail benefits from recording that a field was present.
  */
 export function redactNegotiationMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
   const walk = (value: unknown): unknown => {
@@ -104,4 +105,24 @@ export function redactNegotiationMetadata(metadata: Record<string, unknown>): Re
     return out
   }
   return walk(metadata) as Record<string, unknown>
+}
+
+/**
+ * Removes forbidden fields entirely. Unlike `redactNegotiationMetadata`, which
+ * keeps the key as a marker for the audit trail, this drops the key so the
+ * payload that leaves the process contains no credential-shaped name at all.
+ * Used on the operator handoff, where even a placeholder key is unnecessary.
+ */
+export function stripForbiddenFields<T>(value: T): T {
+  const walk = (input: unknown): unknown => {
+    if (input == null || typeof input !== "object") return input
+    if (Array.isArray(input)) return input.map(walk)
+    const out: Record<string, unknown> = {}
+    for (const [key, child] of Object.entries(input as Record<string, unknown>)) {
+      if (isForbiddenFieldName(key)) continue
+      out[key] = walk(child)
+    }
+    return out
+  }
+  return walk(value) as T
 }

@@ -84,6 +84,21 @@ export type NegotiationCopy = {
   assistedIntro: string
   noCredentials: string
 
+  // Assisted mode (MODE B)
+  assistedHandoffTitle: string
+  assistedHandoffIntro: string
+  assistedQueueStatus: string
+  assistedStatuses: Record<string, string>
+  assistedStart: string
+  assistedStarting: string
+  assistedQueued: string
+  assistedQueueFailed: string
+  assistedAuthorizationRequired: string
+  assistedNotConfigured: string
+  assistedCancel: string
+  assistedCancelled: string
+  assistedCancelFailed: string
+
   // Offers
   offerTitle: string
   offerIntro: string
@@ -274,6 +289,29 @@ export const negotiationCopy: Record<Locale, NegotiationCopy> = {
       "HORIZON bereitet das Paket für eine VZG-Betreuung vor. Eine Vollmacht kann nötig sein und wird nicht vorausgesetzt.",
     noCredentials:
       "HORIZON fragt niemals nach Passwörtern, PINs, TANs oder Einmalcodes. Nutze nur Vertragsdaten und Dokumente.",
+
+    assistedHandoffTitle: "Übergabe an VZG-Betreuung",
+    assistedHandoffIntro:
+      "HORIZON übergibt das vorbereitete Paket an die Betreuung. Es werden nur die notwendigen Angaben weitergegeben, keine Zugangsdaten.",
+    assistedQueueStatus: "Status der Betreuung",
+    assistedStatuses: {
+      QUEUED: "In der Warteschlange",
+      IN_PROGRESS: "In Bearbeitung",
+      AWAITING_CUSTOMER: "Rückfrage an dich",
+      AWAITING_PROVIDER: "Warten auf den Anbieter",
+      COMPLETED: "Abgeschlossen",
+      CANCELLED: "Abgebrochen",
+    },
+    assistedStart: "An Betreuung übergeben",
+    assistedStarting: "Wird übergeben …",
+    assistedQueued: "Das Paket liegt jetzt bei der Betreuung.",
+    assistedQueueFailed: "Die Übergabe ist fehlgeschlagen. Es wurde nichts gesendet.",
+    assistedAuthorizationRequired:
+      "Ohne erteilte Vollmacht wird nichts übergeben. Erteile zuerst die Vollmacht.",
+    assistedNotConfigured: "Die Betreuungsschnittstelle ist nicht eingerichtet.",
+    assistedCancel: "Übergabe abbrechen",
+    assistedCancelled: "Die Übergabe wurde abgebrochen.",
+    assistedCancelFailed: "Der Abbruch ist fehlgeschlagen.",
 
     offerTitle: "Angebot des Anbieters",
     offerIntro:
@@ -466,6 +504,29 @@ export const negotiationCopy: Record<Locale, NegotiationCopy> = {
       "HORIZON подготвя пакета за екип на VZG. Може да е нужно пълномощно и то не се предполага.",
     noCredentials:
       "HORIZON никога не иска пароли, PIN, TAN или еднократни кодове. Използвай само данни по договора и документи.",
+
+    assistedHandoffTitle: "Предаване към екип на VZG",
+    assistedHandoffIntro:
+      "HORIZON предава подготвения пакет на екипа. Предават се само необходимите данни, без достъпи.",
+    assistedQueueStatus: "Статус на обработката",
+    assistedStatuses: {
+      QUEUED: "В опашка",
+      IN_PROGRESS: "В обработка",
+      AWAITING_CUSTOMER: "Има въпрос към теб",
+      AWAITING_PROVIDER: "Чакаме доставчика",
+      COMPLETED: "Завършено",
+      CANCELLED: "Прекратено",
+    },
+    assistedStart: "Предай на екипа",
+    assistedStarting: "Предава се …",
+    assistedQueued: "Пакетът вече е при екипа.",
+    assistedQueueFailed: "Предаването не успя. Нищо не беше изпратено.",
+    assistedAuthorizationRequired:
+      "Без дадено пълномощно нищо не се предава. Първо дай пълномощно.",
+    assistedNotConfigured: "Интерфейсът за екипа не е настроен.",
+    assistedCancel: "Прекрати предаването",
+    assistedCancelled: "Предаването е прекратено.",
+    assistedCancelFailed: "Прекратяването не успя.",
 
     offerTitle: "Оферта от доставчика",
     offerIntro:

@@ -12,6 +12,8 @@ import type {
 } from "./contract"
 import { isNegotiationState, isDecisionAction } from "./contract"
 import type { MissingInformation, OpportunityReason } from "./opportunity"
+import type { AssistedRequestStatus } from "./assisted"
+import { isAssistedRequestStatus } from "./assisted"
 import type { NegotiationPreferences } from "./preferences"
 import type { OfferSource } from "./offer-parse"
 import type { OfferTerms } from "./savings"
@@ -50,6 +52,9 @@ export type NegotiationSessionRow = {
   analysis: Record<string, unknown>
   execution_mode: ExecutionMode
   mode_b_request_id: string | null
+  mode_b_status: AssistedRequestStatus | null
+  mode_b_queued_at: string | null
+  mode_b_updated_at: string | null
   authorization_status: AuthorizationStatus
   current_monthly_cost: number | null
   target_monthly_cost: number | null
@@ -102,7 +107,7 @@ export type NegotiationEventRow = {
 }
 
 const SESSION_COLUMNS =
-  "id,owner_id,household_id,contract_id,category,state,decision_action,reason_codes,missing_information,opportunity_confidence,next_review_date,analysis,execution_mode,mode_b_request_id,authorization_status,current_monthly_cost,target_monthly_cost,potential_monthly_saving,potential_annual_saving,promotion_expiry,verification_due_at,verified_at,closed_at,created_at,updated_at"
+  "id,owner_id,household_id,contract_id,category,state,decision_action,reason_codes,missing_information,opportunity_confidence,next_review_date,analysis,execution_mode,mode_b_request_id,mode_b_status,mode_b_queued_at,mode_b_updated_at,authorization_status,current_monthly_cost,target_monthly_cost,potential_monthly_saving,potential_annual_saving,promotion_expiry,verification_due_at,verified_at,closed_at,created_at,updated_at"
 
 export class NegotiationRepository {
   constructor(
@@ -171,6 +176,9 @@ export class NegotiationRepository {
       analysis: Record<string, unknown>
       execution_mode: ExecutionMode
       mode_b_request_id: string | null
+      mode_b_status: AssistedRequestStatus | null
+      mode_b_queued_at: string | null
+      mode_b_updated_at: string | null
       authorization_status: AuthorizationStatus
       target_monthly_cost: number | null
       potential_monthly_saving: number | null
@@ -478,5 +486,52 @@ export class NegotiationRepository {
     if (error) return fail("NEGOTIATION_AUTHORIZATION_UPDATE_FAILED")
     if (!data) return fail("NEGOTIATION_AUTHORIZATION_NOT_FOUND")
     return ok(data as { id: string })
+  }
+
+  /** The granted authorization for a session, if any. Owner-scoped. */
+  async getGrantedAuthorization(
+    sessionId: string,
+  ): Promise<RepoResult<{ id: string; scope: string } | null>> {
+    const { data, error } = await this.client
+      .from("negotiation_authorizations")
+      .select("id,scope,status")
+      .eq("session_id", sessionId)
+      .eq("owner_id", this.ownerId)
+      .eq("status", "granted")
+      .order("granted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) return fail("NEGOTIATION_AUTHORIZATION_UNAVAILABLE")
+    return ok((data as { id: string; scope: string } | null) ?? null)
+  }
+
+  /** Records a queued operator handoff. `mode_b_request_id` is the queue key. */
+  async queueAssistedHandoff(input: {
+    sessionId: string
+    requestId: string
+  }): Promise<RepoResult<NegotiationSessionRow>> {
+    const now = new Date().toISOString()
+    return this.updateSession(input.sessionId, {
+      execution_mode: "ASSISTED",
+      mode_b_request_id: input.requestId,
+      mode_b_status: "QUEUED",
+      mode_b_queued_at: now,
+      mode_b_updated_at: now,
+    })
+  }
+
+  /**
+   * Advances the operator queue state. The legal moves are checked by the caller
+   * against `canTransitionAssistedRequest`; this only refuses an unknown status.
+   */
+  async updateAssistedStatus(input: {
+    sessionId: string
+    status: AssistedRequestStatus
+  }): Promise<RepoResult<NegotiationSessionRow>> {
+    if (!isAssistedRequestStatus(input.status)) return fail("NEGOTIATION_MODE_B_INVALID_STATUS")
+    return this.updateSession(input.sessionId, {
+      mode_b_status: input.status,
+      mode_b_updated_at: new Date().toISOString(),
+    })
   }
 }

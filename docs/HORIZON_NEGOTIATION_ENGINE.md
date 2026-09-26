@@ -42,8 +42,13 @@ Reused, not duplicated:
 
 The negotiation domain (`lib/horizon/negotiation/`) is pure and deterministic:
 `facts`, `categories`, `opportunity`, `dossier`, `savings`, `preferences`,
-`offer-parse`, `verification`, `timeline`, `review`, `execution`, `guard`, `copy`.
+`offer-parse`, `verification`, `timeline`, `review`, `execution`, `assisted`,
+`guard`, `copy`.
 Persistence and HTTP live in `repository.ts`, `service.ts` and the routes.
+
+The negotiation routes are `start`, `session/[sessionId]`, `preferences`, `offers`,
+`offers/[offerId]/decision`, `authorization`, `assisted` (MODE B handoff and cancel),
+and `verification`.
 
 ## 2. State machine
 
@@ -189,6 +194,28 @@ are refused by both the API and the UI.
   required information is passed; no provider credentials. A Vollmacht lifecycle is
   supported but a generic Vollmacht is not assumed to be accepted by every provider —
   the stored scope says what the user agreed to, not what any provider will honour.
+
+  The handoff is refused unless an authorization was granted. The operator queue is
+  its own state machine (`mode_b_status`), deliberately separate from the negotiation
+  lifecycle (`state`), so a queue position is never inferred from — or confused with —
+  the negotiation state:
+
+  ```
+  QUEUED → IN_PROGRESS → AWAITING_CUSTOMER ┐
+                        → AWAITING_PROVIDER ┤→ IN_PROGRESS
+                        → COMPLETED          │
+                        → CANCELLED          ┘
+  ```
+
+  `COMPLETED` and `CANCELLED` are terminal. A customer may only move a request to
+  `CANCELLED`; an operator-driven move arrives through the service-role path, not the
+  session client. The payload handed to the queue is stripped of any credential-shaped
+  field before it leaves the process, and it carries the reviewed dossier and plan as
+  they were recorded rather than a recomputation. The queue transport is the existing
+  n8n webhook pattern (`N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL`), reusing the
+  `N8N_WEBHOOK_SECRET` header the service-request route already uses. When it is not
+  configured the handoff reports `NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED` and sends
+  nothing.
 - **MODE C — AUTOMATED.** Adapter interface only. Disabled by default. No provider is
   called, no message sent, no offer accepted, and no impersonation occurs.
 
@@ -264,6 +291,18 @@ tables were created instead, all owner-scoped:
 
 `negotiation_sessions`, `negotiation_preferences`, `negotiation_offers`,
 `negotiation_authorizations`, `negotiation_verifications`, `negotiation_events`.
+
+`negotiation_sessions` also carries the MODE B operator-queue columns
+(`mode_b_status`, `mode_b_queued_at`, `mode_b_updated_at`) alongside the existing
+`mode_b_request_id`. The queue state is kept in its own column so it is never
+inferred from the negotiation lifecycle.
+
+Every child table is coupled to the owner by a composite foreign key
+(`(session_id, owner_id) references negotiation_sessions (id, owner_id)` and the
+household/contract chain), so a row cannot reference another customer's session even
+if RLS were bypassed. This is asserted in
+`supabase/tests/rls/horizon_negotiation_isolation.sql`, run by
+`scripts/rls-integration.mjs`.
 
 Migration: `supabase/migrations/20260926090000_horizon_negotiation_engine.sql`.
 It is additive only — no drops, no renames — and **has not been applied to any

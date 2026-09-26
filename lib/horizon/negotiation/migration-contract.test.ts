@@ -86,6 +86,36 @@ describe("negotiation migration — owner isolation", () => {
   })
 })
 
+describe("negotiation migration — MODE B operator queue state", () => {
+  it("keeps the operator queue status separate from the negotiation lifecycle", () => {
+    // The queue has its own column, so a handoff cannot be inferred from, or
+    // confused with, the negotiation state machine.
+    expect(migration).toContain("mode_b_status text check")
+    expect(migration).toContain("mode_b_queued_at timestamptz")
+    expect(migration).toContain("mode_b_updated_at timestamptz")
+  })
+
+  it("constrains the queue status to the declared set", () => {
+    for (const status of [
+      "QUEUED",
+      "IN_PROGRESS",
+      "AWAITING_CUSTOMER",
+      "AWAITING_PROVIDER",
+      "COMPLETED",
+      "CANCELLED",
+    ]) {
+      expect(migration).toContain(`'${status.toLowerCase()}'`)
+    }
+  })
+
+  it("grants update on the queue columns so a handoff can be recorded", () => {
+    const grant = migration.match(/grant update \([^)]*\)\s*on public\.negotiation_sessions to authenticated/)
+    expect(grant).not.toBeNull()
+    expect(grant![0]).toContain("mode_b_status")
+    expect(grant![0]).toContain("mode_b_request_id")
+  })
+})
+
 describe("negotiation migration — immutable timeline and offers", () => {
   it("grants only select and insert on the event timeline", () => {
     expect(migration).toContain("grant select on public.negotiation_events to authenticated")
