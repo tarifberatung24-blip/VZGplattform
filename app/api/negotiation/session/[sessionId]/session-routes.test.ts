@@ -18,6 +18,7 @@ const state = vi.hoisted(() => ({
   verificationUpdate: null as Record<string, unknown> | null,
   sessionUpdate: null as Record<string, unknown> | null,
   preferencesUpsert: null as Record<string, unknown> | null,
+  audit: [] as Array<Record<string, unknown>>,
 }))
 
 vi.mock("server-only", () => ({}))
@@ -50,6 +51,7 @@ vi.mock("@/lib/supabase/server", () => ({
         },
         maybeSingle: async () => ({ data: rowFor(), error: null }),
         single: async () => {
+          if (table === "negotiation_preferences") return { data: { id: "preferences-1" }, error: null }
           if (table === "negotiation_verifications") {
             const created = { id: "verification-1", session_id: "session-1", result: "pending" }
             state.verifications = [created, ...state.verifications]
@@ -60,6 +62,7 @@ vi.mock("@/lib/supabase/server", () => ({
         insert: (rows: unknown) => {
           const list = Array.isArray(rows) ? rows : [rows]
           if (table === "negotiation_events") state.events.push(...(list as Array<Record<string, unknown>>))
+          if (table === "platform_audit_events") state.audit.push(...(list as Array<Record<string, unknown>>))
           return query
         },
         update: (patch: Record<string, unknown>) => {
@@ -145,6 +148,7 @@ beforeEach(() => {
   state.verificationUpdate = null
   state.sessionUpdate = null
   state.preferencesUpsert = null
+  state.audit = []
 })
 
 describe("bill verification route", () => {
@@ -195,6 +199,29 @@ describe("bill verification route", () => {
     expect(body.verified_saving.verifiedMonthlySaving).toBeNull()
   })
 
+  it("audits a VERIFIED bill as a verified saving", async () => {
+    const response = await verifyPost(
+      request("/api/negotiation/session/session-1/verification", { monthlyCost: 34.99, oneTimeCredit: 10, activationFee: 0 }),
+      context,
+    )
+    expect(response.status).toBe(200)
+    expect(state.audit).toHaveLength(1)
+    expect(state.audit[0]).toMatchObject({
+      entity_type: "negotiation_session",
+      entity_id: "session-1",
+      event_type: "negotiation.saving_verified",
+    })
+  })
+
+  it("audits a mismatched bill as a failed saving", async () => {
+    await verifyPost(
+      request("/api/negotiation/session/session-1/verification", { monthlyCost: 49.99 }),
+      context,
+    )
+    expect(state.audit).toHaveLength(1)
+    expect(state.audit[0]).toMatchObject({ event_type: "negotiation.saving_failed" })
+  })
+
   it("refuses to verify when there is no accepted offer", async () => {
     state.offers = []
     const response = await verifyPost(
@@ -224,6 +251,16 @@ describe("bill verification route", () => {
 })
 
 describe("preferences route — credential refusal", () => {
+  it("audits saved preferences with redacted metadata", async () => {
+    const response = await preferencesPost(
+      request("/api/negotiation/session/session-1/preferences", { mustKeep: ["same_speed"], minMonthlySaving: 5 }),
+      context,
+    )
+    expect(response.status).toBe(200)
+    expect(state.audit).toHaveLength(1)
+    expect(state.audit[0]).toMatchObject({ event_type: "negotiation.preferences_saved" })
+  })
+
   it("refuses a payload carrying a credential-shaped field", async () => {
     const response = await preferencesPost(
       request("/api/negotiation/session/session-1/preferences", { mustKeep: [], password: "hunter2" }),

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { verifyBill } from "@/lib/horizon/negotiation/verification"
 import { applyTransition } from "@/lib/horizon/negotiation/timeline"
+import { writeNegotiationAudit } from "@/lib/horizon/negotiation/audit"
+import { createClient } from "@/lib/supabase/server"
+import { ensureHousehold } from "@/lib/supabase/household"
 import { verifiedSavingsOutput, calculateSavings, normalizeOfferTerms, type OfferTerms } from "@/lib/horizon/negotiation/savings"
 import {
   isFailure,
@@ -123,6 +126,20 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       currentRemainingMonths: null,
       terms,
       state: verification.result === "VERIFIED" ? "VERIFIED" : "CONFIRMED",
+    })
+
+    const supabase = await createClient()
+    await writeNegotiationAudit(supabase, {
+      householdId: await ensureHousehold(supabase),
+      actorUserId: engine.userId!,
+      sessionId,
+      eventType: verification.result === "VERIFIED" ? "negotiation.saving_verified" : "negotiation.saving_failed",
+      summary: `Bill verification: ${verification.result}`,
+      metadata: {
+        result: verification.result,
+        discrepancies: verification.discrepancies.map((item) => item.field),
+        state,
+      },
     })
 
     return NextResponse.json({

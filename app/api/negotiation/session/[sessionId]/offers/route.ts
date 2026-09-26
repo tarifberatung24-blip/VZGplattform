@@ -9,6 +9,7 @@ import { buildContractFacts } from "@/lib/horizon/negotiation/facts"
 import { buildOfferComparison } from "@/lib/horizon/negotiation/review"
 import { emptyPreferences } from "@/lib/horizon/negotiation/preferences"
 import { applyTransition } from "@/lib/horizon/negotiation/timeline"
+import { writeNegotiationAudit } from "@/lib/horizon/negotiation/audit"
 import { loadOwnedContract, isFailure, requireEngine, requireOwnedSession, upstreamFailed, validationFailed } from "@/lib/horizon/negotiation/route-support"
 import { createClient } from "@/lib/supabase/server"
 import { ensureHousehold } from "@/lib/supabase/household"
@@ -97,6 +98,20 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       preferences,
       offerContentHash: stored.data.content_hash,
       keptServices: parsed.data.keptServices,
+    })
+
+    await writeNegotiationAudit(supabase, {
+      householdId,
+      actorUserId: engine.userId!,
+      sessionId,
+      eventType: "negotiation.offer_received",
+      summary: `Provider response stored (${parsed.data.origin})`,
+      metadata: {
+        offer_id: stored.data.id,
+        origin: parsed.data.origin,
+        source: parsed.data.source,
+        content_hash: stored.data.content_hash,
+      },
     })
 
     return NextResponse.json(

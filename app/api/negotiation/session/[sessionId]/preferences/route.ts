@@ -6,6 +6,9 @@ import {
 } from "@/lib/horizon/negotiation/guard"
 import { PREFERENCE_ITEMS } from "@/lib/horizon/negotiation/preferences"
 import { applyTransition } from "@/lib/horizon/negotiation/timeline"
+import { writeNegotiationAudit } from "@/lib/horizon/negotiation/audit"
+import { ensureHousehold } from "@/lib/supabase/household"
+import { createClient } from "@/lib/supabase/server"
 import {
   isFailure,
   requireEngine,
@@ -71,6 +74,21 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       await engine.repository!.updateSession(sessionId, { state: applied.state })
       await engine.repository!.appendEvents(sessionId, applied.events)
     }
+
+    const supabase = await createClient()
+    const householdId = await ensureHousehold(supabase)
+    await writeNegotiationAudit(supabase, {
+      householdId,
+      actorUserId: engine.userId!,
+      sessionId,
+      eventType: "negotiation.preferences_saved",
+      summary: "Negotiation preferences saved",
+      metadata: {
+        must_keep: parsed.data.mustKeep,
+        must_never_accept: parsed.data.mustNeverAccept,
+        min_monthly_saving: parsed.data.minMonthlySaving,
+      },
+    })
 
     return NextResponse.json({ saved: true })
   } catch {

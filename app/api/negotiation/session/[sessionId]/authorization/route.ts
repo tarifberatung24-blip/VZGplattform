@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { applyTransition } from "@/lib/horizon/negotiation/timeline"
+import { writeNegotiationAudit } from "@/lib/horizon/negotiation/audit"
+import { ensureHousehold } from "@/lib/supabase/household"
+import { createClient } from "@/lib/supabase/server"
 import {
   isFailure,
   requireEngine,
@@ -49,6 +52,15 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
 
     if (!parsed.data.granted) {
       await engine.repository!.updateSession(sessionId, { authorization_status: "pending" })
+      const pendingSupabase = await createClient()
+      await writeNegotiationAudit(pendingSupabase, {
+        householdId: await ensureHousehold(pendingSupabase),
+        actorUserId: engine.userId!,
+        sessionId,
+        eventType: "negotiation.authorization_requested",
+        summary: "Representation authorization recorded as pending",
+        metadata: { scope: parsed.data.scope, granted: false },
+      })
       return NextResponse.json({ status: "pending" }, { status: 201 })
     }
 
@@ -69,6 +81,16 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
       state,
       authorization_status: "granted",
       execution_mode: "ASSISTED",
+    })
+
+    const supabase = await createClient()
+    await writeNegotiationAudit(supabase, {
+      householdId: await ensureHousehold(supabase),
+      actorUserId: engine.userId!,
+      sessionId,
+      eventType: "negotiation.authorization_granted",
+      summary: "Representation authorization granted",
+      metadata: { scope: parsed.data.scope, state },
     })
 
     return NextResponse.json({ status: "granted", state }, { status: 201 })
