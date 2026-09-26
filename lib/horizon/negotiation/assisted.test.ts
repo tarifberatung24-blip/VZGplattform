@@ -76,6 +76,24 @@ describe("assisted mode — operator queue state machine", () => {
     expect(canTransitionAssistedRequest("AWAITING_PROVIDER", "COMPLETED")).toBe(true)
     expect(canTransitionAssistedRequest("IN_PROGRESS", "CANCELLED")).toBe(true)
   })
+
+  it("walks the full operator chain the callback endpoint accepts", () => {
+    const chain = [
+      ["QUEUED", "IN_PROGRESS"],
+      ["IN_PROGRESS", "AWAITING_PROVIDER"],
+      ["AWAITING_PROVIDER", "AWAITING_CUSTOMER"],
+      ["AWAITING_CUSTOMER", "IN_PROGRESS"],
+      ["IN_PROGRESS", "COMPLETED"],
+    ] as const
+    for (const [from, to] of chain) {
+      expect(canTransitionAssistedRequest(from, to)).toBe(true)
+    }
+  })
+
+  it("refuses to skip from AWAITING_CUSTOMER straight to COMPLETED", () => {
+    // Work cannot finish while a customer answer is still outstanding.
+    expect(canTransitionAssistedRequest("AWAITING_CUSTOMER", "COMPLETED")).toBe(false)
+  })
 })
 
 describe("assisted mode — payload carries the reviewed package, never a credential", () => {

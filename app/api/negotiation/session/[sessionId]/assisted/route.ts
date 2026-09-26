@@ -70,7 +70,14 @@ export async function POST(request: Request, context: { params: Promise<{ sessio
     const authorization = await engine.repository!.getGrantedAuthorization(sessionId)
     if (authorization.error) return upstreamFailed(authorization.error).response
 
-    if (!canHandOffToOperator({ authorizationStatus: session.authorization_status })) {
+    // The granted authorization *row* is the evidence: it carries the scope the
+    // customer actually agreed to. The session column is a denormalised mirror,
+    // so both must agree before anything is handed off. Gating on the column alone
+    // would let a drifted mirror queue work no row authorises.
+    if (
+      !authorization.data ||
+      !canHandOffToOperator({ authorizationStatus: session.authorization_status })
+    ) {
       return NextResponse.json({ code: ASSISTED_HANDOFF_REFUSED_CODE }, { status: 409 })
     }
 

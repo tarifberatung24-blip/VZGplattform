@@ -249,6 +249,21 @@ describe("assisted handoff — cancellation", () => {
     expect(state.sessionUpdate).toBeNull()
   })
 
+  it("refuses every operator status a customer might try to set", async () => {
+    // The customer PATCH owns exactly one move. Everything else belongs to the
+    // operator callback, which authenticates differently.
+    for (const status of ["IN_PROGRESS", "AWAITING_PROVIDER", "AWAITING_CUSTOMER", "COMPLETED", "QUEUED"]) {
+      state.session = sessionRow({ mode_b_status: "QUEUED", mode_b_request_id: "hzn_1" })
+      state.sessionUpdate = null
+      const response = await assistedPatch(
+        new Request("http://localhost", { method: "PATCH", body: JSON.stringify({ status }) }),
+        context,
+      )
+      expect(response.status).toBe(400)
+      expect(state.sessionUpdate).toBeNull()
+    }
+  })
+
   it("refuses to cancel a session with no queued request", async () => {
     state.session = sessionRow({ mode_b_status: null })
     const response = await assistedPatch(

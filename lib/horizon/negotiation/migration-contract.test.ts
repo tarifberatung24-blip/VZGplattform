@@ -114,6 +114,17 @@ describe("negotiation migration — MODE B operator queue state", () => {
     expect(grant![0]).toContain("mode_b_status")
     expect(grant![0]).toContain("mode_b_request_id")
   })
+
+  it("declares the operator callback event in the timeline vocabulary", () => {
+    // The callback appends `operator_status_changed`; the CHECK must allow it or
+    // the write fails at the database rather than in a test.
+    expect(migration).toContain("'operator_status_changed'")
+  })
+
+  it("makes the queue key unique so a callback lookup cannot match two sessions", () => {
+    expect(migration).toContain("create unique index if not exists negotiation_sessions_mode_b_request_id_key")
+    expect(migration).toContain("where mode_b_request_id is not null")
+  })
 })
 
 describe("negotiation migration — immutable timeline and offers", () => {

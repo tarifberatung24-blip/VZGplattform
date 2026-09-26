@@ -20,7 +20,12 @@ export async function writeNegotiationAudit(
   supabase: SupabaseClient,
   input: {
     householdId: string
-    actorUserId: string
+    /**
+     * Who acted. `null` records a system/operator actor — an inbound callback has
+     * no signed-in user, and attributing it to the customer would be a false
+     * audit line, which is worse than an unattributed one.
+     */
+    actorUserId: string | null
     sessionId: string
     eventType: string
     summary: string

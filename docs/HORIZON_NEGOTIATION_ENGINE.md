@@ -43,12 +43,12 @@ Reused, not duplicated:
 The negotiation domain (`lib/horizon/negotiation/`) is pure and deterministic:
 `facts`, `categories`, `opportunity`, `dossier`, `savings`, `preferences`,
 `offer-parse`, `verification`, `timeline`, `review`, `execution`, `assisted`,
-`guard`, `copy`.
+`callback`, `guard`, `copy`.
 Persistence and HTTP live in `repository.ts`, `service.ts` and the routes.
 
 The negotiation routes are `start`, `session/[sessionId]`, `preferences`, `offers`,
-`offers/[offerId]/decision`, `authorization`, `assisted` (MODE B handoff and cancel),
-and `verification`.
+`offers/[offerId]/decision`, `authorization`, `assisted` (MODE B handoff and customer
+cancel), `assisted/callback` (MODE B operator/n8n status callback), and `verification`.
 
 ## 2. State machine
 
@@ -208,14 +208,45 @@ are refused by both the API and the UI.
   ```
 
   `COMPLETED` and `CANCELLED` are terminal. A customer may only move a request to
-  `CANCELLED`; an operator-driven move arrives through the service-role path, not the
-  session client. The payload handed to the queue is stripped of any credential-shaped
-  field before it leaves the process, and it carries the reviewed dossier and plan as
-  they were recorded rather than a recomputation. The queue transport is the existing
-  n8n webhook pattern (`N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL`), reusing the
-  `N8N_WEBHOOK_SECRET` header the service-request route already uses. When it is not
-  configured the handoff reports `NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED` and sends
-  nothing.
+  `CANCELLED`; an operator-driven move arrives through the authenticated callback,
+  not the session client. The payload handed to the queue is stripped of any
+  credential-shaped field before it leaves the process, and it carries the reviewed
+  dossier and plan as they were recorded rather than a recomputation. The queue
+  transport is the existing n8n webhook pattern (`N8N_NEGOTIATION_ASSISTED_WEBHOOK_URL`),
+  reusing the `N8N_WEBHOOK_SECRET` header the service-request route already uses.
+  When it is not configured the handoff reports
+  `NEGOTIATION_ASSISTED_QUEUE_NOT_CONFIGURED` and sends nothing.
+
+  **Inbound callback.** `POST /api/negotiation/assisted/callback` is how the queue
+  reports back. It is a separate endpoint from the customer route because the caller
+  is a different principal with different powers:
+
+  - **Authenticated by shared secret.** `HORIZON_NEGOTIATION_CALLBACK_SECRET`, read
+    from `x-horizon-negotiation-callback-secret` or a bearer token and compared in
+    constant time. No session cookie is involved, so being logged in neither grants
+    nor denies access.
+  - **Ownership by queue key.** The body names a `requestId`; the session is resolved
+    by that key only (`negotiation_sessions_mode_b_request_id_key` is a partial unique
+    index, so the lookup cannot match two sessions). A callback cannot name a session
+    it was not queued for.
+  - **Bounded.** Only `mode_b_status` changes, and only along the declared edges.
+    The negotiation lifecycle (`state`) is never advanced from here — an operator
+    finishing queue work is not the same fact as a provider confirming terms.
+  - **Idempotent.** A repeat of the stored status returns `applied: false` and writes
+    nothing, so a retrying queue cannot duplicate a timeline event.
+  - **Append-only.** A move appends one `operator_status_changed` negotiation event
+    and one `negotiation.assisted_status_changed` audit line, attributed to a system
+    actor (`actor_user_id` null) rather than misattributed to the customer.
+  - **Credential-free.** The body shape is closed and has **no free-text field**.
+    A note would be the one place a secret could ride in, and prose cannot be reliably
+    scanned for one, so the callback simply has nowhere to put one.
+
+  The callable status set is narrower than the queue's: `QUEUED` is not callable
+  (it is a start state) and `CANCELLED` is not callable (an operator must not cancel
+  a customer's request — that stays with the customer's PATCH). The callback reads
+  the row with the service-role client, because an inbound callback has no session
+  and RLS would otherwise hide it; the repository is then constructed with the owner
+  id read from that row, so every write remains owner-scoped.
 - **MODE C — AUTOMATED.** Adapter interface only. Disabled by default. No provider is
   called, no message sent, no offer accepted, and no impersonation occurs.
 

@@ -63,6 +63,11 @@ export const NEGOTIATION_EVENTS = [
   "verification_due",
   "saving_verified",
   "saving_failed",
+  // An operator/n8n callback moved the MODE B queue. The queue is a separate
+  // machine from the negotiation lifecycle, so its moves carry their own event
+  // rather than borrowing a customer-facing one (an operator finishing work is
+  // not the same fact as a provider confirming terms).
+  "operator_status_changed",
 ] as const
 
 export type NegotiationEventType = (typeof NEGOTIATION_EVENTS)[number]

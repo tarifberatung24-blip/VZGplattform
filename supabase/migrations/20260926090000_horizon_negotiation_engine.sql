@@ -98,6 +98,14 @@ create index if not exists negotiation_sessions_owner_contract_idx
 create index if not exists negotiation_sessions_household_idx
   on public.negotiation_sessions(household_id);
 
+-- The operator callback resolves a session from its queue key. The key is
+-- generated per handoff, so it is unique by construction; a partial unique index
+-- makes that a database fact rather than an assumption, so a lookup can never
+-- match two sessions. Scoped to non-null keys so un-queued sessions are unaffected.
+create unique index if not exists negotiation_sessions_mode_b_request_id_key
+  on public.negotiation_sessions(mode_b_request_id)
+  where mode_b_request_id is not null;
+
 alter table public.negotiation_sessions enable row level security;
 
 drop policy if exists negotiation_sessions_owner_all on public.negotiation_sessions;
@@ -286,7 +294,8 @@ create table if not exists public.negotiation_events (
     'started','strategy_created','authorization_given','message_prepared',
     'message_sent_by_user','message_sent_by_operator','provider_response_received',
     'offer_parsed','counter_offer_created','offer_approved','offer_rejected',
-    'provider_confirmed','verification_due','saving_verified','saving_failed'
+    'provider_confirmed','verification_due','saving_verified','saving_failed',
+    'operator_status_changed'
   )),
   detail jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),

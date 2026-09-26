@@ -50,7 +50,9 @@ const ASSISTED_TRANSITIONS: Record<AssistedRequestStatus, AssistedRequestStatus[
   QUEUED: ["IN_PROGRESS", "CANCELLED"],
   IN_PROGRESS: ["AWAITING_CUSTOMER", "AWAITING_PROVIDER", "COMPLETED", "CANCELLED"],
   AWAITING_CUSTOMER: ["IN_PROGRESS", "CANCELLED"],
-  AWAITING_PROVIDER: ["IN_PROGRESS", "COMPLETED", "CANCELLED"],
+  // A provider can raise a question that only the customer can answer, so the
+  // request may move straight from waiting-on-provider to waiting-on-customer.
+  AWAITING_PROVIDER: ["IN_PROGRESS", "AWAITING_CUSTOMER", "COMPLETED", "CANCELLED"],
   COMPLETED: [],
   CANCELLED: [],
 }
