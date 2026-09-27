@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono, Inter } from "next/font/google"
+import { Geist, Geist_Mono, IBM_Plex_Mono, Inter } from "next/font/google"
 import { cookies, headers } from "next/headers"
 import { Suspense } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -15,6 +15,11 @@ import "./globals.css"
 const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" })
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" })
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex-mono",
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://vzgplattform.onrender.com"),
@@ -78,7 +83,7 @@ export default async function RootLayout({
   const initialLocale: Locale = isLocale(routeLocale) ? routeLocale : isLocale(stored) ? stored : defaultLocale
 
   return (
-    <html lang={initialLocale} suppressHydrationWarning className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} bg-background`}>
+    <html lang={initialLocale} suppressHydrationWarning className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${ibmPlexMono.variable} bg-background`}>
       <body className="font-sans antialiased">
         <ThemeProvider>
           <LanguageProvider initialLocale={initialLocale}>
