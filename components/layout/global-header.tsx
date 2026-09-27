@@ -45,7 +45,7 @@ export function GlobalHeader() {
   // The public Layer 0 header must not appear inside the operational workspace.
   // `/office` is not behind the workspace shell but renders its own header, so it
   // must not receive this one either — otherwise the page shows two stacked headers.
-  if (isKintexWorkspacePath(pathname) || isSelfChromedPath(pathname)) return null
+  if (stripLocale(pathname) === "/" || isKintexWorkspacePath(pathname) || isSelfChromedPath(pathname)) return null
 
   const labels =
     locale === "de"
