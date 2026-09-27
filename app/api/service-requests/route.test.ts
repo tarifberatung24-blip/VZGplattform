@@ -38,15 +38,15 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe("service request n8n webhook", () => {
-  it("fails clearly when n8n webhook is not configured", async () => {
+describe("service request automation webhook", () => {
+  it("fails clearly when automation is not configured", async () => {
     const response = await POST(request(validBody))
     expect(response.status).toBe(503)
-    expect(await response.json()).toEqual({ code: "N8N_WEBHOOK_NOT_CONFIGURED" })
+    expect(await response.json()).toEqual({ code: "SERVICE_REQUEST_AUTOMATION_NOT_CONFIGURED" })
   })
 
   it("validates required contact data before calling n8n", async () => {
-    vi.stubEnv("N8N_OFFER_REQUEST_WEBHOOK_URL", "https://n8n.example/webhook/finanzbg-offer-request")
+    vi.stubEnv("HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL", "https://automation.example/webhook/offer-request")
     const fetchMock = vi.fn()
     vi.stubGlobal("fetch", fetchMock)
 
@@ -56,9 +56,9 @@ describe("service request n8n webhook", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it("posts a manual offer payload to n8n with the shared secret header", async () => {
-    vi.stubEnv("N8N_OFFER_REQUEST_WEBHOOK_URL", "https://n8n.example/webhook/finanzbg-offer-request")
-    vi.stubEnv("N8N_WEBHOOK_SECRET", "test-secret")
+  it("posts a manual offer payload with the provider-neutral secret header", async () => {
+    vi.stubEnv("HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL", "https://automation.example/webhook/offer-request")
+    vi.stubEnv("HORIZON_AUTOMATION_WEBHOOK_SECRET", "test-secret")
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }))
     vi.stubGlobal("fetch", fetchMock)
 
@@ -69,10 +69,10 @@ describe("service request n8n webhook", () => {
     expect(json.requestId).toMatch(/^fbg_/)
     expect(fetchMock).toHaveBeenCalledOnce()
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
-    expect(url).toBe("https://n8n.example/webhook/finanzbg-offer-request")
+    expect(url).toBe("https://automation.example/webhook/offer-request")
     expect(init.headers).toMatchObject({
       "Content-Type": "application/json",
-      "X-FinanzBG-Webhook-Secret": "test-secret",
+      "X-Horizon-Automation-Secret": "test-secret",
     })
     const payload = JSON.parse(String(init.body))
     expect(payload.workflow).toMatchObject({ name: "finanzbg_offer_request_v1", mode: "manual_offer_preparation", slaMinutes: 120 })

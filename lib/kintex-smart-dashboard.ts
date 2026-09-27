@@ -19,10 +19,10 @@ export const smartDashboardEnvironment = {
   auth: "Supabase Auth",
   database: "Supabase Postgres",
   storage: "Supabase Storage",
-  aiLayer: "AI explanation layer after manual offer preparation",
-  automationLayer: "n8n manual offer workflows",
-  deployment: "Vercel",
-  designSystem: "NovaMind institutional finance UI",
+  aiLayer: "AI explanation with deterministic fallbacks and explicit provider gating",
+  automationLayer: "Provider-neutral webhook orchestration; active only when configured",
+  deployment: "Render from GitHub main",
+  designSystem: "HORIZON Design System v1",
 } as const
 
 export const smartDashboardRules = {
@@ -57,7 +57,7 @@ export const smartDashboardAgents = [
   { id: "workflow-router", stage: "2", title: "Workflow Router", status: "PLANNED", output: "Future orchestration for offer requests after deployment and legal verification" },
   { id: "review-agent", stage: "3", title: "Manual Review Desk", status: "ACTIVE", output: "Human confirmation before offers become trusted" },
   { id: "radar-agent", stage: "4", title: "Radar Orchestrator", status: "NEXT", output: "Rank contracts, documents, deadlines, claims" },
-  { id: "workflow-agent", stage: "5", title: "Connector Layer", status: "PLANNED", output: "Gmail, Telegram, Calendar, GitHub/Vercel workflows after approval" },
+  { id: "workflow-agent", stage: "5", title: "Connector Layer", status: "PLANNED", output: "Approved external connector workflows after explicit owner approval" },
 ] as const
 
 export function getSmartDashboardNextAction(stats: SmartDashboardStats, locale: "bg" | "de") {

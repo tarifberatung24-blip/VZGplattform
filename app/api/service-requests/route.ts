@@ -2,6 +2,12 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { serviceRequestKinds } from "../../../lib/service-request"
 import { checkRateLimit, getRequestKey } from "../../../lib/rate-limit"
+import {
+  resolveServiceRequestAutomation,
+  serviceRequestAutomationHeaders,
+  SERVICE_REQUEST_AUTOMATION_FAILED,
+  SERVICE_REQUEST_AUTOMATION_NOT_CONFIGURED,
+} from "../../../lib/automation/service-request-transport"
 
 const requestSchema = z.object({
   kind: z.enum(serviceRequestKinds),
@@ -17,19 +23,6 @@ const requestSchema = z.object({
   consent: z.literal(true),
   website: z.string().trim().max(200).optional(),
 }).strict()
-
-function getWebhookUrl() {
-  const raw = process.env.N8N_OFFER_REQUEST_WEBHOOK_URL?.trim()
-  if (!raw) return null
-  try {
-    const url = new URL(raw)
-    const local = url.hostname === "localhost" || url.hostname === "127.0.0.1"
-    if (url.protocol !== "https:" && !local) return null
-    return raw
-  } catch {
-    return null
-  }
-}
 
 function addMinutes(date: Date, minutes: number) {
   return new Date(date.getTime() + minutes * 60_000)
@@ -50,10 +43,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "queued", requestId: "accepted" }, { status: 202 })
   }
 
-  const webhookUrl = getWebhookUrl()
-  const secret = process.env.N8N_WEBHOOK_SECRET?.trim()
-  if (!webhookUrl || !secret) {
-    return NextResponse.json({ code: "N8N_WEBHOOK_NOT_CONFIGURED" }, { status: 503 })
+  const automation = resolveServiceRequestAutomation()
+  if (!automation) {
+    return NextResponse.json({ code: SERVICE_REQUEST_AUTOMATION_NOT_CONFIGURED }, { status: 503 })
   }
 
   const receivedAt = new Date()
@@ -88,16 +80,15 @@ export async function POST(request: Request) {
     },
   }
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" }
-  headers["X-FinanzBG-Webhook-Secret"] = secret
+  const headers = serviceRequestAutomationHeaders(automation)
 
   try {
-    const response = await fetch(webhookUrl, { method: "POST", headers, body: JSON.stringify(payload), signal: AbortSignal.timeout(10_000) })
+    const response = await fetch(automation.url, { method: "POST", headers, body: JSON.stringify(payload), signal: AbortSignal.timeout(10_000) })
     if (!response.ok) {
-      return NextResponse.json({ code: "N8N_WEBHOOK_FAILED", requestId }, { status: 502 })
+      return NextResponse.json({ code: SERVICE_REQUEST_AUTOMATION_FAILED, requestId }, { status: 502 })
     }
     return NextResponse.json({ status: "queued", requestId }, { status: 202 })
   } catch {
-    return NextResponse.json({ code: "N8N_WEBHOOK_FAILED", requestId }, { status: 502 })
+    return NextResponse.json({ code: SERVICE_REQUEST_AUTOMATION_FAILED, requestId }, { status: 502 })
   }
 }
