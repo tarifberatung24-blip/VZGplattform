@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { OptimizeFlow } from "@/components/finance/optimize-flow"
+import { NegotiationCenter } from "@/components/finance/negotiation-center"
 import { startKuendigungFromContract } from "@/lib/horizon/contracts/actions"
 import { getContractsCopy } from "@/lib/horizon/contracts/copy"
+import { contractEligibility } from "@/lib/horizon/negotiation/facts"
+import { getNegotiationCopy } from "@/lib/horizon/negotiation/copy"
 
 type ContractCategory = "electricity" | "gas" | "internet" | "mobile" | "insurance" | "housing" | "subscription" | "other"
 type Contract = {
@@ -24,10 +27,11 @@ type ReviewFacts = {
 const categoryValues: ContractCategory[] = ["electricity", "gas", "internet", "mobile", "insurance", "housing", "subscription", "other"]
 const emptyFacts: ReviewFacts = { title: "", category: "other", provider: "", contractNumber: "", monthlyAmount: null, startDate: "", endDate: "", cancellationDeadline: "", confidence: null, evidence: [] }
 
-export function ContractsWorkspace({ householdId, initialContracts, loadError }: { householdId: string; initialContracts: Contract[]; loadError?: string | null }) {
+export function ContractsWorkspace({ householdId, initialContracts, loadError, negotiationEnabled = false }: { householdId: string; initialContracts: Contract[]; loadError?: string | null; negotiationEnabled?: boolean }) {
   const { t, locale } = useLanguage()
   const copy = t.contractWorkspace
   const p17 = getContractsCopy(locale)
+  const negotiationCopy = getNegotiationCopy(locale)
   const [contracts, setContracts] = useState(initialContracts)
   const [form, setForm] = useState({ title: "", category: "electricity" as ContractCategory, provider: "", monthly_cost: "" })
   const [facts, setFacts] = useState<ReviewFacts | null>(null)
@@ -85,7 +89,20 @@ export function ContractsWorkspace({ householdId, initialContracts, loadError }:
     <div className="grid gap-3 md:grid-cols-4"><Input aria-label={copy.designation} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={copy.designation} /><select aria-label={copy.category} className="h-10 border border-input bg-background px-3 text-sm text-foreground" value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value as ContractCategory })}>{categoryValues.map((value) => <option key={value} value={value}>{copy.categories[value]}</option>)}</select><Input aria-label={copy.provider} value={form.provider} onChange={(event) => setForm({ ...form, provider: event.target.value })} placeholder={copy.provider} /><Input aria-label={copy.monthlyCosts} type="number" min="0" step="0.01" value={form.monthly_cost} onChange={(event) => setForm({ ...form, monthly_cost: event.target.value })} placeholder={copy.monthlyCosts} /></div>
     <div className="flex flex-wrap gap-3"><Button onClick={() => void addContract()} disabled={saving}>{saving ? copy.saving : copy.addManually}</Button><Button asChild variant="outline"><Link href="/assistant"><FileText className="size-4" /> {copy.explainWithAi}</Link></Button></div>
     {message && <p role="status" className="border border-border bg-secondary p-3 text-sm text-muted-foreground">{message}</p>}
-    <div className="space-y-2">{contracts.length === 0 ? <p className="bg-secondary p-4 text-sm text-muted-foreground">{copy.noContracts}</p> : contracts.map((contract) => <div key={contract.id} className="border border-border p-4"><div className="flex items-center justify-between"><div><p className="font-medium">{contract.title}</p><p className="text-sm text-muted-foreground">{contract.provider ?? copy.categories[contract.category]}</p></div><div className="text-right"><p className="font-semibold">{contract.monthly_cost == null ? copy.missingData : `${Number(contract.monthly_cost).toFixed(2)} ${copy.monthlyUnit}`}</p><p className="text-xs text-muted-foreground">{contract.review_status === "confirmed" ? copy.confirmed : copy.reviewOpen}</p></div></div><OptimizeFlow contract={contract} /><form action={startKuendigungFromContract} className="mt-3 flex flex-wrap items-center gap-2"><input type="hidden" name="contractId" value={contract.id} /><input type="hidden" name="locale" value={locale} /><Button type="submit" variant="outline" size="sm" disabled={saving}>{p17.startKuendigung}</Button>{contract.review_status !== "confirmed" ? <span className="text-xs text-muted-foreground">{p17.unconfirmedWarning}</span> : null}</form></div>)}</div>
+    <div className="space-y-2">{contracts.length === 0 ? <p className="bg-secondary p-4 text-sm text-muted-foreground">{copy.noContracts}</p> : contracts.map((contract) => {
+      const eligibility = contractEligibility({
+        id: contract.id, title: contract.title, category: contract.category, provider: contract.provider,
+        contractNumber: contract.contract_number ?? null, monthlyAmount: contract.monthly_cost,
+        startDate: contract.start_date ?? null, endDate: contract.end_date ?? null,
+        cancellationDeadline: contract.cancellation_deadline ?? null, promotionExpiry: null,
+        customerNumber: null,
+        services: [], priceHistory: [], reviewStatus: contract.review_status === "confirmed" ? "confirmed" : "needs_review",
+        documentId: contract.document_id ?? null,
+      })
+      const showNegotiation = negotiationEnabled && eligibility.eligible
+      const ineligibleReason = eligibility.reason === "CATEGORY_REGULATED" ? negotiationCopy.notEligibleRegulated : negotiationCopy.ineligibleCategory
+      return <div key={contract.id} className="border border-border p-4"><div className="flex items-center justify-between"><div><p className="font-medium">{contract.title}</p><p className="text-sm text-muted-foreground">{contract.provider ?? copy.categories[contract.category]}</p></div><div className="text-right"><p className="font-semibold">{contract.monthly_cost == null ? copy.missingData : `${Number(contract.monthly_cost).toFixed(2)} ${copy.monthlyUnit}`}</p><p className="text-xs text-muted-foreground">{contract.review_status === "confirmed" ? copy.confirmed : copy.reviewOpen}</p></div></div>{showNegotiation ? <NegotiationCenter contractId={contract.id} /> : negotiationEnabled ? <p className="mt-3 text-xs text-muted-foreground">{ineligibleReason}</p> : null}<OptimizeFlow contract={contract} /><form action={startKuendigungFromContract} className="mt-3 flex flex-wrap items-center gap-2"><input type="hidden" name="contractId" value={contract.id} /><input type="hidden" name="locale" value={locale} /><Button type="submit" variant="outline" size="sm" disabled={saving}>{p17.startKuendigung}</Button>{contract.review_status !== "confirmed" ? <span className="text-xs text-muted-foreground">{p17.unconfirmedWarning}</span> : null}</form></div>
+    })}</div>
     <div className="flex items-start gap-3 border border-primary/30 bg-primary/5 p-4 text-sm text-muted-foreground"><Radar className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" /><p>{copy.radarNote}</p></div>
     {missingCost > 0 && <div className="flex items-start gap-3 border border-border p-4 text-sm text-muted-foreground"><AlertTriangle className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" /><p>{missingCost} {copy.missingCostNote}</p></div>}
     <p className="text-xs text-muted-foreground">{copy.household} {householdId.slice(0, 8)}… · {copy.rls}</p>

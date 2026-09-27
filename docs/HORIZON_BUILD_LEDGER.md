@@ -1202,6 +1202,14 @@ after a module meets the full DONE definition.
   tests, build, real verification pass.
 - **FROZEN:** NO
 
+**Negotiation engine (branch `feature/horizon-negotiation-engine`, base `0798e44`, NOT merged).**
+A contract negotiation lifecycle under OPTIMIZE: deterministic opportunity decision
+(NEGOTIATE / SWITCH / CANCEL / WAIT / NO_ACTION), user preferences with server-side
+enforcement, a provider-response inbox, an offer review screen with no auto-acceptance,
+and bill verification before a saving counts as VERIFIED. Additive only; off unless
+`HORIZON_NEGOTIATION_ENABLED`. See [`HORIZON_NEGOTIATION_ENGINE.md`](./HORIZON_NEGOTIATION_ENGINE.md).
+Not DONE: awaiting owner review, and the migration has not been applied to production.
+
 ---
 
 ## NAVIGATION ARCHITECTURE — N0–N7 (documentation + navigation UI)
