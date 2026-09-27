@@ -38,9 +38,9 @@ function ModuleButton({
       type="submit"
       variant="outline"
       disabled={pending}
-      className="h-auto min-h-20 w-full justify-start gap-3 whitespace-normal px-4 py-4 text-left"
+      className="horizon-card h-auto min-h-24 w-full justify-start gap-4 whitespace-normal border-border bg-card px-5 py-5 text-left hover:bg-card"
     >
-      <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary/5 text-primary">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
         <Icon className="size-4" />
       </span>
       <span className="text-sm font-medium">{pending ? pendingLabel : label}</span>
@@ -68,11 +68,14 @@ export function HorizonHome({
   const copy = getGuideCopy(locale)
 
   return (
-    <section className="mt-8" aria-labelledby="horizon-modules">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="horizon-modules" className="text-lg font-semibold tracking-tight">
+    <section data-reveal className="mt-10" aria-labelledby="horizon-modules">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="horizon-technical-label">{de ? "02 / Aufgaben" : "02 / Задачи"}</p>
+          <h2 id="horizon-modules" className="mt-2 text-2xl font-semibold sm:text-3xl">
           {de ? "Womit kann ich helfen?" : "С какво да помогна?"}
-        </h2>
+          </h2>
+        </div>
         <Link href={`/${locale}/guide`} className="text-xs font-medium text-primary hover:underline">
           {de ? "Alle Wege ansehen" : "Виж всички пътища"}
         </Link>
@@ -81,7 +84,7 @@ export function HorizonHome({
       {errorCode ? (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          className="mt-5 rounded-2xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
         >
           {de
             ? "Der Vorgang konnte nicht geöffnet werden. Bitte erneut versuchen."
@@ -89,7 +92,7 @@ export function HorizonHome({
         </p>
       ) : null}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {homeModules.map((definition) => {
           const Icon = icons[homeModuleIcon[definition.module]] ?? FileSearch
           const count = caseCounts[definition.module] ?? 0

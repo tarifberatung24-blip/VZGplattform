@@ -48,9 +48,9 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
         <SidebarInset
           id="workspace-content"
           tabIndex={-1}
-          className="min-h-svh min-w-0 focus-visible:outline-none"
+          className="min-h-svh min-w-0 bg-background focus-visible:outline-none"
         >
-          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-3 sm:px-4">
+          <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-border bg-card/95 px-3 backdrop-blur-md sm:px-5">
             <SidebarTrigger aria-label={toggleText} />
             {/* Brand lives in the sidebar. Shown here only while the sidebar is a
                 drawer (below md), so exactly one instance is visible per viewport. */}

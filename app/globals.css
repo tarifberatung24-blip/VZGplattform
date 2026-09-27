@@ -395,3 +395,163 @@
     transition: none;
   }
 }
+
+
+/* Layer 1 — Zoah-inspired HORIZON polish. Scoped to authenticated workspace only. */
+.kintex-workspace,
+[data-slot="sidebar"][data-mobile="true"] {
+  color-scheme: light;
+  --background: #f8fafc;
+  --foreground: #10233f;
+  --card: #ffffff;
+  --card-foreground: #10233f;
+  --popover: #ffffff;
+  --popover-foreground: #10233f;
+  --primary: #0f9f6e;
+  --primary-foreground: #ffffff;
+  --primary-hover: #087a53;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #10233f;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #e8f6f0;
+  --accent-foreground: #10233f;
+  --border: #dbe4ee;
+  --input: #dbe4ee;
+  --ring: #0f9f6e;
+  --focus-ring: #0f9f6e;
+  --success: #0f9f6e;
+  --success-foreground: #ffffff;
+  --destructive: #b42318;
+  --sidebar: #10233f;
+  --sidebar-foreground: #eef6f3;
+  --sidebar-primary: #0f9f6e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #173553;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #24435f;
+  --sidebar-ring: #55d3a9;
+  --chart-1: #0f9f6e;
+  --chart-2: #10233f;
+  --chart-3: #64748b;
+  --chart-4: #94a3b8;
+  --chart-5: #cbd5e1;
+  --font-mono: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.kintex-workspace {
+  font-family: var(--font-inter), "Nunito Sans", Arial, sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.kintex-workspace h1,
+.kintex-workspace h2,
+.kintex-workspace h3 {
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.kintex-workspace .horizon-technical-label,
+.kintex-workspace .nm-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.kintex-workspace .horizon-primary-action {
+  min-height: 56px;
+  border-radius: 999px;
+  padding-inline: 1.4rem 1.25rem;
+  font-weight: 700;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.kintex-workspace .horizon-primary-action:hover {
+  transform: translateY(-2px);
+  background: var(--primary-hover);
+  box-shadow: 0 8px 24px rgb(15 159 110 / 20%);
+}
+
+.kintex-workspace .horizon-card {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--card);
+  transition:
+    transform 280ms cubic-bezier(0.22, 0.85, 0.3, 1.03),
+    box-shadow 280ms ease,
+    border-color 280ms ease;
+}
+
+.kintex-workspace .horizon-card:hover {
+  transform: translateY(-5px);
+  border-color: #a9c7bb;
+  box-shadow: 0 18px 50px rgb(16 35 63 / 10%);
+}
+
+.kintex-workspace .kintex-panel {
+  border-radius: 24px;
+  background: var(--card);
+}
+
+.kintex-workspace .kintex-panel-subtle {
+  border-radius: 20px;
+  background: var(--background);
+}
+
+.kintex-workspace .horizon-hero-title {
+  animation: horizon-hero-in 800ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.kintex-workspace .horizon-hero-copy {
+  animation: horizon-hero-in 800ms 100ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes horizon-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kintex-workspace [data-reveal].reveal-pending {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms cubic-bezier(0.32, 0.72, 0, 1),
+    transform 700ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.kintex-workspace [data-reveal].reveal-pending.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kintex-workspace .horizon-primary-action,
+  .kintex-workspace .horizon-card,
+  .kintex-workspace .horizon-hero-title,
+  .kintex-workspace .horizon-hero-copy,
+  .kintex-workspace [data-reveal].reveal-pending {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+
+  .kintex-workspace [data-reveal].reveal-pending {
+    opacity: 1;
+  }
+}
