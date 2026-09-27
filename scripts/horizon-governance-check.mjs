@@ -32,6 +32,10 @@ const serviceRoute = read("app/api/service-requests/route.ts")
 if (/process\.env\.N8N_/.test(serviceRoute)) {
   fail("Service-request route must resolve automation through the provider-neutral transport boundary.")
 }
+const preflight = read("scripts/terra-preflight.mjs")
+if (!preflight.includes("HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL")) {
+  fail("Terra preflight must report the provider-neutral service-request automation configuration.")
+}
 
 const pkg = JSON.parse(read("package.json"))
 const master = read("docs/HORIZON_MASTER_MAP.md")

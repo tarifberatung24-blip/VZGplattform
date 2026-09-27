@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { getPdfReadiness } from "@/lib/tax-pipeline"
-import { emptyCanonicalTaxReturn } from "@/lib/canonical-tax-model"
 import { getAuthenticatedUser } from "@/lib/office/supabase/auth"
 
 export async function POST(request: Request) {
@@ -9,8 +8,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ code: "AUTHENTICATION_REQUIRED" }, { status: 401 })
   }
 
-  const body = await request.json().catch(() => ({}))
-  const canonical = body?.canonicalTaxReturn ?? emptyCanonicalTaxReturn()
+  const body = await request.json().catch(() => null)
+  const canonical = body?.canonicalTaxReturn
+  if (
+    !canonical ||
+    typeof canonical !== "object" ||
+    !Array.isArray(canonical.selectedForms) ||
+    !Array.isArray(canonical.validationIssues)
+  ) {
+    return NextResponse.json({ code: "CANONICAL_TAX_RETURN_REQUIRED" }, { status: 400 })
+  }
   const readiness = getPdfReadiness(canonical)
 
   if (readiness.status !== "READY_FOR_USER_USE") {

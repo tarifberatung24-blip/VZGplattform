@@ -28,9 +28,32 @@ const project = JSON.parse(readFileSync(resolve(root, 'supabase/project.json'), 
 const literal = guard.match(/===\s*["']https:\/\/([a-z0-9]+)\.supabase\.co["']/)
 if (literal && literal[1] !== project.projectRef) report('WARN', 'Confirmed static project-ref mismatch in document upload guard; T0 required')
 else report('INFO', 'No known literal mismatch detected; regression tests still required')
-for (const name of ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'GROQ_API_KEY', 'N8N_OFFER_REQUEST_WEBHOOK_URL', 'N8N_WEBHOOK_SECRET']) {
+for (const name of [
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+  'GROQ_API_KEY',
+  'HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL',
+  'HORIZON_AUTOMATION_WEBHOOK_SECRET',
+]) {
   report('INFO', `${name}: ${process.env[name] ? 'present in process (validity unchecked)' : 'absent from process (env files not loaded)'}`)
 }
+const neutralAutomationConfigured = Boolean(
+  process.env.HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL &&
+  process.env.HORIZON_AUTOMATION_WEBHOOK_SECRET,
+)
+const legacyAutomationConfigured = Boolean(
+  process.env.N8N_OFFER_REQUEST_WEBHOOK_URL &&
+  process.env.N8N_WEBHOOK_SECRET,
+)
+report(
+  'INFO',
+  neutralAutomationConfigured
+    ? 'Service-request automation: neutral pair present (preferred)'
+    : legacyAutomationConfigured
+      ? 'Service-request automation: legacy n8n pair present (compatibility fallback)'
+      : 'Service-request automation: no complete pair present in process',
+)
 const git = spawnSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8', timeout: 10000 })
 if (git.status === 0) report('INFO', `Worktree entries: ${git.stdout.trim() ? git.stdout.trim().split('\n').length : 0}; preserve existing changes`)
 else { blocked = true; report('BLOCKED', 'Cannot inspect worktree') }

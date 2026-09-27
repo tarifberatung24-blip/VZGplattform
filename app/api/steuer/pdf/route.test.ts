@@ -29,6 +29,16 @@ describe("legacy tax PDF readiness route", () => {
     expect(await response.json()).toEqual({ code: "AUTHENTICATION_REQUIRED" })
   })
 
+  it("requires an explicit canonical tax return", async () => {
+    const response = await POST(new Request("http://localhost/api/steuer/pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    }))
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({ code: "CANONICAL_TAX_RETURN_REQUIRED" })
+  })
+
   it("returns truthful readiness and points generation to the canonical case route", async () => {
     const response = await POST(request())
     const json = await response.json()

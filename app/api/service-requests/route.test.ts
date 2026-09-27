@@ -45,7 +45,7 @@ describe("service request automation webhook", () => {
     expect(await response.json()).toEqual({ code: "SERVICE_REQUEST_AUTOMATION_NOT_CONFIGURED" })
   })
 
-  it("validates required contact data before calling n8n", async () => {
+  it("validates required contact data before calling automation", async () => {
     vi.stubEnv("HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL", "https://automation.example/webhook/offer-request")
     const fetchMock = vi.fn()
     vi.stubGlobal("fetch", fetchMock)
