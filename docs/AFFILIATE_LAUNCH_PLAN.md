@@ -1,8 +1,8 @@
 # Affiliate Launch: first four customer enquiries
 
-Status: parked until the n8n manual offer request workflow and the first paid service are fully live.
+Status: parked until the provider-neutral manual offer-request workflow and the first paid service are fully live.
 
-For the current launch phase, Facebook traffic should go to the request routes in `docs/N8N_OFFER_REQUEST_PLAN.md`, not directly to affiliate deeplinks. Affiliate links remain useful for later campaign tests after the manual workflow can capture, answer and measure customer demand.
+For the current launch phase, Facebook traffic should go to the service-request routes, not directly to affiliate deeplinks. The automation receiver may be Activepieces or another approved provider; legacy n8n is compatibility-only. Affiliate links remain useful for later campaign tests after the manual workflow can capture, answer and measure customer demand.
 
 ## Launch principle
 
@@ -19,7 +19,7 @@ All production URLs use `https://www.finanzberaterbg.de` before the paths above.
 
 ## Required activation before paid traffic
 
-1. In Vercel, configure the exact approved URLs as production environment variables:
+1. In the current production environment (Render), configure the exact approved URLs as production environment variables:
    - `AFFILIATE_SCHUFA_URL`
    - `AFFILIATE_CREDIT_URL`
    - `AFFILIATE_KFZ_URL`

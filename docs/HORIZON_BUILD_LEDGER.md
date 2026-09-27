@@ -649,7 +649,7 @@ after a module meets the full DONE definition.
   the deterministic translator does not produce a real translation for non-`de` locales; two
   overlapping draft/approval families exist with no canonical choice.
 - **DEPENDENCIES:** P5, P7.
-- **BLOCKERS:** canonical draft/approval model depends on the P5 case-model decision.
+- **BLOCKERS:** none for the verified approval gate. Consolidating the two historical draft/approval families remains architecture debt, not a P5 decision blocker.
   **Live E2E observed 2026-09-25:** approval was exercised against the real generated tax-form
   draft. A missing hash was refused with HTTP 400 `"A valid approved content hash is required"`;
   the recorded `content_hash` produced an approval row (HTTP 201) bound to that exact hash; and
@@ -962,7 +962,7 @@ after a module meets the full DONE definition.
   - `lib/horizon/pdf/actions.ts` and `lib/horizon/case/missing-info.ts` — Agentur mappings wired
     into the fill path; missing-information derivation is now module- and task-aware.
 - **REUSE:** shared engines E1–E10, the P9 writer/inspection path, and the P5 case spine.
-- **MISSING:** authenticated browser runtime E2E; additional BA form mappings only when a real
+- **MISSING:** no blocking browser-E2E gap remains. Additional BA form mappings are added only when a real
   workflow needs them (coordinates must be measured from the exact template bytes).
 - **SCOPE DECISION (recorded, not a defect):** three of the four tasks are `online_only` or
   `online_preferred` and expose no official fillable PDF. They are represented as online-only and
@@ -997,7 +997,7 @@ after a module meets the full DONE definition.
   spine; the online-first fact is represented as such rather than converted to a paper form.
 - **REUSE:** shared engines E1–E10; the P12 module pattern; `lib/horizon/pdf/` for the one
   fillable official form.
-- **MISSING:** authenticated browser end-to-end verification.
+- **MISSING:** no blocking browser-E2E gap remains; additional Jobcenter form breadth is added only for an approved real workflow.
 - **DEPENDENCIES:** P5, P6, P7, P8, P9, and P12 (Agentur für Arbeit pattern).
 - **BLOCKERS:** none technical.
 - **DONE CRITERIA:** the Agentur für Arbeit workflow is reproduced using the same shared engines,
@@ -1032,9 +1032,9 @@ after a module meets the full DONE definition.
   `lib/contracts/extraction.ts`, radar date logic and the `cancellation` case intent.
 - **REUSE:** contracts workspace, contract extraction, radar date logic, `contracts` table,
   `case_messages`, `correspondence_drafts`, P8 approval, P9 PDF writer, P10/P11 gates.
-- **MISSING:** authenticated browser end-to-end verification of prepare → review → approve →
-  download. Visual signature of the generated letter is deliberately not offered (no verified
-  placement exists for a self-drawn artifact).
+- **MISSING:** no blocking browser-E2E gap remains for prepare → review → approve → download.
+  Visual signature of the generated letter is deliberately not offered (no verified placement
+  exists for a self-drawn artifact).
 - **DEPENDENCIES:** P5, P6, P7, P8, P9 (optional P10/P11).
 - **BLOCKERS:** `DOCUMENT_FEASIBILITY_AUDIT.md` states that preparing a cancellation draft and
   checklist is acceptable, but sending requires explicit user approval and a configured lawful
@@ -1081,12 +1081,14 @@ after a module meets the full DONE definition.
   (`provider_integrations`, `provider_submission_attempts`, `provider_submission_events`,
   `provider_receipts`), education table `financial_education_lessons`.
 - **REUSE:** all of the above.
-- **MISSING:** actual PDF package generation (no PDF library — see P9); deterministic
-  calculation verification end-to-end; guided collection wired to the shared case engine;
-  review and manual-submission packaging; ELSTER integration (intentionally absent).
+- **MISSING:** no PDF-generation gap remains for the verified 2025 form set; P9 provides the
+  `pdf-lib` writer and verified mappings. Remaining work is deterministic tax-calculation
+  verification end-to-end, guided-collection completeness, manual-submission packaging, and
+  ELSTER integration (intentionally absent).
 - **DEPENDENCIES:** P5, P6, P7, P8, P9.
 - **BLOCKERS:** no approved ELSTER integration exists, so automatic submission stays out of scope.
-  `/api/steuer/pdf` returns readiness only. Adding a PDF dependency requires owner approval.
+  The legacy `/api/steuer/pdf` endpoint is authenticated readiness-only and points generation to
+  the canonical case-bound `/api/horizon/cases/{id}/tax-form` route.
   **Live E2E observed 2026-09-25:** on the real `Steuer 2025` case the tax-year selector offered
   the verified 2025 official templates (`Hauptvordruck ESt 1 A` plus the 8 Anlagen) and correctly
   reported 2026 as "Amtlich noch nicht veröffentlicht", with no 2025 form or rule reused for
@@ -1187,15 +1189,18 @@ after a module meets the full DONE definition.
   `contract_radar_history` and `radar_events`); optimize sessions
   (`lib/optimize/flow.ts`, `optimize_sessions`, provenance-tracked filled data);
   affiliate offers (`lib/affiliate-offers.ts`, `/go/{offer}` with exact deeplink, no guessed
-  tracking parameters); manual offer intake via n8n (`/api/service-requests`);
+  tracking parameters); manual offer intake through the provider-neutral automation boundary
+  (`/api/service-requests`);
   contracts table with `end_date`, `cancellation_deadline`, `review_status`,
   `extraction_confidence`.
 - **REUSE:** all of the above.
-- **MISSING:** module entry from the HORIZON dashboard; contract-to-case linkage; unified
-  contract review flow on the shared case engine; migration of KintexBG-era contract UI naming.
+- **MISSING:** the unified contract review flow on the shared case engine still needs consolidation,
+  and KintexBG-era contract UI naming remains to be cleaned up. Dashboard entry and the verified
+  contract linkage are already shipped.
 - **DEPENDENCIES:** P5, P6, P8.
-- **BLOCKERS:** none technical; affiliate and offer-request surfaces are parked until the manual
-  n8n workflow and first paid service are live (`docs/AFFILIATE_LAUNCH_PLAN.md`).
+- **BLOCKERS:** none technical; affiliate and offer-request surfaces remain parked until the
+  provider-neutral manual automation workflow and first paid service are live
+  (`docs/AFFILIATE_LAUNCH_PLAN.md`).
 - **DONE CRITERIA:** contract archive, provider/cost visibility, cancellation deadlines,
   deterministic source-backed signals, and user-approved next steps all operate on the shared
   case engine; no invented savings or prices; loading, error, and empty states complete;

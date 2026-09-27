@@ -49,6 +49,7 @@ User actions must follow:
 - `docs/HORIZON_EXECUTION_CHECKLIST.md` is the plain working list. A `✅` there means the item is
   actually done and verified; an unchecked item still needs work or confirmation. The checklist
   does not override the Master Map, the Build Ledger, or these rules.
+- `docs/RELIABILITY_GUARDRAILS.md` is mandatory for change control, evidence hierarchy, CI, provider boundaries, accessibility, and agent behavior.
 - Work proceeds sequentially by approved phase. Only one implementation phase may be active at a
   time unless the owner explicitly authorizes otherwise.
 - A later phase must not be started merely because its files already exist.
@@ -119,6 +120,8 @@ another task.
 ## Collaboration and Validation
 
 - Only one active AI agent may modify a module or its files at a time.
+- AI-authored implementation must use a focused branch and pull request. Direct writes to `main` are prohibited unless the owner explicitly authorizes that exact direct write.
+- Required CI from `docs/RELIABILITY_GUARDRAILS.md` must pass before an implementation is presented as merge-ready.
 - Before implementation, inspect the latest `main` and the existing patterns.
 - Required before handoff: typecheck, production build, and applicable tests.
 - Verify deployment with real HTTP checks against the actual routes; do not rely only on compilation.

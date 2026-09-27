@@ -16,7 +16,9 @@
     "i18n:unused": "node scripts/i18n-unused.mjs",
     "i18n:hardcoded": "node scripts/i18n-hardcoded.mjs",
     "i18n:verify": "pnpm i18n:check && pnpm i18n:unused && pnpm i18n:hardcoded",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "governance:check": "node scripts/horizon-governance-check.mjs",
+    "verify": "pnpm governance:check && pnpm typecheck && pnpm lint && pnpm i18n:verify && pnpm test && pnpm build"
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.37",

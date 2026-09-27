@@ -66,8 +66,9 @@ Copy `.env.example` to `.env.local`. Never commit `.env.local`, service-role cre
 | `SUPABASE_SECRET_KEY` | Server-side operations | Server-only Supabase secret/service key; never expose it to the browser |
 | `NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL` | Local OAuth | Local callback URL, normally `http://localhost:3000/auth/callback` |
 | `GROQ_API_KEY` | AI features | Server-side AI provider key |
-| `N8N_OFFER_REQUEST_WEBHOOK_URL` | Offer requests | n8n intake webhook URL |
-| `N8N_WEBHOOK_SECRET` | Offer requests | Shared secret used to authenticate webhook delivery |
+| `HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL` | Offer requests | Provider-neutral HTTPS webhook URL (Activepieces-ready) |
+| `HORIZON_AUTOMATION_WEBHOOK_SECRET` | Offer requests | Shared server-side secret for provider-neutral webhook delivery |
+| `N8N_OFFER_REQUEST_WEBHOOK_URL`, `N8N_WEBHOOK_SECRET` | Legacy fallback | Read only when both provider-neutral variables are absent; never mixed with them |
 
 Public pages and `/api/health` can run without Supabase configuration. Protected routes and integrations require the relevant variables and return a controlled configuration error when they are unavailable.
 
@@ -83,6 +84,8 @@ Public pages and `/api/health` can run without Supabase configuration. Protected
 | `pnpm test` | Run the Vitest suite |
 | `pnpm i18n:verify` | Check translation parity, usage, and hardcoded strings |
 | `pnpm supabase:check` | Validate the configured Supabase project |
+| `pnpm governance:check` | Enforce repository reliability invariants |
+| `pnpm verify` | Run governance, typecheck, lint, i18n, tests, and production build |
 | `node scripts/terra-preflight.mjs` | Check Terra/tool readiness before assigned work |
 
 Recommended pre-commit verification:
@@ -125,7 +128,7 @@ Review migration SQL and RLS policies before applying changes to a shared or pro
 The production service is deployed from the GitHub `main` branch to Render. A normal deployment flow is:
 
 1. Run the local verification commands.
-2. Commit a focused change to a branch or `main`, according to the repository workflow.
+2. Commit a focused change to a branch and open a pull request. AI-authored implementation must not push directly to `main` unless the owner explicitly authorizes that exact direct push.
 3. Push to GitHub and wait for Render to finish the automatic deployment.
 4. Verify the health endpoint and the relevant localized route.
 
@@ -139,6 +142,7 @@ curl -I https://vzgplattform.onrender.com/de/auth/login
 
 ## Documentation
 
+- [`docs/RELIABILITY_GUARDRAILS.md`](docs/RELIABILITY_GUARDRAILS.md) — mandatory change, CI, evidence, and agent guardrails
 - [`docs/TERRA_START.md`](docs/TERRA_START.md) — Terra readiness and first-work-package guidance
 - [`docs/N8N_OFFER_REQUEST_PLAN.md`](docs/N8N_OFFER_REQUEST_PLAN.md) — offer-request webhook contract and operating plan
 - [`docs/AFFILIATE_LAUNCH_PLAN.md`](docs/AFFILIATE_LAUNCH_PLAN.md) — affiliate launch scope

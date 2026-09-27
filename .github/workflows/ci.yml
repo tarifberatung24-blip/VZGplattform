@@ -5,9 +5,17 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -21,24 +29,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # 22.13 is the floor required by pdfjs-dist (see "engines" in
-          # package.json). On Node 20 `Promise.withResolvers` is missing, so the
-          # AcroForm field reader throws and fillable official templates are
-          # silently misclassified as non-fillable.
+          # Node 22 is the repository floor for pdfjs-dist and the PDF field reader.
           node-version: 22
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Typecheck
-        run: pnpm run --if-present typecheck
-
-      - name: Tests
-        run: pnpm run --if-present test
-
-      - name: Production build
-        run: pnpm run build
+      - name: Full repository verification
+        run: pnpm verify

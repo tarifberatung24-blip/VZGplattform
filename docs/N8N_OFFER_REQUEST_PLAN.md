@@ -1,6 +1,12 @@
-# FinanzBG n8n Offer Request Plan
+# Legacy n8n Offer Request Plan
 
-## Decision
+> **Compatibility note (2026-09-27):** this document records the original n8n operating plan.
+> The application now uses a provider-neutral service-request transport. Activepieces-compatible
+> webhooks are the preferred current direction; the old n8n environment variables and header are
+> supported only as a complete legacy fallback pair. Do not use this file as the current
+> infrastructure source of truth; see `docs/RELIABILITY_GUARDRAILS.md` and `.env.example`.
+
+## Historical decision
 
 For the first revenue-focused integration, FinanzBG stops using complex AI document processing as the primary intake path.
 
@@ -22,10 +28,10 @@ This keeps the service operational while the platform matures. AI remains useful
 
 | Area | Public BG route | Public DE route | Service key | Current destination |
 |---|---|---|---|---|
-| Ток / Газ | `/bg/zayavka?service=energy` | `/de/anfrage?service=energy` | `energy` | `/api/service-requests` → n8n |
-| Kfz застраховка | `/bg/zayavka?service=kfz` | `/de/anfrage?service=kfz` | `kfz` | `/api/service-requests` → n8n |
-| Потребителски кредит | `/bg/zayavka?service=credit` | `/de/anfrage?service=credit` | `credit` | `/api/service-requests` → n8n |
-| SCHUFA | `/bg/zayavka?service=schufa` | `/de/anfrage?service=schufa` | `schufa` | `/api/service-requests` → n8n |
+| Ток / Газ | `/bg/zayavka?service=energy` | `/de/anfrage?service=energy` | `energy` | `/api/service-requests` → provider-neutral automation webhook |
+| Kfz застраховка | `/bg/zayavka?service=kfz` | `/de/anfrage?service=kfz` | `kfz` | `/api/service-requests` → provider-neutral automation webhook |
+| Потребителски кредит | `/bg/zayavka?service=credit` | `/de/anfrage?service=credit` | `credit` | `/api/service-requests` → provider-neutral automation webhook |
+| SCHUFA | `/bg/zayavka?service=schufa` | `/de/anfrage?service=schufa` | `schufa` | `/api/service-requests` → provider-neutral automation webhook |
 
 ## Information Collection
 
@@ -54,7 +60,7 @@ Use one n8n workflow named `finanzbg_offer_request_v1`.
 | 8 | Email / client panel link | Send offer or missing-info request |
 | 9 | Status update | Mark queued, in_review, sent, waiting_customer, closed |
 
-Production must use the n8n production webhook URL, not the temporary test URL. The workflow must be active before the site environment variable is configured.
+For a legacy n8n deployment, use its production webhook rather than a temporary test URL. For current deployments, configure the provider-neutral URL + secret pair only after the receiving automation is active.
 
 ## Payload Contract
 
@@ -148,6 +154,15 @@ Paid services should start only after the first n8n offer request workflow is st
 Each paid service needs its own price, legal boundary, delivery promise, and refund/cancellation rule before activation.
 
 ## Environment Variables
+
+Current preferred pair:
+
+```bash
+HORIZON_AUTOMATION_SERVICE_REQUEST_WEBHOOK_URL=https://your-automation.example/webhook/offer-request
+HORIZON_AUTOMATION_WEBHOOK_SECRET=change-me
+```
+
+Legacy n8n fallback (read only when both neutral variables are absent):
 
 ```bash
 N8N_OFFER_REQUEST_WEBHOOK_URL=https://your-n8n.example/webhook/finanzbg-offer-request

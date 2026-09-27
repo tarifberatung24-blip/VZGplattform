@@ -25,13 +25,14 @@ Do not use these four names interchangeably. Details are in `PROJECT_RULES.md`.
 12. VERIFY
 13. HANDOFF
 
-Never allow two agents to modify the same module at the same time. Do not invent missing data. Deployment and merge require explicit owner approval.
+Never allow two agents to modify the same module at the same time. Do not invent missing data. Deployment and merge require explicit owner approval. AI-authored implementation never writes directly to `main` unless the owner explicitly authorizes that exact direct write.
 
 ## Canonical Build Map and Sequencing
 
 `docs/HORIZON_MASTER_MAP.md` is the canonical target build map;
 `docs/HORIZON_BUILD_LEDGER.md` tracks implementation status;
-`docs/HORIZON_EXECUTION_CHECKLIST.md` is the plain working list (`✅` = done and verified).
+`docs/HORIZON_EXECUTION_CHECKLIST.md` is the plain working list (`✅` = done and verified);
+`docs/RELIABILITY_GUARDRAILS.md` defines mandatory evidence, CI, provider, accessibility, and agent guardrails.
 
 - Phases run in the order fixed by the Master Map. Only one implementation phase is active at a
   time unless the owner explicitly authorizes otherwise.

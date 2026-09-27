@@ -1,5 +1,7 @@
 import type { CanonicalTaxField, CanonicalTaxReturn2025, Provenance } from "@/lib/canonical-tax-model"
 import { fms2025Registry } from "@/lib/fms-2025-registry"
+import { FMS_2025_TEMPLATES } from "@/lib/horizon/pdf/registry"
+import { formSupportForTemplate } from "@/lib/horizon/steuer/registry"
 
 export type TaxPipelineIssue = { code: string; message: string; field?: string }
 
@@ -21,13 +23,33 @@ export function buildCanonicalTaxReturn(answers: Record<string, unknown>): Canon
 
 export function getSelectedFormStatus(selectedForms: string[]) {
   return selectedForms.map((identifier) => {
-    const form = fms2025Registry.find((entry) => entry.fmsIdentifier === identifier)
-    return { identifier, title: form?.officialGermanTitle ?? identifier, verificationStatus: form?.verificationStatus ?? "UNVERIFIED", mappingStatus: "FIELD_MAPPING_UNVERIFIED" as const }
+    const legacyForm = fms2025Registry.find((entry) => entry.fmsIdentifier === identifier)
+    const template = FMS_2025_TEMPLATES.find((entry) => entry.formId === identifier)
+    const fillable = Boolean(template && formSupportForTemplate(template.id) === "fillable")
+    return {
+      identifier,
+      title: template?.formName ?? legacyForm?.officialGermanTitle ?? identifier,
+      verificationStatus: template ? ("VERIFIED" as const) : (legacyForm?.verificationStatus ?? "UNVERIFIED"),
+      mappingStatus: fillable ? ("FIELD_MAPPING_VERIFIED" as const) : ("FIELD_MAPPING_UNVERIFIED" as const),
+      templateId: template?.id ?? null,
+      fillable,
+    }
   })
 }
 
 export function getPdfReadiness(canonical: CanonicalTaxReturn2025) {
   const forms = getSelectedFormStatus(canonical.selectedForms)
-  const pdfNotFillable = true
-  return { status: canonical.validationIssues.length || pdfNotFillable ? "BLOCKED" : "READY_FOR_USER_USE", forms, issues: [...canonical.validationIssues, ...(pdfNotFillable ? [{ code: "PDF_NOT_FILLABLE", message: "Официалният PDF не е потвърден като попълваем." }] : [])] }
+  const mappingIssues: TaxPipelineIssue[] = forms
+    .filter((form) => !form.fillable)
+    .map((form) => ({
+      code: "PDF_MAPPING_UNAVAILABLE",
+      message: `Няма проверено PDF съответствие за формуляр ${form.identifier}.`,
+      field: form.identifier,
+    }))
+  const issues: TaxPipelineIssue[] = [...canonical.validationIssues, ...mappingIssues]
+  return {
+    status: issues.length > 0 ? ("BLOCKED" as const) : ("READY_FOR_USER_USE" as const),
+    forms,
+    issues,
+  }
 }

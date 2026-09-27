@@ -14,7 +14,7 @@
  */
 
 import { readFile } from "node:fs/promises"
-import { resolve } from "node:path"
+import { relative, resolve, sep } from "node:path"
 import { PDFDocument, StandardFonts } from "pdf-lib"
 import type { PdfFieldAssignment } from "./fill"
 import type { OverlayPlan } from "./overlay-fill"
@@ -50,10 +50,27 @@ export async function createTextMeasurer(): Promise<(text: string, size: number)
 
 export type TemplateBytes = { ok: true; bytes: Uint8Array } | { ok: false; detail: string }
 
-/** Reads a registered template from the repository. */
+const REGISTERED_TEMPLATE_PREFIX = "public/forms/"
+
+/** Reads a registered template from the repository and nowhere else. */
 export async function readTemplateBytes(path: string): Promise<TemplateBytes> {
   try {
-    const loaded = await readFile(resolve(process.cwd(), path))
+    if (!path.startsWith(REGISTERED_TEMPLATE_PREFIX)) {
+      return { ok: false, detail: "template_path_not_registered" }
+    }
+    const relativePath = path.slice(REGISTERED_TEMPLATE_PREFIX.length)
+    if (!relativePath || relativePath.includes("\\0")) {
+      return { ok: false, detail: "template_path_not_registered" }
+    }
+
+    const formsRoot = resolve(process.cwd(), "public", "forms")
+    const resolvedPath = resolve(process.cwd(), "public", "forms", relativePath)
+    const withinRoot = relative(formsRoot, resolvedPath)
+    if (withinRoot === ".." || withinRoot.startsWith(`..${sep}`)) {
+      return { ok: false, detail: "template_path_not_registered" }
+    }
+
+    const loaded = await readFile(resolve(process.cwd(), "public", "forms", relativePath))
     return { ok: true, bytes: new Uint8Array(loaded) }
   } catch (error) {
     return { ok: false, detail: error instanceof Error ? error.message : "read_failed" }
