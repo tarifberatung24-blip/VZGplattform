@@ -154,4 +154,4 @@ Unit тестовете проверяват домейн логика и mock-�
 
 ## Reliability reconciliation — 27 септември 2026 г.
 
-Добавени са автоматичен governance check и GitHub CI gate, поправена е забраната за browser zoom, legacy tax readiness е вързан към реалния verified PDF registry, service-request automation transport е provider-neutral с fail-closed pairwise configuration, а противоречивите P8/P12/P13/P14/P15/P17 ledger записи са изчистени. Историческите констатации по-горе се четат като audit history, не като текущ source of truth.
+Добавен е автоматичен governance check и съществуващият GitHub CI gate е разширен с пълния `pnpm verify`, поправена е забраната за browser zoom, legacy tax readiness е вързан към реалния verified PDF registry, service-request automation transport е provider-neutral с fail-closed pairwise configuration, а противоречивите P8/P12/P13/P14/P15/P17 ledger записи са изчистени. Историческите констатации по-горе се четат като audit history, не като текущ source of truth.
