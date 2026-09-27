@@ -1189,16 +1189,18 @@ after a module meets the full DONE definition.
   `contract_radar_history` and `radar_events`); optimize sessions
   (`lib/optimize/flow.ts`, `optimize_sessions`, provenance-tracked filled data);
   affiliate offers (`lib/affiliate-offers.ts`, `/go/{offer}` with exact deeplink, no guessed
-  tracking parameters); manual offer intake via n8n (`/api/service-requests`);
+  tracking parameters); manual offer intake through the provider-neutral automation boundary
+  (`/api/service-requests`);
   contracts table with `end_date`, `cancellation_deadline`, `review_status`,
   `extraction_confidence`.
 - **REUSE:** all of the above.
 - **MISSING:** the unified contract review flow on the shared case engine still needs consolidation,
-  and KintexBG-era contract UI naming remains to be cleaned up. The dashboard entry and
-  contract-to-case linkage are already shipped and runtime-verified.
+  and KintexBG-era contract UI naming remains to be cleaned up. Dashboard entry and the verified
+  contract linkage are already shipped.
 - **DEPENDENCIES:** P5, P6, P8.
-- **BLOCKERS:** none technical; affiliate and offer-request surfaces are parked until the manual
-  n8n workflow and first paid service are live (`docs/AFFILIATE_LAUNCH_PLAN.md`).
+- **BLOCKERS:** none technical; affiliate and offer-request surfaces remain parked until the
+  provider-neutral manual automation workflow and first paid service are live
+  (`docs/AFFILIATE_LAUNCH_PLAN.md`).
 - **DONE CRITERIA:** contract archive, provider/cost visibility, cancellation deadlines,
   deterministic source-backed signals, and user-approved next steps all operate on the shared
   case engine; no invented savings or prices; loading, error, and empty states complete;
