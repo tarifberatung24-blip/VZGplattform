@@ -104,11 +104,11 @@ Supabase Preview configuration is missing.
 
 **Поправка:** преместете потребителските текстове в `messages/bg.json` и `messages/de.json`; оставете само технически labels/типове извън речника; добавете CI режим, който fail-ва при нов hardcoded UI текст.
 
-### 9. PDF endpoint-ът е недовършен feature — Medium/Product
+### 9. Legacy tax PDF readiness drift — Medium/Product — **ПРИЛОЖЕНО в reliability pass**
 
-`app/api/steuer/pdf/route.ts:12` винаги връща `501 PDF_GENERATION_NOT_CONFIGURED`, дори когато readiness е успешен. Ако UI показва активна възможност за PDF, потребителят получава гарантиран failure.
+Старият `/api/steuer/pdf` endpoint вече не държи постоянен `PDF_GENERATION_NOT_CONFIGURED` / `501` placeholder. Той е автентикиран readiness/compatibility endpoint, чете реалното verified mapping състояние и при готовност сочи към каноничния case-bound генератор `/api/horizon/cases/{caseId}/tax-form`.
 
-**Поправка:** или имплементирайте реална генерация и download response, или скрийте/маркирайте функцията като unavailable в UI. Добавете API тестове за `409`, `501` и успешен binary response.
+Реалната PDF генерация остава в P9/P15 engine-а и не се дублира в legacy tax pipeline.
 
 ### 10. Няма интеграционна проверка на миграциите срещу реален Supabase — Medium/Operations
 
@@ -118,7 +118,7 @@ Unit тестовете проверяват домейн логика и mock-�
 
 ### 11. Конфигурационна и брандова непоследователност — Low/Medium
 
-`package.json:2` използва име `my-project`, README говори за `FinanzBG`, а част от кода/SQL съобщенията използват `KintexBG` и `VZGplattform`. Това не чупи runtime, но обърква deployment, logs, telemetry и поддръжка.
+`package.json` вече използва `vzgplattform`, а canonical identity е HORIZON by VZG / VZG CONSULT / Tarifberater24 / VZGplattform. Остават отделни legacy KintexBG/FinanzBG compatibility имена, които трябва да се премахват само когато конкретният consumer бъде мигриран. Това не чупи runtime, но обърква deployment, logs, telemetry и поддръжка.
 
 **Поправка:** изберете един canonical product/project name и го уеднаквете в `package.json`, README, error messages, metadata, Supabase project checks и UI copy.
 
@@ -150,3 +150,8 @@ Unit тестовете проверяват домейн логика и mock-�
 ## Validation update — 15 септември 2026 г.
 
 Точки 1–7 и 12 от този одит са реално приложени и push-нати в текущия main чрез commit fa68775 (за точки 1–7) и commit 73c1e41/последващото health hardening (за точка 12). Те вече не се третират като отворени дефекти. Точки 8–11 остават реално отворени. PDF export-ът е отделно документиран като извън v1 scope в docs/PDF_EXPORT_SCOPE.md.
+
+
+## Reliability reconciliation — 27 септември 2026 г.
+
+Добавени са автоматичен governance check и GitHub CI gate, поправена е забраната за browser zoom, legacy tax readiness е вързан към реалния verified PDF registry, service-request automation transport е provider-neutral с fail-closed pairwise configuration, а противоречивите P8/P12/P13/P14/P15/P17 ledger записи са изчистени. Историческите констатации по-горе се четат като audit history, не като текущ source of truth.

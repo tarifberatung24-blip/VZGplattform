@@ -606,9 +606,10 @@ MISSING PARTS · DEPENDENT MODULES · TARGET STATUS · COMPLETION CRITERIA.
   `app/api/steuer/pdf`.
 - **EXISTING DATABASE SUPPORT:** `tax_form_registry` (official source, verification_status,
   mapping_status, technical_pdf_status), `official_sources`, `tax_cases`.
-- **MISSING PARTS:** an actual PDF writer — **no PDF generation library is present in `package.json`**
-  (no pdfkit / pdf-lib / jspdf / puppeteer / pdfmake). `/api/steuer/pdf` returns readiness only.
-  Form-field mapping for Agentur für Arbeit, Jobcenter and Kündigung.
+- **CURRENT PDF CAPABILITY:** `pdf-lib` is the canonical writer. The verified 2025 FMS set is
+  generated through hash-bound mappings; Agentur für Arbeit and Jobcenter use their verified
+  template paths. The legacy `/api/steuer/pdf` endpoint is readiness-only; generation is case-bound
+  under `/api/horizon/cases/{id}/tax-form`. Kündigung uses its own deterministic letter/PDF path.
 - **DEPENDENT MODULES:** Phases 9, 12, 13, 15.
 - **TARGET STATUS:** NOT_STARTED (readiness metadata only).
 - **COMPLETION CRITERIA:** the original official template is used unmodified; only confirmed facts fill
@@ -711,7 +712,7 @@ AI **must NOT** decide:
 
 ### 5.4 AUTOMATION
 
-`n8n` is intended for bounded orchestration only:
+External automation is provider-neutral and bounded. Activepieces-compatible webhooks are the current preferred direction; legacy n8n variables remain compatibility fallbacks only:
 
 - approved webhooks
 - notifications
