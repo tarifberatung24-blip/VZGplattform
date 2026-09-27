@@ -1,6 +1,6 @@
 # VZGplattform coding-agent entry point
 
-Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, and `docs/TERRA_START.md` before work.
+Read `PROJECT_RULES.md`, `AI_WORKFLOW.md`, `docs/RELIABILITY_GUARDRAILS.md`, and `docs/TERRA_START.md` before work.
 
 Canonical identity: LEGAL ENTITY `Tarifberater24`, EXPERT BRAND `VZG CONSULT`, PRODUCT `HORIZON by VZG`, CODEBASE `VZGplattform`. Keep these four names distinct; do not use them interchangeably.
 
@@ -58,6 +58,8 @@ Do not load the complete `docs/HORIZON_MASTER_MAP.md` or `docs/HORIZON_BUILD_LED
 ## Rules
 
 - AionUi does **not** replace GitHub. GitHub `main` remains the source of truth.
+- AI-authored implementation goes through a focused branch + PR; never push directly to `main` without explicit owner authorization for that exact direct push.
+- Do not add repo-local personality/disposition files such as `SOUL.md`; stable agent rules belong in the canonical rule files.
 - Model/agent identity and connected tools are controlled by the host; this file does not switch the model or grant permissions.
 - One writer per module. Never allow two agents to modify the same module at the same time.
 - Inspect the latest `main` before implementation.

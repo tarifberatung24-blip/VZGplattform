@@ -84,6 +84,8 @@ Public pages and `/api/health` can run without Supabase configuration. Protected
 | `pnpm test` | Run the Vitest suite |
 | `pnpm i18n:verify` | Check translation parity, usage, and hardcoded strings |
 | `pnpm supabase:check` | Validate the configured Supabase project |
+| `pnpm governance:check` | Enforce repository reliability invariants |
+| `pnpm verify` | Run governance, typecheck, lint, i18n, tests, and production build |
 | `node scripts/terra-preflight.mjs` | Check Terra/tool readiness before assigned work |
 
 Recommended pre-commit verification:
@@ -140,6 +142,7 @@ curl -I https://vzgplattform.onrender.com/de/auth/login
 
 ## Documentation
 
+- [`docs/RELIABILITY_GUARDRAILS.md`](docs/RELIABILITY_GUARDRAILS.md) — mandatory change, CI, evidence, and agent guardrails
 - [`docs/TERRA_START.md`](docs/TERRA_START.md) — Terra readiness and first-work-package guidance
 - [`docs/N8N_OFFER_REQUEST_PLAN.md`](docs/N8N_OFFER_REQUEST_PLAN.md) — offer-request webhook contract and operating plan
 - [`docs/AFFILIATE_LAUNCH_PLAN.md`](docs/AFFILIATE_LAUNCH_PLAN.md) — affiliate launch scope
