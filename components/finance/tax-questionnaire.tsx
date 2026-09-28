@@ -45,9 +45,11 @@ export function TaxQuestionnaire({ initialCase }: { initialCase: { id: string; a
         continueLaterNote: "Du kannst später fortfahren.",
         saving: "Wird gespeichert…",
         save: "Speichern und fortfahren",
+        verified: "Quelle bestätigt",
+        unverified: "Quelle noch offen",
       }
     : {
-        intro: "Die Fragen sind als sichere Datenerfassung vorbereitet. Unverifizierte Fragen beeinflussen keine Steuerlogik und keine Berechnung.",
+        intro: "Въпросите са подготвени за сигурно въвеждане на данни. Неверифицираните въпроси не влияят на данъчната логика и на изчисленията.",
         answered: "от",
         answeredSuffix: "отговорени",
         officialTerm: "Официален термин:",
@@ -63,6 +65,8 @@ export function TaxQuestionnaire({ initialCase }: { initialCase: { id: string; a
         continueLaterNote: "Можеш да продължиш по-късно.",
         saving: "Запазване…",
         save: "Запази и продължи",
+        verified: "Източникът е потвърден",
+        unverified: "Източникът още не е потвърден",
       }
   const [caseId, setCaseId] = useState(initialCase?.id ?? null)
   const [answers, setAnswers] = useState<Record<string, unknown>>(initialCase?.answers ?? {})
@@ -90,10 +94,10 @@ export function TaxQuestionnaire({ initialCase }: { initialCase: { id: string; a
   }
 
   return (
-    <section className="mt-10 rounded-sm border border-border bg-card p-8 shadow-none" aria-labelledby="questionnaire-title">
+    <section className="mt-10 rounded-md border border-border bg-card p-6 sm:p-8" aria-labelledby="questionnaire-title">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{de ? "Steuererklärung 2025" : "Данъчна декларация 2025"}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{de ? "Steuererklärung 2025" : "Данъчна декларация 2025"}</p>
           <h2 id="questionnaire-title" className="mt-3 text-3xl font-black tracking-[-0.04em] text-foreground">{de ? "Fragebogen für Arbeitnehmer" : "Въпросник за работещи"}</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">{copy.intro}</p>
         </div>
@@ -106,7 +110,7 @@ export function TaxQuestionnaire({ initialCase }: { initialCase: { id: string; a
           return <div key={question.question_id} className="border-t border-border pt-5">
             <div className="flex items-start justify-between gap-4">
               <div><p className="text-xs font-medium text-primary">{categoryLabels[question.category][de ? "de" : "bg"]}</p><label htmlFor={question.question_id} className="mt-1 block font-medium text-foreground">{de ? question.german_question : question.bulgarian_question}</label><p className="mt-1 text-sm text-muted-foreground">{copy.officialTerm} {question.official_german_label}</p></div>
-               <span className="inline-flex items-center gap-1 rounded-sm border border-border px-2 py-1 text-[11px] font-bold text-muted-foreground"><CircleAlert className="size-3" /> {question.verification_status}</span>
+               <span className="inline-flex items-center gap-1 rounded-sm border border-border px-2 py-1 text-[11px] font-bold text-muted-foreground"><CircleAlert className="size-3" /> {question.verification_status === "VERIFIED" ? copy.verified : copy.unverified}</span>
             </div>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row"><Input id={question.question_id} value={String(answers[question.question_id] ?? "")} onChange={(event) => setAnswers((current) => ({ ...current, [question.question_id]: event.target.value }))} placeholder={copy.placeholder} /><Button type="button" variant="ghost" size="sm" onClick={() => setOpenHelp(helpOpen ? null : question.question_id)} aria-expanded={helpOpen}>{helpOpen ? <ChevronUp /> : <ChevronDown />} {copy.help}</Button></div>
              {helpOpen && <div className="mt-4 rounded-sm border border-border bg-background p-4 text-sm leading-7 text-muted-foreground"><p><strong>{copy.whatMeans}</strong> {de ? question.german_help : question.bulgarian_help}</p><p className="mt-2"><strong>{copy.whyRequired}</strong> {question.verification_status === "VERIFIED" ? copy.whyRequiredVerified : copy.whyRequiredUnverified}</p><p className="mt-2 text-xs">{copy.source} {question.source_form}{copy.sourceNote}</p></div>}

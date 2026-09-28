@@ -76,7 +76,7 @@ export function TaxFormRegistry({ forms, locale = "bg" }: { forms: FormRow[]; lo
         validated: "Валидиран",
       }
   return (
-    <section className="mt-10 rounded-2xl border border-border bg-muted/40 p-5" aria-labelledby="registry-title">
+    <section className="mt-10 rounded-md border border-border bg-muted/40 p-5" aria-labelledby="registry-title">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.eyebrow}</p>
@@ -85,7 +85,7 @@ export function TaxFormRegistry({ forms, locale = "bg" }: { forms: FormRow[]; lo
         <Badge variant="outline">{forms.length} {copy.badge}</Badge>
       </div>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">{copy.intro}</p><div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs leading-5 text-emerald-200">{copy.sourcePrefix} {forms.filter((form) => form.source_retrieval_status === "RETRIEVED").length} {copy.sourceOf} {forms.length} {copy.sourceSuffix}</div>
-      <div className="mt-5 overflow-x-auto rounded-xl border border-border bg-card">
+      <div className="mt-5 overflow-x-auto rounded-md border border-border bg-card">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-border bg-muted/60 text-xs text-muted-foreground">
             <tr><th className="px-4 py-3 font-medium">{copy.colForm}</th><th className="px-4 py-3 font-medium">{copy.colYear}</th><th className="px-4 py-3 font-medium">{copy.colStatus}</th><th className="px-4 py-3 font-medium">{copy.colMapping}</th><th className="px-4 py-3 font-medium">{copy.colPdf}</th></tr>

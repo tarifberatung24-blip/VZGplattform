@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { guideIntentIcon, guideIntents } from "@/lib/horizon/guide/intents"
 import { getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
@@ -49,10 +50,10 @@ export function GuideChooser({
   const copy = getGuideCopy(locale)
 
   return (
-    <main className="min-h-[calc(100dvh-5rem)] bg-background px-4 py-8 sm:px-6 lg:px-8">
+    <WorkspacePage>
       <div className="mx-auto max-w-3xl">
         <header className="border-b border-border pb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.brand}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.brand}</p>
           <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{copy.brandNote}</p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight">{copy.title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{copy.intro}</p>
@@ -127,7 +128,7 @@ export function GuideChooser({
           </div>
         </section>
       </div>
-    </main>
+    </WorkspacePage>
   )
 }
 

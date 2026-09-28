@@ -133,7 +133,9 @@ export function GlobalHeader() {
         </nav>
 
         <div className="flex min-w-0 items-center gap-2">
-          <LanguageSwitcher className="shrink-0" />
+          {/* The switcher moves into the mobile menu below `sm`: at 390px the brand,
+              the switcher, a CTA and the menu button do not fit in one row. */}
+          <LanguageSwitcher className="hidden shrink-0 sm:inline-flex" />
           {sessionReady && sessionActive ? (
             <Button
               asChild
@@ -160,7 +162,7 @@ export function GlobalHeader() {
               <Button
                 asChild
                 size="sm"
-                className="rounded-md bg-primary px-5 text-primary-foreground shadow-none hover:bg-primary/90"
+                className="rounded-md bg-primary px-4 text-primary-foreground shadow-none hover:bg-primary/90 sm:px-5"
               >
                 <Link href={localizedPath("/auth/sign-up", locale)}>
                   {labels.register}
@@ -207,6 +209,11 @@ export function GlobalHeader() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t border-border pt-3">
+              {/* The header switcher is hidden below `sm`, so it is repeated here
+                  to keep language selection reachable on mobile. */}
+              <div className="px-1 pb-1 sm:hidden">
+                <LanguageSwitcher />
+              </div>
               {sessionActive ? (
                 <Button
                   asChild

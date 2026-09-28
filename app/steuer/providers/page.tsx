@@ -1,3 +1,4 @@
+import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { redirect } from "next/navigation"
 import { ProviderAuditTimeline } from "@/components/finance/provider-audit-timeline"
 import { FinanceModulePage } from "@/components/finance/module-page"
@@ -73,14 +74,14 @@ export default async function Page() {
       }
 
   return (
-    <main className="min-h-screen bg-background">
+    <WorkspacePage>
       <FinanceModulePage
         title={text.providers.title}
         description={text.providers.description}
         items={copy.items}
       />
-      <SteuerTabs />
-      <div className="mx-auto max-w-3xl px-4 pb-10 space-y-8">
+      <div className="mt-6"><SteuerTabs /></div>
+      <div className="mt-6 space-y-8">
         <div className="rounded-lg border border-border bg-card p-6">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{copy.availability}</p>
           <h2 className="mt-2 text-xl font-semibold text-foreground">ELSTER / ERiC</h2>
@@ -137,6 +138,6 @@ export default async function Page() {
           </div>
         )}
       </div>
-    </main>
+    </WorkspacePage>
   )
 }

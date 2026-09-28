@@ -1,3 +1,4 @@
+import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { redirect } from "next/navigation"
 import { FinanceModulePage } from "@/components/finance/module-page"
 import { DocumentsWorkspace } from "@/components/finance/documents-workspace"
@@ -19,9 +20,9 @@ export default async function Page() {
     .order("created_at", { ascending: false })
 
   return (
-    <main>
+    <WorkspacePage>
       <FinanceModulePage title={text.documents.title} description={text.documents.description} items={text.documents.items} />
-      <div className="mx-auto -mt-10 max-w-4xl px-4 pb-10 sm:px-6 lg:px-8"><DocumentsWorkspace initialDocuments={documents ?? []} loadError={error ? text.documents.loadError : null} /></div>
-    </main>
+      <div className="mt-6"><DocumentsWorkspace initialDocuments={documents ?? []} loadError={error ? text.documents.loadError : null} /></div>
+    </WorkspacePage>
   )
 }

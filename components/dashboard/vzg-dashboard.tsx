@@ -55,15 +55,22 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
         {/* The header search was decorative: it had no state and no handler, and the only working
             filter is the one in ContractsTable. */}
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          {/* The single dominant action on this page. Every other entry point is secondary. */}
-          <Button asChild className="h-11 w-full sm:w-auto"><Link href={`/${locale}/guide`}><Plus className="mr-2 size-4" />{de ? "Vorgang starten" : "Започни случай"}</Link></Button>
+          {/* Secondary here on purpose: the state-derived next step in the banner below is the
+              single primary action, so this generic entry point must not compete with it. */}
+          <Button asChild variant="outline" className="h-11 w-full sm:w-auto"><Link href={`/${locale}/guide`}><Plus className="mr-2 size-4" />{de ? "Vorgang starten" : "Започни случай"}</Link></Button>
           <Button asChild variant="outline" className="h-11 w-full sm:w-auto"><Link href="/vertraege">{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button>
         </div>
       </header>
 
+      <WorkplaceActionCenter nextAction={nextAction} />
+
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard metrics">
         {[{ icon: WalletCards, label: de ? "Monatliche Kosten" : "Месечни разходи", value: monthlyTotal ? money(monthlyTotal, locale) : missingData, note: de ? "Nur eingetragene Beträge" : "Само въведени суми" }, { icon: Receipt, label: de ? "Aktive Verträge" : "Активни договори", value: String(contracts.length), note: de ? "Alle gespeicherten Verträge" : "Всички записани договори" }, { icon: CalendarDays, label: de ? "Nächster Termin" : "Следващ срок", value: date(nextReminder?.due_at ?? null, locale), note: nextReminder?.title ?? (de ? "Keine Frist erfasst" : "Няма записан срок") }, { icon: Bell, label: de ? "Zur Prüfung" : "За проверка", value: String(reviewCount + missingCosts), note: de ? "Dokumente und fehlende Beträge" : "Документи и липсващи суми" }].map(({ icon: Icon, label, value, note }) => <article key={label} className="rounded-md border border-border bg-card p-4 shadow-none"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-md bg-primary/5 text-primary"><Icon className="size-5" /></span><p className="text-sm font-medium text-muted-foreground">{label}</p></div><p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></article>)}
       </section>
+
+      <MissingInformationInterviewer questions={questions} />
+
+      <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} />
 
       <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,0.8fr)]" aria-label="Dashboard charts">
         <ContractsChart contracts={contracts} />
@@ -74,9 +81,6 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
         <ContractsTable contracts={contracts} />
       </section>
 
-      <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} />
-      <WorkplaceActionCenter firstName={firstName} nextAction={nextAction} />
-      <MissingInformationInterviewer questions={questions} />
       <DocumentAnalyzer initialDocuments={documents} />
     </div>
   </div>

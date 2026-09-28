@@ -1,3 +1,4 @@
+import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { redirect } from "next/navigation"
 import { FinanceModulePage } from "@/components/finance/module-page"
 import { SteuerTabs } from "@/components/finance/steuer-tabs"
@@ -36,5 +37,15 @@ export default async function Page() {
   const moduleCopy = locale === "de"
     ? { title: "Steuererklärung", description: "Sammle deine steuerrelevanten Informationen und erkenne fehlende Angaben.", items: ["Persönliche Situation und Steuerjahr erfassen", "Werbungskosten und abzugsfähige Ausgaben sammeln", "Belege sicher zuordnen", "Ergebnis vor dem Einreichen prüfen"] }
     : { title: "Данъчна декларация", description: "Събери информацията, важна за данъците, и разпознай липсващите данни.", items: ["Лична ситуация и данъчна година", "Werbungskosten и признати разходи", "Сигурно подреждане на документите", "Преглед на резултата преди подаване"] }
-  return <main className="min-h-screen bg-background"><FinanceModulePage title={moduleCopy.title} description={moduleCopy.description} items={moduleCopy.items} /><SteuerTabs /><div className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><TaxQuestionnaire initialCase={taxCase ? { id: taxCase.id, answers: initialAnswers, status: taxCase.status } : null} /><TaxPipelineReview canonical={canonical} locale={locale} /><TaxFormRegistry forms={forms ?? []} locale={locale} /></div></main>
+  return (
+    <WorkspacePage>
+      <FinanceModulePage title={moduleCopy.title} description={moduleCopy.description} items={moduleCopy.items} />
+      <div className="mt-6"><SteuerTabs /></div>
+      <div className="mt-6">
+        <TaxQuestionnaire initialCase={taxCase ? { id: taxCase.id, answers: initialAnswers, status: taxCase.status } : null} />
+        <TaxPipelineReview canonical={canonical} locale={locale} />
+        <TaxFormRegistry forms={forms ?? []} locale={locale} />
+      </div>
+    </WorkspacePage>
+  )
 }

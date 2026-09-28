@@ -4,6 +4,7 @@ import { requireGuideContext } from "@/lib/horizon/guide/guard"
 import { getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
 import { combineAnalysisText } from "@/lib/horizon/unterlagen/analysis"
 import { isLocale } from "@/lib/i18n/dictionaries"
+import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { CaseWorkspace } from "@/components/guide/case-workspace"
 
 export const dynamic = "force-dynamic"
@@ -45,7 +46,7 @@ export default async function GuideCasePage({
   const copy = getGuideCopy(locale)
 
   return (
-    <main className="min-h-[calc(100dvh-5rem)] bg-background px-4 py-8 sm:px-6 lg:px-8">
+    <WorkspacePage>
       <div className="mx-auto max-w-4xl">
         <Link
           href={`/${locale}/guide`}
@@ -55,10 +56,10 @@ export default async function GuideCasePage({
         </Link>
 
         <header className="mt-4 border-b border-border pb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {copy.brand}
           </p>
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight">{loaded.data.title}</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight">{loaded.data.title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {copy.moduleLabel}: {guideModuleLabel(locale, loaded.data.module)} ·{" "}
             {copy.statusLabel}: {loaded.data.status}
@@ -79,6 +80,6 @@ export default async function GuideCasePage({
           documentText={documentText}
         />
       </div>
-    </main>
+    </WorkspacePage>
   )
 }

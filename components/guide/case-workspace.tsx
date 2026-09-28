@@ -47,17 +47,19 @@ export type CaseWorkspaceProps = {
 }
 
 function Panel({
+  id,
   title,
   empty,
   children,
 }: {
+  id?: string
   title: string
   empty: string
   children: React.ReactNode
 }) {
   const hasContent = Array.isArray(children) ? children.length > 0 : Boolean(children)
   return (
-    <section className="rounded-md border border-border bg-card p-4 sm:p-5">
+    <section id={id} className="rounded-md border border-border bg-card p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         {title}
       </h2>
@@ -159,8 +161,98 @@ export function CaseWorkspace({
   // send record. `isSendRecordDraft` is the client-safe half of the marker check.
   const sendableDraft = pickSendableDraft(drafts)
 
+  // A truthful progress spine derived only from stored state. Every value here is
+  // something the engine actually recorded; nothing is inferred or simulated.
+  const confirmedFacts = facts.filter((fact) => fact.confirmedAt).length
+  const missingCount =
+    (missing?.missingFactKeys.length ?? 0) + (missing?.unconfirmedCriticalFactKeys.length ?? 0)
+  const hasApproval = approvals.length > 0
+
+  const nextStep = (() => {
+    if (documents.length === 0 && facts.length === 0) {
+      return {
+        text: de ? "Füge zuerst ein Dokument oder einen Text hinzu." : "Добави първо документ или текст.",
+        anchor: "case-intake",
+      }
+    }
+    if (missingCount > 0) {
+      return {
+        text: de
+          ? `${missingCount} Angaben fehlen noch — kläre sie vor dem Fortfahren.`
+          : `Липсват още ${missingCount} данни — изясни ги преди да продължиш.`,
+        anchor: "case-missing",
+      }
+    }
+    if (!latestDraft) {
+      return {
+        text: de
+          ? "Erstelle einen Entwurf aus den bestätigten Angaben."
+          : "Създай чернова от потвърдените данни.",
+        anchor: "case-drafts",
+      }
+    }
+    if (!release.releasable) {
+      return {
+        text: de
+          ? "Prüfe den Entwurf und gib ihn frei."
+          : "Прегледай черновата и я одобри.",
+        anchor: "case-draft-review",
+      }
+    }
+    if (!hasApproval) {
+      return {
+        text: de
+          ? "Der Entwurf ist bereit — bestätige die Freigabe."
+          : "Черновата е готова — потвърди одобрението.",
+        anchor: "case-draft-review",
+      }
+    }
+    return {
+      text: de
+        ? "Alles vorbereitet — der Versand ist der letzte Schritt."
+        : "Всичко е подготвено — изпращането е последната стъпка.",
+      anchor: "case-send",
+    }
+  })()
+
+  const steps = [
+    { label: de ? "Dokumente" : "Документи", value: `${documents.length}`, done: documents.length > 0 },
+    { label: de ? "Bestätigte Fakten" : "Потвърдени факти", value: `${confirmedFacts}/${facts.length}`, done: facts.length > 0 && confirmedFacts === facts.length },
+    { label: de ? "Fehlende Angaben" : "Липсващи данни", value: `${missingCount}`, done: missingCount === 0, alert: missingCount > 0 },
+    { label: de ? "Entwurf" : "Чернова", value: latestDraft ? `${de ? "v" : "в"}${latestDraft.version}` : "—", done: Boolean(latestDraft) && release.releasable },
+  ]
+
   return (
     <div className="mt-6 space-y-4">
+      <section className="rounded-md border border-border bg-card p-4 sm:p-5" aria-label={de ? "Vorgangsstatus" : "Състояние на случая"}>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {de ? "Nächster Schritt" : "Следваща стъпка"}
+            </p>
+            <p className="mt-1 text-sm font-medium text-foreground">{nextStep.text}</p>
+          </div>
+          <a
+            href={`#${nextStep.anchor}`}
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            {de ? "Zum Schritt" : "Към стъпката"}
+          </a>
+        </div>
+        <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {steps.map((step) => (
+            <div key={step.label} className="rounded-md border border-border bg-background p-3">
+              <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {step.label}
+              </dt>
+              <dd className={`mt-1 text-lg font-semibold tabular-nums ${step.alert ? "text-destructive" : step.done ? "text-success" : "text-foreground"}`}>
+                {step.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       <AgenturTaskPanel
         caseId={caseId}
         locale={locale}
@@ -208,7 +300,7 @@ export function CaseWorkspace({
       <CaseAssistantPanel caseId={caseId} module={module} locale={locale} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-      <Panel title={copy.intake} empty={copy.none}>
+      <Panel id="case-intake" title={copy.intake} empty={copy.none}>
         <TextIntakeForm caseId={caseId} locale={locale} />
       </Panel>
 
@@ -216,7 +308,7 @@ export function CaseWorkspace({
         <DocumentIntakeForm caseId={caseId} locale={locale} />
       </Panel>
 
-      <Panel title={copy.missing} empty={copy.missingNone}>
+      <Panel id="case-missing" title={copy.missing} empty={copy.missingNone}>
         {missing && !missing.complete ? (
           <div className="space-y-2">
             <p className="text-xs font-medium text-foreground">{copy.missingHas}</p>
@@ -267,7 +359,7 @@ export function CaseWorkspace({
         ))}
       </Panel>
 
-      <Panel title={copy.drafts} empty={copy.none}>
+      <Panel id="case-drafts" title={copy.drafts} empty={copy.none}>
         {drafts.map((draft) => (
           <div key={draft.id} className="border-b border-border/70 pb-2 last:border-0">
             <p className="text-sm font-medium">{draft.subject}</p>
@@ -287,7 +379,7 @@ export function CaseWorkspace({
         />
       </Panel>
 
-      <Panel title={copy.draftReview} empty={copy.none}>
+      <Panel id="case-draft-review" title={copy.draftReview} empty={copy.none}>
         <DraftReviewPanel
           caseId={caseId}
           locale={locale}
@@ -300,7 +392,7 @@ export function CaseWorkspace({
         <SignaturePanel caseId={caseId} locale={locale} />
       </Panel>
 
-      <Panel title={copy.send} empty={copy.none}>
+      <Panel id="case-send" title={copy.send} empty={copy.none}>
         <SendPanel caseId={caseId} locale={locale} draftId={sendableDraft?.id ?? null} />
       </Panel>
 

@@ -20,7 +20,7 @@ export function SteuerTabs() {
   return (
     <nav
       aria-label={locale === "de" ? "Steuer-Bereiche" : "Раздели на данъците"}
-      className="mx-auto flex max-w-4xl flex-wrap gap-2 px-5 pt-6 sm:px-8"
+      className="flex flex-wrap gap-2"
     >
       {steuerTabs.map((tab) => {
         const isCurrent = current === tab.href

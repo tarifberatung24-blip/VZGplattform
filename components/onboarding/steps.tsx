@@ -31,7 +31,7 @@ function Frame({
   const copy = getOnboardingCopy(locale)
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-lg rounded-md border border-border bg-card p-8 shadow-sm">
         <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">
           {copy.brand}
           <span className="mt-1 block text-[10px] text-muted-foreground">{copy.brandNote}</span>
