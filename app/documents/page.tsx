@@ -4,9 +4,10 @@ import { DocumentsWorkspace } from "@/components/finance/documents-workspace"
 import { createClient } from "@/lib/supabase/server"
 import { ensureHousehold } from "@/lib/supabase/household"
 import { getDictionary } from "@/lib/i18n/dictionaries"
+import { requestLocale } from "@/lib/i18n/server-locale"
 
 export default async function Page() {
-  const text = getDictionary("bg").cleanup
+  const text = getDictionary(await requestLocale()).cleanup
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login?next=/documents")

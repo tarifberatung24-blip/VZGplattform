@@ -54,7 +54,7 @@ export function AnimatedHero() {
                 <feComponentTransfer in="monoNoise" result="alphaAdjustedNoise">
                   <feFuncA type="discrete" tableValues="0.03 0.06 0.09 0.12" />
                 </feComponentTransfer>
-                <feComposite in="blur" in2="alphaAdjustedNoise" operator="multiply" result="noisyBlur" />
+                <feComposite in="blur" in2="alphaAdjustedNoise" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="noisyBlur" />
                 <feMerge>
                   <feMergeNode in="noisyBlur" />
                 </feMerge>
@@ -102,7 +102,7 @@ export function AnimatedHero() {
                 <feComponentTransfer in="monoNoise" result="alphaAdjustedNoise">
                   <feFuncA type="discrete" tableValues="0.05 0.1 0.15 0.2" />
                 </feComponentTransfer>
-                <feComposite in="blur" in2="alphaAdjustedNoise" operator="multiply" result="noisyBlur" />
+                <feComposite in="blur" in2="alphaAdjustedNoise" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="noisyBlur" />
                 <feMerge>
                   <feMergeNode in="noisyBlur" />
                 </feMerge>

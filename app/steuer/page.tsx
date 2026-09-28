@@ -6,8 +6,10 @@ import { TaxQuestionnaire } from "@/components/finance/tax-questionnaire"
 import { createClient } from "@/lib/supabase/server"
 import { buildCanonicalTaxReturn } from "@/lib/tax-pipeline"
 import { TaxPipelineReview } from "@/components/finance/tax-pipeline-review"
+import { requestLocale } from "@/lib/i18n/server-locale"
 
 export default async function Page() {
+  const locale = await requestLocale()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/auth/login")
@@ -31,5 +33,8 @@ export default async function Page() {
     : {}
 
   const canonical = buildCanonicalTaxReturn(initialAnswers)
-  return <main className="min-h-screen bg-background"><FinanceModulePage title="Steuererklärung" description="Sammle deine steuerrelevanten Informationen und erkenne fehlende Angaben." items={["Persönliche Situation und Steuerjahr erfassen", "Werbungskosten und abzugsfähige Ausgaben sammeln", "Belege sicher zuordnen", "Ergebnis vor dem Einreichen prüfen"]} /><SteuerTabs /><div className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><TaxQuestionnaire initialCase={taxCase ? { id: taxCase.id, answers: initialAnswers, status: taxCase.status } : null} /><TaxPipelineReview canonical={canonical} /><TaxFormRegistry forms={forms ?? []} /></div></main>
+  const moduleCopy = locale === "de"
+    ? { title: "Steuererklärung", description: "Sammle deine steuerrelevanten Informationen und erkenne fehlende Angaben.", items: ["Persönliche Situation und Steuerjahr erfassen", "Werbungskosten und abzugsfähige Ausgaben sammeln", "Belege sicher zuordnen", "Ergebnis vor dem Einreichen prüfen"] }
+    : { title: "Данъчна декларация", description: "Събери информацията, важна за данъците, и разпознай липсващите данни.", items: ["Лична ситуация и данъчна година", "Werbungskosten и признати разходи", "Сигурно подреждане на документите", "Преглед на резултата преди подаване"] }
+  return <main className="min-h-screen bg-background"><FinanceModulePage title={moduleCopy.title} description={moduleCopy.description} items={moduleCopy.items} /><SteuerTabs /><div className="mx-auto max-w-4xl px-5 pb-20 sm:px-8"><TaxQuestionnaire initialCase={taxCase ? { id: taxCase.id, answers: initialAnswers, status: taxCase.status } : null} /><TaxPipelineReview canonical={canonical} locale={locale} /><TaxFormRegistry forms={forms ?? []} locale={locale} /></div></main>
 }
