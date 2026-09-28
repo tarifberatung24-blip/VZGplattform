@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { requireGuideContext } from "@/lib/horizon/guide/guard"
-import { getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
+import { getGuideCopy, guideModuleLabel, caseStatusLabel } from "@/lib/horizon/guide/copy"
 import { combineAnalysisText } from "@/lib/horizon/unterlagen/analysis"
 import { isLocale } from "@/lib/i18n/dictionaries"
 import { WorkspacePage } from "@/components/layout/workspace-page-header"
@@ -62,7 +62,7 @@ export default async function GuideCasePage({
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">{loaded.data.title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {copy.moduleLabel}: {guideModuleLabel(locale, loaded.data.module)} ·{" "}
-            {copy.statusLabel}: {loaded.data.status}
+            {copy.statusLabel}: {caseStatusLabel(locale, loaded.data.status)}
           </p>
         </header>
 

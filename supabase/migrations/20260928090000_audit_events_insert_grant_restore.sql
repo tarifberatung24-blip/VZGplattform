@@ -1,0 +1,21 @@
+-- HORIZON fix: restore the audit_events INSERT grant for the session client.
+--
+-- 20260919150000_horizon_case_engine.sql granted column-scoped INSERT on
+-- (actor_id, case_id, action, metadata) so the case engine could record audit
+-- events through the request-scoped session client.
+--
+-- 20260920090000_horizon_audit_events_reconcile.sql later ran
+-- `revoke all on public.audit_events from anon, authenticated` followed by
+-- `grant select ... to authenticated`. Because grants union rather than replace,
+-- the revoke cleared the earlier column-level INSERT and the following grant
+-- only restored SELECT. From that point every `audit_events` insert from the
+-- session client failed with "permission denied for table audit_events".
+--
+-- Several engine flows treat a failed audit write as a hard failure and roll the
+-- user-visible operation back, so document intake returned UPLOAD_FAILED, the
+-- uploaded object was deleted again, and the case showed zero documents.
+--
+-- This migration re-establishes the INSERT grant only. It is additive: it does
+-- not touch the SELECT grant, any policy, or any row.
+grant insert (actor_id, case_id, action, metadata)
+  on public.audit_events to authenticated;

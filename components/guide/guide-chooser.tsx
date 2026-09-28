@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { guideIntentIcon, guideIntents } from "@/lib/horizon/guide/intents"
-import { getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
+import { caseStatusLabel, getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
 import { startGuideCase } from "@/lib/horizon/guide/actions"
 
 const icons: Record<string, LucideIcon> = {
@@ -118,7 +118,8 @@ export function GuideChooser({
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-medium">{item.title}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {copy.moduleLabel}: {guideModuleLabel(locale, item.module)}
+                      {copy.moduleLabel}: {guideModuleLabel(locale, item.module)} ·{" "}
+                      {caseStatusLabel(locale, item.status)}
                     </span>
                   </span>
                   <span className="text-xs text-primary">{copy.continueLabel}</span>

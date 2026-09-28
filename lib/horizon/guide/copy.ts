@@ -150,3 +150,135 @@ export function caseCountLabel(locale: Locale, count: number): string {
 export function guideModuleLabel(locale: Locale, module: string): string {
   return (guideModules[locale] ?? guideModules.bg)[module] ?? module
 }
+
+/**
+ * Human labels for the canonical HORIZON case lifecycle.
+ *
+ * The case header used to print the stored enum verbatim, so a German interface
+ * showed a bare `draft`. Keys are exactly `HORIZON_CASE_STATUSES`; an unknown
+ * value falls back to the raw string rather than inventing a state.
+ */
+const caseStatusLabels: Record<Locale, Record<string, string>> = {
+  de: {
+    draft: "Entwurf",
+    collecting_data: "Angaben werden gesammelt",
+    waiting_for_user: "Wartet auf dich",
+    processing: "Wird verarbeitet",
+    draft_ready: "Entwurf bereit",
+    review: "In Prüfung",
+    approved: "Freigegeben",
+    action_ready: "Versandbereit",
+    completed: "Abgeschlossen",
+    cancelled: "Abgebrochen",
+  },
+  bg: {
+    draft: "Чернова",
+    collecting_data: "Събират се данни",
+    waiting_for_user: "Чака теб",
+    processing: "Обработва се",
+    draft_ready: "Черновата е готова",
+    review: "В преглед",
+    approved: "Одобрен",
+    action_ready: "Готов за изпращане",
+    completed: "Завършен",
+    cancelled: "Отказан",
+  },
+}
+
+/** Status of a stored source document (`source_documents.status`). */
+const documentStatusLabels: Record<Locale, Record<string, string>> = {
+  de: {
+    UPLOADED: "Hochgeladen",
+    EXTRACTING: "Text wird gelesen",
+    READY: "Gelesen",
+    NEEDS_CONFIRMATION: "Prüfung nötig",
+    FAILED: "Fehlgeschlagen",
+  },
+  bg: {
+    UPLOADED: "Качен",
+    EXTRACTING: "Текстът се чете",
+    READY: "Прочетен",
+    NEEDS_CONFIRMATION: "Нужна е проверка",
+    FAILED: "Неуспешно",
+  },
+}
+
+/** Status of a case task (`tasks.status`). */
+const taskStatusLabels: Record<Locale, Record<string, string>> = {
+  de: {
+    pending: "Offen",
+    running: "Läuft",
+    completed: "Erledigt",
+    failed: "Fehlgeschlagen",
+    cancelled: "Abgebrochen",
+  },
+  bg: {
+    pending: "Отворена",
+    running: "В ход",
+    completed: "Изпълнена",
+    failed: "Неуспешна",
+    cancelled: "Отказана",
+  },
+}
+
+/** Kind of a case task (`tasks.type`). */
+const taskTypeLabels: Record<Locale, Record<string, string>> = {
+  de: { reminder: "Erinnerung", human_review: "Manuelle Prüfung" },
+  bg: { reminder: "Напомняне", human_review: "Ръчна проверка" },
+}
+
+/** Outcome of a draft review (`correspondence_drafts.review_status`). */
+const draftReviewStatusLabels: Record<Locale, Record<string, string>> = {
+  de: { pending: "Prüfung offen", pass: "Prüfung bestanden", revise: "Überarbeiten", block: "Blockiert" },
+  bg: { pending: "Чака проверка", pass: "Проверката е успешна", revise: "За преработка", block: "Блокиран" },
+}
+
+function label(
+  table: Record<Locale, Record<string, string>>,
+  locale: Locale,
+  value: string,
+): string {
+  return (table[locale] ?? table.bg)[value] ?? value
+}
+
+export const caseStatusLabel = (locale: Locale, status: string) =>
+  label(caseStatusLabels, locale, status)
+export const documentStatusLabel = (locale: Locale, status: string) =>
+  label(documentStatusLabels, locale, status)
+export const taskStatusLabel = (locale: Locale, status: string) =>
+  label(taskStatusLabels, locale, status)
+export const taskTypeLabel = (locale: Locale, type: string) =>
+  label(taskTypeLabels, locale, type)
+export const draftReviewStatusLabel = (locale: Locale, status: string) =>
+  label(draftReviewStatusLabels, locale, status)
+
+/**
+ * Human labels for the required-fact keys the engine reports as missing.
+ *
+ * The missing-information panel printed the raw key, so a German user saw
+ * `recipient_institution`. Keys mirror `REQUIRED_FACT_KEYS`; an unknown key
+ * falls back to the raw key.
+ */
+const factKeyLabels: Record<Locale, Record<string, string>> = {
+  de: {
+    recipient_institution: "Empfänger / Behörde",
+    claim_type: "Art des Antrags",
+    contract_provider: "Anbieter des Vertrags",
+    contract_reference: "Vertragsnummer",
+    tax_year: "Steuerjahr",
+    agentur_task: "Aufgabe bei der Agentur für Arbeit",
+    jobcenter_task: "Aufgabe beim Jobcenter",
+  },
+  bg: {
+    recipient_institution: "Получател / институция",
+    claim_type: "Вид на заявлението",
+    contract_provider: "Доставчик на договора",
+    contract_reference: "Номер на договора",
+    tax_year: "Данъчна година",
+    agentur_task: "Задача в Агенцията по заетостта",
+    jobcenter_task: "Задача в Джобцентъра",
+  },
+}
+
+export const factKeyLabel = (locale: Locale, key: string) =>
+  label(factKeyLabels, locale, key)

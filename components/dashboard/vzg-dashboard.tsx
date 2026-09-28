@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Bell, CalendarDays, LayoutDashboard, Plus, Receipt, WalletCards } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { localizedPath } from "@/lib/i18n/routing"
 import { WorkplaceActionCenter } from "@/components/dashboard/workplace-action-center"
 import { MissingInformationInterviewer } from "@/components/dashboard/missing-information-interviewer"
 import { DocumentAnalyzer, type DashboardDocument } from "@/components/dashboard/document-analyzer"
@@ -39,7 +40,7 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
   const missingCosts = contracts.filter((item) => item.monthly_amount == null).length
   const nextReminder = reminders.find((item) => item.due_at) ?? null
   const nextAction = getSmartDashboardNextAction({ profileCompleteness: profile?.completeness ?? 0, contracts: contracts.length, documents: documents.length, documentsNeedingReview: reviewCount, contractsNeedingInfo: missingCosts }, de ? "de" : "bg")
-  const questions = contracts.filter((item) => item.monthly_amount == null).slice(0, 2).map((item) => ({ id: item.id, label: `${de ? "Monatlicher Betrag für" : "Месечна сума за"} „${item.title}“?`, detail: de ? "Dieser Wert fehlt und wird nicht automatisch erfunden." : "Тази стойност липсва и няма да бъде измисляна автоматично.", href: "/vertraege" }))
+  const questions = contracts.filter((item) => item.monthly_amount == null).slice(0, 2).map((item) => ({ id: item.id, label: `${de ? "Monatlicher Betrag für" : "Месечна сума за"} „${item.title}“?`, detail: de ? "Dieser Wert fehlt und wird nicht automatisch erfunden." : "Тази стойност липсва и няма да бъде измисляна автоматично.", href: localizedPath("/vertraege", locale) }))
 
   return <div className="relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6 lg:px-8">
     <div className="relative z-10 mx-auto min-w-0 max-w-[1440px]">
@@ -58,7 +59,7 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
           {/* Secondary here on purpose: the state-derived next step in the banner below is the
               single primary action, so this generic entry point must not compete with it. */}
           <Button asChild variant="outline" className="h-11 w-full sm:w-auto"><Link href={`/${locale}/guide`}><Plus className="mr-2 size-4" />{de ? "Vorgang starten" : "Започни случай"}</Link></Button>
-          <Button asChild variant="outline" className="h-11 w-full sm:w-auto"><Link href="/vertraege">{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button>
+          <Button asChild variant="outline" className="h-11 w-full sm:w-auto"><Link href={localizedPath("/vertraege", locale)}>{de ? "Vertrag hinzufügen" : "Добави договор"}</Link></Button>
         </div>
       </header>
 

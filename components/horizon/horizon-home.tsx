@@ -73,7 +73,7 @@ export function HorizonHome({
         <h2 id="horizon-modules" className="text-lg font-semibold tracking-tight">
           {de ? "Womit kann ich helfen?" : "С какво да помогна?"}
         </h2>
-        <Link href={`/${locale}/guide`} className="text-xs font-medium text-primary hover:underline">
+        <Link href={`/${locale}/guide`} className="inline-flex min-h-9 items-center text-xs font-medium text-primary hover:underline">
           {de ? "Alle Wege ansehen" : "Виж всички пътища"}
         </Link>
       </div>

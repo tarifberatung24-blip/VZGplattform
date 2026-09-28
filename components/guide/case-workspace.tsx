@@ -14,6 +14,14 @@ import { KuendigungPanel } from "@/components/kuendigung/kuendigung-panel"
 import { SteuerPanel } from "@/components/steuer/steuer-panel"
 import { UnterlagenPanel } from "@/components/unterlagen/unterlagen-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
+import {
+  documentStatusLabel,
+  draftReviewStatusLabel,
+  factKeyLabel,
+  taskStatusLabel,
+  taskTypeLabel,
+} from "@/lib/horizon/guide/copy"
+import type { Locale } from "@/lib/i18n/dictionaries"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
 import { pickSendableDraft } from "@/lib/horizon/send/marker"
 import {
@@ -315,7 +323,7 @@ export function CaseWorkspace({
             <ul className="space-y-1 text-xs text-muted-foreground">
               {[...missing.missingFactKeys, ...missing.unconfirmedCriticalFactKeys].map((key) => (
                 <li key={key} className="rounded border border-border bg-secondary px-2 py-1">
-                  {key}
+                  {factKeyLabel(locale as Locale, key)}
                 </li>
               ))}
             </ul>
@@ -347,7 +355,8 @@ export function CaseWorkspace({
           <div key={doc.id} className="border-b border-border/70 pb-2 last:border-0">
             <p className="truncate text-sm font-medium">{documentDisplayName(doc.path)}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {doc.mime} · {Math.round(doc.sizeBytes / 1024)} KB · {doc.status}
+              {doc.mime} · {Math.round(doc.sizeBytes / 1024)} KB ·{" "}
+              {documentStatusLabel(locale as Locale, doc.status)}
             </p>
             <DocumentExtractButton
               caseId={caseId}
@@ -364,7 +373,8 @@ export function CaseWorkspace({
           <div key={draft.id} className="border-b border-border/70 pb-2 last:border-0">
             <p className="text-sm font-medium">{draft.subject}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {copy.version} {draft.version} · {draft.reviewStatus}
+              {copy.version} {draft.version} ·{" "}
+              {draftReviewStatusLabel(locale as Locale, draft.reviewStatus)}
             </p>
           </div>
         ))}
@@ -399,9 +409,9 @@ export function CaseWorkspace({
       <Panel title={copy.tasks} empty={copy.none}>
         {tasks.map((task) => (
           <div key={task.id} className="border-b border-border/70 pb-2 last:border-0">
-            <p className="text-sm font-medium">{task.type}</p>
+            <p className="text-sm font-medium">{taskTypeLabel(locale as Locale, task.type)}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {task.status}
+              {taskStatusLabel(locale as Locale, task.status)}
               {task.dueAt ? ` · ${task.dueAt}` : ""}
             </p>
           </div>

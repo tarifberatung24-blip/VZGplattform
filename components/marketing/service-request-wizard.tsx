@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { localizedPath } from "@/lib/i18n/routing"
 import {
   serviceRequestMeta,
   serviceRequestKinds,
@@ -302,7 +303,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
       <section className="border-b border-border bg-card">
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-16">
           <div>
-            <Link href="/produkte" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+            <Link href={localizedPath("/functions", locale)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               <ArrowLeft className="size-4" />{de ? "Alle Angebote" : "Всички предложения"}
             </Link>
             <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.eyebrow}</p>
