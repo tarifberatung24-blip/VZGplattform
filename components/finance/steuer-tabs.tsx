@@ -29,7 +29,7 @@ export function SteuerTabs() {
             key={tab.href}
             href={localizedPath(tab.href, locale)}
             aria-current={isCurrent ? "page" : undefined}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+            className={`inline-flex min-h-10 items-center rounded-full border px-4 text-sm font-medium transition-colors ${
               isCurrent
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"

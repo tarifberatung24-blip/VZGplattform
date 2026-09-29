@@ -29,12 +29,12 @@ export function GlobalFooter() {
     <footer className="border-t border-border bg-background">
       <div className="mx-auto max-w-[1440px] px-5 py-8 lg:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <nav className="flex flex-wrap gap-6 text-sm font-medium text-muted-foreground">
+          <nav className="flex flex-wrap gap-x-6 text-sm font-medium text-muted-foreground">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={localizedPath(link.href, locale)}
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex min-h-10 items-center text-muted-foreground transition-colors hover:text-foreground"
               >
                 {link.label}
               </Link>
