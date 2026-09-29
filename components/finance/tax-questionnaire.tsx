@@ -98,7 +98,7 @@ export function TaxQuestionnaire({ initialCase }: { initialCase: { id: string; a
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{de ? "Steuererklärung 2025" : "Данъчна декларация 2025"}</p>
-          <h2 id="questionnaire-title" className="mt-3 text-3xl font-black tracking-[-0.04em] text-foreground">{de ? "Fragebogen für Arbeitnehmer" : "Въпросник за работещи"}</h2>
+          <h2 id="questionnaire-title" className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{de ? "Fragebogen für Arbeitnehmer" : "Въпросник за работещи"}</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">{copy.intro}</p>
         </div>
         <div className="min-w-40 text-right"><p className="text-2xl font-semibold text-foreground">{progress}%</p><p className="text-xs text-muted-foreground">{answered} {copy.answered} {applicable.length} {copy.answeredSuffix}</p></div>

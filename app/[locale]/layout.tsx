@@ -26,7 +26,13 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   if (!routing.locales.includes(locale as Locale)) return {}
   const content = localeMetadata[locale as Locale]
   return {
-    title: content.title,
+    // `absolute` stops the root layout's "%s · HORIZON by VZG" template from
+    // doubling the brand on localized defaults; `template` still suffixes
+    // child pages that set their own title (e.g. "Kfz-Versicherung").
+    title: {
+      absolute: content.title,
+      template: "%s · HORIZON by VZG",
+    },
     description: content.description,
     keywords: content.keywords,
     alternates: {

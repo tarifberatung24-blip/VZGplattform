@@ -3,13 +3,18 @@
 import { Send } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { submitLead, type LeadSubmitResult } from "./lead-submit"
+
+const fieldClass = "h-11"
 
 export default function ContactForm({ locale }: { locale: string }) {
   const [state, setState] = useState<LeadSubmitResult>(null)
 
   return (
-    <section className="flex flex-col gap-6 rounded-md border border-border/60 bg-card/40 bg-slate-950/40 backdrop-blur px-6 py-8 shadow-sm">
+    <section className="flex flex-col gap-6 rounded-md border border-border bg-muted/40 px-6 py-8">
       <h2 className="text-xl font-semibold">
         {locale === "bg" ? "Изпратете съобщение" : "Nachricht senden"}
       </h2>
@@ -24,21 +29,21 @@ export default function ContactForm({ locale }: { locale: string }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-2">
             <span className="text-sm font-medium">Name</span>
-            <input
+            <Input
               name="name"
               type="text"
               required
-              className="h-10 rounded-xl border border-border bg-muted/20 px-3 text-sm placeholder:text-muted-foreground focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              className={fieldClass}
               placeholder={locale === "bg" ? "Вашето име" : "Ihr Name"}
             />
           </label>
           <label className="flex flex-col gap-2">
             <span className="text-sm font-medium">E-Mail</span>
-            <input
+            <Input
               name="email"
               type="email"
               required
-              className="h-10 rounded-xl border border-border bg-muted/20 px-3 text-sm placeholder:text-muted-foreground focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              className={fieldClass}
               placeholder={locale === "bg" ? "Вашият имейл" : "Ihre E-Mail-Adresse"}
             />
           </label>
@@ -48,11 +53,11 @@ export default function ContactForm({ locale }: { locale: string }) {
           <span className="text-sm font-medium">
             {locale === "bg" ? "Съобщение" : "Nachricht"}
           </span>
-          <textarea
+          <Textarea
             name="message"
             required
             rows={5}
-            className="h-24 resize-none rounded-xl border border-border bg-muted/20 px-3 py-3 text-sm placeholder:text-muted-foreground focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            className="min-h-28 resize-none py-3"
             placeholder={locale === "bg" ? "Напишете съобщение..." : "Schreiben Sie Ihre Nachricht..."}
           />
         </label>
@@ -78,13 +83,10 @@ export default function ContactForm({ locale }: { locale: string }) {
                 : "Sendefehler. Bitte versuchen Sie es erneut oder nutzen Sie das E-Mail."}
             </p>
           )}
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          >
+          <Button type="submit" size="lg" className="w-full sm:w-auto sm:self-start">
             <Send className="size-4" />
             {locale === "bg" ? "Изпрати" : "Absenden"}
-          </button>
+          </Button>
         </div>
       </form>
     </section>
