@@ -15,13 +15,22 @@
 
 | Репо | Видимост | Права на OpenHands |
 |---|---|---|
-| `tarifberatung24-blip/VZGplattform` | public | ✅ **push** |
+| `tarifberatung24-blip/VZGplattform` | public | ✅ **push** (admin) |
 | `vilstar-jpg/novamind-mypos-checkout` | public | ❌ **само четене** |
 
 **Критично:** публичността на репото **не** дава права за запис.
-Достъпът идва от инсталацията на OpenHands app (`openhands-ai`), която е само на `VZGplattform`.
+Достъпът идва от токен, не от видимостта.
 
-→ За да дадеш достъп: https://github.com/settings/installations → OpenHands → Configure → добави репото
+### Кой токен работи
+
+| Променлива | Статус |
+|---|---|
+| `GITHUB_TOKEN` | ❌ 401 — издаден от OpenHands app, обезсилен |
+| токен в git remote (`ghu_...`) | ❌ 401 |
+| **`GITHUB_PERSONAL_ACCESS_TOKEN`** | ✅ **работи** — `tarifberatung24-blip`, admin на VZGplattform |
+
+→ За push към VZGplattform ползвай `GITHUB_PERSONAL_ACCESS_TOKEN`.
+→ За novamind трябва отделен токен от `vilstar-jpg` (различен акаунт, собственик на репото).
 
 ## NovaMind myPOS Checkout
 
