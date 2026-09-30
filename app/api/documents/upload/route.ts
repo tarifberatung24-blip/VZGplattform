@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { recordAuditEvent } from "@/lib/office/supabase/record-audit-event"
 import { ensureHousehold } from "@/lib/supabase/household"
 import { DocumentValidationError, isCanonicalSupabase, validateDocument } from "@/lib/documents/validation"
 
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       return jsonError("STORAGE_NOT_CONFIGURED", 503)
     }
 
-    await supabase.from("audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "document", entity_id: documentId, event_type: "document.uploaded", event_summary: "Document uploaded", metadata: { mime_type: metadata.type, size_bytes: metadata.size } })
+    await recordAuditEvent(supabase, { actorId: user.id, action: "document.uploaded", metadata: { entityType: "document", entityId: documentId, summary: "Document uploaded", mimeType: metadata.type, sizeBytes: metadata.size } })
     return NextResponse.json({ document: { id: documentId, ...metadata, status: "uploaded" } }, { status: 201 })
   } catch (error) {
     if (error instanceof DocumentValidationError) return jsonError(error.code, 400)

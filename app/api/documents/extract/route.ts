@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { recordAuditEvent } from "@/lib/office/supabase/record-audit-event"
 import { ensureHousehold } from "@/lib/supabase/household"
 import { extractDocumentText } from "@/lib/documents/extraction"
 
@@ -38,14 +39,10 @@ export async function POST(request: Request) {
       processing_status: result.status === "extracted" ? "awaiting_analysis" : "analysis_not_configured",
     }).eq("id", document.id).eq("household_id", householdId)
     if (updateError) return NextResponse.json({ code: "SCHEMA_NOT_VERIFIED" }, { status: 503 })
-    await supabase.from("audit_events").insert({
-      household_id: householdId,
-      actor_user_id: user.id,
-      entity_type: "document",
-      entity_id: document.id,
-      event_type: "document.extracted",
-      event_summary: result.status === "extracted" ? "Digital text extracted" : "OCR required",
-      metadata: { status: result.status },
+    await recordAuditEvent(supabase, {
+      actorId: user.id,
+      action: "document.extracted",
+      metadata: { entityType: "document", entityId: document.id, summary: result.status === "extracted" ? "Digital text extracted" : "OCR required", status: result.status },
     })
     return NextResponse.json({ documentId: document.id, ...result })
   } catch {

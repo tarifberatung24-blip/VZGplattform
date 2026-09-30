@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { recordAuditEvent } from "@/lib/office/supabase/record-audit-event"
 import { ensureHousehold } from "@/lib/supabase/household"
 
 const updateSchema = z.object({
@@ -40,7 +41,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       .maybeSingle()
     if (error) return NextResponse.json({ code: "CONTRACT_UPDATE_FAILED" }, { status: 502 })
     if (!data) return NextResponse.json({ code: "HOUSEHOLD_ACCESS_DENIED" }, { status: 404 })
-    await supabase.from("audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "contract", entity_id: data.id, event_type: "contract.updated", event_summary: "Contract updated", metadata: { review_status: parsed.data.reviewStatus } })
+    await recordAuditEvent(supabase, { actorId: user.id, action: "contract.updated", metadata: { entityType: "contract", entityId: data.id, summary: "Contract updated", reviewStatus: parsed.data.reviewStatus } })
     return NextResponse.json({ contract: data })
   } catch {
     return NextResponse.json({ code: "CONTRACT_UPDATE_FAILED" }, { status: 502 })
@@ -56,7 +57,7 @@ export async function DELETE(_request: Request, context: { params: Promise<{ id:
     const { id } = await context.params
     const { error } = await supabase.from("contracts").delete().eq("id", id).eq("household_id", householdId)
     if (error) return NextResponse.json({ code: "CONTRACT_DELETE_FAILED" }, { status: 502 })
-    await supabase.from("audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "contract", entity_id: id, event_type: "contract.deleted", event_summary: "Contract deleted", metadata: {} })
+    await recordAuditEvent(supabase, { actorId: user.id, action: "contract.deleted", metadata: { entityType: "contract", entityId: id, summary: "Contract deleted" } })
     return NextResponse.json({ deleted: true })
   } catch {
     return NextResponse.json({ code: "CONTRACT_DELETE_FAILED" }, { status: 502 })

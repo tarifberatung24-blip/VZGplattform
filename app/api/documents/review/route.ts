@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { recordAuditEvent } from "@/lib/office/supabase/record-audit-event"
 import { ensureHousehold } from "@/lib/supabase/household"
 
 const reviewSchema = z.object({
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
       status: "draft",
     }, { onConflict: "document_id" }).select("id,title,category,provider:provider_name,monthly_cost:monthly_amount,contract_number,start_date,end_date,cancellation_deadline,review_status,status,document_id,extraction_confidence,extracted_facts").single()
     if (contractError) return NextResponse.json({ code: "CONTRACT_CREATE_FAILED" }, { status: 502 })
-    await supabase.from("audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "document", entity_id: documentId, event_type: "document.reviewed", event_summary: "Document reviewed and contract created", metadata: { confirmed: true, contract_id: contract.id } })
+    await recordAuditEvent(supabase, { actorId: user.id, action: "document.reviewed", metadata: { entityType: "document", entityId: documentId, summary: "Document reviewed and contract created", confirmed: true, contractId: contract.id } })
     return NextResponse.json({ documentId, status: "processed", confirmedAt: new Date().toISOString(), contract })
   } catch {
     return NextResponse.json({ code: "REVIEW_FAILED" }, { status: 502 })

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
+import { recordAuditEvent } from "@/lib/office/supabase/record-audit-event"
 import { ensureHousehold } from "@/lib/supabase/household"
 
 const category = z.enum(["electricity", "gas", "internet", "mobile", "insurance", "housing", "subscription", "other"])
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
       .select("id,title,category,provider:provider_name,monthly_cost:monthly_amount,contract_number,start_date,end_date,cancellation_deadline,review_status,status,document_id,extraction_confidence,extracted_facts")
       .single()
     if (error) return NextResponse.json({ code: "CONTRACT_SAVE_FAILED" }, { status: 502 })
-    await supabase.from("audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "contract", entity_id: data.id, event_type: "contract.created", event_summary: "Contract created", metadata: { source: parsed.data.documentId ? "document" : "manual" } })
+    await recordAuditEvent(supabase, { actorId: user.id, action: "contract.created", metadata: { entityType: "contract", entityId: data.id, summary: "Contract created", source: parsed.data.documentId ? "document" : "manual" } })
     return NextResponse.json({ contract: data }, { status: 201 })
   } catch {
     return NextResponse.json({ code: "CONTRACT_SAVE_FAILED" }, { status: 502 })
