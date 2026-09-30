@@ -1,8 +1,8 @@
 # Affiliate Launch: first four customer enquiries
 
-Status: parked until the n8n manual offer request workflow and the first paid service are fully live.
+Status: parked until the manual offer request automation flow and the first paid service are fully live.
 
-For the current launch phase, Facebook traffic should go to the request routes in `docs/N8N_OFFER_REQUEST_PLAN.md`, not directly to affiliate deeplinks. Affiliate links remain useful for later campaign tests after the manual workflow can capture, answer and measure customer demand.
+For the current launch phase, Facebook traffic should go to the request routes in `docs/AUTOMATION_OFFER_REQUEST_PLAN.md`, not directly to affiliate deeplinks. Affiliate links remain useful for later campaign tests after the manual workflow can capture, answer and measure customer demand.
 
 ## Launch principle
 

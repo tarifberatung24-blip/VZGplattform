@@ -260,8 +260,8 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | `/{locale}/produkte` | REDIRECT | product overview | mixed | redirect → `/{locale}/functions` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
 | `/{locale}/tarife` | REDIRECT | tariffs | KintexBG-era | redirect → `/{locale}/versicherungen` (N7) | — | none | LEGACY | Phase 17 (partner) | LEGACY |
 | `/{locale}/za-nas` | PUBLIC | about (BG slug) | HAMMAL in messages | `bg`/`de` | `app/za-nas/page.tsx` | static | ACTIVE | Phase 1 | LEGACY |
-| `/{locale}/zayavka` | PUBLIC | service request (BG) | mixed | `bg`/`de` | `app/zayavka/page.tsx` | `/api/service-requests` → n8n | PARTIAL | Phase 1 / 17 | LEGACY |
-| `/{locale}/anfrage` | PUBLIC | service request (DE) | mixed | `bg`/`de` | re-export of `zayavka` | `/api/service-requests` → n8n | PARTIAL | Phase 1 / 17 | LEGACY |
+| `/{locale}/zayavka` | PUBLIC | service request (BG) | mixed | `bg`/`de` | `app/zayavka/page.tsx` | `/api/service-requests` → automation webhook | PARTIAL | Phase 1 / 17 | LEGACY |
+| `/{locale}/anfrage` | PUBLIC | service request (DE) | mixed | `bg`/`de` | re-export of `zayavka` | `/api/service-requests` → automation webhook | PARTIAL | Phase 1 / 17 | LEGACY |
 | `/{locale}/angebote/{offer}` | PUBLIC | affiliate offer landing | mixed | `bg`/`de` | `affiliate-offer-landing` | `lib/affiliate-offers`, `/go/{offer}` | ACTIVE | Phase 17 | KEEP |
 | `/{locale}/contact` | PUBLIC | contact form | `Tarifberater24` | `bg`/`de` | `app/[locale]/contact/page.tsx` | `/api/leads`, `leads` table | ACTIVE | Phase 1 | REUSE |
 | `/{locale}/how-it-works` | PUBLIC | explainer | `KintexBG · BY VZG CONSULT` | `bg`/`de` | `app/[locale]/how-it-works/page.tsx` | static | ACTIVE | Phase 1 | REPLACE LATER |
@@ -318,7 +318,7 @@ source of truth for which patterns are reachable after N7.
 | `/api/generate-letter` | AUTH | letter generation (Cerebras) | `CEREBRAS_API_KEY` | PARTIAL | Phase 8 |
 | `/api/kindergeld/draft` | AUTH | Kindergeld draft | `kindergeld_cases`, locales `bg`/`de` | PARTIAL | Phase 4 |
 | `/api/leads` | PUBLIC | lead intake | `leads` | ACTIVE | Phase 1 |
-| `/api/service-requests` | PUBLIC | offer request → n8n webhook | `N8N_OFFER_REQUEST_WEBHOOK_URL`, `N8N_WEBHOOK_SECRET` | PARTIAL | Phase 17 / automation |
+| `/api/service-requests` | PUBLIC | offer request → automation webhook | `AUTOMATION_WEBHOOK_URL`, `AUTOMATION_WEBHOOK_SECRET` | PARTIAL | Phase 17 / automation |
 | `/api/radar` | AUTH | contract radar signals | `contract_radar_history`, deterministic `lib/kintex-radar` | PARTIAL | Phase 17 |
 | `/api/optimize/start` | AUTH | optimize session start | `optimize_sessions` | PARTIAL | Phase 17 |
 | `/api/optimize/{sessionId}` | AUTH | session read | `optimize_sessions` | PARTIAL | Phase 17 |
@@ -711,7 +711,7 @@ AI **must NOT** decide:
 
 ### 5.4 AUTOMATION
 
-`n8n` is intended for bounded orchestration only:
+`Activepieces` is intended for bounded orchestration only:
 
 - approved webhooks
 - notifications
@@ -720,9 +720,9 @@ AI **must NOT** decide:
 - scheduled follow-ups
 - document pipeline coordination
 
-Current evidence: `app/api/service-requests/route.ts` posts to `N8N_OFFER_REQUEST_WEBHOOK_URL`
-with `N8N_WEBHOOK_SECRET`; documented in `docs/N8N_OFFER_REQUEST_PLAN.md`.
-n8n must never bypass application authorization, RLS, or user approval.
+Current evidence: `app/api/service-requests/route.ts` posts to `AUTOMATION_WEBHOOK_URL`
+with `AUTOMATION_WEBHOOK_SECRET`; documented in `docs/AUTOMATION_OFFER_REQUEST_PLAN.md`.
+Activepieces must never bypass application authorization, RLS, or user approval.
 
 ### 5.5 DEVELOPMENT TOOLS (BUILD-TIME, not end-user runtime)
 

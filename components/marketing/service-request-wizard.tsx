@@ -276,7 +276,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
       setMessage(de ? "Anfrage ist eingegangen. Wir melden uns mit Angebot oder klarer Rueckfrage." : "Заявката е приета. Ще получиш оферта или ясен уточняващ въпрос.")
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "REQUEST_FAILED"
-      setMessage(code === "N8N_WEBHOOK_NOT_CONFIGURED"
+      setMessage(code === "AUTOMATION_WEBHOOK_NOT_CONFIGURED"
         ? (de ? "Die Anfrageverarbeitung ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut." : "Обработката на заявката временно не е налична. Опитай отново по-късно.")
         : (de ? "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut." : "Заявката не можа да бъде изпратена. Опитай отново."))
     } finally {

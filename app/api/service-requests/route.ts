@@ -19,7 +19,7 @@ const requestSchema = z.object({
 }).strict()
 
 function getWebhookUrl() {
-  const raw = process.env.N8N_OFFER_REQUEST_WEBHOOK_URL?.trim()
+  const raw = process.env.AUTOMATION_WEBHOOK_URL?.trim()
   if (!raw) return null
   try {
     const url = new URL(raw)
@@ -51,17 +51,17 @@ export async function POST(request: Request) {
   }
 
   const webhookUrl = getWebhookUrl()
-  const secret = process.env.N8N_WEBHOOK_SECRET?.trim()
+  const secret = process.env.AUTOMATION_WEBHOOK_SECRET?.trim()
   if (!webhookUrl || !secret) {
-    return NextResponse.json({ code: "N8N_WEBHOOK_NOT_CONFIGURED" }, { status: 503 })
+    return NextResponse.json({ code: "AUTOMATION_WEBHOOK_NOT_CONFIGURED" }, { status: 503 })
   }
 
   const receivedAt = new Date()
-  const requestId = `fbg_${crypto.randomUUID()}`
+  const requestId = `hz_${crypto.randomUUID()}`
   const payload = {
     requestId,
     workflow: {
-      name: "finanzbg_offer_request_v1",
+      name: "horizon_offer_request_v1",
       mode: "manual_offer_preparation",
       slaMinutes: 120,
       promisedResponseBy: addMinutes(receivedAt, 120).toISOString(),
@@ -88,16 +88,20 @@ export async function POST(request: Request) {
     },
   }
 
+  // Provider-neutral: this route only knows "an automation webhook that accepts
+  // a signed JSON payload". The vendor behind AUTOMATION_WEBHOOK_URL (currently
+  // Activepieces Cloud) is a deployment choice, not a code dependency, so the
+  // orchestrator can be replaced without touching this contract.
   const headers: Record<string, string> = { "Content-Type": "application/json" }
-  headers["X-FinanzBG-Webhook-Secret"] = secret
+  headers["X-Horizon-Webhook-Secret"] = secret
 
   try {
     const response = await fetch(webhookUrl, { method: "POST", headers, body: JSON.stringify(payload), signal: AbortSignal.timeout(10_000) })
     if (!response.ok) {
-      return NextResponse.json({ code: "N8N_WEBHOOK_FAILED", requestId }, { status: 502 })
+      return NextResponse.json({ code: "AUTOMATION_WEBHOOK_FAILED", requestId }, { status: 502 })
     }
     return NextResponse.json({ status: "queued", requestId }, { status: 202 })
   } catch {
-    return NextResponse.json({ code: "N8N_WEBHOOK_FAILED", requestId }, { status: 502 })
+    return NextResponse.json({ code: "AUTOMATION_WEBHOOK_FAILED", requestId }, { status: 502 })
   }
 }

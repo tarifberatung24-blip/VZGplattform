@@ -1,4 +1,4 @@
-# FinanzBG n8n Offer Request Plan
+# HORIZON Offer Request — Automation Plan
 
 ## Decision
 
@@ -9,7 +9,7 @@ The first working product is:
 ```text
 Facebook ad / landing page
 → short conversational request
-→ n8n webhook
+→ automation webhook (Activepieces)
 → manual offer preparation
 → customer receives offer or a clear follow-up question within 2 hours
 → chatbot explains the prepared offer after it exists
@@ -22,10 +22,10 @@ This keeps the service operational while the platform matures. AI remains useful
 
 | Area | Public BG route | Public DE route | Service key | Current destination |
 |---|---|---|---|---|
-| Ток / Газ | `/bg/zayavka?service=energy` | `/de/anfrage?service=energy` | `energy` | `/api/service-requests` → n8n |
-| Kfz застраховка | `/bg/zayavka?service=kfz` | `/de/anfrage?service=kfz` | `kfz` | `/api/service-requests` → n8n |
-| Потребителски кредит | `/bg/zayavka?service=credit` | `/de/anfrage?service=credit` | `credit` | `/api/service-requests` → n8n |
-| SCHUFA | `/bg/zayavka?service=schufa` | `/de/anfrage?service=schufa` | `schufa` | `/api/service-requests` → n8n |
+| Ток / Газ | `/bg/zayavka?service=energy` | `/de/anfrage?service=energy` | `energy` | `/api/service-requests` → automation webhook |
+| Kfz застраховка | `/bg/zayavka?service=kfz` | `/de/anfrage?service=kfz` | `kfz` | `/api/service-requests` → automation webhook |
+| Потребителски кредит | `/bg/zayavka?service=credit` | `/de/anfrage?service=credit` | `credit` | `/api/service-requests` → automation webhook |
+| SCHUFA | `/bg/zayavka?service=schufa` | `/de/anfrage?service=schufa` | `schufa` | `/api/service-requests` → automation webhook |
 
 ## Information Collection
 
@@ -38,14 +38,14 @@ The form asks one question group at a time. The goal is to collect enough inform
 | Credit | amount, income, employment status, SCHUFA expectation | term, purpose, existing obligations | decide whether to send CHECK24 partner path or request more data |
 | SCHUFA | purpose, urgency, existing report status | rental/credit/general context | send the right SCHUFA path or explain next step |
 
-## n8n Workflow v1
+## Activepieces Flow v1
 
-Use one n8n workflow named `finanzbg_offer_request_v1`.
+One Activepieces flow named `horizon_offer_request_v1`.
 
 | Step | Node | Purpose |
 |---|---|---|
 | 1 | Webhook | Receive `POST` payload from FinanzBG |
-| 2 | Header auth / IF | Check `X-FinanzBG-Webhook-Secret` |
+| 2 | Header auth / IF | Check `X-Horizon-Webhook-Secret` |
 | 3 | Edit Fields | Normalize customer, service, SLA, answers |
 | 4 | IF by `request.kind` | Route to Energy, Kfz, Credit, SCHUFA branch |
 | 5 | Slack | Post a task in the operational channel |
@@ -54,7 +54,28 @@ Use one n8n workflow named `finanzbg_offer_request_v1`.
 | 8 | Email / client panel link | Send offer or missing-info request |
 | 9 | Status update | Mark queued, in_review, sent, waiting_customer, closed |
 
-Production must use the n8n production webhook URL, not the temporary test URL. The workflow must be active before the site environment variable is configured.
+The flow must be active before `AUTOMATION_WEBHOOK_URL` is configured in the site environment.
+
+## Callback — NOT YET IMPLEMENTED
+
+The intended full loop is:
+
+```text
+HORIZON → automation webhook → manual work → callback to HORIZON
+```
+
+**Only the outbound half exists today.** `/api/service-requests` returns `202`
+with a `requestId`, but there is no endpoint that accepts a status callback and
+no storage table for request status. Consequences:
+
+- the customer-facing status of a request cannot currently be shown in HORIZON;
+- the operator marks status inside the orchestrator, not in the platform;
+- `/api/service-requests` does not persist the request at all — it only
+  forwards it. If webhook delivery fails, the request is lost.
+
+This is an open gap, not delivered functionality. Closing it needs a new
+endpoint, a storage table, and an owner-approved design for inbound
+authentication. Do not describe the loop as complete until that exists.
 
 ## Payload Contract
 
@@ -62,9 +83,9 @@ The site sends:
 
 ```json
 {
-  "requestId": "fbg_uuid",
+  "requestId": "hz_uuid",
   "workflow": {
-    "name": "finanzbg_offer_request_v1",
+    "name": "horizon_offer_request_v1",
     "mode": "manual_offer_preparation",
     "slaMinutes": 120,
     "promisedResponseBy": "ISO_DATE"
@@ -101,7 +122,7 @@ The site sends:
 Create or reuse one channel:
 
 ```text
-#finanzbg-offer-desk
+#horizon-offer-desk
 ```
 
 Slack task format:
@@ -136,7 +157,7 @@ Marketing/Eve Team should use the public landing URLs as campaign destinations. 
 
 ## Paid Services After v1
 
-Paid services should start only after the first n8n offer request workflow is stable. Suggested paid services:
+Paid services should start only after the first offer request flow is stable. Suggested paid services:
 
 | Paid service | Scope | Suggested trigger |
 |---|---|---|
@@ -150,8 +171,8 @@ Each paid service needs its own price, legal boundary, delivery promise, and ref
 ## Environment Variables
 
 ```bash
-N8N_OFFER_REQUEST_WEBHOOK_URL=https://your-n8n.example/webhook/finanzbg-offer-request
-N8N_WEBHOOK_SECRET=change-me
+AUTOMATION_WEBHOOK_URL=https://your-activepieces.example/webhook/horizon-offer-request
+AUTOMATION_WEBHOOK_SECRET=change-me
 ```
 
 Affiliate deeplinks remain configured separately and should be activated after the manual workflow and paid-service layer are tested.

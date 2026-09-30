@@ -197,7 +197,7 @@ catch-all renders.
 | `/tarife` | REDIRECT | → `/{locale}/versicherungen` | LEGACY |
 | `/{locale}/onboarding/language` | REDIRECT | → `/{locale}/onboarding/profile` | LEGACY |
 | `/kindergeld`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces, kept reachable | LEGACY |
-| `/{locale}/anfrage`, `/{locale}/zayavka` | PUBLIC | Lead capture → n8n, kept reachable (live lead channel) | LEGACY |
+| `/{locale}/anfrage`, `/{locale}/zayavka` | PUBLIC | Lead capture → automation webhook, kept reachable (live lead channel) | LEGACY |
 
 N7 deleted the superseded pages rather than leaving unreachable code: `/{locale}/office`,
 `/{locale}/office/cases/[id]`, `/{locale}/onboarding/language`, `/check`, `/produkte`, `/tarife`,
@@ -230,7 +230,7 @@ surfaces.
 | `/{locale}/kindergeld` | Kindergeld navigator | **KEEP** | Backed by `/api/kindergeld/draft`; P4 social module not yet delivered |
 | `/{locale}/za-nas` | BG about page | **KEEP** | BG copy |
 | `/{locale}/app` | PWA install help | **KEEP** | None identified |
-| `/{locale}/anfrage`, `/{locale}/zayavka` | Lead capture → n8n | **KEEP** | Live lead channel; `/{locale}/contact` overlaps but is a different pipeline |
+| `/{locale}/anfrage`, `/{locale}/zayavka` | Lead capture → automation webhook | **KEEP** | Live lead channel; `/{locale}/contact` overlaps but is a different pipeline |
 | `/{locale}/email-generator` | KintexBG letter generator | **KEEP (RETIRE on approval)** | Public and reachable; superseded by P8 draft/review |
 
 The public/authenticated security naming collision is resolved: `HORIZON_MASTER_MAP.md` §2.2 labels

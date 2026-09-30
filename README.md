@@ -66,8 +66,8 @@ Copy `.env.example` to `.env.local`. Never commit `.env.local`, service-role cre
 | `SUPABASE_SECRET_KEY` | Server-side operations | Server-only Supabase secret/service key; never expose it to the browser |
 | `NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL` | Local OAuth | Local callback URL, normally `http://localhost:3000/auth/callback` |
 | `GROQ_API_KEY` | AI features | Server-side AI provider key |
-| `N8N_OFFER_REQUEST_WEBHOOK_URL` | Offer requests | n8n intake webhook URL |
-| `N8N_WEBHOOK_SECRET` | Offer requests | Shared secret used to authenticate webhook delivery |
+| `AUTOMATION_WEBHOOK_URL` | Offer requests | Automation webhook URL (currently Activepieces Cloud) |
+| `AUTOMATION_WEBHOOK_SECRET` | Offer requests | Shared secret used to authenticate webhook delivery |
 
 Public pages and `/api/health` can run without Supabase configuration. Protected routes and integrations require the relevant variables and return a controlled configuration error when they are unavailable.
 
@@ -140,7 +140,7 @@ curl -I https://vzgplattform.onrender.com/de/auth/login
 ## Documentation
 
 - [`docs/TERRA_START.md`](docs/TERRA_START.md) — Terra readiness and first-work-package guidance
-- [`docs/N8N_OFFER_REQUEST_PLAN.md`](docs/N8N_OFFER_REQUEST_PLAN.md) — offer-request webhook contract and operating plan
+- [`docs/AUTOMATION_OFFER_REQUEST_PLAN.md`](docs/AUTOMATION_OFFER_REQUEST_PLAN.md) — offer-request webhook contract and operating plan
 - [`docs/AFFILIATE_LAUNCH_PLAN.md`](docs/AFFILIATE_LAUNCH_PLAN.md) — affiliate launch scope
 - [`docs/PDF_EXPORT_SCOPE.md`](docs/PDF_EXPORT_SCOPE.md) — PDF export scope
 - [`PROJECT_RULES.md`](PROJECT_RULES.md) — repository safety and implementation rules

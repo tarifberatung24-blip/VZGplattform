@@ -854,7 +854,7 @@ after a module meets the full DONE definition.
   SMTP only when fully configured. `EmailAttachment` and `VerifiedAttachment` now carry the verified
   bytes so the transport sends exactly what was hashed.
 - **REUSE:** draft/approval model (P8), audit spine, `correspondence_drafts.attachments`,
-  `approvals`, and the n8n webhook pattern (`N8N_WEBHOOK_SECRET`).
+  `approvals`, and the automation webhook pattern (`AUTOMATION_WEBHOOK_SECRET`).
 - **DESIGN DECISION:** an outbound send is recorded as a normal artifact — a new draft carrying
   the outcome, plus an `email_send_attempted` audit event — rather than a new table. The case
   engine already provides owner-scoped RLS and column grants for both, and the approval engine
@@ -1187,7 +1187,7 @@ after a module meets the full DONE definition.
   `contract_radar_history` and `radar_events`); optimize sessions
   (`lib/optimize/flow.ts`, `optimize_sessions`, provenance-tracked filled data);
   affiliate offers (`lib/affiliate-offers.ts`, `/go/{offer}` with exact deeplink, no guessed
-  tracking parameters); manual offer intake via n8n (`/api/service-requests`);
+  tracking parameters); manual offer intake via the automation webhook (`/api/service-requests`);
   contracts table with `end_date`, `cancellation_deadline`, `review_status`,
   `extraction_confidence`.
 - **REUSE:** all of the above.
@@ -1195,7 +1195,7 @@ after a module meets the full DONE definition.
   contract review flow on the shared case engine; migration of KintexBG-era contract UI naming.
 - **DEPENDENCIES:** P5, P6, P8.
 - **BLOCKERS:** none technical; affiliate and offer-request surfaces are parked until the manual
-  n8n workflow and first paid service are live (`docs/AFFILIATE_LAUNCH_PLAN.md`).
+  automation flow and first paid service are live (`docs/AFFILIATE_LAUNCH_PLAN.md`).
 - **DONE CRITERIA:** contract archive, provider/cost visibility, cancellation deadlines,
   deterministic source-backed signals, and user-approved next steps all operate on the shared
   case engine; no invented savings or prices; loading, error, and empty states complete;
