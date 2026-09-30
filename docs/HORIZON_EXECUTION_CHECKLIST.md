@@ -181,6 +181,14 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 Status: DONE 2026-09-25 — ALL FIVE INPUT TYPES + REAL OCR + TWO-STACK RECONCILIATION — NOT FROZEN.
 The current HORIZON intake and legacy document flows coexist, but they now share one READY rule.
 
+Scope note (owner-confirmed 2026-09-28): the DONE status covers Document Intake / OCR /
+Explanation only. It does NOT close the shared engines this phase depends on:
+  P6 Document Intake/OCR: DONE
+  E3 Translation Layer: NOT IMPLEMENTED / OPEN
+`docs/HORIZON_CONTEXT_INDEX.json` maps P6 to engines E2, E3, E10, and
+`docs/HORIZON_MASTER_MAP.md` lists E3 as a dependency of Phases 6, 7, 8 and 12–17. E3 must not
+be read as delivered because P6 is marked DONE.
+
 - ✅ PDF/image upload capabilities exist
 - ✅ PDF.js/Tesseract capabilities exist
 - ✅ Document analysis/review components exist
@@ -577,8 +585,10 @@ rather than as phases.
   (two real authenticated users, 2026-09-25); `platform_*` preserved as legacy
 - ✅ E2 Document Intake/OCR — five input types, real Tesseract OCR, one shared READY rule
   (`lib/documents/extraction-contract.ts`); two-stack reconciliation closed 2026-09-25 (P6)
-- ⬜ E3 Translation Layer — the deterministic translator does not yet produce a real translation
-  for non-`de` locales
+- ⬜ E3 Translation Layer — NOT IMPLEMENTED / OPEN. The deterministic translator only prefixes
+  a translation label for non-`de` locales; it does not translate. Verified: translation is always
+  marked as a translation (`correspondence_drafts.translation_locale`) and UI/conversation/output
+  locale are persisted as distinct fields. Required by Phases 6, 7, 8 and 12–17.
 - ⬜ E4 Risk/Urgency Engine — risk indication exists in P16; a shared risk/urgency engine is not
   yet extracted
 - ✅ E5 Context AI Assistant orchestration — rails/context verified live; end-to-end answer
