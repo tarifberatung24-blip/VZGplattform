@@ -100,11 +100,12 @@ export function GlobalHeader() {
           className="flex shrink-0 items-baseline gap-3 whitespace-nowrap text-xl font-black tracking-[-0.04em] text-foreground sm:text-2xl"
         >
           HORIZON by VZG
-          {/* Redundant lockup below `sm`: at 390px the brand plus the auth
-              controls exceed the viewport and clip the menu button. The suffix
-              is decorative, so it is the safe thing to drop on small screens. */}
+          {/* The wordmark already ends in "by VZG", so the suffix carries only the
+              expert brand; repeating the preposition read as "HORIZON by VZG by
+              VZG CONSULT". Redundant below `sm` too: at 390px the brand plus the
+              auth controls exceed the viewport and clip the menu button. */}
           <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">
-            by VZG CONSULT
+            VZG CONSULT
           </span>
         </Link>
 
