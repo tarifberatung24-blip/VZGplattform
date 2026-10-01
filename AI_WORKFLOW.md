@@ -71,15 +71,17 @@ Load the complete `docs/HORIZON_MASTER_MAP.md` or `docs/HORIZON_BUILD_LEDGER.md`
 
 ## Roles
 
-- **CHATGPT:** architecture, orchestration, planning, prompt design, review
+- **CHATGPT:** architecture, orchestration, planning, prompt design, review; cross-provider policy follows `docs/HORIZON_AI_ORCHESTRATION.md`
 - **AIONUI:** local multi-agent workspace / control interface
 - **OPENHANDS:** focused repository implementation, testing, branches, PRs
-- **OPENCLAW:** reusable local AI agent, usable through AionUi when available
+- **OPENCLAW:** deferred from the current HORIZON AI integration pass by owner instruction; remains a reusable local agent
 - **MANUS:** research, source gathering, setup work
 - **GORDON:** Docker diagnostics and environment optimization
 - **v0:** optional approved UI/design implementation source
 - **GITHUB MAIN:** source of truth — `tarifberatung24-blip/VZGplattform` (`main`)
 - **RENDER:** current production deployment, from GitHub `main`
+- **HORIZON AI RUNTIME:** product-facing model routing policy; provider-neutral target documented in `docs/HORIZON_AI_ORCHESTRATION.md`
+- **LITELLM GATEWAY (TARGET):** model/provider abstraction only; it never owns product authorization, RLS, approvals, deterministic calculations, or customer actions
 
 ## Product Principle
 
