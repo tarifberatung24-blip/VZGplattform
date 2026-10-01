@@ -145,6 +145,16 @@
   --glass-border: rgb(0 63 136 / 0.14);
   --glass-sheen: rgb(255 255 255 / 0.7);
   --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
+
+  /* Card glass. Separate from the chrome tokens above so card styling can
+     change without disturbing the approved header/footer. Cards are near-opaque
+     (10% of the backdrop shows through) with a neutral hairline and a 3D glass
+     edge: a light top highlight and a darker bottom shade. */
+  --card-glass-bg: rgb(255 255 255 / 0.9);
+  --card-glass-border: rgb(0 0 0 / 0.08);
+  --card-glass-highlight: rgb(255 255 255 / 0.95);
+  --card-glass-shade: rgb(0 0 0 / 0.05);
+  --card-glass-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.22);
 }
 .dark {
   color-scheme: dark;
@@ -194,6 +204,17 @@
   --glass-border: rgb(249 115 22 / 0.34);
   --glass-sheen: rgb(249 115 22 / 0.30);
   --glass-shadow: 0 8px 30px -14px rgb(249 115 22 / 0.45);
+
+  /* Card glass — dark theme. Near-opaque black (10% shows through) with the
+     neutral #27272a hairline measured from the reference design. The orange
+     border is deliberately gone: the accent now lives only in the icon. The
+     highlight is a cool white rather than orange so the 3D edge reads as glass
+     catching light, not as a glow. */
+  --card-glass-bg: rgb(0 0 0 / 0.9);
+  --card-glass-border: #27272a;
+  --card-glass-highlight: rgb(255 255 255 / 0.14);
+  --card-glass-shade: rgb(0 0 0 / 0.5);
+  --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.8);
 }
 @layer base {
   * {
@@ -255,16 +276,42 @@
   box-shadow: inset 0 1px 0 var(--glass-sheen), var(--glass-shadow);
 }
 
-/* Layer 0 glass cards. Same recipe as the header/footer chrome, so cards read
-   as part of one surface family: translucent fill, hairline border and the
-   theme glow. The inset sheen follows the element's own rounding, which keeps
-   it clean on rounded cards (the chrome's top line would poke out of corners).
-   Blur comes from Tailwind's backdrop-blur-* utility on the element. */
+/* Layer 0 glass cards — 3D glassmorphism.
+   Near-opaque fill (10% of the backdrop shows through), a neutral hairline
+   instead of the old orange one, and a lit edge for depth: a 1px highlight on
+   the top, a 1px shade on the bottom, plus a soft outer drop shadow. The
+   two inset lines are what make the surface read as a physical pane rather
+   than a flat rectangle. Blur comes from Tailwind's backdrop-blur-* utility on
+   the element. */
 .glass-card {
   position: relative;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--glass-shadow);
+  background: var(--card-glass-bg);
+  border: 1px solid var(--card-glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--card-glass-highlight),
+    inset 0 -1px 0 var(--card-glass-shade),
+    var(--card-glass-shadow);
+}
+
+/* A diagonal sheen across the top-left corner, like light glancing off glass.
+   Purely decorative and behind the content, so it never affects readability. */
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    var(--card-glass-highlight) 0%,
+    transparent 38%
+  );
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+.glass-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Header wordmark. The supplied PNG is a solid-black monochrome mark, so it is

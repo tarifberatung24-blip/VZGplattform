@@ -81,14 +81,12 @@ export default function HowItWorksPage() {
           </h2>
           <ol className="mt-6 grid gap-4 md:grid-cols-3">
             {steps.map(([title, description], index) => (
-              <li key={title} className="glass-card flex h-full gap-6 rounded-sm p-8 backdrop-blur-md">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-border text-sm font-black text-primary">
-                  {index + 1}
-                </span>
-                <div>
-                  <h3 className="font-bold text-foreground">{title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{description}</p>
+              <li key={title} className="glass-card flex h-full flex-col rounded-sm p-8 backdrop-blur-md">
+                <div className="flex items-baseline gap-4">
+                  <span className="text-sm font-black text-primary">{String(index + 1).padStart(2, "0")}</span>
+                  <h3 className="text-lg font-bold text-foreground">{title}</h3>
                 </div>
+                <p className="mt-4 text-sm leading-7 text-muted-foreground">{description}</p>
               </li>
             ))}
           </ol>

@@ -72,11 +72,15 @@ export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
         <section className="mt-16 grid gap-4 md:grid-cols-3" aria-label={content.title}>
           {content.items.map(([title, description], index) => {
             const Icon = icons[index]
-            return <article key={title} className="glass-card flex h-full flex-col rounded-sm p-7 backdrop-blur-md md:p-8">
-              <Icon className="size-5 text-primary" aria-hidden="true" />
-              <p className="mt-8 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">0{index + 1}</p>
-              <h2 className="mt-3 text-xl font-bold">{title}</h2>
-              <p className="mt-3 text-sm leading-7 text-muted-foreground">{description}</p>
+            return <article key={title} className="glass-card flex h-full items-start gap-4 rounded-sm p-7 backdrop-blur-md md:p-8">
+              <Icon className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
+              <div className="min-w-0">
+                <div className="flex items-baseline gap-4">
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">0{index + 1}</span>
+                  <h2 className="text-xl font-bold">{title}</h2>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{description}</p>
+              </div>
             </article>
           })}
         </section>
