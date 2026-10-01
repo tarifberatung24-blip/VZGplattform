@@ -1,11 +1,47 @@
 # HORIZON AI / Agent Orchestration Contract
 
-Status: **FOUNDATION / NOT YET A PRODUCTION PROVIDER CUTOVER**
+Status: **FOUNDATION / FREE-FIRST / NOT YET A PRODUCTION PROVIDER CUTOVER**
 
 This document is subordinate to `docs/HORIZON_MASTER_MAP.md`, `PROJECT_RULES.md`,
-`AGENTS.md`, and `AI_WORKFLOW.md`. It defines how agents, model providers and
-automation systems are connected without turning any model vendor into the product
-architecture.
+`AGENTS.md`, and `AI_WORKFLOW.md`.
+
+## Owner directive: FREE + STRONG first
+
+The routing priority is now explicit:
+
+```text
+FREE + STRONG
+  -> FREE + FAST
+  -> FREE SPECIALIST / MULTIMODAL
+  -> TRIAL CREDIT
+  -> PAID ONLY WITH EXPLICIT APPROVAL
+```
+
+No paid provider is a default. Bedrock/OpenAI are escalation capacity, not the
+normal HORIZON route.
+
+### Current free/strong anchor
+
+The existing Groq integration is the shortest path to a strong zero-cost default
+because HORIZON already uses `@ai-sdk/groq`.
+
+Target free aliases:
+
+```text
+horizon-free-strong      -> Groq openai/gpt-oss-120b
+horizon-free-fast        -> Groq openai/gpt-oss-20b
+horizon-free-multimodal  -> Groq qwen/qwen3.8-27b
+```
+
+The actual model IDs remain configuration, not business logic.
+
+Google Gemini free-tier and OpenRouter free models are secondary free targets for
+non-sensitive workloads after adapters and canaries exist. They are not treated
+as production-ready merely because they are free.
+
+Cerebras remains useful as an existing specialist adapter, but its publicly
+advertised free access is trial credit, so it is not classified as a durable
+free primary.
 
 ## Scope declaration
 
@@ -17,23 +53,25 @@ architecture.
 
 ## 1. Separation of planes
 
-HORIZON has three different planes. They must not be mixed.
-
-### Product runtime plane
+### Product runtime
 
 ```text
 HORIZON Next.js
-  -> HORIZON AI Runtime policy
-  -> provider adapter
-  -> provider-neutral LiteLLM gateway (target)
-  -> approved model provider
+  -> HORIZON AI Runtime
+  -> FREE-FIRST routing policy
+      -> current/free Groq
+      -> local self-hosted model when viable
+      -> Gemini free target
+      -> OpenRouter free target
+      -> trial specialist
+      -> paid escalation only if owner approved
 ```
 
-The application owns authentication, RLS, case context, deterministic rules,
-user-approval gates and audit semantics. The model only performs bounded AI
-capabilities already allowed by the application.
+Authentication, RLS, deterministic calculations, user approvals and execution
+remain application responsibilities. A model is never allowed to grant itself
+authority.
 
-### Engineering agent plane
+### Engineering agents
 
 ```text
 Owner / ChatGPT
@@ -43,71 +81,68 @@ Owner / ChatGPT
   -> merge/deploy only when explicitly authorized
 ```
 
-AionUI is a local control interface. Manus is a research/setup worker. Gordon is
-an infrastructure diagnostic worker. v0 is an optional approved UI source.
-OpenClaw is intentionally deferred by owner instruction and is not part of this
-integration pass.
-
-Engineering agents never become customer-facing HORIZON identities and never
-receive production authority merely because they can edit code.
+AionUI is the local control interface. Manus is research/setup. Gordon is
+infrastructure diagnostics. v0 is an optional approved UI source. OpenClaw is
+deferred by owner instruction in this pass.
 
 ### Automation/action plane
 
-Activepieces is the currently documented bounded automation system. n8n may be
-added only through an explicit decision. Automation may prepare work, enqueue
-tasks or execute a separately approved action, but it must not silently bypass:
+Activepieces is the currently documented bounded automation system. n8n can be
+added only by an explicit architecture decision.
+
+All action flows preserve:
 
 ```text
 ANALYZE -> EXPLAIN -> REVIEW -> USER APPROVES -> EXECUTE
 ```
 
-## 2. Provider target
+## 2. Cost routing
 
-The target provider path is:
-
-```text
-HORIZON
-  -> LiteLLM-compatible gateway
-      -> PRIMARY: approved Bedrock route
-      -> SECONDARY: approved OpenAI route for non-PII/repository workloads
-      -> SPECIALIST: approved Vertex route for low-cost/multimodal verification
-```
-
-Model names should be gateway aliases (for example `horizon-primary`) rather
-than hard-coded vendor model names in application routes. This keeps model
-replacement outside product logic.
-
-### Existing runtime during migration
-
-The repository currently contains direct Groq and Cerebras integrations. They
-remain **legacy runtime adapters** until the new gateway route is configured,
-tested and accepted. This foundation does not delete or silently reroute them.
-
-`OPENROUTER_API_KEY` and `OPENROUTER_MODEL` are declared in the current
-environment example, but the repository has no OpenRouter runtime client. They
-must therefore be treated as **declared-only**, not as an available fallback.
-
-## 3. Personal-data rule: fail closed
-
-Customer/case/document data may contain personal or sensitive personal data.
-
-A provider failure must not cause a silent change of provider for that data.
+For non-sensitive/public/repository workloads:
 
 ```text
-approved personal-data primary available -> route
-approved personal-data primary unavailable -> BLOCK
+1. Groq free strong
+2. local self-hosted if quality/latency is acceptable
+3. Gemini free target
+4. OpenRouter free target
+5. Cerebras trial specialist
+6. paid provider ONLY when paidEscalationApproved = true
 ```
 
-A switch to a different processor/subprocessor, geography or retention contract
-requires a separate governance decision. Availability is not authorization.
+Paid escalation is a switch, not a fallback side effect.
 
-The pure policy is implemented in:
+## 3. Personal data
 
-`lib/horizon/ai/orchestration.ts`
+"Free" does not override privacy.
 
-## 4. Agent authority levels
+Customer/case/document data can contain personal or sensitive personal data.
+A free-tier quota failure must not silently move that data to another external
+provider.
 
-Agent intelligence and mutation authority are separate.
+Preferred zero-API-cost direction:
+
+```text
+verified local/self-hosted model -> allowed after quality/privacy approval
+otherwise -> BLOCK
+paid privacy-approved route -> only with explicit paid + personal-data approval
+```
+
+This rule is implemented in `lib/horizon/ai/orchestration.ts`.
+
+## 4. Why the free targets are not equivalent
+
+- **Groq:** already integrated in HORIZON, so it is the practical first target.
+  Free-plan limits exist for GPT-OSS 120B/20B and Qwen 3.8 27B.
+- **Gemini free tier:** useful for free multimodal/fast work, but free-tier data
+  treatment is different from paid tier, therefore keep it out of customer PII
+  by default.
+- **OpenRouter free:** useful as a low-volume free fallback; the free plan has
+  tighter request limits and does not provide the same policy/routing controls
+  as paid plans.
+- **Cerebras:** current adapter is valuable, but its free access is trial credit.
+- **Bedrock/OpenAI paid APIs:** quality/privacy escalation only, not default.
+
+## 5. Agent authority levels
 
 | Level | Authority | Typical use |
 | --- | --- | --- |
@@ -118,102 +153,87 @@ Agent intelligence and mutation authority are separate.
 | L4 | privileged engineering actions behind approval | exceptional migrations/config |
 | L5 | orchestration of workers | coordination only; does not imply production mutation rights |
 
-Default mapping:
+A high orchestration level never implies database, deployment, secret or payment
+authority.
 
-| Agent/system | Default role |
-| --- | --- |
-| ChatGPT | L5 orchestration, L1 direct mutation unless a connected repo action is explicitly requested |
-| OpenHands | L3 focused repo worker |
-| Manus | L1 research/setup; L2 only for explicitly bounded setup work |
-| Gordon | L0/L1 infrastructure diagnostics |
-| AionUI | control interface, no independent mutation authority |
-| v0 | approved UI/design source only |
-| OpenClaw | deferred; no current HORIZON authority |
+## 6. System ownership
 
-A higher orchestration level never grants higher database, deployment, secret or
-payment authority.
-
-## 5. System ownership boundaries
-
-| System | Canonical responsibility |
+| System | Responsibility |
 | --- | --- |
 | GitHub `main` | source of truth |
-| Render | production deployment from approved main |
+| Render | production deployment |
 | Supabase | auth, RLS, application data |
-| HORIZON Next.js | product policy, deterministic rules, user gates |
-| LiteLLM gateway (target) | provider-neutral model routing, bounded retry, model aliases |
-| Bedrock/OpenAI/Vertex | inference providers, not orchestration authority |
-| Groq/Cerebras | current legacy inference adapters |
-| Activepieces | bounded automation only |
-| OTel collector (target) | traces/metrics/audit correlation without raw secrets/docs |
+| HORIZON Next.js | product policy, deterministic rules, approval gates |
+| HORIZON AI Runtime | FREE-FIRST model selection and data-class policy |
+| LiteLLM gateway (target) | common interface/routing, not product authority |
+| Groq | current free-first external runtime |
+| Local open model | privacy-sensitive zero-API-cost target when viable |
+| Gemini/OpenRouter | free non-sensitive targets after adapters/canaries |
+| Cerebras | current trial-credit specialist |
+| Bedrock/OpenAI | paid escalation only |
+| Activepieces | bounded automation |
+| OTel collector | traces/metrics correlation with redaction |
 
-## 6. Required audit envelope
-
-Every provider/agent run that becomes operational should be correlatable with:
+## 7. Required audit envelope
 
 ```text
 run_id
 trace_id
-repository / commit (engineering work only)
 task / phase
 agent or runtime component
 provider alias
 model alias
+cost class
 prompt version
 data class
+approval flags
 tools/actions attempted
-approval events
-tests / exit codes where applicable
 tokens / cost / latency where available
 result
 ```
 
-Do not log raw API keys, cookies, browser storage, production documents or raw
-prompts containing customer data by default.
+Never log API keys, cookies, browser storage or raw production documents by
+default.
 
-## 7. Migration sequence
+## 8. Migration sequence
 
-### Pass A — foundation (this change)
-- canonical provider/agent separation
+### Pass A — FREE-FIRST foundation
+- free/strong provider priority
+- paid escalation disabled by default
+- fail-closed customer-data routing
 - machine-readable routing policy
-- fail-closed personal-data rule
-- target gateway environment contract
-- tests for provider routing policy
+- tests
 
 ### Pass B — runtime adapter
-- add one `HorizonAiRuntime` interface
-- migrate case assistant, household chat, routing, interviewer, extraction and
-  drafting behind that interface without changing their business rails
-- keep current Groq/Cerebras adapters until parity tests pass
+- introduce one `HorizonAiRuntime`
+- move assistant/chat/routing/interviewer/extraction/drafting behind it
+- preserve existing Groq/Cerebras behavior until parity tests pass
+- split tasks into strong / fast / multimodal model aliases
 
-### Pass C — provider gateway
-- connect the runtime adapter to the LiteLLM gateway
-- configure model aliases outside application code
-- verify Bedrock primary with sentinel/read-only canary
-- verify approved secondary providers only with non-PII fixtures
-- no production customer document in a canary
+### Pass C — free adapters
+- Groq strong model canary
+- Groq fast model canary
+- Groq multimodal canary
+- implement Gemini free adapter for non-sensitive workloads
+- implement OpenRouter free adapter for low-volume non-sensitive fallback
+- evaluate a local open model on available VZG hardware
 
 ### Pass D — observability
-- correlate AI calls with OTel `trace_id`
-- record provider/model alias, latency, token/cost metadata where available
-- redact customer data from traces by default
+- trace/model/cost-class provenance
+- quota visibility
+- free-tier exhaustion events
+- no raw customer payload in traces
 
-### Pass E — controlled cutover
-- A/B/canary on fixed HORIZON evaluation tasks
-- compare success, corrections, latency and cost
-- owner approval
-- only then retire a legacy direct provider
+### Pass E — paid escalation, optional
+Only if the owner explicitly enables it:
+- add paid gateway routes
+- fixed per-run budget
+- canary first
+- no automatic paid spend
 
-## 8. Acceptance criteria for a provider to become active
+## 9. Acceptance rule
 
-A provider is not active because an API key exists. It is active only when:
-
-1. contract/data-processing boundary is approved for the intended data class;
-2. credentials are server-side and absent from repo/logs;
-3. model access is verified with non-customer sentinel data;
-4. the HORIZON adapter passes deterministic unit/contract tests;
-5. rate limit, timeout, retry and circuit-breaker behavior is bounded;
-6. provider/model/prompt provenance is emitted;
-7. personal-data fallback behavior is fail-closed;
-8. a reproducible HORIZON canary passes;
-9. production activation is explicitly approved.
+A provider/model becomes active only after a reproducible HORIZON canary proves:
+quality, schema compliance, latency, rate-limit behavior, data-class safety and
+cost classification. "Free" alone is not enough, and "premium" alone is not a
+reason to choose it.
