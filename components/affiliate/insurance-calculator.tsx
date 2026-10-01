@@ -65,7 +65,7 @@ export function InsuranceCalculator({
   })
 
   return (
-    <section className="border border-border bg-card p-6 sm:p-8" aria-labelledby={`calculator-${offerId}`}>
+    <section className="glass-card rounded-sm p-6 backdrop-blur-md sm:p-8" aria-labelledby={`calculator-${offerId}`}>
       <div className="flex items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center border border-border text-primary">
           <ClipboardList className="size-5" />
@@ -111,7 +111,7 @@ export function InsuranceCalculator({
         ))}
       </div>
 
-      <div className="mt-8 border border-border bg-background p-5">
+      <div className="glass-card mt-8 rounded-sm p-5 backdrop-blur-md">
         <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           {copy.summaryTitle}
         </h3>

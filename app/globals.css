@@ -133,6 +133,31 @@
   --success: #287047;
   --success-foreground: #ffffff;
   --focus-ring: var(--ring);
+  --primary-hover: #002f66;
+
+  /* Layer 0 network threads — light theme (blue on white). */
+  --thread-core: #003f88;
+  --thread-glow: #2f80ed;
+  --thread-edge: #ffffff;
+
+  /* Layer 0 glass chrome (header, footer, buttons). The sheen is blue, not
+     white: a white highlight is invisible on a white page, which is why the
+     light theme had no lit edge where the dark theme gets one from its orange. */
+  --glass-bg: rgb(255 255 255 / 0.55);
+  --glass-border: rgb(0 63 136 / 0.14);
+  --glass-sheen: rgb(0 63 136 / 0.40);
+  --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
+
+  /* Card glass. Neutral, mirroring the dark theme's neutral #27272a hairline
+     rather than tinting it blue: the accent belongs to the icon, and the two
+     themes should agree on the card edge. The fill sits a shade below pure
+     white because a white card cannot show a white top bevel, which would
+     flatten the 3D edge. Near-opaque, so 10% of the backdrop shows through. */
+  --card-glass-bg: rgb(250 250 250 / 0.9);
+  --card-glass-border: rgb(0 0 0 / 0.08);
+  --card-glass-highlight: rgb(255 255 255 / 0.95);
+  --card-glass-shade: rgb(0 0 0 / 0.10);
+  --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.28);
 }
 .dark {
   color-scheme: dark;
@@ -142,40 +167,67 @@
   --card-foreground: #ffffff;
   --popover: #000000;
   --popover-foreground: #ffffff;
-  --primary: #2f80ed;
+  --primary: #f97316;
   --primary-foreground: #ffffff;
   --secondary: #09090b;
   --secondary-foreground: #ffffff;
   --muted: #09090b;
   --muted-foreground: #a1a1aa;
-  --accent: #2f80ed;
+  --accent: #f97316;
   --accent-foreground: #ffffff;
   --destructive: oklch(0.64 0.21 25.33);
   --border: #27272a;
   --input: #27272a;
-  --ring: #2f80ed;
-  --chart-1: #2f80ed;
-  --chart-2: #3b82f6;
-  --chart-3: #60a5fa;
-  --chart-4: #93c5fd;
+  --ring: #f97316;
+  --chart-1: #f97316;
+  --chart-2: #fb923c;
+  --chart-3: #fdba74;
+  --chart-4: #fed7aa;
   --sidebar: #000000;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #2f80ed;
+  --sidebar-primary: #f97316;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #09090b;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #27272a;
-  --sidebar-ring: #2f80ed;
+  --sidebar-ring: #f97316;
   --success: oklch(0.70 0.14 155);
   --success-foreground: oklch(0.20 0 0);
   --focus-ring: var(--ring);
+  --primary-hover: #fb923c;
+
+  /* Layer 0 network threads — dark theme (orange on black). */
+  --thread-core: #f97316;
+  --thread-glow: #fb923c;
+  --thread-edge: #000000;
+
+  /* Layer 0 glass chrome — dark theme. Sheen and border are brighter than the
+     light theme so the glass edge still reads against a black page. */
+  --glass-bg: rgb(0 0 0 / 0.45);
+  --glass-border: rgb(249 115 22 / 0.34);
+  --glass-sheen: rgb(249 115 22 / 0.30);
+  --glass-shadow: 0 8px 30px -14px rgb(249 115 22 / 0.45);
+
+  /* Card glass — dark theme. Near-opaque black (10% shows through) with the
+     neutral #27272a hairline measured from the reference design. The orange
+     border is deliberately gone: the accent now lives only in the icon. The
+     highlight is a cool white rather than orange so the 3D edge reads as glass
+     catching light, not as a glow. */
+  --card-glass-bg: rgb(0 0 0 / 0.9);
+  --card-glass-border: #27272a;
+  --card-glass-highlight: rgb(255 255 255 / 0.14);
+  --card-glass-shade: rgb(0 0 0 / 0.5);
+  --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.8);
 }
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* Transparent so the fixed network layer (z-index: -10) paints above the
+       canvas background, which comes from <html>. An opaque body would hide it. */
+    background: transparent;
     font-feature-settings: "rlig" 1, "calt" 1;
     line-height: 1.65;
     overflow-x: hidden;
@@ -197,6 +249,119 @@
 .layer0-hero button,
 .layer0-hero [role="button"] {
   min-height: unset;
+}
+
+/* The hero carries the menu bar's glow, so the two read as one lit surface.
+   The chrome's own recipe is a 1px sheen line plus the theme halo; here the
+   line is replaced by an inward glow that spills down from the bar. Drawing
+   the line as well would stack it on the header's border-b at the same
+   boundary and read as one thick doubled band. The hero keeps its transparent
+   background, so the global threads still show through it, and the --glass-*
+   tokens keep the effect theme-aware (orange on black, blue on white). */
+.layer0-hero {
+  box-shadow:
+    inset 0 2px 30px -6px var(--glass-sheen),
+    var(--glass-shadow);
+}
+
+/* Layer 0 glass chrome — translucent, with a top sheen for depth. The blur
+   itself comes from Tailwind's backdrop-blur-* utilities on the element: a
+   backdrop-filter declared here is stripped by the CSS build. Colours come
+   from the theme tokens above, so one class serves both themes. */
+.glass-chrome {
+  position: relative;
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass-chrome::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-sheen), transparent);
+  box-shadow: 0 0 14px 1px var(--glass-sheen);
+  pointer-events: none;
+}
+
+/* Layer 0 glass surfaces (buttons, cards). Blur is applied with Tailwind's
+   backdrop-blur-* utility on the element. */
+.glass-surface {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--glass-shadow);
+}
+
+/* Layer 0 glass cards — 3D glassmorphism.
+   Near-opaque fill (10% of the backdrop shows through), a neutral hairline
+   instead of the old orange one, and a lit edge for depth: a 1px highlight on
+   the top, a 1px shade on the bottom, plus a soft outer drop shadow. The
+   two inset lines are what make the surface read as a physical pane rather
+   than a flat rectangle. Blur comes from Tailwind's backdrop-blur-* utility on
+   the element. */
+.glass-card {
+  position: relative;
+  background: var(--card-glass-bg);
+  border: 1px solid var(--card-glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--card-glass-highlight),
+    inset 0 -1px 0 var(--card-glass-shade),
+    var(--card-glass-shadow);
+}
+
+/* A diagonal sheen across the top-left corner, like light glancing off glass.
+   Purely decorative and behind the content, so it never affects readability. */
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    var(--card-glass-highlight) 0%,
+    transparent 38%
+  );
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+.glass-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header wordmark. The supplied PNG is a solid-black monochrome mark, so it is
+   used as a mask and painted with the theme foreground; a plain <img> would be
+   invisible on the dark theme. Aspect ratio is intrinsic to the asset. */
+.logo-mask {
+  display: block;
+  aspect-ratio: 1217 / 174;
+  background-color: currentColor;
+  -webkit-mask-image: url("/logo-horizon.png");
+  mask-image: url("/logo-horizon.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* Layer 0 background network. Fixed behind everything; the hero is transparent
+   so the threads read as infrastructure running under the whole page. */
+.layer0-network {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer0-network animate,
+  .layer0-network animateMotion {
+    display: none;
+  }
 }
 
 .data-flow-visual {

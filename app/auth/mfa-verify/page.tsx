@@ -10,7 +10,7 @@ export default async function MfaVerifyPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-md rounded-md border border-border bg-card p-8 shadow-sm">
+      <div className="glass-card w-full max-w-md rounded-md p-8 backdrop-blur-md">
         <Link href="/" className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">HORIZON by VZG<span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span></Link>
         <p className="mt-8 text-sm font-semibold uppercase tracking-[0.16em] text-primary">Допълнителна защита</p>
         <h1 className="mt-2 text-3xl font-bold text-foreground">Потвърди входа</h1>

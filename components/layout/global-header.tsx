@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { cn } from "@/lib/utils"
@@ -93,20 +94,12 @@ export function GlobalHeader() {
   ]
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-none">
+    <header className="glass-chrome sticky top-0 z-40 border-b backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-2 px-3 sm:gap-6 sm:px-5 lg:px-8">
-        <Link
-          href={homeHref}
-          className="flex shrink-0 items-baseline gap-3 whitespace-nowrap text-xl font-black tracking-[-0.04em] text-foreground sm:text-2xl"
-        >
-          HORIZON by VZG
-          {/* The wordmark already ends in "by VZG", so the suffix carries only the
-              expert brand; repeating the preposition read as "HORIZON by VZG by
-              VZG CONSULT". Redundant below `sm` too: at 390px the brand plus the
-              auth controls exceed the viewport and clip the menu button. */}
-          <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground sm:inline">
-            VZG CONSULT
-          </span>
+        <Link href={homeHref} className="flex shrink-0 items-center" aria-label="HORIZON by VZG">
+          {/* The supplied mark is monochrome and painted with the theme colour
+              via .logo-mask, so it stays legible in both themes. */}
+          <span className="logo-mask h-6 w-auto text-foreground sm:h-8" />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -134,8 +127,13 @@ export function GlobalHeader() {
         </nav>
 
         <div className="flex min-w-0 items-center gap-2">
-          {/* The switcher moves into the mobile menu below `sm`: at 390px the brand,
-              the switcher, a CTA and the menu button do not fit in one row. */}
+          {/* Both switchers drop into the mobile menu below `sm`: at 390px the
+              brand, a switcher, the register CTA and the menu button already
+              exceed the viewport and clip the menu button. */}
+          <ThemeToggle
+            className="hidden sm:inline-flex"
+            labels={{ light: locale === "de" ? "Helles Design" : "Светла тема", dark: locale === "de" ? "Dunkles Design" : "Тъмна тема" }}
+          />
           <LanguageSwitcher className="hidden shrink-0 sm:inline-flex" />
           {sessionReady && sessionActive ? (
             <Button
@@ -187,7 +185,7 @@ export function GlobalHeader() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border bg-background md:hidden">
+        <div className="glass-chrome border-t backdrop-blur-xl backdrop-saturate-150 md:hidden">
           <nav className="flex flex-col gap-1 px-4 py-4">
             <Link
               href={homeHref}
@@ -210,10 +208,13 @@ export function GlobalHeader() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t border-border pt-3">
-              {/* The header switcher is hidden below `sm`, so it is repeated here
-                  to keep language selection reachable on mobile. */}
-              <div className="px-1 pb-1 sm:hidden">
+              {/* The header switchers are hidden below `sm`, so both are repeated
+                  here to keep language and theme reachable on mobile. */}
+              <div className="flex items-center gap-2 px-1 pb-1 sm:hidden">
                 <LanguageSwitcher />
+                <ThemeToggle
+                  labels={{ light: locale === "de" ? "Helles Design" : "Светла тема", dark: locale === "de" ? "Dunkles Design" : "Тъмна тема" }}
+                />
               </div>
               {sessionActive ? (
                 <Button

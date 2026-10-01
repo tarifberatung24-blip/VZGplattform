@@ -36,7 +36,7 @@ export function InsuranceProductCard({
 }) {
   const isActive = status === "active"
   return (
-    <article className="flex flex-col border border-border bg-card p-6 sm:p-8">
+    <article className="glass-card flex flex-col rounded-sm p-6 sm:p-8 backdrop-blur-md">
       <div className="flex items-start justify-between gap-4">
         <span
           className={cn(

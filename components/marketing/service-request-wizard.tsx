@@ -310,7 +310,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
             <h1 className="mt-4 max-w-3xl text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{copy.title}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">{copy.intro}</p>
           </div>
-          <aside className="rounded-lg border border-border bg-background p-5">
+          <aside className="glass-card rounded-lg p-5 backdrop-blur-md">
             <div className="flex items-center gap-3">
               <span className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary"><Clock3 className="size-5" /></span>
               <div>
@@ -334,7 +334,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
           <span className="text-sm font-medium text-muted-foreground">{progress}%</span>
         </div>
 
-        <form onSubmit={submit} className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-7">
+        <form onSubmit={submit} className="glass-card rounded-lg p-5 backdrop-blur-md sm:p-7">
           <div className="rounded-lg bg-secondary/60 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.request} {stepIndex + 1} / {steps.length}</p>
             <h2 className="mt-3 text-2xl font-semibold text-foreground">{de ? current.questionDe : current.questionBg}</h2>
