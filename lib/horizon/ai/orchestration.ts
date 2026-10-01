@@ -1,25 +1,24 @@
 /**
- * HORIZON AI orchestration policy.
+ * HORIZON AI orchestration policy — FREE-FIRST.
  *
- * This file is deliberately provider-neutral and contains no SDK client,
- * credential lookup, network call, or customer data. It defines the allowed
- * routing decisions that provider adapters must obey.
+ * Cost policy:
+ *   1. Strong free/open routes first whenever the data class allows it.
+ *   2. Paid providers are escalation-only and require an explicit approval flag.
+ *   3. Customer personal data never silently hops to a different external
+ *      provider because a free tier is exhausted.
  *
- * The important boundary is:
- *   policy decides WHETHER a provider may be used;
- *   an adapter decides HOW to call that provider.
- *
- * Provider changes for personal/customer data are never silent. If the
- * approved personal-data route is unavailable, the policy fails closed.
+ * This module contains no SDK client, credentials, network call or customer
+ * data. It only decides whether a route is allowed.
  */
 
 export const HORIZON_AI_PROVIDER_IDS = [
-  "gateway-bedrock",
-  "gateway-openai",
-  "gateway-vertex",
-  "groq-legacy",
-  "cerebras-legacy",
-  "openrouter-declared-only",
+  "local-selfhosted",
+  "groq-free",
+  "gemini-free-target",
+  "openrouter-free-target",
+  "cerebras-trial",
+  "bedrock-paid-escalation",
+  "openai-paid-escalation",
 ] as const
 
 export type HorizonAiProviderId = (typeof HORIZON_AI_PROVIDER_IDS)[number]
@@ -42,26 +41,38 @@ export type HorizonAiDataClass =
   | "sensitive_personal_data"
 
 export type HorizonAiProviderStage =
-  | "target_primary"
-  | "target_secondary"
-  | "target_specialist"
-  | "legacy_runtime"
-  | "declared_only"
+  | "target_free"
+  | "legacy_free_runtime"
+  | "trial_only"
+  | "paid_escalation"
+
+export type HorizonAiCostClass = "free" | "trial_credit" | "paid"
 
 export type HorizonAiProviderPolicy = {
   id: HorizonAiProviderId
   stage: HorizonAiProviderStage
-  transport: "litellm_gateway" | "direct_legacy" | "none"
+  costClass: HorizonAiCostClass
+  transport: "direct_current" | "litellm_gateway" | "local_runtime" | "not_implemented"
   supports: readonly HorizonAiWorkload[]
-  personalDataPolicy: "approved_only" | "not_default" | "legacy_existing" | "forbidden"
+  personalDataPolicy: "local_only" | "existing_only" | "non_sensitive_only" | "approval_required"
   description: string
 }
 
+export const HORIZON_AI_FREE_MODEL_ALIASES = {
+  /** Strong reasoning/coding/extraction default on the Groq free tier. */
+  strong: "openai/gpt-oss-120b",
+  /** Very fast cheap/free-tier route for classification and short transforms. */
+  fast: "openai/gpt-oss-20b",
+  /** Free-tier multimodal candidate on Groq; must be canary-tested before cutover. */
+  multimodal: "qwen/qwen3.8-27b",
+} as const
+
 export const HORIZON_AI_PROVIDERS: Readonly<Record<HorizonAiProviderId, HorizonAiProviderPolicy>> = {
-  "gateway-bedrock": {
-    id: "gateway-bedrock",
-    stage: "target_primary",
-    transport: "litellm_gateway",
+  "local-selfhosted": {
+    id: "local-selfhosted",
+    stage: "target_free",
+    costClass: "free",
+    transport: "local_runtime",
     supports: [
       "case_assistant",
       "household_chat",
@@ -72,13 +83,34 @@ export const HORIZON_AI_PROVIDERS: Readonly<Record<HorizonAiProviderId, HorizonA
       "drafting",
       "multimodal_verification",
     ],
-    personalDataPolicy: "approved_only",
-    description: "Target primary route through the provider-neutral HORIZON LiteLLM gateway.",
+    personalDataPolicy: "local_only",
+    description:
+      "Zero-API-cost target for privacy-sensitive work when suitable local hardware/model quality is verified.",
   },
-  "gateway-openai": {
-    id: "gateway-openai",
-    stage: "target_secondary",
-    transport: "litellm_gateway",
+  "groq-free": {
+    id: "groq-free",
+    stage: "legacy_free_runtime",
+    costClass: "free",
+    transport: "direct_current",
+    supports: [
+      "case_assistant",
+      "household_chat",
+      "document_analysis",
+      "structured_extraction",
+      "routing",
+      "missing_info",
+      "drafting",
+      "multimodal_verification",
+    ],
+    personalDataPolicy: "existing_only",
+    description:
+      "Current runtime provider and first free/strong external route; migrate model selection to free strong/fast aliases.",
+  },
+  "gemini-free-target": {
+    id: "gemini-free-target",
+    stage: "target_free",
+    costClass: "free",
+    transport: "not_implemented",
     supports: [
       "case_assistant",
       "household_chat",
@@ -88,48 +120,71 @@ export const HORIZON_AI_PROVIDERS: Readonly<Record<HorizonAiProviderId, HorizonA
       "drafting",
       "multimodal_verification",
     ],
-    personalDataPolicy: "not_default",
-    description: "Secondary provider for approved non-PII/repository workloads unless separately approved.",
+    personalDataPolicy: "non_sensitive_only",
+    description:
+      "Free-tier target for non-sensitive workloads only; never a silent fallback for customer personal data.",
   },
-  "gateway-vertex": {
-    id: "gateway-vertex",
-    stage: "target_specialist",
-    transport: "litellm_gateway",
-    supports: ["structured_extraction", "routing", "multimodal_verification"],
-    personalDataPolicy: "not_default",
-    description: "Target low-cost/multimodal verification provider behind the same gateway.",
-  },
-  "groq-legacy": {
-    id: "groq-legacy",
-    stage: "legacy_runtime",
-    transport: "direct_legacy",
+  "openrouter-free-target": {
+    id: "openrouter-free-target",
+    stage: "target_free",
+    costClass: "free",
+    transport: "not_implemented",
     supports: [
       "case_assistant",
       "household_chat",
-      "document_analysis",
       "structured_extraction",
       "routing",
       "missing_info",
       "drafting",
     ],
-    personalDataPolicy: "legacy_existing",
-    description: "Current direct provider. Preserve during migration; do not expand its authority silently.",
+    personalDataPolicy: "non_sensitive_only",
+    description:
+      "Free-model target for low-volume non-sensitive fallback. Runtime client must be implemented and tested first.",
   },
-  "cerebras-legacy": {
-    id: "cerebras-legacy",
-    stage: "legacy_runtime",
-    transport: "direct_legacy",
+  "cerebras-trial": {
+    id: "cerebras-trial",
+    stage: "trial_only",
+    costClass: "trial_credit",
+    transport: "direct_current",
     supports: ["document_analysis", "multimodal_verification"],
-    personalDataPolicy: "legacy_existing",
-    description: "Current specialist document-analysis path. Preserve until the gateway replacement is verified.",
+    personalDataPolicy: "existing_only",
+    description:
+      "Existing specialist adapter; free credit is trial credit, so it is not treated as a durable free primary.",
   },
-  "openrouter-declared-only": {
-    id: "openrouter-declared-only",
-    stage: "declared_only",
-    transport: "none",
-    supports: [],
-    personalDataPolicy: "forbidden",
-    description: "Environment variables exist, but no runtime client is implemented. Never route traffic here.",
+  "bedrock-paid-escalation": {
+    id: "bedrock-paid-escalation",
+    stage: "paid_escalation",
+    costClass: "paid",
+    transport: "litellm_gateway",
+    supports: [
+      "case_assistant",
+      "household_chat",
+      "document_analysis",
+      "structured_extraction",
+      "routing",
+      "missing_info",
+      "drafting",
+      "multimodal_verification",
+    ],
+    personalDataPolicy: "approval_required",
+    description: "Paid quality/privacy escalation only; disabled by default.",
+  },
+  "openai-paid-escalation": {
+    id: "openai-paid-escalation",
+    stage: "paid_escalation",
+    costClass: "paid",
+    transport: "litellm_gateway",
+    supports: [
+      "case_assistant",
+      "household_chat",
+      "structured_extraction",
+      "routing",
+      "missing_info",
+      "drafting",
+      "multimodal_verification",
+    ],
+    personalDataPolicy: "approval_required",
+    description: "Paid secondary escalation only; disabled by default.",
   },
 }
 
@@ -137,25 +192,28 @@ export type HorizonAiRouteInput = {
   workload: HorizonAiWorkload
   dataClass: HorizonAiDataClass
   availableProviders: readonly HorizonAiProviderId[]
-  /**
-   * Explicit governance decision that the primary gateway route is approved for
-   * customer personal data. Merely having credentials is not approval.
-   */
-  personalDataPrimaryApproved?: boolean
+  /** Local provider was explicitly approved for the current data class and task. */
+  localPersonalDataApproved?: boolean
+  /** Paid use is never implicit; this must be true before any paid provider can be returned. */
+  paidEscalationApproved?: boolean
+  /** A specific paid route is approved for personal/customer data. */
+  paidPersonalDataApproved?: boolean
 }
 
 export type HorizonAiRouteDecision =
   | {
       status: "route"
       provider: HorizonAiProviderId
+      costClass: HorizonAiCostClass
       reason: string
     }
   | {
       status: "blocked"
       reason:
         | "NO_APPROVED_PERSONAL_DATA_PROVIDER"
+        | "NO_FREE_PROVIDER_AVAILABLE"
         | "NO_COMPATIBLE_PROVIDER"
-        | "DECLARED_ONLY_PROVIDER"
+        | "PAID_ESCALATION_NOT_APPROVED"
     }
 
 const isPersonal = (dataClass: HorizonAiDataClass) =>
@@ -167,40 +225,72 @@ const availableAndSupports = (
   available: ReadonlySet<HorizonAiProviderId>,
 ) => available.has(provider) && HORIZON_AI_PROVIDERS[provider].supports.includes(workload)
 
+const route = (provider: HorizonAiProviderId, reason: string): HorizonAiRouteDecision => ({
+  status: "route",
+  provider,
+  costClass: HORIZON_AI_PROVIDERS[provider].costClass,
+  reason,
+})
+
 export function routeHorizonAi(input: HorizonAiRouteInput): HorizonAiRouteDecision {
   const available = new Set(input.availableProviders)
 
   if (isPersonal(input.dataClass)) {
     if (
-      input.personalDataPrimaryApproved &&
-      availableAndSupports("gateway-bedrock", input.workload, available)
+      input.localPersonalDataApproved &&
+      availableAndSupports("local-selfhosted", input.workload, available)
     ) {
-      return {
-        status: "route",
-        provider: "gateway-bedrock",
-        reason: "approved primary personal-data route",
-      }
+      return route("local-selfhosted", "approved zero-API-cost local personal-data route")
     }
 
-    // Deliberately no automatic OpenAI/Vertex/provider swap for customer data.
-    // A different processor/subprocessor/geography/retention contract requires
-    // a separate governance decision, not a retry branch.
+    if (
+      input.paidEscalationApproved &&
+      input.paidPersonalDataApproved &&
+      availableAndSupports("bedrock-paid-escalation", input.workload, available)
+    ) {
+      return route("bedrock-paid-escalation", "explicitly approved paid personal-data escalation")
+    }
+
+    // Do not silently move customer data to free external services because a
+    // quota was exhausted. Free-tier availability is not a privacy approval.
     return { status: "blocked", reason: "NO_APPROVED_PERSONAL_DATA_PROVIDER" }
   }
 
-  const order: readonly HorizonAiProviderId[] =
+  const freeOrder: readonly HorizonAiProviderId[] =
     input.workload === "multimodal_verification"
-      ? ["gateway-vertex", "gateway-bedrock", "gateway-openai", "cerebras-legacy", "groq-legacy"]
-      : ["gateway-bedrock", "gateway-openai", "gateway-vertex", "groq-legacy", "cerebras-legacy"]
+      ? ["groq-free", "local-selfhosted", "gemini-free-target", "openrouter-free-target"]
+      : ["groq-free", "local-selfhosted", "gemini-free-target", "openrouter-free-target"]
 
-  for (const provider of order) {
+  for (const provider of freeOrder) {
     if (availableAndSupports(provider, input.workload, available)) {
-      return { status: "route", provider, reason: "highest-priority compatible provider" }
+      return route(provider, "free-first compatible provider")
     }
   }
 
-  if (available.has("openrouter-declared-only")) {
-    return { status: "blocked", reason: "DECLARED_ONLY_PROVIDER" }
+  // Cerebras is intentionally after durable free routes: current public access
+  // is trial credit rather than a recurring free primary.
+  if (availableAndSupports("cerebras-trial", input.workload, available)) {
+    return route("cerebras-trial", "trial-credit specialist fallback")
+  }
+
+  const paidAvailable =
+    availableAndSupports("bedrock-paid-escalation", input.workload, available) ||
+    availableAndSupports("openai-paid-escalation", input.workload, available)
+
+  if (paidAvailable && !input.paidEscalationApproved) {
+    return { status: "blocked", reason: "PAID_ESCALATION_NOT_APPROVED" }
+  }
+
+  if (input.paidEscalationApproved) {
+    for (const provider of ["bedrock-paid-escalation", "openai-paid-escalation"] as const) {
+      if (availableAndSupports(provider, input.workload, available)) {
+        return route(provider, "explicitly approved paid escalation")
+      }
+    }
+  }
+
+  if (input.availableProviders.length > 0) {
+    return { status: "blocked", reason: "NO_FREE_PROVIDER_AVAILABLE" }
   }
 
   return { status: "blocked", reason: "NO_COMPATIBLE_PROVIDER" }
