@@ -148,15 +148,16 @@
   --glass-sheen: rgb(0 63 136 / 0.40);
   --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
 
-  /* Card glass. Blue-tinted to mirror the dark theme's orange-tinted chrome.
-     The fill sits a shade below pure white: on a white card the white top
-     highlight has nothing to contrast against, so the 3D edge flattens and the
-     card reads as a plain rectangle. Near-opaque, so 10% of the backdrop shows. */
-  --card-glass-bg: rgb(248 250 252 / 0.9);
-  --card-glass-border: rgb(0 63 136 / 0.16);
+  /* Card glass. Neutral, mirroring the dark theme's neutral #27272a hairline
+     rather than tinting it blue: the accent belongs to the icon, and the two
+     themes should agree on the card edge. The fill sits a shade below pure
+     white because a white card cannot show a white top bevel, which would
+     flatten the 3D edge. Near-opaque, so 10% of the backdrop shows through. */
+  --card-glass-bg: rgb(250 250 250 / 0.9);
+  --card-glass-border: rgb(0 0 0 / 0.08);
   --card-glass-highlight: rgb(255 255 255 / 0.95);
-  --card-glass-shade: rgb(0 63 136 / 0.16);
-  --card-glass-shadow: 0 12px 32px -16px rgb(0 63 136 / 0.32);
+  --card-glass-shade: rgb(0 0 0 / 0.10);
+  --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.28);
 }
 .dark {
   color-scheme: dark;
