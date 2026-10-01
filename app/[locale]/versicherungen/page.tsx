@@ -45,7 +45,7 @@ export default async function VersicherungenPage({ params }: { params: Promise<{
           <h2 id="insurance-products" className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {copy.productsTitle}
           </h2>
-          <div className="mt-6 grid gap-px border border-border bg-border md:grid-cols-2">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {products.map((product) => (
               <InsuranceProductCard
                 key={product.id}
@@ -63,7 +63,7 @@ export default async function VersicherungenPage({ params }: { params: Promise<{
           </div>
         </section>
 
-        <section className="mt-12 flex items-start gap-3 border border-border bg-card p-5 text-sm leading-7 text-muted-foreground">
+        <section className="glass-card mt-12 flex items-start gap-3 rounded-sm p-5 text-sm leading-7 text-muted-foreground backdrop-blur-md">
           <CircleAlert className="mt-0.5 size-5 shrink-0" />
           <span>{copy.notice}</span>
         </section>

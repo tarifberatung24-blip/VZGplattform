@@ -105,7 +105,7 @@ export function ProductOpportunityBoard() {
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveId(product.id)}
-                  className={`group flex items-center gap-4 rounded-md border p-4 text-left transition-colors ${isActive ? "border-primary/50 bg-card shadow-sm" : "border-border bg-card hover:border-primary/50"}`}
+                  className={`glass-card group flex items-center gap-4 rounded-md p-4 text-left transition-colors backdrop-blur-md ${isActive ? "border-primary/60" : "hover:border-primary/40"}`}
                 >
                   <span className={`flex size-11 shrink-0 items-center justify-center rounded-sm ${product.accent}`}>
                     <Icon aria-hidden="true" className="size-5" />
@@ -120,7 +120,7 @@ export function ProductOpportunityBoard() {
             })}
           </div>
 
-          <div className="relative min-h-[430px] overflow-hidden rounded-md border border-border bg-card p-6 shadow-sm sm:p-8">
+          <div className="relative min-h-[430px] overflow-hidden glass-card rounded-md p-6 sm:p-8 backdrop-blur-md">
             <div className="relative flex h-full flex-col">
               <div className="flex items-start justify-between gap-4">
                 <span className={`flex size-14 items-center justify-center rounded-sm ${active.accent}`}>

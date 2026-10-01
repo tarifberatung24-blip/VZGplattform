@@ -255,6 +255,18 @@
   box-shadow: inset 0 1px 0 var(--glass-sheen), var(--glass-shadow);
 }
 
+/* Layer 0 glass cards. Same recipe as the header/footer chrome, so cards read
+   as part of one surface family: translucent fill, hairline border and the
+   theme glow. The inset sheen follows the element's own rounding, which keeps
+   it clean on rounded cards (the chrome's top line would poke out of corners).
+   Blur comes from Tailwind's backdrop-blur-* utility on the element. */
+.glass-card {
+  position: relative;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--glass-shadow);
+}
+
 /* Header wordmark. The supplied PNG is a solid-black monochrome mark, so it is
    used as a mask and painted with the theme foreground; a plain <img> would be
    invisible on the dark theme. Aspect ratio is intrinsic to the asset. */

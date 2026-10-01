@@ -18,13 +18,8 @@ export function AnimatedHero() {
 
   return (
     <div className="layer0-hero relative flex min-h-[100dvh] flex-col overflow-hidden">
-      <main className="relative z-10 flex flex-1 items-center px-6 py-20 sm:px-12 lg:px-20">
+      <main className="relative z-10 flex flex-1 items-start px-6 pt-28 pb-20 sm:px-12 sm:pt-32 lg:px-20">
         <div className="flex w-full max-w-2xl flex-col items-start gap-6">
-          <span className="glass-surface inline-flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur-md text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground">
-            <span className="size-1.5 rounded-full" style={{ background: "var(--thread-core)" }} aria-hidden="true" />
-            {t.home.hero.badge}
-          </span>
-
           <h1 className="font-display text-balance text-[clamp(2.4rem,6vw,5rem)] font-black leading-[1.02] tracking-[-0.04em] text-foreground">
             {t.home.hero.headline1}
             <span className="mt-1 block" style={{ color: "var(--thread-core)" }}>

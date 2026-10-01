@@ -36,7 +36,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
   const letter = isLetterResult ? output : null
 
   return (
-    <section className="flex flex-col gap-10 rounded-sm border border-border bg-card p-8 shadow-none md:p-10">
+    <section className="glass-card flex flex-col gap-10 rounded-sm p-8 md:p-10 backdrop-blur-md">
       <form
         className="flex flex-col gap-6"
         onSubmit={(event) => {

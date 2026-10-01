@@ -19,7 +19,7 @@ export default async function ImpressumPage() {
           {isBg ? "Към началото" : "Zur Startseite"}
         </Link>
 
-        <article className="flex flex-col gap-8 rounded-md border border-border px-6 py-8">
+        <article className="flex flex-col gap-8 glass-card rounded-md px-6 py-8 backdrop-blur-md">
           <header className="flex flex-col gap-3">
             <p className="text-sm font-medium text-primary">
               {isBg ? "Правна информация" : "Rechtliche Informationen"}
@@ -39,7 +39,7 @@ export default async function ImpressumPage() {
               {isBg ? "Данни за доставчика" : "Angaben zum Anbieter"}
             </h2>
 
-            <div className="flex flex-col gap-4 rounded-md border border-border bg-muted p-5">
+            <div className="flex flex-col gap-4 glass-card rounded-md p-5 backdrop-blur-md">
               {address.length > 0 && (
                 <address className="not-italic leading-relaxed text-muted-foreground">
                   {address.map((line) => (

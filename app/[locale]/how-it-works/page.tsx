@@ -17,7 +17,6 @@ export default function HowItWorksPage() {
   const labels = isBg
     ? {
         back: "← Към началото",
-        eyebrow: "HORIZON by VZG · VZG CONSULT",
         title: "Как работи",
         intro: "Три стъпки от първия въпрос до готов план за действие — без документи и без обвързване.",
         stepsTitle: "Твоят път",
@@ -29,7 +28,6 @@ export default function HowItWorksPage() {
       }
     : {
         back: "← Zur Startseite",
-        eyebrow: "HORIZON by VZG · VZG CONSULT",
         title: "So funktioniert's",
         intro: "Drei Schritte von der ersten Frage bis zum fertigen Aktionsplan — ohne Dokumente und ohne Verpflichtung.",
         stepsTitle: "Dein Weg",
@@ -61,8 +59,8 @@ export default function HowItWorksPage() {
       ]
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-[1440px] px-5 py-16 lg:px-8 md:py-24">
+    <main className="relative min-h-screen text-foreground">
+      <div className="mx-auto max-w-[1440px] px-5 pt-28 pb-16 lg:px-8 md:pt-32 md:pb-24">
         <Link
           href={localizedPath("/", locale)}
           className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -71,8 +69,7 @@ export default function HowItWorksPage() {
         </Link>
 
         <section className="mt-10 max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{labels.eyebrow}</p>
-          <h1 className="mt-6 text-balance text-4xl font-black tracking-[-0.05em] text-foreground md:text-6xl">
+          <h1 className="text-balance text-4xl font-black tracking-[-0.05em] text-foreground md:text-6xl">
             {labels.title}
           </h1>
           <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground">{labels.intro}</p>
@@ -82,9 +79,9 @@ export default function HowItWorksPage() {
           <h2 id="how-it-works-steps" className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {labels.stepsTitle}
           </h2>
-          <ol className="mt-6 border-y border-border">
+          <ol className="mt-6 grid gap-4 md:grid-cols-3">
             {steps.map(([title, description], index) => (
-              <li key={title} className="flex gap-6 border-b border-border p-8 last:border-b-0">
+              <li key={title} className="glass-card flex h-full gap-6 rounded-sm p-8 backdrop-blur-md">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-border text-sm font-black text-primary">
                   {index + 1}
                 </span>
@@ -101,9 +98,9 @@ export default function HowItWorksPage() {
           <h2 id="how-it-works-benefits" className="text-xl font-black text-foreground">
             {labels.expected}
           </h2>
-          <div className="mt-6 grid gap-px border border-border bg-border md:grid-cols-2">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {benefits.map((item, index) => (
-              <div key={item} className="flex items-start gap-4 bg-background p-6">
+              <div key={item} className="glass-card flex h-full items-start gap-4 rounded-sm p-6 backdrop-blur-md">
                 <span className="flex size-8 shrink-0 items-center justify-center border border-border text-xs font-black text-primary">
                   {index + 1}
                 </span>
@@ -115,7 +112,7 @@ export default function HowItWorksPage() {
             ))}
           </div>
 
-          <div className="mt-8 flex items-start gap-3 border border-border bg-background p-5 text-sm leading-7 text-muted-foreground">
+          <div className="glass-card mt-8 flex items-start gap-3 rounded-sm p-5 text-sm leading-7 text-muted-foreground backdrop-blur-md">
             <CircleAlert className="mt-0.5 size-5 shrink-0" />
             <span>
               {labels.notice} {labels.disclaimer}

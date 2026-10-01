@@ -12,7 +12,7 @@ export default function ContactPage() {
   const address = legalAddress()
 
   return (
-    <main className="min-h-screen bg-background px-4 py-16 text-foreground">
+    <main className="relative min-h-screen px-4 pt-28 pb-16 text-foreground md:pt-32">
       <div className="mx-auto flex max-w-3xl flex-col gap-8">
         <Link
           href={`/${locale}`}
@@ -33,12 +33,12 @@ export default function ContactPage() {
         </div>
 
         <div className="flex flex-col gap-8">
-          <section className="flex flex-col gap-6 rounded-md border border-border px-6 py-8">
+          <section className="flex flex-col gap-6 glass-card rounded-md px-6 py-8 backdrop-blur-md">
             <h2 className="text-xl font-semibold">
               {isBg ? "Контактни данни" : "Kontaktdaten"}
             </h2>
 
-            <div className="flex flex-col gap-4 rounded-md border border-border bg-muted p-5">
+            <div className="flex flex-col gap-4 glass-card rounded-md p-5 backdrop-blur-md">
               {address.length > 0 && (
                 <address className="not-italic leading-relaxed text-muted-foreground">
                   {address.map((line) => (
