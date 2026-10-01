@@ -140,21 +140,23 @@
   --thread-glow: #2f80ed;
   --thread-edge: #ffffff;
 
-  /* Layer 0 glass chrome (header, footer, buttons). */
+  /* Layer 0 glass chrome (header, footer, buttons). The sheen is blue, not
+     white: a white highlight is invisible on a white page, which is why the
+     light theme had no lit edge where the dark theme gets one from its orange. */
   --glass-bg: rgb(255 255 255 / 0.55);
   --glass-border: rgb(0 63 136 / 0.14);
-  --glass-sheen: rgb(255 255 255 / 0.7);
+  --glass-sheen: rgb(0 63 136 / 0.40);
   --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
 
-  /* Card glass. Separate from the chrome tokens above so card styling can
-     change without disturbing the approved header/footer. Cards are near-opaque
-     (10% of the backdrop shows through) with a neutral hairline and a 3D glass
-     edge: a light top highlight and a darker bottom shade. */
-  --card-glass-bg: rgb(255 255 255 / 0.9);
-  --card-glass-border: rgb(0 0 0 / 0.08);
+  /* Card glass. Blue-tinted to mirror the dark theme's orange-tinted chrome.
+     The fill sits a shade below pure white: on a white card the white top
+     highlight has nothing to contrast against, so the 3D edge flattens and the
+     card reads as a plain rectangle. Near-opaque, so 10% of the backdrop shows. */
+  --card-glass-bg: rgb(248 250 252 / 0.9);
+  --card-glass-border: rgb(0 63 136 / 0.16);
   --card-glass-highlight: rgb(255 255 255 / 0.95);
-  --card-glass-shade: rgb(0 0 0 / 0.05);
-  --card-glass-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.22);
+  --card-glass-shade: rgb(0 63 136 / 0.16);
+  --card-glass-shadow: 0 12px 32px -16px rgb(0 63 136 / 0.32);
 }
 .dark {
   color-scheme: dark;
