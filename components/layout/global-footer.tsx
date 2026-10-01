@@ -26,9 +26,15 @@ export function GlobalFooter() {
   ]
 
   return (
-    <footer className="border-t border-border bg-background">
+    <footer className="glass-chrome relative border-t backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto max-w-[1440px] px-5 py-8 lg:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-black tracking-[-0.03em] text-foreground">HORIZON by VZG</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              VZG CONSULT · Tarifberater24
+            </span>
+          </div>
           <nav className="flex flex-wrap gap-x-6 text-sm font-medium text-muted-foreground">
             {links.map((link) => (
               <Link

@@ -27,7 +27,7 @@ const products: Product[] = [
     title: "Energiekosten im Blick",
     description: "Vergleiche deinen aktuellen Strom- oder Gasvertrag mit passenden Tarifen.",
     icon: Lightbulb,
-    accent: "bg-[#2563eb]/15 text-[#2563eb]",
+    accent: "bg-primary/15 text-primary",
     eyebrow: "Mögliche monatliche Optimierung",
     detail: ["Verbrauch strukturiert erfassen", "Preis und Laufzeit vergleichen", "Wechsel transparent vorbereiten"],
     action: "Angebot bis 2 Std. anfragen",
@@ -39,7 +39,7 @@ const products: Product[] = [
     title: "Bonität verstehen",
     description: "Prüfe deine Bonitätsdaten, bevor du einen wichtigen Vertrag oder Kredit beantragst.",
     icon: FileSearch,
-    accent: "bg-[#2563eb]/15 text-[#2563eb]",
+    accent: "bg-primary/15 text-primary",
     eyebrow: "Bonitätscheck",
     detail: ["Passende Auskunft auswählen", "Daten beim Partner prüfen", "Für Miet- oder Kreditpläne vorbereitet sein"],
     action: "SCHUFA Anfrage starten",
@@ -63,7 +63,7 @@ const products: Product[] = [
     title: "Finanzierung mit Klarheit",
     description: "Bereite deine Finanzierungsfragen vor, bevor du Angebote vergleichst.",
     icon: CircleDollarSign,
-    accent: "bg-blue-50 text-blue-700",
+    accent: "bg-primary/15 text-primary",
     eyebrow: "Partnervergleich",
     detail: ["Finanzierungsziel festhalten", "Rate und Laufzeit verstehen", "Angebote beim Partner vergleichen"],
     action: "Kredit-Anfrage vorbereiten",
@@ -82,7 +82,7 @@ export function ProductOpportunityBoard() {
     <section className="relative overflow-hidden border-b border-border bg-background text-foreground" aria-labelledby="produkte-title">
       <div className="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 md:pb-24 md:pt-16 lg:px-8">
         <div className="max-w-3xl">
-          <Badge variant="outline" className="mb-5 rounded-full border-blue-200 bg-card px-3 py-1 text-foreground shadow-sm">
+          <Badge variant="outline" className="mb-5 rounded-full border-primary/30 bg-card px-3 py-1 text-foreground shadow-sm">
             Dein Finanzradar
           </Badge>
           <h1 id="produkte-title" className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
@@ -105,7 +105,7 @@ export function ProductOpportunityBoard() {
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveId(product.id)}
-                  className={`group flex items-center gap-4 rounded-md border p-4 text-left transition-colors ${isActive ? "border-blue-300 bg-card shadow-sm" : "border-border bg-card hover:border-blue-300"}`}
+                  className={`group flex items-center gap-4 rounded-md border p-4 text-left transition-colors ${isActive ? "border-primary/50 bg-card shadow-sm" : "border-border bg-card hover:border-primary/50"}`}
                 >
                   <span className={`flex size-11 shrink-0 items-center justify-center rounded-sm ${product.accent}`}>
                     <Icon aria-hidden="true" className="size-5" />

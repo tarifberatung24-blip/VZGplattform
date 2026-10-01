@@ -5,28 +5,32 @@ import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 
-export function ThemeToggle({ className }: { className?: string }) {
+/**
+ * Layer 0 theme switch. Icon-only so it fits the glass header at every width;
+ * the accessible name carries the state for screen readers.
+ */
+export function ThemeToggle({ className, labels }: { className?: string; labels?: { light: string; dark: string } }) {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
 
   const isDark = mounted && resolvedTheme === "dark"
+  const label = isDark ? labels?.light ?? "Light theme" : labels?.dark ?? "Dark theme"
 
   return (
     <button
       type="button"
-      aria-label={isDark ? "Светла тема" : "Тъмна тема"}
-      aria-pressed={isDark}
-      title={isDark ? "Светла тема" : "Тъмна тема"}
+      aria-label={label}
+      title={label}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={cn(
-        "inline-flex h-10 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "inline-flex size-9 shrink-0 items-center justify-center rounded-md border text-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 max-sm:size-11",
         className,
       )}
+      style={{ borderColor: "var(--glass-border)" }}
     >
       {isDark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}
-      <span className="sr-only sm:not-sr-only">{isDark ? "Light" : "Dark"}</span>
     </button>
   )
 }

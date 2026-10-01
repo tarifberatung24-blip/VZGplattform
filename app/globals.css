@@ -133,6 +133,18 @@
   --success: #287047;
   --success-foreground: #ffffff;
   --focus-ring: var(--ring);
+  --primary-hover: #002f66;
+
+  /* Layer 0 network threads — light theme (blue on white). */
+  --thread-core: #003f88;
+  --thread-glow: #2f80ed;
+  --thread-edge: #ffffff;
+
+  /* Layer 0 glass chrome (header, footer, buttons). */
+  --glass-bg: rgb(255 255 255 / 0.55);
+  --glass-border: rgb(0 63 136 / 0.14);
+  --glass-sheen: rgb(255 255 255 / 0.7);
+  --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
 }
 .dark {
   color-scheme: dark;
@@ -142,40 +154,56 @@
   --card-foreground: #ffffff;
   --popover: #000000;
   --popover-foreground: #ffffff;
-  --primary: #2f80ed;
+  --primary: #f97316;
   --primary-foreground: #ffffff;
   --secondary: #09090b;
   --secondary-foreground: #ffffff;
   --muted: #09090b;
   --muted-foreground: #a1a1aa;
-  --accent: #2f80ed;
+  --accent: #f97316;
   --accent-foreground: #ffffff;
   --destructive: oklch(0.64 0.21 25.33);
   --border: #27272a;
   --input: #27272a;
-  --ring: #2f80ed;
-  --chart-1: #2f80ed;
-  --chart-2: #3b82f6;
-  --chart-3: #60a5fa;
-  --chart-4: #93c5fd;
+  --ring: #f97316;
+  --chart-1: #f97316;
+  --chart-2: #fb923c;
+  --chart-3: #fdba74;
+  --chart-4: #fed7aa;
   --sidebar: #000000;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #2f80ed;
+  --sidebar-primary: #f97316;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #09090b;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #27272a;
-  --sidebar-ring: #2f80ed;
+  --sidebar-ring: #f97316;
   --success: oklch(0.70 0.14 155);
   --success-foreground: oklch(0.20 0 0);
   --focus-ring: var(--ring);
+  --primary-hover: #fb923c;
+
+  /* Layer 0 network threads — dark theme (orange on black). */
+  --thread-core: #f97316;
+  --thread-glow: #fb923c;
+  --thread-edge: #000000;
+
+  /* Layer 0 glass chrome — dark theme. Sheen and border are brighter than the
+     light theme so the glass edge still reads against a black page. */
+  --glass-bg: rgb(0 0 0 / 0.45);
+  --glass-border: rgb(249 115 22 / 0.34);
+  --glass-sheen: rgb(249 115 22 / 0.30);
+  --glass-shadow: 0 8px 30px -14px rgb(249 115 22 / 0.45);
 }
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* Transparent so the fixed network layer (z-index: -10) paints above the
+       canvas background, which comes from <html>. An opaque body would hide it. */
+    background: transparent;
     font-feature-settings: "rlig" 1, "calt" 1;
     line-height: 1.65;
     overflow-x: hidden;
@@ -197,6 +225,68 @@
 .layer0-hero button,
 .layer0-hero [role="button"] {
   min-height: unset;
+}
+
+/* Layer 0 glass chrome — translucent, with a top sheen for depth. The blur
+   itself comes from Tailwind's backdrop-blur-* utilities on the element: a
+   backdrop-filter declared here is stripped by the CSS build. Colours come
+   from the theme tokens above, so one class serves both themes. */
+.glass-chrome {
+  position: relative;
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass-chrome::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-sheen), transparent);
+  box-shadow: 0 0 14px 1px var(--glass-sheen);
+  pointer-events: none;
+}
+
+/* Layer 0 glass surfaces (buttons, cards). Blur is applied with Tailwind's
+   backdrop-blur-* utility on the element. */
+.glass-surface {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--glass-shadow);
+}
+
+/* Header wordmark. The supplied PNG is a solid-black monochrome mark, so it is
+   used as a mask and painted with the theme foreground; a plain <img> would be
+   invisible on the dark theme. Aspect ratio is intrinsic to the asset. */
+.logo-mask {
+  display: block;
+  aspect-ratio: 1217 / 174;
+  background-color: currentColor;
+  -webkit-mask-image: url("/logo-horizon.png");
+  mask-image: url("/logo-horizon.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* Layer 0 background network. Fixed behind everything; the hero is transparent
+   so the threads read as infrastructure running under the whole page. */
+.layer0-network {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer0-network animate,
+  .layer0-network animateMotion {
+    display: none;
+  }
 }
 
 .data-flow-visual {
