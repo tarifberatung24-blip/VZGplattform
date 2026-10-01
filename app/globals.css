@@ -248,6 +248,19 @@
   min-height: unset;
 }
 
+/* The hero carries the menu bar's glow, so the two read as one lit surface.
+   The chrome's own recipe is a 1px sheen line plus the theme halo; here the
+   line is replaced by an inward glow that spills down from the bar. Drawing
+   the line as well would stack it on the header's border-b at the same
+   boundary and read as one thick doubled band. The hero keeps its transparent
+   background, so the global threads still show through it, and the --glass-*
+   tokens keep the effect theme-aware (orange on black, blue on white). */
+.layer0-hero {
+  box-shadow:
+    inset 0 2px 30px -6px var(--glass-sheen),
+    var(--glass-shadow);
+}
+
 /* Layer 0 glass chrome — translucent, with a top sheen for depth. The blur
    itself comes from Tailwind's backdrop-blur-* utilities on the element: a
    backdrop-filter declared here is stripped by the CSS build. Colours come
