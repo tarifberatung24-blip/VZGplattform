@@ -67,7 +67,41 @@
     "what4": "Welche Verträge und Fristen muss ich im Blick behalten?",
     "finalCtaTitle": "Bereit, deine Möglichkeiten zu prüfen?",
     "finalCtaDesc": "Erstelle ein kostenloses Profil und speichere deine Ergebnisse in HORIZON by VZG.",
-    "disclaimer": "HORIZON by VZG bietet Informationen und Dokumentenvorbereitung. Es ist kein Steuerberater, Rechtsanwalt oder Versicherungsberater. Offizielle Entscheidungen treffen die zuständigen Behörden."
+    "disclaimer": "HORIZON by VZG bietet Informationen und Dokumentenvorbereitung. Es ist kein Steuerberater, Rechtsanwalt oder Versicherungsberater. Offizielle Entscheidungen treffen die zuständigen Behörden.",
+    "wheel": {
+      "rings": [
+        {
+          "title": "Dein Problem",
+          "caption": "Was in HORIZON hineingeht",
+          "steps": [
+            "Dokument",
+            "Verstehen",
+            "Fakten",
+            "Nächster Schritt"
+          ],
+          "bullets": [
+            "Brief vom Finanzamt, Jobcenter oder Agentur",
+            "Vertrag, den du nicht verstehst",
+            "Foto oder PDF — ohne Abtippen"
+          ]
+        },
+        {
+          "title": "Dein Vorteil",
+          "caption": "Was bei dir bleibt",
+          "steps": [
+            "Kontrolle",
+            "Erinnerung",
+            "Vergleich",
+            "Ersparnis"
+          ],
+          "bullets": [
+            "Alle Verträge und Fristen an einem Ort",
+            "Warnung vor der Kündigungsfrist",
+            "Echter Prüfanlass — keine Werbung"
+          ]
+        }
+      ]
+    }
   },
   "opportunityCards": {
     "taxTitle": "Steuern",
@@ -381,7 +415,8 @@
     "filledData": "Ausgefüllte Daten",
     "sourceDocument": "Dokument",
     "sourceProfile": "Profil",
-    "sourceAi": "KI-Annahme", "missingData": "Keine Angabe",
+    "sourceAi": "KI-Annahme",
+    "missingData": "Keine Angabe",
     "confirm": "Bestätigen und fortfahren",
     "edit": "Daten bearbeiten",
     "cancel": "Abbrechen",

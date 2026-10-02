@@ -554,3 +554,164 @@
     transition: none;
   }
 }
+
+/* HORIZON lifecycle wheel — prototype.
+   Design language borrowed from the Agile/Waterfall reference mockup:
+   two labelled rings side by side with a bulleted legend. */
+
+.horizon-wheel {
+  width: 100%;
+  padding: 8px 0 4px;
+}
+
+.horizon-wheel__rings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 4vw, 56px);
+  align-items: start;
+}
+
+.horizon-wheel__ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+}
+
+.horizon-wheel__svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  overflow: visible;
+}
+
+/* Slow rotation of the whole ring, paused for reduced-motion users. */
+.horizon-wheel__rotor {
+  transform-origin: 100px 100px;
+  animation: horizon-wheel-spin 60s linear infinite;
+}
+
+@keyframes horizon-wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.horizon-wheel__segment {
+  opacity: 0;
+  animation: horizon-segment-in 0.7s ease-out forwards;
+}
+
+@keyframes horizon-segment-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The hub masks the inner edge of the ring, giving the donut its hole. */
+.horizon-wheel__hub {
+  fill: var(--background);
+}
+
+.horizon-wheel__caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.horizon-wheel__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.horizon-wheel__sub {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.horizon-wheel__steps,
+.horizon-wheel__bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 300px;
+}
+
+.horizon-wheel__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.horizon-wheel__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.horizon-wheel__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: var(--thread-core);
+}
+
+.horizon-wheel__bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.horizon-wheel__bullet {
+  position: relative;
+  padding-left: 14px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.horizon-wheel__bullet::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--thread-core);
+  opacity: 0.7;
+}
+
+/* Mobile: stack the rings and centre the legend. */
+@media (max-width: 640px) {
+  .horizon-wheel__rings {
+    grid-template-columns: 1fr;
+  }
+
+  .horizon-wheel__svg {
+    max-width: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .horizon-wheel__rotor,
+  .horizon-wheel__segment {
+    animation: none;
+  }
+
+  .horizon-wheel__segment {
+    opacity: 1;
+  }
+}
