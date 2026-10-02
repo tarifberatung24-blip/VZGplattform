@@ -16,7 +16,7 @@
   --ring-0: #003f88;
   --ring-1: #c9d4e3;
   --ring-2: #0b1220;
-  --ring-tick: #003f88;
+  --ring-core: rgb(0 0 0 / 0.34);
 }
 
 [data-theme="dark"] {
@@ -33,7 +33,7 @@
   --ring-0: #f97316;
   --ring-1: #e4e4e7;
   --ring-2: #3f3f46;
-  --ring-tick: #f97316;
+  --ring-core: rgb(249 115 22 / 0.28);
 }
 
 * { box-sizing: border-box; }
@@ -217,7 +217,8 @@ body {
   cursor: grab;
   touch-action: none;
 }
-.ring:active { cursor: grabbing; }
+.ring.is-dragging { cursor: grabbing; }
+.ring.is-paused { cursor: pointer; }
 
 .ring-labels {
   position: absolute;
@@ -225,11 +226,12 @@ body {
   pointer-events: none;
 }
 
-/* Chips sit on the ring's projected ellipse. Each carries its own angle, so
-   the label rotates to follow the ring rather than all staying flat. */
+/* Chips are positioned in pixels from Zdog's own 3D transforms each frame, so
+   they track the segments as the ring turns. */
 .chip {
   position: absolute;
   transform: translate(-50%, -50%);
+  will-change: left, top, opacity;
   padding: 4px 11px;
   border-radius: 999px;
   background: var(--glass-bg);
@@ -275,4 +277,33 @@ body {
 @media (max-width: 720px) {
   .nav { display: none; }
   .chip { font-size: 0.64rem; padding: 3px 8px; }
+}
+
+.ring-hint {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition: opacity 0.4s ease;
+}
+.ring-wrap:hover + .ring-hint { opacity: 0; }
+
+/* Grounding shadow. A canvas has no box-shadow of its own, so the shadow is a
+   separate layer under the ring; without it the ring reads as floating. */
+.ring-wrap::after {
+  content: "";
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  bottom: 26%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    var(--ring-core) 0%,
+    color-mix(in srgb, var(--ring-core) 40%, transparent) 46%,
+    transparent 74%);
+  filter: blur(8px);
+  pointer-events: none;
 }

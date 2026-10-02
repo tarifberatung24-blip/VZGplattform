@@ -21,6 +21,7 @@ window.I18N = {
     "pillars.0": "Администрация",
     "pillars.1": "Комуникация",
     "pillars.2": "Документи и договори",
+    "ring.hint": "Задръж и завърти · клик за пауза",
     "footer.rights": "© 2026 HORIZON by VZG",
     "footer.legal": "Правна информация"
   },
@@ -44,6 +45,7 @@ window.I18N = {
     "pillars.0": "Verwaltung",
     "pillars.1": "Kommunikation",
     "pillars.2": "Dokumente und Verträge",
+    "ring.hint": "Ziehen zum Drehen · Klick für Pause",
     "footer.rights": "© 2026 HORIZON by VZG",
     "footer.legal": "Rechtliches"
   },
@@ -67,6 +69,7 @@ window.I18N = {
     "pillars.0": "Administration",
     "pillars.1": "Communication",
     "pillars.2": "Documents and contracts",
+    "ring.hint": "Drag to rotate · click to pause",
     "footer.rights": "© 2026 HORIZON by VZG",
     "footer.legal": "Legal"
   }

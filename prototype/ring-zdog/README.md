@@ -32,6 +32,19 @@ The general approach to segmented rings follows the standard
 - The tilt lives on the illustration, so the extrusion is foreshortened by the
   same transform as the faces.
 
+## Motion
+
+The ring turns continuously and can be dragged to spin. Hovering holds it still
+so a label can be read without chasing it, and a click toggles pause.
+
+`prefers-reduced-motion: reduce` starts it paused — drag still works, but nothing
+moves on its own.
+
+Because the chips are HTML and the segments are canvas, the chips are
+re-projected from Zdog's own transforms every frame. Placed once at build time
+they slid off their segments the moment the ring moved; that is the bug this
+avoids.
+
 ## i18n
 
 Every visible string, **including the ring's own six labels**, lives in
