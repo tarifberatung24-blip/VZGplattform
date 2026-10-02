@@ -16,7 +16,11 @@
   --thread-core: #003f88;
   --thread-glow: #2f80ed;
   --thread-edge: #ffffff;
-  --ring-core: rgb(0 0 0 / 0.30);
+  --ring-0: #003f88;
+  --ring-1: #d7dfea;
+  --ring-2: #0b1220;
+  --ring-wall: #001a3a;
+  --ring-bevel: rgb(255 255 255 / 0.85);
 }
 
 [data-theme="dark"] {
@@ -33,7 +37,11 @@
   --thread-core: #f97316;
   --thread-glow: #fb923c;
   --thread-edge: #000000;
-  --ring-core: rgb(249 115 22 / 0.24);
+  --ring-0: #f97316;
+  --ring-1: #e4e4e7;
+  --ring-2: #18181b;
+  --ring-wall: #7c2d12;
+  --ring-bevel: rgb(255 255 255 / 0.35);
 }
 
 * { box-sizing: border-box; }

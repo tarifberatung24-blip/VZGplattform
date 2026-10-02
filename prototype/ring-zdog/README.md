@@ -7,56 +7,48 @@ switches wired up.
 cd prototype/ring-zdog && python3 -m http.server 12001
 ```
 
-## What this is
+## Design source
 
-Blocks linked into a chain, arranged around a circle, seen in 3D. Six blocks
-carrying the six platform areas, joined by six links with packets travelling
-between them. The ring stands upright and turns, so the links always read as a
-chain and never collapse into a row of boxes.
+The visual language is taken from `components/marketing/horizon-3d-scene.tsx`,
+the ring already on `/bg`. The blocks use the same palette (`--ring-0/1/2`), the
+same dark wall offset for thickness (`--ring-wall`), the same light bevel along
+the lit edge (`--ring-bevel`), and the same isometric tilt — `rotateX(58deg)
+rotateZ(-18deg)` — so the two graphics read as one family rather than two
+different illustrations.
 
-## Why plain canvas
+Two details are copied deliberately from that component:
 
-The blocks, their faces, and the packets all need per-frame control, which a
-retained 3D scene graph fights. The projection is a few lines of trigonometry
-and there is no dependency.
+- Each face is stroked in **its own tone darkened**, not with one shared stroke.
+  A single stroke cannot work: a white outline is invisible on the light segment.
+- The wall is a **copy of the shape pushed down**, not a filter. A filter would
+  be foreshortened along with the ring instead of sitting under it.
 
-## How the 3D works
+## Why canvas, not SVG
 
-A block is eight corners in its own local space. The ring position, the upright
-lean, and the spin are all applied at projection time, so one set of corner data
-serves every block and every frame.
+The site's ring is static, so SVG suits it. Here the blocks turn and the packets
+travel, both of which need per-frame control. The design language is matched by
+using the same tokens and the same lighting model, not by using the same
+technology.
 
-Two things make it read as 3D rather than as flat shapes:
+## Structure
 
-- **Lean.** The ring tilts back about X, so a circle of blocks still reads as a
-  circle under perspective instead of as a line.
-- **Perspective.** Near blocks are drawn up to 32% larger than far ones. The
-  first version used a weak factor and the result looked flat — the depth spread
-  was only 11%, which the eye reads as a flat ring.
+Six blocks, one per platform area, joined by six links closing the circle. Each
+link carries two packets, so information is visibly moving in both directions.
 
-Every face and every link is collected into one list with a depth value and
-sorted before painting, so the whole scene draws back to front in a single pass.
-Back faces are drawn dim rather than culled, so a block still reads as a solid
-object when it turns edge-on.
-
-## What is inside a block
-
-A stack of bars whose height is the block's fill level, plus a hash strip along
-the bottom. Enough to read as data without being busy. The fill level drifts
-between targets over time, so the chain looks like it is confirming rather than
-sitting still.
+Inside each block: bars whose height is the fill level, plus a hash strip. The
+fill drifts between targets, so the chain looks like it is confirming rather
+than sitting still.
 
 ## Theme
 
-Colour comes from the site's `--thread-*` tokens, the same ones the Layer 0
-background layer uses: blue on white, orange on black. The tokens are cached
-rather than read from `getComputedStyle` every frame, which would force a style
-recalc at 60fps.
+Tokens are read from CSS custom properties and cached — reading
+`getComputedStyle` every frame would force a style recalc at 60fps. The parser
+understands both hex and `rgb()`, because the site's tokens are a mix of the two.
 
 ## Motion
 
 Slow rotation, drag to turn it, hover to hold it still so a label can be read,
 click to pause. `prefers-reduced-motion: reduce` starts it paused.
 
-Labels are projected from each block's own centre, so they follow the chain as
-it turns and dim with depth instead of sitting on a fixed ring.
+Labels are projected from each block's own centre, so they follow the chain and
+dim with depth instead of sitting on a fixed ring.
