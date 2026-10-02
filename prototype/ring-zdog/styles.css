@@ -13,10 +13,10 @@
   --glass-sheen: rgb(0 63 136 / 0.42);
   --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
 
-  --ring-0: #003f88;
-  --ring-1: #c9d4e3;
-  --ring-2: #0b1220;
-  --ring-core: rgb(0 0 0 / 0.34);
+  --thread-core: #003f88;
+  --thread-glow: #2f80ed;
+  --thread-edge: #ffffff;
+  --ring-core: rgb(0 0 0 / 0.30);
 }
 
 [data-theme="dark"] {
@@ -30,10 +30,10 @@
   --glass-sheen: rgb(249 115 22 / 0.55);
   --glass-shadow: 0 8px 30px -14px rgb(0 0 0 / 0.9);
 
-  --ring-0: #f97316;
-  --ring-1: #e4e4e7;
-  --ring-2: #3f3f46;
-  --ring-core: rgb(249 115 22 / 0.28);
+  --thread-core: #f97316;
+  --thread-glow: #fb923c;
+  --thread-edge: #000000;
+  --ring-core: rgb(249 115 22 / 0.24);
 }
 
 * { box-sizing: border-box; }
