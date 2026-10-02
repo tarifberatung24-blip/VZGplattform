@@ -33,9 +33,14 @@
       "navSecurity": "Sicherheit",
       "navAbout": "So funktioniert's",
       "navContact": "Kontakt",
-      "headline1": "Übernimm die Kontrolle.",
-      "headline2": "Klarer Horizont in Deutschland.",
-      "subtitle": "Verwalte deine Verträge und Kosten an einem Ort – du siehst, wie viel du sparen kannst und was als Nächstes zu tun ist.",
+      "headline1": "HORIZON",
+      "headline2": "Dein digitaler Berater in Deutschland.",
+      "subtitle": "Klare Hilfe für deinen Verwaltungsalltag in Deutschland.",
+      "pillars": [
+        "Verwaltung",
+        "Kommunikation",
+        "Verträge und Dokumente verwalten und kontrollieren"
+      ],
       "primaryCta": "Kostenlos starten"
     },
     "ctaPrimary": "Möglichkeiten prüfen",
