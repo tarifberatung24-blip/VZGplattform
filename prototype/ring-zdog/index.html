@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="bg" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HORIZON — 3D ring demo</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="chrome">
+  <div class="chrome__inner">
+    <span class="brand">HORIZON</span>
+    <nav class="nav">
+      <a href="#" data-i18n="nav.how">Как работи</a>
+      <a href="#" data-i18n="nav.fn">Функции</a>
+      <a href="#" data-i18n="nav.contact">Контакт</a>
+    </nav>
+    <div class="controls">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="bg" class="on">BG</button>
+        <button type="button" data-lang="de">DE</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <button type="button" id="themeBtn" class="theme" aria-label="Theme">
+        <span data-i18n="theme">Тъмна</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="hero">
+  <div class="hero__copy">
+    <h1 data-i18n="hero.h1">Документи. Договори. Институции.</h1>
+    <p class="accent" data-i18n="hero.h2">По-лесно с HORIZON.</p>
+    <p class="sub" data-i18n="hero.sub">Разбирай документи и управлявай административни задачи в Германия — стъпка по стъпка.</p>
+    <div class="cta">
+      <a href="#" class="btn btn--primary" data-i18n="hero.cta">Започни</a>
+      <a href="#" class="btn" data-i18n="hero.cta2">Виж как работи</a>
+    </div>
+  </div>
+
+  <div class="hero__scene">
+    <!-- Zdog draws the ring into this canvas. Its labels come from the
+         translation table, so switching language rebuilds the whole scene. -->
+    <div class="ring-wrap">
+      <canvas class="ring" id="ring" width="620" height="620"></canvas>
+      <div class="ring-labels" id="ringLabels"></div>
+    </div>
+  </div>
+</main>
+
+<section class="pillars" id="pillars"></section>
+
+<footer class="chrome chrome--footer">
+  <div class="chrome__inner">
+    <span data-i18n="footer.rights">© 2026 HORIZON by VZG</span>
+    <span data-i18n="footer.legal">Правна информация</span>
+  </div>
+</footer>
+
+<script src="zdog.dist.min.js"></script>
+<script src="i18n.js"></script>
+<script src="ring.js"></script>
+</body>
+</html>

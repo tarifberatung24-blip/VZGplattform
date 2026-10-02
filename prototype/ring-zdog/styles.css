@@ -1,0 +1,278 @@
+/* HORIZON demo — glass chrome, two themes, Zdog ring.
+   The theme tokens mirror the ones in the real app so what you see here is
+   what the ring will look like once it is ported. */
+
+:root {
+  --bg: #ffffff;
+  --fg: #0b1220;
+  --muted: #4b5563;
+  --accent: #003f88;
+
+  --glass-bg: rgb(255 255 255 / 0.62);
+  --glass-border: rgb(0 63 136 / 0.16);
+  --glass-sheen: rgb(0 63 136 / 0.42);
+  --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
+
+  --ring-0: #003f88;
+  --ring-1: #c9d4e3;
+  --ring-2: #0b1220;
+  --ring-tick: #003f88;
+}
+
+[data-theme="dark"] {
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #a1a1aa;
+  --accent: #f97316;
+
+  --glass-bg: rgb(255 255 255 / 0.06);
+  --glass-border: rgb(255 255 255 / 0.12);
+  --glass-sheen: rgb(249 115 22 / 0.55);
+  --glass-shadow: 0 8px 30px -14px rgb(0 0 0 / 0.9);
+
+  --ring-0: #f97316;
+  --ring-1: #e4e4e7;
+  --ring-2: #3f3f46;
+  --ring-tick: #f97316;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ---- glass chrome ---- */
+
+.chrome {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.chrome--footer {
+  position: static;
+  border-bottom: 0;
+  border-top: 1px solid var(--glass-border);
+  margin-top: auto;
+}
+
+.chrome__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.brand {
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  font-size: 0.9rem;
+}
+
+.nav {
+  display: flex;
+  gap: 22px;
+  margin-left: 12px;
+}
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+.nav a:hover { color: var(--fg); }
+
+.controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lang {
+  display: flex;
+  border: 1px solid var(--glass-border);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.lang button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.lang button.on {
+  background: var(--accent);
+  color: #fff;
+}
+
+.theme {
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+/* ---- hero ---- */
+
+.hero {
+  flex: 1;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 56px 24px 24px;
+  display: grid;
+  gap: 40px;
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr); }
+}
+
+.hero__copy h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.hero__copy .accent {
+  margin: 6px 0 0;
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+}
+.hero__copy .sub {
+  margin: 20px 0 0;
+  max-width: 34rem;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  color: var(--fg);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.25s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn--primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* ---- ring ---- */
+
+.hero__scene { display: flex; justify-content: center; }
+
+.ring-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 1;
+}
+
+.ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+.ring:active { cursor: grabbing; }
+
+.ring-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Chips sit on the ring's projected ellipse. Each carries its own angle, so
+   the label rotates to follow the ring rather than all staying flat. */
+.chip {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--fg);
+  box-shadow: 0 4px 14px -8px rgb(0 0 0 / 0.5);
+}
+
+/* ---- pillars ---- */
+
+.pillars {
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8px 24px 56px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 32px;
+}
+.pillar {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.pillar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+@media (max-width: 720px) {
+  .nav { display: none; }
+  .chip { font-size: 0.64rem; padding: 3px 8px; }
+}
