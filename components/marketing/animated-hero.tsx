@@ -22,14 +22,34 @@ export function AnimatedHero() {
         <div className="flex w-full max-w-2xl flex-col items-start gap-6">
           <h1 className="font-display text-balance text-[clamp(2.4rem,6vw,5rem)] font-black leading-[1.02] tracking-[-0.04em] text-foreground">
             {t.home.hero.headline1}
-            <span className="mt-1 block" style={{ color: "var(--thread-core)" }}>
-              {t.home.hero.headline2}
-            </span>
           </h1>
+
+          <p
+            className="text-pretty text-lg font-semibold leading-snug sm:text-xl"
+            style={{ color: "var(--thread-core)" }}
+          >
+            {t.home.hero.headline2}
+          </p>
 
           <p className="max-w-xl text-pretty text-base leading-8 text-muted-foreground sm:text-lg">
             {t.home.hero.subtitle}
           </p>
+
+          <ul className="flex flex-col gap-2.5">
+            {t.home.hero.pillars.map((pillar) => (
+              <li
+                key={pillar}
+                className="flex items-start gap-3 text-sm font-medium text-foreground sm:text-base"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-2 size-1.5 shrink-0 rounded-full"
+                  style={{ background: "var(--thread-core)" }}
+                />
+                {pillar}
+              </li>
+            ))}
+          </ul>
 
           <div className="flex flex-wrap items-center gap-3">
             <Link

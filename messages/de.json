@@ -33,14 +33,19 @@
       "navSecurity": "Sicherheit",
       "navAbout": "So funktioniert's",
       "navContact": "Kontakt",
-      "headline1": "Dokumente. Verträge. Behörden.",
-      "headline2": "Einfacher mit HORIZON.",
-      "subtitle": "Verstehe Dokumente, bereite Anträge vor und erledige wichtige Verwaltungs- und Vertragsaufgaben in Deutschland – Schritt für Schritt.",
-      "primaryCta": "Jetzt starten"
+      "headline1": "HORIZON",
+      "headline2": "Dein digitaler Berater in Deutschland.",
+      "subtitle": "Klare Hilfe für deinen Verwaltungsalltag in Deutschland.",
+      "pillars": [
+        "Verwaltung",
+        "Kommunikation",
+        "Verträge und Dokumente verwalten und kontrollieren"
+      ],
+      "primaryCta": "Kostenlos starten"
     },
     "ctaPrimary": "Möglichkeiten prüfen",
     "ctaSecondary": "Meine Kosten optimieren",
-    "trust": "Kostenlos starten.",
+    "trust": "Kostenloses Profil. Ohne Verpflichtung.",
     "promise": "Lass kein Geld liegen.",
     "promiseSub": "HORIZON by VZG prüft Verträge, Kosten, Steuermöglichkeiten und mögliche staatliche Hilfen, die für deine Situation relevant sind.",
     "opportunityTitle": "Wo verlierst du Geld?",
