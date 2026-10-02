@@ -1,18 +1,28 @@
-/* HORIZON — the platform as a nervous system.
-   A miniature of the product: a sphere of filaments with information running
-   through it. Everything lives inside the circle; nothing spills past the rim.
+/* HORIZON — a circular block chain.
+   Blocks linked into a chain, arranged around a circle, seen in 3D. The ring
+   stands upright and turns, so the links are always visibly a chain and never
+   flatten into a row of boxes.
 
-   Plain canvas rather than a 3D library. The filaments are a branching network
-   and the information is a pulse travelling along each branch, which needs
-   per-frame control of every strand. A retained 3D scene graph fights that.
+   Plain canvas: the blocks, their faces, and the packets travelling the links
+   all need per-frame control, which a retained 3D scene graph fights. The
+   projection is a few lines of trigonometry.
 
-   Colour comes from the site's --thread-* tokens, so it follows the theme
-   exactly like the Layer 0 background layer does. */
+   Colour comes from the site's --thread-* tokens, so the graphic follows the
+   theme exactly like the Layer 0 background layer does. */
 
-/* ---------- deterministic randomness ----------
-   A seeded generator, so the network is identical on every load and on every
-   language switch. Without it the layout would be reshuffled whenever the user
-   changed language, which reads as a glitch rather than a redraw. */
+const SEGMENTS = 6;
+
+/* Block data. The labels are the six platform areas, so the diagram reads as
+   this product rather than as a generic blockchain. */
+const BLOCKS = [
+  { i18n: "ring.0", tone: 0 },
+  { i18n: "ring.1", tone: 1 },
+  { i18n: "ring.2", tone: 2 },
+  { i18n: "ring.3", tone: 0 },
+  { i18n: "ring.4", tone: 1 },
+  { i18n: "ring.5", tone: 2 },
+];
+
 function mulberry32(seed) {
   return function () {
     seed |= 0;
@@ -23,8 +33,6 @@ function mulberry32(seed) {
   };
 }
 
-const SEGMENTS = 6;
-
 const state = {
   lang: "bg",
   theme: "dark",
@@ -32,120 +40,7 @@ const state = {
   t: (k) => (window.I18N[state.lang] && window.I18N[state.lang][k]) || k,
 };
 
-/* ---------- network geometry ---------- */
-
-let nodes = [];       // { x, y, z, r } inside the unit sphere
-let edges = [];       // { a, b, len } between nearby nodes
-let filaments = [];   // { a, b, c, len, pulses:[{ t, speed }] }
-let rot = { y: 0, x: 0 };
-let drag = null;
-
-/* Fibonacci sphere: an even spread of nodes with no poles or clumping, which is
-   what makes the network read as a globe rather than a random blob. */
-function seedNodes(rand, count) {
-  const out = [];
-  const golden = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < count; i++) {
-    const y = 1 - (i / (count - 1)) * 2;
-    const r = Math.sqrt(Math.max(0, 1 - y * y));
-    const th = golden * i;
-    // Pull each node slightly off the shell so the network has depth inside the
-    // circle instead of sitting on a hollow surface.
-    const k = 0.55 + rand() * 0.45;
-    out.push({
-      x: Math.cos(th) * r * k,
-      y: y * k,
-      z: Math.sin(th) * r * k,
-      r: 0.5 + rand() * 0.9,
-    });
-  }
-  return out;
-}
-
-function buildNetwork() {
-  const rand = mulberry32(20261001);
-  const N = 190;
-  nodes = seedNodes(rand, N);
-
-  // Connect each node to its nearest few. Distances are computed in 3D, so the
-  // web is a real sphere rather than a flat disc.
-  edges = [];
-  for (let i = 0; i < N; i++) {
-    const d = [];
-    for (let j = 0; j < N; j++) {
-      if (i === j) continue;
-      const dx = nodes[i].x - nodes[j].x;
-      const dy = nodes[i].y - nodes[j].y;
-      const dz = nodes[i].z - nodes[j].z;
-      d.push({ j, d2: dx * dx + dy * dy + dz * dz });
-    }
-    d.sort((p, q) => p.d2 - q.d2);
-    const links = 2 + Math.floor(rand() * 3);
-    for (let k = 0; k < links && k < d.length; k++) {
-      const j = d[k].j;
-      if (j < i) continue;             // one edge per pair
-      edges.push({ a: i, b: j, len: Math.sqrt(d[k].d2) });
-    }
-  }
-
-  // Each edge is drawn as a curved filament rather than a straight line: the
-  // bow gives the branching, organic look of a nerve rather than a wire mesh.
-  filaments = edges.map((e, idx) => {
-    const bow = 0.06 + rand() * 0.14;
-    const ang = rand() * Math.PI * 2;
-    return {
-      ...e,
-      // control point for the quadratic curve, offset perpendicular to the edge
-      c: { x: Math.cos(ang) * bow, y: Math.sin(ang) * bow, z: (rand() - 0.5) * bow },
-      // Information travelling through: a pulse per filament, staggered so the
-      // network never blinks in unison.
-      pulses: [
-        { t: rand(), speed: 0.10 + rand() * 0.16 },
-        ...(idx % 3 === 0 ? [{ t: rand(), speed: 0.07 + rand() * 0.12 }] : []),
-      ],
-      w: 0.5 + rand() * 0.9,
-    };
-  });
-}
-
-/* ---------- projection ----------
-   Rotate the point, then apply a weak perspective so the near side of the
-   sphere is slightly larger. Without the perspective term the projection reads
-   as flat and the "miniature globe" effect is lost. */
-function project(p, cx, cy, R) {
-  const cy_ = Math.cos(rot.y), sy_ = Math.sin(rot.y);
-  const cx_ = Math.cos(rot.x), sx_ = Math.sin(rot.x);
-
-  let x = p.x * cy_ + p.z * sy_;
-  let z = -p.x * sy_ + p.z * cy_;
-  let y = p.y * cx_ - z * sx_;
-  z = p.y * sx_ + z * cx_;
-
-  const persp = 1 / (1 - z * 0.22);
-  return { x: cx + x * R * persp, y: cy + y * R * persp, z, s: persp };
-}
-
-/* Clip a filament to the circle. Anything outside the rim is trimmed, so the
-   network is contained rather than spilling over the edges. */
-function clipToCircle(pts, cx, cy, R) {
-  const inside = (p) => {
-    const dx = p.x - cx, dy = p.y - cy;
-    return dx * dx + dy * dy <= R * R;
-  };
-  const out = [];
-  for (let i = 0; i < pts.length; i++) {
-    const p = pts[i];
-    if (inside(p)) {
-      out.push(p);
-    } else if (out.length) {
-      break; // left the circle; stop the strand here
-    }
-  }
-  return out;
-}
-
 let colors = null;
-
 function refreshColors() {
   const css = getComputedStyle(document.body);
   colors = {
@@ -154,9 +49,130 @@ function refreshColors() {
   };
 }
 
+/* ---------- geometry ----------
+   A block is eight corners in its own local space. Everything else — the ring
+   position, the upright tilt, the spin — is applied at projection time, so the
+   same corner data works for every block and every frame. */
+const BLOCK = {
+  half: { x: 0.30, y: 0.30, z: 0.16 },   // half-extents; z is the thickness
+  ringR: 0.74,                            // radius of the circle of blocks
+  tilt: 0.52,                             // how far the ring leans back, radians
+};
+
+function blockCorners(cx, cy, cz) {
+  const { x: hx, y: hy, z: hz } = BLOCK.half;
+  const out = [];
+  for (const sx of [-1, 1]) {
+    for (const sy of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        out.push({ x: cx + sx * hx, y: cy + sy * hy, z: cz + sz * hz });
+      }
+    }
+  }
+  return out;
+}
+
+/* Which corner pairs form the twelve edges. Indices match blockCorners order:
+   bit 2 = x sign, bit 1 = y sign, bit 0 = z sign. */
+const EDGES = [];
+for (let a = 0; a < 8; a++) {
+  for (let b = a + 1; b < 8; b++) {
+    // adjacent corners differ in exactly one bit
+    if ((a ^ b) === 1 || (a ^ b) === 2 || (a ^ b) === 4) EDGES.push([a, b]);
+  }
+}
+
+/* The six faces, as corner indices, each with its outward normal in local
+   space. Used to sort faces and to shade them by which way they point. */
+const FACES = [
+  { idx: [0, 2, 6, 4], n: [-1, 0, 0] },
+  { idx: [1, 3, 7, 5], n: [1, 0, 0] },
+  { idx: [0, 1, 5, 4], n: [0, -1, 0] },
+  { idx: [2, 3, 7, 6], n: [0, 1, 0] },
+  { idx: [0, 1, 3, 2], n: [0, 0, -1] },
+  { idx: [4, 5, 7, 6], n: [0, 0, 1] },
+];
+
+let blocks = [];
+let links = [];
+let drag = null;
+let rot = { y: 0, x: 0 };
+
+function buildBlocks() {
+  const rand = mulberry32(77003);
+  blocks = [];
+
+  for (let i = 0; i < BLOCKS.length; i++) {
+    const a = (i / BLOCKS.length) * Math.PI * 2;
+
+    // Each block sits on the circle, facing outward along its radius.
+    const cx = Math.cos(a) * BLOCK.ringR;
+    const cy = Math.sin(a) * BLOCK.ringR;
+    const cz = 0;
+
+    blocks.push({
+      ...BLOCKS[i],
+      angle: a,
+      center: { x: cx, y: cy, z: cz },
+      corners: blockCorners(cx, cy, cz),
+      // Height of the little tower inside the block, animated as the chain
+      // "confirms". Kept in 0..1 so it can be eased.
+      fill: 0.15 + rand() * 0.7,
+      fillTarget: 0.15 + rand() * 0.7,
+      // A small hash strip on the front face, so a block reads as a block.
+      hash: Array.from({ length: 7 }, () => rand()),
+    });
+  }
+
+  // Links between consecutive blocks, closing the ring. Each carries packets
+  // travelling from one block to the next.
+  links = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const a = blocks[i];
+    const b = blocks[(i + 1) % blocks.length];
+    links.push({
+      a: i,
+      b: (i + 1) % blocks.length,
+      packets: [
+        { t: rand(), speed: 0.16 + rand() * 0.14 },
+        { t: (rand() + 0.5) % 1, speed: 0.12 + rand() * 0.16 },
+      ],
+      // The link bows outward, which is what makes it read as a chain rather
+      // than as a ring of straight spokes.
+      bow: 0.16 + rand() * 0.1,
+    });
+  }
+}
+
+/* ---------- projection ---------- */
+function project(p, cx, cy, R) {
+  // Upright ring: lean it back about X so the circle reads as a circle in
+  // perspective, then spin about Y.
+  const tilt = BLOCK.tilt;
+
+  // lean back (X axis)
+  let y = p.y * Math.cos(tilt) - p.z * Math.sin(tilt);
+  let z = p.y * Math.sin(tilt) + p.z * Math.cos(tilt);
+
+  // spin (Y axis)
+  const cy_ = Math.cos(rot.y), sy_ = Math.sin(rot.y);
+  const x = p.x * cy_ + z * sy_;
+  z = -p.x * sy_ + z * cy_;
+
+  const persp = 1 / (1 - z * 0.36);
+  return { x: cx + x * R * persp, y: cy + y * R * persp, z, s: persp };
+}
+
+function hexA(hex, a) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec((hex || "").trim());
+  if (!m) return `rgba(249,115,22,${a})`;
+  const c = [1, 2, 3].map((i) => parseInt(m[i], 16));
+  return `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+}
+
 /* ---------- render ---------- */
 
-function draw(time) {
+function draw() {
   const canvas = document.getElementById("ring");
   const ctx = canvas.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
@@ -167,125 +183,207 @@ function draw(time) {
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
   }
-
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssW, cssH);
-
-  const cx = cssW / 2;
-  const cy = cssH / 2;
-  const R = Math.min(cssW, cssH) * 0.42;
 
   if (!colors) refreshColors();
   const col = colors;
 
-  // Project every node once per frame.
-  const P = nodes.map((n) => project(n, cx, cy, R));
+  const cx = cssW / 2;
+  const cy = cssH / 2;
+  const R = Math.min(cssW, cssH) * 0.365;
 
-  // Rim: the boundary the network is contained by. A soft inner glow reads as
-  // glass; the crisp ring keeps the circle legible.
-  const rim = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.02);
-  rim.addColorStop(0, "transparent");
-  rim.addColorStop(0.82, hexA(col.glow, 0.05));
-  rim.addColorStop(1, hexA(col.glow, 0.16));
-  ctx.fillStyle = rim;
-  ctx.beginPath();
-  ctx.arc(cx, cy, R * 1.02, 0, Math.PI * 2);
-  ctx.fill();
+  // ---- build the draw list: every block face and every link, each with a
+  // depth, so the whole scene can be painted back to front in one pass.
+  const items = [];
 
-  ctx.strokeStyle = hexA(col.glow, 0.34);
-  ctx.lineWidth = 1.1;
-  ctx.beginPath();
-  ctx.arc(cx, cy, R, 0, Math.PI * 2);
-  ctx.stroke();
+  const P = blocks.map((b) => ({
+    b,
+    center: project(b.center, cx, cy, R),
+    corners: b.corners.map((c) => project(c, cx, cy, R)),
+  }));
 
-  // Filaments, drawn back to front so the near strands sit on top.
-  const order = filaments
-    .map((f) => ({ f, z: (P[f.a].z + P[f.b].z) / 2 }))
-    .sort((p, q) => p.z - q.z);
+  for (const bp of P) {
+    // face normals in world space, for shading
+    const rotN = (n) => {
+      const tilt = BLOCK.tilt;
+      let y = n[1] * Math.cos(tilt) - n[2] * Math.sin(tilt);
+      let z = n[1] * Math.sin(tilt) + n[2] * Math.cos(tilt);
+      const cy_ = Math.cos(rot.y), sy_ = Math.sin(rot.y);
+      const x = n[0] * cy_ + z * sy_;
+      z = -n[0] * sy_ + z * cy_;
+      return { x, y, z };
+    };
 
-  for (const { f, z } of order) {
-    const a = P[f.a];
-    const b = P[f.b];
-    const c = project(f.c, cx, cy, R);
+    for (const f of FACES) {
+      const pts = f.idx.map((i) => bp.corners[i]);
+      const zAvg = pts.reduce((s, p) => s + p.z, 0) / pts.length;
+      const n = rotN(f.n);
+      // The face points away from the viewer when its normal has negative z.
+      const facing = n.z;
+      items.push({ kind: "face", pts, z: zAvg, facing, block: bp.b, face: f });
+    }
+  }
 
-    // Quadratic curve sampled into points, so it can be clipped to the circle.
+  for (const l of links) {
+    const a = P[l.a].center;
+    const b = P[l.b].center;
+    // Bow the link outward from the ring centre.
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    const outX = mx - cx;
+    const outY = my - cy;
+    const len = Math.hypot(outX, outY) || 1;
+    const ctrl = {
+      x: mx + (outX / len) * R * l.bow,
+      y: my + (outY / len) * R * l.bow,
+      z: (a.z + b.z) / 2,
+    };
+
     const pts = [];
-    for (let i = 0; i <= 12; i++) {
-      const t = i / 12;
+    for (let i = 0; i <= 16; i++) {
+      const t = i / 16;
       const u = 1 - t;
       pts.push({
-        x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
-        y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
+        x: u * u * a.x + 2 * u * t * ctrl.x + t * t * b.x,
+        y: u * u * a.y + 2 * u * t * ctrl.y + t * t * b.y,
+        z: u * u * a.z + 2 * u * t * ctrl.z + t * t * b.z,
         t,
       });
     }
-    const kept = clipToCircle(pts, cx, cy, R);
-    if (kept.length < 2) continue;
+    items.push({ kind: "link", pts, z: (a.z + b.z) / 2, link: l });
+  }
 
-    const depth = (z + 1) / 2;             // 0 = far, 1 = near
-    const alpha = 0.10 + depth * 0.42;
+  items.sort((p, q) => p.z - q.z);
 
-    ctx.strokeStyle = hexA(col.core, alpha);
-    ctx.lineWidth = f.w * (0.6 + depth * 0.8);
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(kept[0].x, kept[0].y);
-    for (let i = 1; i < kept.length; i++) ctx.lineTo(kept[i].x, kept[i].y);
-    ctx.stroke();
-
-    // Information flowing: a bright pulse travelling along the filament.
-    for (const pulse of f.pulses) {
-      if (!state.paused) pulse.t += pulse.speed * 0.004;
-      if (pulse.t > 1) pulse.t -= 1;
-
-      // Position along the clipped run, so a pulse never lights up outside the
-      // circle even when its filament is trimmed at the rim.
-      const idx = Math.floor(pulse.t * (kept.length - 1));
-      const p0 = kept[idx];
-      const p1 = kept[Math.min(idx + 1, kept.length - 1)];
-      const frac = pulse.t * (kept.length - 1) - idx;
-      const px = p0.x + (p1.x - p0.x) * frac;
-      const py = p0.y + (p1.y - p0.y) * frac;
-
-      const g = ctx.createRadialGradient(px, py, 0, px, py, 7);
-      g.addColorStop(0, hexA(col.glow, 0.95 * (0.4 + depth * 0.6)));
-      g.addColorStop(0.4, hexA(col.glow, 0.35 * (0.4 + depth * 0.6)));
-      g.addColorStop(1, hexA(col.glow, 0));
-      ctx.fillStyle = g;
+  // ---- paint
+  for (const it of items) {
+    if (it.kind === "face") {
+      // Back faces are drawn dimmer rather than culled, so a block still reads
+      // as a solid object when it turns edge-on.
+      const lit = Math.max(0, it.facing);
+      const alpha = it.facing < 0 ? 0.06 : 0.12 + lit * 0.16;
+      ctx.fillStyle = hexA(col.core, alpha);
       ctx.beginPath();
-      ctx.arc(px, py, 7, 0, Math.PI * 2);
+      ctx.moveTo(it.pts[0].x, it.pts[0].y);
+      for (let i = 1; i < it.pts.length; i++) ctx.lineTo(it.pts[i].x, it.pts[i].y);
+      ctx.closePath();
       ctx.fill();
 
-      ctx.fillStyle = hexA("#ffffff", 0.85 * (0.35 + depth * 0.65));
+      // Edges: the wireframe that makes it a block rather than a smudge.
+      ctx.strokeStyle = hexA(col.glow, it.facing < 0 ? 0.18 : 0.55);
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+
+      // Front face only: the little content inside the block.
+      if (it.face.n[2] === 1) {
+        drawBlockContents(ctx, it, col);
+      }
+    } else {
+      const depth = (it.z + 1) / 2;
+      // The link is the chain: drawn solid, with a brighter head where it
+      // meets the next block.
+      ctx.strokeStyle = hexA(col.core, 0.28 + depth * 0.35);
+      ctx.lineWidth = 1.6 + depth * 1.2;
+      ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.arc(px, py, 1.3, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(it.pts[0].x, it.pts[0].y);
+      for (let i = 1; i < it.pts.length; i++) ctx.lineTo(it.pts[i].x, it.pts[i].y);
+      ctx.stroke();
+
+      for (const pk of it.link.packets) {
+        const idx = Math.min(it.pts.length - 1, Math.floor(pk.t * (it.pts.length - 1)));
+        const p0 = it.pts[idx];
+        const p1 = it.pts[Math.min(idx + 1, it.pts.length - 1)];
+        const frac = pk.t * (it.pts.length - 1) - idx;
+        const px = p0.x + (p1.x - p0.x) * frac;
+        const py = p0.y + (p1.y - p0.y) * frac;
+
+        const g = ctx.createRadialGradient(px, py, 0, px, py, 6);
+        g.addColorStop(0, hexA(col.glow, 0.9 * (0.4 + depth * 0.6)));
+        g.addColorStop(0.45, hexA(col.glow, 0.3 * (0.4 + depth * 0.6)));
+        g.addColorStop(1, hexA(col.glow, 0));
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = hexA("#ffffff", 0.85 * (0.4 + depth * 0.6));
+        ctx.beginPath();
+        ctx.arc(px, py, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }
 
-  // Nodes: the synapses. Drawn last so they sit on top of the filaments.
-  for (const n of P) {
-    const depth = (n.z + 1) / 2;
-    ctx.fillStyle = hexA(col.glow, 0.25 + depth * 0.6);
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, 0.8 + depth * 1.4, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  // ---- the six labels, drawn as HTML chips by syncChips()
 }
 
-/* hex + alpha -> rgba(), so the site's hex tokens can be drawn with opacity. */
-function hexA(hex, a) {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec((hex || "").trim());
-  if (!m) return `rgba(249,115,22,${a})`;
-  const c = [1, 2, 3].map((i) => parseInt(m[i], 16));
-  return `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+/* The inside of a block: a stack of "transactions" whose height is the fill
+   level, plus a hash strip. Enough to read as data without being busy. */
+function drawBlockContents(ctx, it, col) {
+  const b = it.block;
+  const pts = it.pts;
+  // centre of the front face
+  const fx = (pts[0].x + pts[2].x) / 2;
+  const fy = (pts[0].y + pts[2].y) / 2;
+
+  // face width/height from the projected corners
+  const w = Math.abs(pts[2].x - pts[0].x);
+  const h = Math.abs(pts[2].y - pts[0].y);
+
+  // stacked bars = the block's contents filling up
+  const bars = 4;
+  const bw = w * 0.52;
+  for (let i = 0; i < bars; i++) {
+    const level = Math.min(1, Math.max(0, b.fill * bars - i));
+    if (level <= 0) continue;
+    const bh = (h * 0.5) / bars - 1.5;
+    ctx.fillStyle = hexA(col.glow, 0.5 + level * 0.4);
+    ctx.fillRect(
+      fx - bw / 2,
+      fy + h * 0.22 - i * (bh + 1.5) - bh,
+      bw * level,
+      Math.max(1, bh)
+    );
+  }
+
+  // hash strip: short ticks along the bottom, so it reads as a hash
+  ctx.strokeStyle = hexA(col.glow, 0.5);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  const hy = fy + h * 0.30;
+  for (let i = 0; i < b.hash.length; i++) {
+    const x = fx - w * 0.26 + (i / (b.hash.length - 1)) * w * 0.52;
+    const t = 2 + b.hash[i] * 4;
+    ctx.moveTo(x, hy);
+    ctx.lineTo(x, hy + t);
+  }
+  ctx.stroke();
 }
 
 /* ---------- loop ---------- */
 
 function frame() {
-  if (!state.paused && !drag) rot.y += 0.0022;
+  if (!state.paused && !drag) rot.y += 0.0016;
   if (drag) rot.y = drag.rot;
+
+  // Blocks "confirm" over time: each drifts toward its target fill.
+  if (!state.paused) {
+    for (const b of blocks) {
+      if (Math.abs(b.fill - b.fillTarget) < 0.01) {
+        b.fillTarget = 0.15 + Math.random() * 0.7;
+      }
+      b.fill += (b.fillTarget - b.fill) * 0.02;
+    }
+    for (const l of links) {
+      for (const pk of l.packets) {
+        pk.t += pk.speed * 0.004;
+        if (pk.t > 1) pk.t -= 1;
+      }
+    }
+  }
+
   draw();
   requestAnimationFrame(frame);
 }
@@ -301,28 +399,35 @@ function makeChips() {
   for (let i = 0; i < SEGMENTS; i++) {
     const el = document.createElement("span");
     el.className = "chip";
-    el.dataset.i18n = `ring.${i}`;
+    el.dataset.i18n = BLOCKS[i].i18n;
     host.appendChild(el);
     chipEls.push(el);
   }
 }
 
-/* The labels sit on the rim, evenly spaced and counter-rotating slowly with the
-   network, so they read as attached to the object rather than painted on. */
+/* Labels sit on their own block, projected from the block's centre, so they
+   follow the chain as it turns instead of sitting on a fixed ring. */
 function syncChips() {
   const canvas = document.getElementById("ring");
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   const cx = w / 2;
   const cy = h / 2;
-  const R = Math.min(w, h) * 0.42;
+  const R = Math.min(w, h) * 0.365;
 
   for (let i = 0; i < chipEls.length; i++) {
-    const a = (i / SEGMENTS) * Math.PI * 2 - Math.PI / 2 + rot.y * 0.25;
+    if (!blocks[i]) continue;
+    const p = project(blocks[i].center, cx, cy, R);
     const el = chipEls[i];
-    el.style.left = cx + R * 1.14 * Math.cos(a) + "px";
-    el.style.top = cy + R * 1.14 * Math.sin(a) + "px";
-    el.style.opacity = (0.4 + 0.6 * (0.5 + 0.5 * Math.cos(a))).toFixed(2);
+    // Push the chip out past the block so it does not cover the block itself.
+    const outX = p.x - cx;
+    const outY = p.y - cy;
+    const len = Math.hypot(outX, outY) || 1;
+    el.style.left = p.x + (outX / len) * 40 + "px";
+    el.style.top = p.y + (outY / len) * 40 + "px";
+    // Blocks at the back fade, which reads as depth.
+    el.style.opacity = (0.35 + 0.65 * ((p.z + 1) / 2)).toFixed(2);
+    el.style.zIndex = String(1000 + Math.round(p.z * 100));
   }
 }
 
@@ -383,8 +488,6 @@ function renderPillars() {
   });
 }
 
-/* ---------- wiring ---------- */
-
 function setLang(lang) {
   state.lang = lang;
   applyI18n();
@@ -410,13 +513,12 @@ if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
   state.paused = true;
 }
 
-buildNetwork();
+buildBlocks();
 makeChips();
 applyI18n();
 renderPillars();
 attachPointer(document.getElementById("ring"));
 
-// The chips track the rotation, so they are synced from the same loop.
 (function tick() {
   syncChips();
   requestAnimationFrame(tick);
