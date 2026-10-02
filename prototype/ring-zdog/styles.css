@@ -226,8 +226,8 @@ body {
   pointer-events: none;
 }
 
-/* Chips are positioned in pixels from Zdog's own 3D transforms each frame, so
-   they track the segments as the ring turns. */
+/* Chips are positioned in pixels on the rim each frame, counter-rotating slowly
+   with the network, so they read as attached to the object. */
 .chip {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -290,20 +290,3 @@ body {
 }
 .ring-wrap:hover + .ring-hint { opacity: 0; }
 
-/* Grounding shadow. A canvas has no box-shadow of its own, so the shadow is a
-   separate layer under the ring; without it the ring reads as floating. */
-.ring-wrap::after {
-  content: "";
-  position: absolute;
-  left: 16%;
-  right: 16%;
-  bottom: 26%;
-  height: 9%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center,
-    var(--ring-core) 0%,
-    color-mix(in srgb, var(--ring-core) 40%, transparent) 46%,
-    transparent 74%);
-  filter: blur(8px);
-  pointer-events: none;
-}
