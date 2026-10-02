@@ -53,6 +53,22 @@ export function AnimatedHero() {
               </Link>
             </div>
 
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+              {t.home.hero.pillars.map((pillar) => (
+                <li
+                  key={pillar}
+                  className="relative pl-4 text-sm font-semibold text-foreground"
+                >
+                  <span
+                    className="absolute left-0 top-1/2 size-1.5 -translate-y-1/2 rounded-full"
+                    style={{ background: "var(--primary)" }}
+                    aria-hidden="true"
+                  />
+                  {pillar}
+                </li>
+              ))}
+            </ul>
+
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               {t.home.trust}
             </p>

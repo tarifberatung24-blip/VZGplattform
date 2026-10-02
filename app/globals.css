@@ -159,13 +159,18 @@
   --card-glass-shade: rgb(0 0 0 / 0.10);
   --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.28);
 
-  /* 3D hero scene. The slab needs to read as a physical pane against a white
-     page, which a near-white glass fill cannot do on its own: the blue tint
-     and the stronger edge are what make it visible. */
-  --scene-slab-top: rgb(255 255 255 / 0.98);
-  --scene-slab-bottom: rgb(0 63 136 / 0.22);
-  --scene-slab-border: rgb(0 63 136 / 0.28);
-  --scene-slab-shadow: 0 30px 52px -24px rgb(0 63 136 / 0.45);
+  /* Ring segments. The reference alternates three colours around the ring;
+     here they are the brand blue, the page white and the page ink, so the ring
+     reads as HORIZON's palette rather than the reference's red. */
+  --ring-0: #003f88;
+  --ring-1: #d7dfea;
+  --ring-2: #0b1220;
+  --ring-wall: #001a3a;
+  --ring-bevel: rgb(255 255 255 / 0.85);
+  /* Contact shadow. A soft pool alone reads as a halo, so a tighter, darker
+     core sits under the ring's near edge to actually ground it. */
+  --scene-ground: rgb(0 0 0 / 0.30);
+  --scene-ground-core: rgb(0 0 0 / 0.72);
 }
 .dark {
   color-scheme: dark;
@@ -227,12 +232,17 @@
   --card-glass-shade: rgb(0 0 0 / 0.5);
   --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.8);
 
-  /* 3D hero scene. On black the slab is lifted with an orange rim rather than
-     a blue one, so it separates from the background without going grey. */
-  --scene-slab-top: rgb(255 255 255 / 0.10);
-  --scene-slab-bottom: rgb(0 0 0 / 0.55);
-  --scene-slab-border: rgb(249 115 22 / 0.30);
-  --scene-slab-shadow: 0 30px 52px -24px rgb(0 0 0 / 0.85);
+  /* Ring segments. Same three-colour alternation as the light theme, keyed to
+     the dark palette: orange, a lifted grey and near-black. */
+  --ring-0: #f97316;
+  --ring-1: #e4e4e7;
+  --ring-2: #18181b;
+  --ring-wall: #7c2d12;
+  --ring-bevel: rgb(255 255 255 / 0.35);
+  /* On black a dark pool is invisible, so the ring is grounded with a warm
+     glow instead — light pooling on the floor rather than shade under it. */
+  --scene-ground: rgb(249 115 22 / 0.18);
+  --scene-ground-core: rgb(249 115 22 / 0.60);
 }
 @layer base {
   * {
@@ -571,10 +581,14 @@
 }
 
 /* HORIZON 3D hero scene — prototype.
-   Reference design language: a glossy sphere with one bright specular
-   highlight and a lit rim, a slab tilted back in perspective, and a soft
-   contact shadow. Built from CSS gradients only — no WebGL, no dependency —
-   so it recolours with the theme and stays sharp at any size. */
+   Design language from the reference: a 3D extruded ring of six separate
+   segments in alternating colours, tilted into an isometric view. The ring is
+   SVG and its thickness is a duplicated, downward-offset copy of each segment,
+   so it stays vector art with no WebGL.
+
+   The tilt is on the SVG itself. That matters: the offset wall is foreshortened
+   by the same transform as the faces, so the depth stays consistent around the
+   whole ring instead of being faked per segment. */
 
 .horizon-scene {
   position: relative;
@@ -582,9 +596,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* The scene owns the 3D space; children opt into it individually. */
-  perspective: 1200px;
-  perspective-origin: 50% 45%;
 }
 
 .horizon-scene__stage {
@@ -592,158 +603,131 @@
   width: 100%;
   max-width: 520px;
   aspect-ratio: 1 / 0.86;
+  perspective: 1200px;
+}
+
+/* ---- The ring ---------------------------------------------------------
+   rotateX lays it into an isometric plane; the slight rotateZ keeps it from
+   looking perfectly symmetrical, as in the reference. */
+.horizon-ring {
+  position: absolute;
+  /* The horizontal inset is generous because rotateZ inflates the bounding
+     box by ~1.26x; at 10% the rotated ring escaped the stage and gave the
+     page a horizontal scrollbar on tablet widths. */
+  inset: 8% 16% 16% 16%;
+  transform: rotateX(58deg) rotateZ(-18deg);
   transform-style: preserve-3d;
+  animation: horizon-ring-float 10s ease-in-out infinite;
 }
 
-/* ---- The sphere -------------------------------------------------------
-   Four stacked gradients do the work of a render:
-   1. a tight specular dot, 2. a broad top-left sheen, 3. the body colour
-   shading to a darker lower-right, 4. a rim light along the lower edge that
-   separates the sphere from the background. */
-.horizon-scene__sphere {
-  position: absolute;
-  top: 4%;
-  left: 2%;
-  width: 62%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 33% 26%,
-      rgb(255 255 255 / 0.98) 0%,
-      rgb(255 255 255 / 0.55) 5%,
-      rgb(255 255 255 / 0) 20%
-    ),
-    radial-gradient(
-      circle at 30% 22%,
-      color-mix(in srgb, var(--primary) 55%, white) 0%,
-      var(--primary) 38%,
-      color-mix(in srgb, var(--primary) 72%, black) 74%,
-      color-mix(in srgb, var(--primary) 45%, black) 100%
-    );
-  box-shadow:
-    /* rim light on the lower-right, as if a second light sits behind */
-    inset -14px -18px 34px -14px color-mix(in srgb, var(--primary) 40%, white),
-    /* a darker inner edge so the silhouette does not float flat */
-    inset 8px 10px 26px -12px rgb(255 255 255 / 0.35),
-    /* cast shadow on the ground */
-    0 40px 60px -30px rgb(0 0 0 / 0.55);
-  animation: horizon-float 9s ease-in-out infinite;
+.horizon-ring__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-/* ---- The slab ---------------------------------------------------------
-   Tilted back in perspective, so its far edge is visibly narrower than its
-   near edge. Kept in the theme's glass treatment so it reads as the same
-   material as the cards elsewhere on the site. */
-.horizon-scene__slab {
-  position: absolute;
-  right: 0;
-  top: 22%;
-  width: 58%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 22px 24px;
-  border-radius: 18px;
-  transform: rotateY(-19deg) rotateX(7deg) translateZ(20px);
-  transform-origin: right center;
-  /* A top-to-bottom falloff over the glass fill. The plain glass fill is
-     near-white on the light theme, so the slab would vanish into the page;
-     these tokens are what give it a lit surface and a visible edge. */
-  background: linear-gradient(
-    160deg,
-    var(--scene-slab-top) 0%,
-    var(--scene-slab-bottom) 100%
-  );
-  border: 1px solid var(--scene-slab-border);
-  box-shadow:
-    inset 0 1px 0 var(--card-glass-highlight),
-    inset 0 -1px 0 var(--card-glass-shade),
-    var(--scene-slab-shadow);
-  backdrop-filter: blur(12px);
+/* The wall sits a fixed distance "below" the faces in SVG space; the tilt
+   converts that offset into the visible thickness of the ring. The offset is
+   what makes the extrusion read — at a few pixels it looked like a flat
+   sticker, so it is deliberately generous. */
+.horizon-ring__wall {
+  transform: translateY(22px);
 }
 
-.horizon-scene__pillar {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--foreground);
-  padding-left: 14px;
-  position: relative;
+/* The bevel is the face lifted 1px and drawn light, so only a sliver shows
+   along the upper edge — a lit rim rather than a second shape. */
+.horizon-ring__bevel {
+  transform: translateY(-1.5px);
 }
-.horizon-scene__pillar::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.5em;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--primary);
-  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--primary) 60%, transparent);
+
+/* Each face is stroked with its own darkened tone. A single shared stroke
+   cannot work: a white outline is invisible on the white segment. The stroke
+   is a bevel: it darkens the segment's edge so the face does not read as a
+   flat cut-out. */
+.horizon-ring__face {
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+  opacity: 0;
+  animation: horizon-face-in 0.6s ease-out forwards;
+}
+.horizon-ring__face[data-tone="0"] { stroke: color-mix(in srgb, var(--ring-0) 60%, black); }
+.horizon-ring__face[data-tone="1"] { stroke: color-mix(in srgb, var(--ring-1) 72%, black); }
+.horizon-ring__face[data-tone="2"] { stroke: color-mix(in srgb, var(--ring-2) 70%, white); }
+
+@keyframes horizon-face-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes horizon-ring-float {
+  0%,
+  100% {
+    transform: rotateX(58deg) rotateZ(-18deg) translateY(0);
+  }
+  50% {
+    transform: rotateX(58deg) rotateZ(-18deg) translateY(-10px);
+  }
 }
 
 /* ---- Contact shadow ---------------------------------------------------
-   A blurred ellipse under the whole stage, tying the objects to a floor. */
-.horizon-scene__shadow {
+   In screen space, not inside the SVG: a filter on the SVG would be
+   foreshortened with the ring and would not read as a shadow cast on a floor. */
+.horizon-scene__ground {
   position: absolute;
-  bottom: 4%;
-  left: 6%;
-  width: 76%;
-  height: 9%;
+  left: 12%;
+  right: 12%;
+  /* Measured against the rendered ring: its lower arc lands ~21% above the
+     stage bottom, so the shadow box is anchored there rather than at the
+     stage floor. Anchoring at the floor left a 90px gap of bare page and the
+     ring read as floating. */
+  bottom: 21%;
+  height: 13%;
   border-radius: 50%;
-  background: radial-gradient(
-    ellipse at center,
-    rgb(0 0 0 / 0.42) 0%,
-    rgb(0 0 0 / 0.18) 45%,
-    transparent 72%
-  );
-  filter: blur(18px);
+  /* Two layers. The core is narrow, dark and sits on the ring's lower arc —
+     measured against the rendered ring, that arc lands at 48% of this box.
+     The pool is the wider bleed. A pool on its own reads as a halo, which is
+     what made earlier revisions look like the ring was floating. */
+  background:
+    radial-gradient(
+      ellipse 38% 30% at 50% 48%,
+      var(--scene-ground-core) 0%,
+      color-mix(in srgb, var(--scene-ground-core) 50%, transparent) 42%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse at center,
+      var(--scene-ground) 0%,
+      color-mix(in srgb, var(--scene-ground) 40%, transparent) 46%,
+      transparent 74%
+    );
+  filter: blur(5px);
   pointer-events: none;
 }
 
-@keyframes horizon-float {
-  0%,
-  100% {
-    transform: translateY(0) translateZ(0);
-  }
-  50% {
-    transform: translateY(-12px) translateZ(14px);
-  }
-}
-
-/* On narrow screens the two objects would collide, so the slab drops below
-   the sphere and the tilt is flattened for legibility. */
+/* On narrow screens the ring shrinks and stops floating, so it cannot drift
+   out of its box. */
 @media (max-width: 900px) {
   .horizon-scene__stage {
-    aspect-ratio: 1 / 0.95;
+    aspect-ratio: 1 / 0.9;
   }
 
-  .horizon-scene__sphere {
-    top: 0;
-    left: 50%;
-    width: 52%;
-    transform: translateX(-50%);
-    /* the float keyframes also drive `transform`, so it has to yield here */
+  .horizon-ring {
+    inset: 6% 15% 14% 15%;
     animation: none;
-  }
-
-  .horizon-scene__slab {
-    top: auto;
-    bottom: 0;
-    right: 50%;
-    width: 84%;
-    transform: translateX(50%) rotateX(6deg);
-    transform-origin: center bottom;
-  }
-
-  .horizon-scene__shadow {
-    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .horizon-scene__sphere {
+  .horizon-ring {
     animation: none;
+  }
+
+  .horizon-ring__face {
+    animation: none;
+    opacity: 1;
   }
 }
