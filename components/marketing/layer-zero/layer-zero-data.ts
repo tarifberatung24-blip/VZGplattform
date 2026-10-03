@@ -61,31 +61,31 @@ export const LAYER_ZERO_DEFAULT: LayerZeroModuleId = "dokumente"
 /** Vertical squash of the orbit, so it reads as a ring seen slightly from above. */
 export const ORBIT_SQUASH = 0.92
 
-export type OrbitGeometry = {
-  size: number
-  radius: number
-  coreSize: number
-  nodeSize: number
-}
+/**
+ * Node centre distance from the orbit centre, as a percentage of the box.
+ * It is 50% minus half a node (13.5% / 2), so a node sitting at 0° or 90° still
+ * lands fully inside the box instead of hanging over the edge and being clipped
+ * by the hero's overflow.
+ */
+export const NODE_ORBIT_RADIUS = 43.25
 
 /**
- * Derive the geometry from the measured width rather than scaling a fixed
- * layout, so node and core sizes stay legible at every breakpoint instead of
- * shrinking together with a CSS transform.
+ * Node centres as percentages of the orbit box, so the ring is laid out by CSS
+ * alone. Percentages resolve identically on the server and the client, which a
+ * measured pixel layout could not do — the server has no width to measure, so it
+ * would render a different geometry than the client and trip hydration.
+ *
+ * The orbit is square, so equal percentages give a circle; ORBIT_SQUASH is
+ * applied by the CSS aspect ratio of the box itself.
  */
-export function orbitGeometry(width: number): OrbitGeometry {
-  const size = Math.max(280, Math.min(width, 760))
-  const nodeSize = Math.max(64, Math.min(size * 0.135, 98))
-  const coreSize = Math.max(176, Math.min(size * 0.42, 320))
-  // Nodes sit on the ring line, kept fully inside the container.
-  const radius = size / 2 - nodeSize / 2
-  return { size, radius, coreSize, nodeSize }
-}
-
-export function nodePosition(angle: number, radius: number) {
+export function nodePositionPercent(angle: number) {
   const rad = (angle * Math.PI) / 180
+  // Rounded to a fixed precision: React serialises floats to fewer decimals on
+  // the server than on the client, so an unrounded value renders as "6.69873%"
+  // on one side and "6.698729810778083%" on the other and trips hydration.
+  const round = (n: number) => Math.round(n * 10000) / 10000
   return {
-    x: Math.sin(rad) * radius,
-    y: -Math.cos(rad) * radius * ORBIT_SQUASH,
+    x: round(50 + Math.sin(rad) * NODE_ORBIT_RADIUS),
+    y: round(50 - Math.cos(rad) * NODE_ORBIT_RADIUS * ORBIT_SQUASH),
   }
 }

@@ -1,20 +1,22 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-
 import { HorizonCore } from "./horizon-core"
 import { LayerZeroNode } from "./layer-zero-node"
 import {
   LAYER_ZERO_MODULES,
+  NODE_ORBIT_RADIUS,
   ORBIT_SQUASH,
-  nodePosition,
-  orbitGeometry,
+  nodePositionPercent,
   type LayerZeroModuleId,
 } from "./layer-zero-data"
 
 /**
- * The orbital navigation. Geometry is recomputed from the measured width so the
- * ring scales by rebuilding the layout, never by transforming a fixed graphic.
+ * The orbital navigation.
+ *
+ * Geometry is expressed in percentages of the orbit box and resolved by CSS, so
+ * the server and the client always agree on the markup. A measured-pixel layout
+ * could not do that: the server has no width to measure, so it would render one
+ * geometry and the client another, which trips hydration.
  */
 export function HorizonOrbit({
   active,
@@ -27,68 +29,45 @@ export function HorizonOrbit({
   labels: Record<LayerZeroModuleId, string>
   coreLabel: string
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [width, setWidth] = useState(0)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new ResizeObserver(([entry]) => {
-      setWidth(entry.contentRect.width)
-    })
-    observer.observe(el)
-    setWidth(el.getBoundingClientRect().width)
-    return () => observer.disconnect()
-  }, [])
-
-  const { size, radius, coreSize, nodeSize } = orbitGeometry(width || 0)
-  const rx = size / 2 - nodeSize / 2
-  const ry = rx * ORBIT_SQUASH
-
   const activeMod = LAYER_ZERO_MODULES.find((m) => m.id === active)!
-  const activePos = nodePosition(activeMod.angle, radius)
+  const activePos = nodePositionPercent(activeMod.angle)
 
   return (
-    <div
-      ref={ref}
-      className="layer-zero-orbit"
-      style={{ width: "100%", maxWidth: 760, height: size }}
-    >
+    <div className="layer-zero-orbit">
       <svg
         className="layer-zero-orbit__svg"
-        viewBox={`0 0 ${size} ${size}`}
-        width={size}
-        height={size}
+        viewBox="0 0 100 100"
         aria-hidden="true"
       >
         <ellipse
-          cx={size / 2}
-          cy={size / 2}
-          rx={rx}
-          ry={ry}
+          cx={50}
+          cy={50}
+          rx={NODE_ORBIT_RADIUS}
+          ry={NODE_ORBIT_RADIUS * ORBIT_SQUASH}
           className="layer-zero-orbit__ring"
+          vectorEffect="non-scaling-stroke"
         />
         <line
-          x1={size / 2}
-          y1={size / 2}
-          x2={size / 2 + activePos.x}
-          y2={size / 2 + activePos.y}
+          x1={50}
+          y1={50}
+          x2={activePos.x}
+          y2={activePos.y}
           className="layer-zero-orbit__connector"
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
 
       <div className="layer-zero-orbit__core">
-        <HorizonCore size={coreSize} label={coreLabel} />
+        <HorizonCore label={coreLabel} />
       </div>
 
       {LAYER_ZERO_MODULES.map((mod) => {
-        const pos = nodePosition(mod.angle, radius)
+        const pos = nodePositionPercent(mod.angle)
         return (
           <LayerZeroNode
             key={mod.id}
             mod={mod}
             label={labels[mod.id]}
-            size={nodeSize}
             x={pos.x}
             y={pos.y}
             active={mod.id === active}

@@ -23,7 +23,7 @@ export function LayerZeroHero() {
   const copy = t.layerZero
 
   return (
-    <div className="layer0-hero layer-zero-scope dark relative flex min-h-[100dvh] flex-col overflow-hidden">
+    <div className="layer0-hero layer-zero-scope relative flex min-h-[100dvh] flex-col overflow-hidden">
       <main className="layer-zero-main relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col items-center gap-8 px-5 pt-24 pb-16 sm:px-8 sm:pt-28 lg:gap-10 lg:pt-32">
         <header className="layer-zero-head">
           <h1 className="layer-zero-title">

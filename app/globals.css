@@ -158,6 +158,24 @@
   --card-glass-highlight: rgb(255 255 255 / 0.95);
   --card-glass-shade: rgb(0 0 0 / 0.10);
   --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.28);
+
+  /* Layer 0 Horizon — light theme. The accent is the brand blue, so the orbit
+     reads as the same design language as the rest of the light app. */
+  --horizon-background: #ffffff;
+  --horizon-surface: #f8fafc;
+  --horizon-surface-elevated: #ffffff;
+  --horizon-accent: #003f88;
+  --horizon-accent-strong: #002f66;
+  --horizon-accent-soft: rgb(0 63 136 / 0.12);
+  --horizon-orbit: rgb(0 63 136 / 0.15);
+  --horizon-glow: rgb(0 63 136 / 0.28);
+  --horizon-node-bg: rgb(0 63 136 / 0.06);
+  --horizon-node-border: rgb(0 63 136 / 0.28);
+  --horizon-text: #0f172a;
+  --horizon-muted: #475569;
+  --horizon-panel: #ffffff;
+  --horizon-cta-from: #003f88;
+  --horizon-cta-to: #2f80ed;
 }
 .dark {
   color-scheme: dark;
@@ -218,6 +236,23 @@
   --card-glass-highlight: rgb(255 255 255 / 0.14);
   --card-glass-shade: rgb(0 0 0 / 0.5);
   --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.8);
+
+  /* Layer 0 Horizon — dark theme. Orange on near-black, matching the reference. */
+  --horizon-background: #050505;
+  --horizon-surface: #0b0b0d;
+  --horizon-surface-elevated: #151518;
+  --horizon-accent: #f97316;
+  --horizon-accent-strong: #ff7a1a;
+  --horizon-accent-soft: rgb(249 115 22 / 0.15);
+  --horizon-orbit: rgb(249 115 22 / 0.15);
+  --horizon-glow: rgb(249 115 22 / 0.30);
+  --horizon-node-bg: rgb(35 15 8 / 0.6);
+  --horizon-node-border: rgb(249 115 22 / 0.30);
+  --horizon-text: #f8fafc;
+  --horizon-muted: #a1a1aa;
+  --horizon-panel: #0b0b0d;
+  --horizon-cta-from: #f97316;
+  --horizon-cta-to: #ff9a3c;
 }
 @layer base {
   * {
@@ -558,25 +593,16 @@
 /* ---------------------------------------------------------------------------
    Layer 0 hero — orbital navigation.
 
-   The accent is taken from the theme's own primary, so the ring inherits the
-   dark orange (#f97316) and the light blue automatically instead of pinning the
-   design to one theme. Amber-2/3 are the lighter stops used for the energy ring
-   and glow only.
+   Every colour comes from the --horizon-* tokens, which the theme blocks above
+   define per theme. The component structure is identical in both themes; only
+   these values change, so dark gets orange-on-black and light gets blue-on-white.
 --------------------------------------------------------------------------- */
 
-.layer-zero-main {
-  --lz-accent: var(--primary);
-  --lz-amber-2: color-mix(in srgb, var(--primary) 72%, #ffffff);
-  --lz-amber-3: color-mix(in srgb, var(--primary) 48%, #ffffff);
-  --lz-line: color-mix(in srgb, var(--primary) 30%, transparent);
-  --lz-line-soft: color-mix(in srgb, var(--primary) 15%, transparent);
-  --lz-node-bg: color-mix(in srgb, var(--primary) 12%, var(--background));
-}
-
-/* The reference is a dark surface. The palette is scoped to the hero instead of
-   switching the whole site theme, so the rest of the app keeps its own theme. */
+/* Transparent, so the global theme background and the fixed network layer show
+   through — the same reason the body is transparent. The horizon surface tokens
+   are still used by the core disc and the panel. */
 .layer-zero-scope {
-  background: #050505;
+  background: transparent;
 }
 
 .layer-zero-head {
@@ -593,45 +619,49 @@
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.04em;
-  color: var(--foreground);
+  color: var(--horizon-text);
 }
 
 .layer-zero-title__number {
-  color: var(--lz-accent);
+  color: var(--horizon-accent);
   margin-left: 0.15em;
 }
 
 .layer-zero-tagline {
   font-size: clamp(0.95rem, 2.4vw, 1.125rem);
-  color: var(--muted-foreground);
+  color: var(--horizon-muted);
 }
 
 /* Orbit -------------------------------------------------------------------- */
 
 .layer-zero-orbit {
   position: relative;
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 1 / 1;
   margin-inline: auto;
 }
 
 .layer-zero-orbit__svg {
   position: absolute;
   inset: 0;
-  margin: auto;
+  width: 100%;
+  height: 100%;
   overflow: visible;
 }
 
 .layer-zero-orbit__ring {
   fill: none;
-  stroke: var(--lz-line-soft);
+  stroke: var(--horizon-orbit);
   stroke-width: 1;
 }
 
 .layer-zero-orbit__connector {
-  stroke: var(--lz-accent);
+  stroke: var(--horizon-accent);
   stroke-width: 1.5;
   stroke-linecap: round;
   transition: all 300ms ease;
-  filter: drop-shadow(0 0 6px var(--lz-line));
+  filter: drop-shadow(0 0 6px var(--horizon-glow));
 }
 
 .layer-zero-orbit__core {
@@ -639,12 +669,15 @@
   inset: 0;
   display: grid;
   place-items: center;
+  pointer-events: none;
 }
 
 /* Core --------------------------------------------------------------------- */
 
 .layer-zero-core {
   position: relative;
+  width: 42%;
+  aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
 }
@@ -659,27 +692,27 @@
 
 .layer-zero-core__orbit--outer {
   inset: -6%;
-  border: 1px solid var(--lz-line-soft);
+  border: 1px solid var(--horizon-orbit);
 }
 
 .layer-zero-core__orbit--inner {
   inset: 6%;
-  border: 1px solid var(--lz-line);
+  border: 1px solid var(--horizon-node-border);
 }
 
 .layer-zero-core__glow {
   inset: 10%;
   box-shadow:
-    0 0 40px 6px var(--lz-line),
-    inset 0 0 30px var(--lz-line-soft);
+    0 0 40px 6px var(--horizon-glow),
+    inset 0 0 30px var(--horizon-accent-soft);
   animation: lz-breathe 6s ease-in-out infinite;
 }
 
 .layer-zero-core__energy {
   inset: 14%;
   border: 2px solid transparent;
-  border-top-color: var(--lz-amber-2);
-  border-right-color: var(--lz-amber-3);
+  border-top-color: var(--horizon-accent);
+  border-right-color: var(--horizon-accent-strong);
   animation: lz-spin 22s linear infinite;
 }
 
@@ -689,10 +722,10 @@
   place-items: center;
   background: radial-gradient(
     circle at 50% 40%,
-    color-mix(in srgb, var(--primary) 14%, var(--background)),
-    var(--background) 72%
+    var(--horizon-surface-elevated),
+    var(--horizon-background) 72%
   );
-  border: 1px solid var(--lz-line);
+  border: 1px solid var(--horizon-node-border);
 }
 
 .layer-zero-core__label {
@@ -700,22 +733,24 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   font-size: clamp(1.05rem, 3.4vw, 1.9rem);
-  color: var(--lz-amber-2);
+  color: var(--horizon-accent);
 }
 
 /* Nodes -------------------------------------------------------------------- */
 
 .layer-zero-node {
   position: absolute;
+  width: 13.5%;
+  aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.2rem;
   border-radius: 9999px;
-  background: var(--lz-node-bg);
-  border: 1px solid var(--lz-line);
-  color: var(--foreground);
+  background: var(--horizon-node-bg);
+  border: 1px solid var(--horizon-node-border);
+  color: var(--horizon-text);
   translate: -50% -50%;
   transition:
     transform 220ms ease,
@@ -733,7 +768,7 @@
 .layer-zero-node__icon {
   width: clamp(1.05rem, 3vw, 1.5rem);
   height: clamp(1.05rem, 3vw, 1.5rem);
-  color: var(--lz-amber-2);
+  color: var(--horizon-accent);
 }
 
 .layer-zero-node__label {
@@ -747,24 +782,24 @@
 
 .layer-zero-node:hover {
   transform: scale(1.05);
-  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+  border-color: var(--horizon-accent);
 }
 
 .layer-zero-node[aria-pressed="true"] {
   transform: scale(1.08);
-  border-color: var(--lz-accent);
+  border-color: var(--horizon-accent);
   box-shadow:
-    0 0 22px 2px var(--lz-line),
-    inset 0 0 14px var(--lz-line-soft);
+    0 0 22px 2px var(--horizon-glow),
+    inset 0 0 14px var(--horizon-accent-soft);
 }
 
 .layer-zero-node[aria-pressed="true"] .layer-zero-node__ring {
-  border: 1px solid var(--lz-amber-2);
+  border: 1px solid var(--horizon-accent-strong);
   animation: lz-pulse 2.4s ease-in-out infinite;
 }
 
 .layer-zero-node:focus-visible {
-  outline: 2px solid var(--lz-amber-2);
+  outline: 2px solid var(--horizon-accent);
   outline-offset: 3px;
 }
 
@@ -777,12 +812,11 @@
   margin-inline: auto;
   padding: 1.75rem;
   border-radius: 2rem;
-  background: var(--card);
-  border: 1px solid var(--lz-line);
-  border-top: 1px solid var(--lz-line);
+  background: var(--horizon-panel);
+  border: 1px solid var(--horizon-node-border);
   box-shadow:
-    0 -1px 0 var(--lz-line),
-    0 24px 60px -30px var(--lz-line);
+    0 -1px 0 var(--horizon-accent-soft),
+    0 24px 60px -30px var(--horizon-glow);
   animation: lz-panel-in 300ms ease;
 }
 
@@ -794,7 +828,7 @@
   width: 48px;
   height: 6px;
   border-radius: 9999px;
-  background: color-mix(in srgb, var(--primary) 55%, transparent);
+  background: var(--horizon-accent-soft);
 }
 
 .layer-zero-panel__head {
@@ -811,20 +845,20 @@
   height: 2.75rem;
   flex-shrink: 0;
   border-radius: 0.875rem;
-  background: color-mix(in srgb, var(--primary) 14%, var(--background));
-  border: 1px solid var(--lz-line);
-  color: var(--lz-amber-2);
+  background: var(--horizon-node-bg);
+  border: 1px solid var(--horizon-node-border);
+  color: var(--horizon-accent);
 }
 
 .layer-zero-panel__title {
   font-size: 1.0625rem;
   font-weight: 700;
-  color: var(--foreground);
+  color: var(--horizon-text);
 }
 
 .layer-zero-panel__subtitle {
   font-size: 0.8125rem;
-  color: var(--muted-foreground);
+  color: var(--horizon-muted);
 }
 
 .layer-zero-panel__features {
@@ -854,12 +888,12 @@
 .layer-zero-panel__feature-title {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--foreground);
+  color: var(--horizon-text);
 }
 
 .layer-zero-panel__feature-detail {
   font-size: 0.75rem;
-  color: var(--muted-foreground);
+  color: var(--horizon-muted);
 }
 
 .layer-zero-panel__cta {
@@ -873,13 +907,13 @@
   border-radius: 0.875rem;
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--primary-foreground);
+  color: #ffffff;
   background: linear-gradient(
     135deg,
-    var(--lz-accent),
-    var(--lz-amber-2)
+    var(--horizon-cta-from),
+    var(--horizon-cta-to)
   );
-  box-shadow: 0 12px 30px -14px var(--lz-line);
+  box-shadow: 0 12px 30px -14px var(--horizon-glow);
   transition: transform 220ms ease;
 }
 
@@ -888,8 +922,8 @@
 }
 
 .layer-zero-panel__cta--off {
-  background: var(--muted);
-  color: var(--muted-foreground);
+  background: var(--horizon-surface);
+  color: var(--horizon-muted);
   box-shadow: none;
   cursor: not-allowed;
 }

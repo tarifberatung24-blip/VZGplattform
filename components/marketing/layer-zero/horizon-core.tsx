@@ -4,14 +4,13 @@
  * The HORIZON core: a stack of rings rather than a flat circle, built from CSS
  * layers so it stays cheap on mobile. The word Horizon sits inside the core, not
  * in a box on top of it.
+ *
+ * Sizes are percentages of the orbit box so the core scales with the ring
+ * without a measured width, which keeps server and client markup identical.
  */
-export function HorizonCore({ size, label }: { size: number; label: string }) {
+export function HorizonCore({ label }: { label: string }) {
   return (
-    <div
-      className="layer-zero-core"
-      style={{ width: size, height: size }}
-      aria-hidden="true"
-    >
+    <div className="layer-zero-core" aria-hidden="true">
       <span className="layer-zero-core__orbit layer-zero-core__orbit--outer" />
       <span className="layer-zero-core__orbit layer-zero-core__orbit--inner" />
       <span className="layer-zero-core__glow" />
