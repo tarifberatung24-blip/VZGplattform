@@ -412,5 +412,123 @@
   "mobileNav": {
     "more": "Mehr",
     "app": "App"
+  },
+  "layerZero": {
+    "titleWord": "Layer",
+    "titleNumber": "0",
+    "tagline": "Alles Wichtige. An einem Ort.",
+    "core": "Horizon",
+    "modules": {
+      "inkasso": "Inkasso",
+      "steuern": "Steuern",
+      "tarife": "Tarife",
+      "rechte": "Ansprüche",
+      "kindergeld": "Kindergeld",
+      "jobcenter": "Jobcenter",
+      "dokumente": "Dokumente",
+      "vertraege": "Verträge",
+      "energie": "Energie"
+    },
+    "panels": {
+      "inkasso": {
+        "title": "Inkasso-Prüfung",
+        "description": "Prüfe, ob ein Inkasso-Schreiben berechtigt ist und was zu tun ist.",
+        "features": [
+          { "title": "Schreiben prüfen", "detail": "Wer fordert was" },
+          { "title": "Beträge prüfen", "detail": "Was stimmt, was nicht" },
+          { "title": "Nächste Schritte", "detail": "Wie du antwortest" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "steuern": {
+        "title": "Steuer-Assistent",
+        "description": "Die Steuererklärung, Schritt für Schritt erklärt.",
+        "features": [
+          { "title": "Angaben", "detail": "Unterlagen sammeln" },
+          { "title": "Prüfung", "detail": "Übersehenes finden" },
+          { "title": "Abgabe", "detail": "Bereit fürs Finanzamt" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "tarife": {
+        "title": "Tarif-Berater",
+        "description": "Prüfe, ob du monatlich zu viel zahlst.",
+        "features": [
+          { "title": "Verträge", "detail": "Was du jetzt zahlst" },
+          { "title": "Vergleich", "detail": "Ein besseres Angebot" },
+          { "title": "Ersparnis", "detail": "Die Differenz pro Monat" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "rechte": {
+        "title": "Anspruchsprüfung",
+        "description": "Prüfe, auf welche staatlichen Leistungen du Anspruch hast.",
+        "features": [
+          { "title": "Situation", "detail": "Kurzes Profil" },
+          { "title": "Ansprüche", "detail": "Was dir zusteht" },
+          { "title": "Antrag", "detail": "Wie du es bekommst" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "kindergeld": {
+        "title": "Kindergeld-Assistent",
+        "description": "Kindergeld ohne Verwirrung.",
+        "features": [
+          { "title": "Anspruch", "detail": "Hast du Anspruch" },
+          { "title": "Antrag", "detail": "Richtig ausfüllen" },
+          { "title": "Fristen", "detail": "Nichts geht verloren" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "jobcenter": {
+        "title": "Jobcenter-Assistent",
+        "description": "Verstehe, was du vor dem Jobcenter tun musst.",
+        "features": [
+          { "title": "Schreiben", "detail": "Was verlangt wird" },
+          { "title": "Frist", "detail": "Der letzte Termin" },
+          { "title": "Antwort", "detail": "Was zu tun ist" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "dokumente": {
+        "title": "Dokumente-Assistent",
+        "description": "Lade einen Brief hoch. Verstehe, was er bedeutet.",
+        "features": [
+          { "title": "Dokument hochladen", "detail": "PDF, Foto, Brief" },
+          { "title": "KI-Analyse", "detail": "Klare Erklärung" },
+          { "title": "Nächste Schritte", "detail": "Was zu tun ist" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "vertraege": {
+        "title": "Verträge",
+        "description": "Kündige einen Vertrag in wenigen Minuten richtig.",
+        "features": [
+          { "title": "Prüfung", "detail": "Bedingungen und Frist" },
+          { "title": "Kündigung", "detail": "Der richtige Text" },
+          { "title": "Bestätigung", "detail": "Der Nachweis" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      },
+      "energie": {
+        "title": "Energie",
+        "description": "Senke deine Rechnungen und deinen Verbrauch.",
+        "features": [
+          { "title": "Rechnungen", "detail": "Was du zahlst" },
+          { "title": "Vergleich", "detail": "Ein besserer Tarif" },
+          { "title": "Ersparnis", "detail": "Jedes Jahr" }
+        ],
+        "cta": "Öffnen",
+        "unavailable": "Demnächst"
+      }
+    }
   }
 }

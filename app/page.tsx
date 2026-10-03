@@ -1,5 +1,5 @@
-import { AnimatedHero } from "@/components/marketing/animated-hero"
+import { LayerZeroHero } from "@/components/marketing/layer-zero/layer-zero-hero"
 
 export default function HomePage() {
-  return <AnimatedHero />
+  return <LayerZeroHero />
 }

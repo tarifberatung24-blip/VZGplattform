@@ -412,5 +412,123 @@
   "mobileNav": {
     "more": "Още",
     "app": "Приложение"
+  },
+  "layerZero": {
+    "titleWord": "Layer",
+    "titleNumber": "0",
+    "tagline": "Всичко важно. На едно място.",
+    "core": "Horizon",
+    "modules": {
+      "inkasso": "Inkasso",
+      "steuern": "Данъци",
+      "tarife": "Тарифи",
+      "rechte": "Права",
+      "kindergeld": "Kindergeld",
+      "jobcenter": "Jobcenter",
+      "dokumente": "Документи",
+      "vertraege": "Договори",
+      "energie": "Енергия"
+    },
+    "panels": {
+      "inkasso": {
+        "title": "Inkasso проверка",
+        "description": "Провери дали писмо от Inkasso е редно и какво да направиш.",
+        "features": [
+          { "title": "Преглед на писмото", "detail": "Кой иска и защо" },
+          { "title": "Проверка на сумите", "detail": "Кое е редно и кое не" },
+          { "title": "Следващи стъпки", "detail": "Какво да отговориш" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "steuern": {
+        "title": "Данъчен асистент",
+        "description": "Данъчна декларация, обяснена стъпка по стъпка.",
+        "features": [
+          { "title": "Данни", "detail": "Събери документите" },
+          { "title": "Проверка", "detail": "Открий пропуснато" },
+          { "title": "Подаване", "detail": "Готово за Finanzamt" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "tarife": {
+        "title": "Тарифен съветник",
+        "description": "Провери дали плащаш прекалено много всеки месец.",
+        "features": [
+          { "title": "Договори", "detail": "Какво плащаш сега" },
+          { "title": "Сравнение", "detail": "По-добра оферта" },
+          { "title": "Спестяване", "detail": "Разликата на месец" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "rechte": {
+        "title": "Проверка на права",
+        "description": "Провери на какви държавни помощи може да имаш право.",
+        "features": [
+          { "title": "Ситуация", "detail": "Кратък профил" },
+          { "title": "Права", "detail": "Какво ти се полага" },
+          { "title": "Кандидатстване", "detail": "Как да го получиш" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "kindergeld": {
+        "title": "Kindergeld асистент",
+        "description": "Kindergeld без объркването.",
+        "features": [
+          { "title": "Право", "detail": "Имаш ли право" },
+          { "title": "Заявление", "detail": "Попълни правилно" },
+          { "title": "Срокове", "detail": "Нищо не се губи" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "jobcenter": {
+        "title": "Jobcenter асистент",
+        "description": "Разбери какво трябва да направиш преди Jobcenter.",
+        "features": [
+          { "title": "Писмо", "detail": "Какво искат" },
+          { "title": "Срок", "detail": "Краен срок" },
+          { "title": "Отговор", "detail": "Какво да направиш" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "dokumente": {
+        "title": "Документи асистент",
+        "description": "Качи писмо. Разбери какво означава.",
+        "features": [
+          { "title": "Качи документ", "detail": "PDF, снимка, писмо" },
+          { "title": "AI анализ", "detail": "Ясно обяснение" },
+          { "title": "Следващи стъпки", "detail": "Какво да направиш" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "vertraege": {
+        "title": "Договори",
+        "description": "Прекрати договор правилно за няколко минути.",
+        "features": [
+          { "title": "Преглед", "detail": "Условия и срок" },
+          { "title": "Прекратяване", "detail": "Правилният текст" },
+          { "title": "Потвърждение", "detail": "Доказателство" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      },
+      "energie": {
+        "title": "Енергия",
+        "description": "Намали сметките и потреблението си.",
+        "features": [
+          { "title": "Сметки", "detail": "Колко плащаш" },
+          { "title": "Сравнение", "detail": "По-добра тарифа" },
+          { "title": "Спестяване", "detail": "Всяка година" }
+        ],
+        "cta": "Отвори",
+        "unavailable": "Очаквайте скоро"
+      }
+    }
   }
 }
