@@ -12,7 +12,6 @@ type PanelCopy = {
   description: string
   features: { title: string; detail: string }[]
   cta: string
-  unavailable: string
 }
 
 /**
@@ -59,22 +58,13 @@ export function LayerZeroDetailPanel({
         ))}
       </ul>
 
-      {mod.route ? (
-        <Link
-          href={localizedPath(mod.route, locale)}
-          className="layer-zero-panel__cta"
-        >
-          {panel.cta}
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </Link>
-      ) : (
-        <span
-          className="layer-zero-panel__cta layer-zero-panel__cta--off"
-          aria-disabled="true"
-        >
-          {panel.unavailable}
-        </span>
-      )}
+      <Link
+        href={localizedPath(mod.route, locale)}
+        className="layer-zero-panel__cta"
+      >
+        {panel.cta}
+        <ArrowRight className="size-4" aria-hidden="true" />
+      </Link>
     </section>
   )
 }

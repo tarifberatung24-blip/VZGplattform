@@ -29,7 +29,7 @@ export function LayerZeroHero() {
 
   return (
     <div className="layer0-hero layer-zero-scope relative flex min-h-[100dvh] flex-col overflow-hidden">
-      <main className="layer-zero-main relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-8 px-5 pt-24 pb-16 sm:px-8 sm:pt-28 lg:gap-12 lg:pt-32">
+      <main className="layer-zero-main relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-8 px-5 pt-24 pb-10 sm:px-8 sm:pt-28 lg:gap-12">
         {/* Left column: the argument. Right column: the system, with its detail
             panel tucked beneath it — the same two-up composition the site's
             home hero already uses, so the two surfaces read as one. */}
@@ -48,12 +48,6 @@ export function LayerZeroHero() {
               >
                 {hero.primaryCta}
                 <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-              <Link
-                href={localizedPath("/how-it-works", locale)}
-                className="layer-zero-cta layer-zero-cta--ghost"
-              >
-                {hero.navAbout}
               </Link>
             </div>
 

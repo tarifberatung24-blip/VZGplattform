@@ -25,38 +25,42 @@ export type LayerZeroModuleId =
 export type LayerZeroModule = {
   id: LayerZeroModuleId
   icon: LucideIcon
-  /** Degrees clockwise from 12 o'clock. Inkasso sits upper-left, taxes near the top. */
+  /** Degrees clockwise from 12 o'clock. Документи sits at the bottom, 180°, so
+   * the selected node lines up with the detail panel underneath it. */
   angle: number
   /**
-   * A verified route, or null when the capability has no page of its own yet.
-   * Every value here was checked against app/ and the catch-all page map; none
-   * is invented. `null` renders an unavailable CTA rather than a dead link.
+   * The public explainer page for this capability. Every module has one, so a
+   * node always leads somewhere real; the protected workspace is one step
+   * further, behind the "Започни" CTA on that page.
    */
-  route: string | null
+  route: string
 }
 
 /**
- * Visual order around the core, clockwise from upper-left. The order matters:
- * it is what makes the orbit read as one system rather than a list.
+ * Visual order around the core, clockwise from the top. The order matters: it
+ * is what makes the orbit read as one system rather than a list.
  *
- * Inkasso has no page on this branch: /pruefung arrives with PR #79. Linking it
- * here would ship a dead link, so it stays selectable with an unavailable CTA
- * until that merges.
+ * Nine nodes sit on an even 40° ring, rotated so Документи lands at 180° — the
+ * bottom of the ring, directly above the panel. That alignment is what makes
+ * the orbit read as one connected instrument instead of a diagram plus a card.
  */
 export const LAYER_ZERO_MODULES: LayerZeroModule[] = [
-  { id: "inkasso", icon: FileWarning, angle: -40, route: null },
-  { id: "steuern", icon: Receipt, angle: 0, route: "/steuer" },
-  { id: "tarife", icon: BarChart3, angle: 40, route: "/versicherungen" },
-  { id: "rechte", icon: Scale, angle: 80, route: "/anspruch" },
-  { id: "kindergeld", icon: Users, angle: 120, route: "/kindergeld" },
-  { id: "jobcenter", icon: Briefcase, angle: 160, route: "/guide" },
-  { id: "dokumente", icon: FileText, angle: 200, route: "/documents" },
-  { id: "vertraege", icon: FileSignature, angle: 240, route: "/vertraege" },
-  { id: "energie", icon: Zap, angle: 280, route: null },
+  { id: "steuern", icon: Receipt, angle: 340, route: "/modules/steuern" },
+  { id: "tarife", icon: BarChart3, angle: 20, route: "/modules/tarife" },
+  { id: "rechte", icon: Scale, angle: 60, route: "/modules/rechte" },
+  { id: "kindergeld", icon: Users, angle: 100, route: "/modules/kindergeld" },
+  { id: "jobcenter", icon: Briefcase, angle: 140, route: "/modules/jobcenter" },
+  { id: "dokumente", icon: FileText, angle: 180, route: "/modules/dokumente" },
+  { id: "vertraege", icon: FileSignature, angle: 220, route: "/modules/vertraege" },
+  { id: "energie", icon: Zap, angle: 260, route: "/modules/energie" },
+  { id: "inkasso", icon: FileWarning, angle: 300, route: "/modules/inkasso" },
 ]
 
 /** The reference state shows Документи selected. */
 export const LAYER_ZERO_DEFAULT: LayerZeroModuleId = "dokumente"
+
+/** Ids only, for validating a slug before rendering a module page. */
+export const LAYER_ZERO_MODULE_IDS: LayerZeroModuleId[] = LAYER_ZERO_MODULES.map((m) => m.id)
 
 /** Vertical squash of the orbit, so it reads as a ring seen slightly from above. */
 export const ORBIT_SQUASH = 0.92

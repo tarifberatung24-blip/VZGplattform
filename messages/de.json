@@ -33,8 +33,8 @@
       "navSecurity": "Sicherheit",
       "navAbout": "So funktioniert's",
       "navContact": "Kontakt",
-      "headline1": "Dokumente. Verträge. Behörden.",
-      "headline2": "Einfacher mit HORIZON.",
+      "headline1": "Horizon",
+      "headline2": "dein digitaler Assistent in Deutschland",
       "subtitle": "Verstehe Dokumente, bereite Anträge vor und erledige wichtige Verwaltungs- und Vertragsaufgaben in Deutschland – Schritt für Schritt.",
       "primaryCta": "Jetzt starten"
     },
@@ -417,7 +417,13 @@
     "titleWord": "Layer",
     "titleNumber": "0",
     "tagline": "Alles Wichtige. An einem Ort.",
-    "core": "Horizon",
+    "core": "Layer 0",
+    "modulePage": {
+      "back": "Zur Startseite",
+      "steps": "Was dich erwartet",
+      "start": "Kostenlos starten",
+      "note": "Die ersten Schritte sind kostenlos. Für das Speichern deines Ergebnisses brauchst du ein Konto."
+    },
     "modules": {
       "inkasso": "Inkasso",
       "steuern": "Steuern",
