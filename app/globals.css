@@ -171,6 +171,7 @@
   --horizon-glow: rgb(0 63 136 / 0.28);
   --horizon-node-bg: rgb(0 63 136 / 0.06);
   --horizon-node-border: rgb(0 63 136 / 0.28);
+  --horizon-wall: rgb(0 47 102 / 0.22);
   --horizon-text: #0f172a;
   --horizon-muted: #475569;
   --horizon-panel: #ffffff;
@@ -248,6 +249,7 @@
   --horizon-glow: rgb(249 115 22 / 0.30);
   --horizon-node-bg: rgb(35 15 8 / 0.6);
   --horizon-node-border: rgb(249 115 22 / 0.30);
+  --horizon-wall: rgb(120 45 5 / 0.75);
   --horizon-text: #f8fafc;
   --horizon-muted: #a1a1aa;
   --horizon-panel: #0b0b0d;
@@ -672,7 +674,10 @@
   pointer-events: none;
 }
 
-/* Core --------------------------------------------------------------------- */
+/* Core — a real 3D globe, spun on a perspective stage.
+   Six meridians at even rotateY steps read as a sphere because they foreshorten
+   and cross as they turn. This is geometry, not a painted gradient: the same
+   technique the site's 3D ring uses, so the two graphics read as one family. */
 
 .layer-zero-core {
   position: relative;
@@ -682,50 +687,84 @@
   place-items: center;
 }
 
-.layer-zero-core__orbit,
-.layer-zero-core__glow,
-.layer-zero-core__energy,
-.layer-zero-core__disc {
-  position: absolute;
-  border-radius: 9999px;
-}
-
-.layer-zero-core__orbit--outer {
-  inset: -6%;
-  border: 1px solid var(--horizon-orbit);
-}
-
-.layer-zero-core__orbit--inner {
-  inset: 6%;
-  border: 1px solid var(--horizon-node-border);
-}
-
 .layer-zero-core__glow {
+  position: absolute;
   inset: 10%;
+  border-radius: 9999px;
   box-shadow:
     0 0 40px 6px var(--horizon-glow),
     inset 0 0 30px var(--horizon-accent-soft);
   animation: lz-breathe 6s ease-in-out infinite;
 }
 
-.layer-zero-core__energy {
-  inset: 14%;
-  border: 2px solid transparent;
+.layer-zero-core__stage {
+  position: absolute;
+  inset: 0;
+  perspective: 460px;
+  perspective-origin: 50% 45%;
+}
+
+.layer-zero-core__globe {
+  position: absolute;
+  inset: 8%;
+  transform-style: preserve-3d;
+  transform: rotateX(-16deg);
+  animation: lz-globe-spin 26s linear infinite;
+}
+
+/* A meridian is a circle seen edge-on; rotating it around Y fans the ring out
+   into a sphere. The border is drawn only on the lit half so the far side of
+   the globe reads as behind, which is what sells the depth. */
+.layer-zero-core__meridian {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
   border-top-color: var(--horizon-accent);
   border-right-color: var(--horizon-accent-strong);
-  animation: lz-spin 22s linear infinite;
+  border-bottom-color: var(--horizon-accent-soft);
+  box-shadow: 0 0 10px -2px var(--horizon-glow);
+}
+
+.layer-zero-core__equator {
+  position: absolute;
+  inset: 6%;
+  border-radius: 9999px;
+  border: 1px solid var(--horizon-accent-soft);
+  transform: rotateX(74deg);
+}
+
+.layer-zero-core__axis {
+  position: absolute;
+  top: -6%;
+  bottom: -6%;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--horizon-accent-strong),
+    transparent
+  );
+  transform: translateX(-50%);
+  opacity: 0.5;
 }
 
 .layer-zero-core__disc {
-  inset: 20%;
+  position: relative;
+  inset: auto;
+  width: 46%;
+  aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
+  border-radius: 9999px;
   background: radial-gradient(
-    circle at 50% 40%,
+    circle at 50% 38%,
     var(--horizon-surface-elevated),
-    var(--horizon-background) 72%
+    var(--horizon-background) 74%
   );
   border: 1px solid var(--horizon-node-border);
+  box-shadow: inset 0 1px 0 var(--horizon-accent-soft);
 }
 
 .layer-zero-core__label {
@@ -736,7 +775,10 @@
   color: var(--horizon-accent);
 }
 
-/* Nodes -------------------------------------------------------------------- */
+/* Nodes — extruded 3D discs. The wall is a copy of the disc pushed down and
+   drawn in a dark tone; the face sits on top, so the pair reads as one solid
+   puck with real thickness instead of a flat circle with a border. Same trick
+   the site's 3D ring uses, so the family reads as one. */
 
 .layer-zero-node {
   position: absolute;
@@ -748,14 +790,35 @@
   justify-content: center;
   gap: 0.2rem;
   border-radius: 9999px;
-  background: var(--horizon-node-bg);
-  border: 1px solid var(--horizon-node-border);
   color: var(--horizon-text);
   translate: -50% -50%;
   transition:
     transform 220ms ease,
     box-shadow 250ms ease,
     border-color 200ms ease;
+}
+
+/* Wall: the puck's thickness. Sits under the face, offset down, unlit. */
+.layer-zero-node::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  top: 5px;
+  border-radius: 9999px;
+  background: var(--horizon-wall);
+  z-index: -1;
+}
+
+/* Face: the lit surface the label and icon sit on. */
+.layer-zero-node::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--horizon-node-bg);
+  border: 1px solid var(--horizon-node-border);
+  box-shadow: inset 0 1px 0 var(--horizon-accent-soft);
+  z-index: -1;
 }
 
 .layer-zero-node__ring {
@@ -780,14 +843,30 @@
   line-height: 1.15;
 }
 
+.layer-zero-node::before,
+.layer-zero-node::after {
+  transition:
+    border-color 200ms ease,
+    transform 220ms ease,
+    box-shadow 250ms ease;
+}
+
 .layer-zero-node:hover {
   transform: scale(1.05);
+}
+
+.layer-zero-node:hover::after {
   border-color: var(--horizon-accent);
 }
 
 .layer-zero-node[aria-pressed="true"] {
   transform: scale(1.08);
+}
+
+/* Pressed: the face lifts off the wall, so the disc visibly rises. */
+.layer-zero-node[aria-pressed="true"]::after {
   border-color: var(--horizon-accent);
+  transform: translateY(-3px);
   box-shadow:
     0 0 22px 2px var(--horizon-glow),
     inset 0 0 14px var(--horizon-accent-soft);
@@ -943,6 +1022,13 @@
   to { transform: rotate(360deg); }
 }
 
+/* The globe keeps its axial tilt and only yaws, so the sphere turns on its own
+   axis instead of tumbling. */
+@keyframes lz-globe-spin {
+  from { transform: rotateX(-16deg) rotateY(0deg); }
+  to { transform: rotateX(-16deg) rotateY(360deg); }
+}
+
 @keyframes lz-pulse {
   0%, 100% { opacity: 0.45; }
   50% { opacity: 1; }
@@ -955,6 +1041,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .layer-zero-core__glow,
+  .layer-zero-core__globe,
   .layer-zero-core__energy,
   .layer-zero-node[aria-pressed="true"] .layer-zero-node__ring {
     animation: none;
