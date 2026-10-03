@@ -63,9 +63,25 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f7f7f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#f7f7f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#050505" },
   ],
 }
+
+/**
+ * Applied before first paint so a dark-default visitor never sees a white
+ * flash: the stored choice wins, otherwise the page starts dark. Kept in the
+ * head as a blocking script because the class must be on <html> before the
+ * first paint.
+ */
+const themeInitScript = `
+(function(){try{
+  var t=localStorage.getItem('theme');
+  if(t!=='light'&&t!=='dark'){t='dark';}
+  var r=document.documentElement;
+  r.classList.add(t);
+  r.style.colorScheme=t;
+}catch(e){document.documentElement.classList.add('dark');}})();
+`
 
 export default async function RootLayout({
   children,
@@ -80,6 +96,9 @@ export default async function RootLayout({
 
   return (
     <html lang={initialLocale} suppressHydrationWarning className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} bg-background`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="font-sans antialiased">
         <ThemeProvider>
           <LanguageProvider initialLocale={initialLocale}>

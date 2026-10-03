@@ -30,6 +30,8 @@ import WithdrawalPage from "@/app/widerruf/page"
 import AppInstallPage from "@/app/app/page"
 import FinanzbildungPage from "@/app/finanzbildung/page"
 import HowItWorksPage from "@/app/[locale]/how-it-works/page"
+import { ModulePage } from "@/components/marketing/module-page"
+import { LAYER_ZERO_MODULE_IDS, type LayerZeroModuleId } from "@/components/marketing/layer-zero/layer-zero-data"
 import { FunctionsPage } from "@/components/marketing/public-layer-page"
 import type { Locale } from "@/lib/i18n/dictionaries"
 import { hasSupabaseConfig } from "@/lib/supabase/config"
@@ -71,6 +73,9 @@ export default async function LocalizedPage({params}: {params: Promise<{locale: 
     if (user) redirect(`/${locale}/dashboard`)
   }
   if (slug.join("/") === "functions") return <FunctionsPage locale={locale as Locale} />
+  if (slug[0] === "modules" && slug[1] && LAYER_ZERO_MODULE_IDS.includes(slug[1] as LayerZeroModuleId)) {
+    return <ModulePage moduleId={slug[1] as LayerZeroModuleId} />
+  }
   if (slug.join("/") === "protected") redirect("/dashboard")
   if (slug[0] === "onboarding") return <OnboardingOutlet locale={locale} step={slug[1]} />
   const Page = pages[slug.join("/")]

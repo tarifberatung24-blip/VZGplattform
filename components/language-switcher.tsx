@@ -18,7 +18,10 @@ export function LanguageSwitcher({ className }: { className?: string }) {
 
   return (
     <div
-      className={cn("inline-flex items-center rounded-full border border-border bg-card p-0.5 text-xs", className)}
+      className={cn(
+        "inline-flex items-center gap-0.5 rounded-[var(--control-radius,0.1875rem)] border border-border bg-card p-0.5 text-xs",
+        className,
+      )}
       role="group"
       aria-label={t.cleanup.language.label}
     >
@@ -29,8 +32,10 @@ export function LanguageSwitcher({ className }: { className?: string }) {
           onClick={() => changeLocale(l)}
           aria-pressed={locale === l}
           className={cn(
-            "min-h-9 min-w-10 rounded-full px-3 py-2 font-semibold uppercase transition-colors",
-            locale === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+            "min-h-9 min-w-10 rounded-[var(--control-radius,0.1875rem)] px-3 py-2 font-semibold uppercase transition-colors",
+            locale === l
+              ? "bg-primary/12 text-primary"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {l}
