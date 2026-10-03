@@ -102,11 +102,12 @@ export function GlobalHeader() {
           <span className="logo-mask h-6 w-auto text-foreground sm:h-8" />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 lg:flex xl:gap-1">
           <Link
             href={homeHref}
+            aria-current={isActivePath("/") ? "page" : undefined}
             className={cn(
-              "px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
+              "hidden px-3 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground xl:block xl:px-4",
               isActivePath("/") ? "text-foreground" : ""
             )}
           >
@@ -117,7 +118,7 @@ export function GlobalHeader() {
               key={link.href}
               href={localizedPath(link.href, locale)}
               className={cn(
-                "px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
+                "px-3 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground xl:px-4",
                 isActivePath(link.href) ? "text-foreground" : ""
               )}
             >
@@ -140,7 +141,7 @@ export function GlobalHeader() {
               asChild
               variant="default"
               size="sm"
-              className="hidden rounded-md shadow-none sm:inline-flex"
+              className="hidden shadow-none sm:inline-flex"
             >
               <Link href={localizedPath("/dashboard", locale)}>
                 {labels.dashboard}
@@ -152,7 +153,7 @@ export function GlobalHeader() {
                 asChild
                 variant="ghost"
                 size="sm"
-                className="hidden rounded-md md:inline-flex"
+                className="hidden lg:inline-flex"
               >
                 <Link href={localizedPath("/auth/login", locale)}>
                   {labels.login}
@@ -161,7 +162,7 @@ export function GlobalHeader() {
               <Button
                 asChild
                 size="sm"
-                className="rounded-md bg-primary px-4 text-primary-foreground shadow-none hover:bg-primary/90 sm:px-5"
+                className="bg-primary text-primary-foreground shadow-none"
               >
                 <Link href={localizedPath("/auth/sign-up", locale)}>
                   {labels.register}
@@ -174,7 +175,7 @@ export function GlobalHeader() {
             type="button"
             variant="ghost"
             size="icon"
-            className="rounded-sm md:hidden"
+            className="md:hidden"
             aria-label={mobileOpen ? labels.close : labels.menu}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
@@ -190,8 +191,9 @@ export function GlobalHeader() {
             <Link
               href={homeHref}
               onClick={closeMobile}
+              aria-current={isActivePath("/") ? "page" : undefined}
               className={cn(
-                "rounded-sm px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
+                "rounded-[var(--control-radius,0.1875rem)] px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
                 isActivePath("/") ? "text-foreground" : ""
               )}
             >
@@ -202,7 +204,7 @@ export function GlobalHeader() {
                 key={link.href}
                 href={localizedPath(link.href, locale)}
                 onClick={closeMobile}
-                className="rounded-sm px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground"
+                className="rounded-[var(--control-radius,0.1875rem)] px-3 py-3 text-sm font-bold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 {labels[link.labelKey]}
               </Link>
@@ -220,7 +222,7 @@ export function GlobalHeader() {
                 <Button
                   asChild
                   variant="default"
-                  className="w-full rounded-md shadow-none"
+                  className="w-full shadow-none"
                   size="lg"
                 >
                   <Link
@@ -237,7 +239,7 @@ export function GlobalHeader() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="w-full rounded-md"
+                    className="w-full"
                     onClick={closeMobile}
                   >
                     <Link href={localizedPath("/auth/login", locale)}>
@@ -247,7 +249,7 @@ export function GlobalHeader() {
                   <Button
                     asChild
                     size="sm"
-                    className="w-full rounded-md bg-primary text-primary-foreground shadow-none"
+                    className="w-full bg-primary text-primary-foreground shadow-none"
                     onClick={closeMobile}
                   >
                     <Link href={localizedPath("/auth/sign-up", locale)}>

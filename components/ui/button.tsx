@@ -2,8 +2,14 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
+/**
+ * Control radius is a single value across the chrome: `--control-radius`.
+ * Buttons used to default to `rounded-sm` (0.125rem) while the header cloned
+ * them with `rounded-md` (0.375rem) and the language switcher used a pill, so
+ * the same control wore three different corners. The token keeps them aligned.
+ */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-bold tracking-[0.01em] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--control-radius,0.1875rem)] text-sm font-bold tracking-[0.01em] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -16,11 +22,11 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-9 px-4 py-2 max-sm:min-h-11",
-        sm: "h-8 rounded-sm gap-1.5 px-3 max-sm:min-h-11",
-        lg: "h-11 rounded-sm px-6",
+        sm: "h-8 gap-1.5 px-3 max-sm:min-h-11",
+        lg: "h-11 px-6",
         icon: "size-9 max-sm:size-11",
-        "icon-xs": "size-6 rounded-sm gap-1 [&_svg:not([class*='size-'])]:size-3 max-sm:size-11",
-        "icon-sm": "size-7 rounded-sm [&_svg:not([class*='size-'])]:size-3.5 max-sm:size-11",
+        "icon-xs": "size-6 gap-1 [&_svg:not([class*='size-'])]:size-3 max-sm:size-11",
+        "icon-sm": "size-7 [&_svg:not([class*='size-'])]:size-3.5 max-sm:size-11",
         "icon-lg": "size-10 max-sm:size-11",
       },
     },

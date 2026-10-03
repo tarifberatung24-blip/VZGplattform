@@ -25,7 +25,7 @@ export function ThemeToggle({ className, labels }: { className?: string; labels?
       title={label}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={cn(
-        "inline-flex size-9 shrink-0 items-center justify-center rounded-md border text-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 max-sm:size-11",
+        "inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--control-radius,0.1875rem)] border text-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 max-sm:size-11",
         className,
       )}
       style={{ borderColor: "var(--glass-border)" }}
