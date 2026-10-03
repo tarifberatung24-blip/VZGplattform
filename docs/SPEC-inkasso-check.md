@@ -29,7 +29,8 @@ energy/utility disputes, and integration with the rest of HORIZON.
 | Letter templates | `lib/inkasso/drafts.ts` |
 | Wizard UI | `components/inkasso/inkasso-wizard.tsx` |
 | Page | `app/[locale]/pruefung/page.tsx` |
-| Table | `supabase/migrations/20261002000000_inkasso_cases.sql` |
+| Table | `supabase/migrations/20261002223611_inkasso_cases.sql` |
+| Document FK index | `supabase/migrations/20261002223748_inkasso_cases_document_id_index.sql` |
 
 ## API
 
@@ -71,7 +72,7 @@ The feature needs two things before it works in production.
 
 **1. The migration must be applied to the Supabase project** (`mteguzgbiuexmdcrqajj`,
 eu-central-1). The case routes return `SCHEMA_MISSING` until the table exists.
-Either paste `supabase/migrations/20261002000000_inkasso_cases.sql` into the SQL
+Either paste `supabase/migrations/20261002223611_inkasso_cases.sql` into the SQL
 editor, or run `supabase link --project-ref mteguzgbiuexmdcrqajj` followed by
 `supabase db push`. Applying it twice is safe; the migration is idempotent.
 

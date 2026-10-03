@@ -2,7 +2,7 @@
 --
 -- Run only against a disposable local/staging database after applying the
 -- canonical spine migration and then:
---   supabase/migrations/20261002000000_inkasso_cases.sql
+--   supabase/migrations/20261002223611_inkasso_cases.sql
 -- The transaction always rolls back its synthetic fixtures.
 --
 -- The point of this file is the parts a unit test cannot reach: row-level
