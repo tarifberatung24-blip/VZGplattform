@@ -615,22 +615,110 @@
   text-align: center;
 }
 
+/* Two-up composition: the argument on the left, the orbital system on the
+   right with its detail panel tucked underneath. On narrow screens it stacks. */
+.layer-zero-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 100%;
+}
+
+.layer-zero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+  max-width: 34rem;
+}
+
+.layer-zero-system {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.layer-zero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.layer-zero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.875rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    var(--horizon-cta-from),
+    var(--horizon-cta-to)
+  );
+  box-shadow: 0 14px 34px -16px var(--horizon-glow);
+  transition: transform 220ms ease;
+}
+
+.layer-zero-cta:hover {
+  transform: translateY(-2px);
+}
+
+.layer-zero-cta--ghost {
+  color: var(--horizon-text);
+  background: var(--horizon-surface-elevated);
+  border: 1px solid var(--horizon-node-border);
+  box-shadow: none;
+}
+
+.layer-zero-trust {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--horizon-muted);
+}
+
+@media (min-width: 1024px) {
+  .layer-zero-split {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3rem;
+  }
+
+  .layer-zero-copy {
+    flex: 1 1 0;
+    max-width: 38rem;
+  }
+
+  .layer-zero-system {
+    flex: 0 0 auto;
+  }
+}
+
 .layer-zero-title {
   font-family: var(--font-display, inherit);
-  font-size: clamp(2.75rem, 8vw, 4.5rem);
+  font-size: clamp(2rem, 4.6vw, 4rem);
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.02;
   letter-spacing: -0.04em;
   color: var(--horizon-text);
 }
 
 .layer-zero-title__number {
+  display: block;
   color: var(--horizon-accent);
-  margin-left: 0.15em;
 }
 
 .layer-zero-tagline {
   font-size: clamp(0.95rem, 2.4vw, 1.125rem);
+  line-height: 1.7;
   color: var(--horizon-muted);
 }
 
@@ -639,7 +727,7 @@
 .layer-zero-orbit {
   position: relative;
   width: 100%;
-  max-width: 760px;
+  max-width: min(100%, 600px);
   aspect-ratio: 1 / 1;
   margin-inline: auto;
 }
@@ -681,7 +769,7 @@
 
 .layer-zero-core {
   position: relative;
-  width: 42%;
+  width: 50%;
   aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
@@ -782,7 +870,7 @@
 
 .layer-zero-node {
   position: absolute;
-  width: 13.5%;
+  width: 15%;
   aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
