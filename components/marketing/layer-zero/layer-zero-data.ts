@@ -40,9 +40,10 @@ export type LayerZeroModule = {
  * Visual order around the core, clockwise from the top. The order matters: it
  * is what makes the orbit read as one system rather than a list.
  *
- * Nine nodes sit on an even 40° ring, rotated so Документи lands at 180° — the
- * bottom of the ring, directly above the panel. That alignment is what makes
- * the orbit read as one connected instrument instead of a diagram plus a card.
+ * Nine nodes sit on an even 40° ring anchored so Документи lands at exactly
+ * 180° — the bottom of the ring, directly above the detail panel. Anchoring the
+ * ring there (rather than at 0°) is what lets the default node line up with the
+ * panel while the remaining eight stay evenly spaced on one coherent orbit.
  */
 export const LAYER_ZERO_MODULES: LayerZeroModule[] = [
   { id: "steuern", icon: Receipt, angle: 340, route: "/modules/steuern" },
@@ -71,7 +72,7 @@ export const ORBIT_SQUASH = 0.92
  * lands fully inside the box instead of hanging over the edge and being clipped
  * by the hero's overflow.
  */
-export const NODE_ORBIT_RADIUS = 43.25
+export const NODE_ORBIT_RADIUS = 40
 
 /**
  * Node centres as percentages of the orbit box, so the ring is laid out by CSS

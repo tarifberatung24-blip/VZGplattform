@@ -34,8 +34,9 @@
       "navAbout": "So funktioniert's",
       "navContact": "Kontakt",
       "headline1": "Horizon",
-      "headline2": "dein digitaler Assistent in Deutschland",
-      "subtitle": "Verstehe Dokumente, bereite Anträge vor und erledige wichtige Verwaltungs- und Vertragsaufgaben in Deutschland – Schritt für Schritt.",
+      "headline2": "DEIN DIGITALER ASSISTENT IN DEUTSCHLAND",
+      "subtitle": "Dokumente, Verträge und Behördengänge — verstanden und an einem Ort verwaltet.",
+      "benefits": ["Verstehe Dokumente und Briefe.", "Behalte Verträge, Fristen und Kosten im Blick.", "Sieh den nächsten Schritt, bevor du handelst."],
       "primaryCta": "Jetzt starten"
     },
     "ctaPrimary": "Möglichkeiten prüfen",
