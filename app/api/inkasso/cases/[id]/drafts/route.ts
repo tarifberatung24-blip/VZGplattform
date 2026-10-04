@@ -61,14 +61,26 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     }, reference),
   }))
 
-  await supabase
+  const storedDrafts = drafts.map((draft) => ({
+    ...draft,
+    approved: false,
+    edited_at: new Date().toISOString(),
+  }))
+  const { error: saveError } = await supabase
     .from("inkasso_cases")
-    .update({ status: "drafted" })
+    .update({ status: "drafted", drafts: storedDrafts })
     .eq("id", id)
     .eq("user_id", user.id)
 
+  if (saveError) {
+    return NextResponse.json(
+      { code: saveError.code === "42703" ? "DRAFTS_COLUMN_MISSING" : "DRAFT_SAVE_FAILED" },
+      { status: 503 },
+    )
+  }
+
   return NextResponse.json({
-    drafts,
+    drafts: storedDrafts,
     guidance: submissionGuidance(locale, reference.deadline),
     disclaimer: evaluation.disclaimer,
   })
