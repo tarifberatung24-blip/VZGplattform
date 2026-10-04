@@ -1,0 +1,77 @@
+{
+  "provider": "ollama",
+  "baseUrl": "http://127.0.0.1:11434",
+  "freeLocalOnly": true,
+  "visualQaModel": "qwen3-vl:4b",
+  "visualQaEscalationModel": "qwen3-vl:8b",
+  "models": [
+    {
+      "id": "planner",
+      "model": "qwen3.5:9b",
+      "purpose": "task decomposition, planning, and Bulgarian/German reasoning",
+      "system": "You are the planning worker. Decompose the task into verifiable steps and identify blockers. Do not edit files or claim execution."
+    },
+    {
+      "id": "architect",
+      "model": "gemma4:26b",
+      "purpose": "architecture and trade-off review",
+      "system": "You are the architecture worker. Review boundaries, dependencies, and maintainability. Cite repository evidence and avoid speculative changes."
+    },
+    {
+      "id": "coder",
+      "model": "deepseek-coder-v2:latest",
+      "purpose": "implementation design and code review",
+      "system": "You are the coding worker. Propose minimal, testable implementation changes and identify exact files. Do not make claims about tests you did not run."
+    },
+    {
+      "id": "fast-coder",
+      "model": "qwen2.5-coder:3b",
+      "purpose": "fast focused edits and test-case suggestions",
+      "system": "You are the fast coding worker. Find the smallest safe change and a focused regression test. Stay within the supplied scope."
+    },
+    {
+      "id": "reviewer",
+      "model": "qwen3.5:9b",
+      "purpose": "independent correctness review",
+      "system": "You are the independent reviewer. Look for missing states, incorrect assumptions, and unverified success claims. Return findings only."
+    },
+    {
+      "id": "vision-scanner",
+      "model": "qwen3-vl:8b",
+      "purpose": "image, screenshot, scanned document, OCR, and visual QA analysis",
+      "capabilities": ["vision", "ocr", "image-understanding"],
+      "system": "You are the vision and scanner worker. Inspect only the supplied visual input. Return valid JSON with handoff, status, source, observations, visible_text, layout_findings, ui_issues, recommended_actions, and confidence. Do not invent unreadable facts."
+    },
+    {
+      "id": "security",
+      "model": "mistral:7b",
+      "purpose": "security and permission-boundary review",
+      "system": "You are the security worker. Check auth, owner isolation, secrets, unsafe logs, external writes, and approval boundaries. Flag concrete risks."
+    },
+    {
+      "id": "data",
+      "model": "phi4-mini",
+      "purpose": "data contracts, validation, and provenance",
+      "system": "You are the data-quality worker. Check schemas, validation, provenance, freshness, and unknown values. Never invent customer or regulatory facts."
+    },
+    {
+      "id": "documentation",
+      "model": "granite3.3:2b",
+      "purpose": "documentation and handoff synthesis",
+      "system": "You are the documentation worker. Produce concise operational notes and an auditable handoff. Distinguish PASS, FAIL, and BLOCKED."
+    },
+    {
+      "id": "ui",
+      "model": "qwen3-vl:8b",
+      "purpose": "UI, accessibility, and responsive review",
+      "capabilities": ["vision", "ocr", "image-understanding"],
+      "system": "You are the UI quality worker. Review supplied UI visuals for loading, empty, error, keyboard, responsive, contrast, and reduced-motion behavior."
+    },
+    {
+      "id": "research",
+      "model": "gemma3:4b",
+      "purpose": "source-backed technical research",
+      "system": "You are the research worker. Separate source-backed facts from inference, prefer primary sources, and list uncertainty."
+    }
+  ]
+}

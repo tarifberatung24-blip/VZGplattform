@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
+import { Layer0Orbit } from "@/components/marketing/layer0-orbit"
 
 /**
  * Layer 0 home hero.
@@ -18,8 +19,8 @@ export function AnimatedHero() {
 
   return (
     <div className="layer0-hero relative flex min-h-[100dvh] flex-col overflow-hidden">
-      <main className="relative z-10 flex flex-1 items-start px-6 pt-28 pb-20 sm:px-12 sm:pt-32 lg:px-20">
-        <div className="flex w-full max-w-2xl flex-col items-start gap-6">
+      <main className="relative z-10 grid flex-1 items-start gap-12 px-6 pt-28 pb-20 sm:px-12 sm:pt-32 lg:grid-cols-[minmax(0,0.82fr)_minmax(34rem,1.18fr)] lg:gap-4 lg:px-20">
+        <div className="flex w-full max-w-2xl flex-col items-start gap-6 lg:pt-20">
           <h1 className="font-display text-balance text-[clamp(2.4rem,6vw,5rem)] font-black leading-[1.02] tracking-[-0.04em] text-foreground">
             {t.home.hero.headline1}
             <span className="mt-1 block" style={{ color: "var(--thread-core)" }}>
@@ -55,6 +56,7 @@ export function AnimatedHero() {
             {t.home.trust}
           </p>
         </div>
+        <Layer0Orbit />
       </main>
     </div>
   )

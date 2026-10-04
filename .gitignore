@@ -32,3 +32,4 @@ skills-lock.json
 .env.local
 .env*.local
 supabase/.branches/
+.openhands/runtime/

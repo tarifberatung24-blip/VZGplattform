@@ -251,6 +251,156 @@
   min-height: unset;
 }
 
+/* Layer 0 orbit navigation: a compact visual map of the real public entry
+   points. It stays CSS-only so the surface remains fast, accessible and local. */
+.layer0-orbit {
+  position: relative;
+  display: flex;
+  min-height: 39rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 1rem 0 0;
+}
+.layer0-orbit__stage {
+  position: relative;
+  width: min(100%, 30rem);
+  height: min(30rem, 78vw);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  margin-bottom: .75rem;
+}
+.layer0-orbit__halo {
+  position: absolute;
+  inset: 16%;
+  border-radius: 999px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--thread-core) 24%, transparent), transparent 68%);
+  filter: blur(18px);
+}
+.layer0-orbit__rings,
+.layer0-orbit__rings span {
+  position: absolute;
+  inset: 18%;
+  border: 1px solid color-mix(in srgb, var(--thread-core) 42%, transparent);
+  border-radius: 50%;
+  transform: rotate(-18deg) scaleY(.55);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--thread-core) 18%, transparent), inset 0 0 18px color-mix(in srgb, var(--thread-glow) 12%, transparent);
+}
+.layer0-orbit__rings span:nth-child(2) { inset: 25% 13%; transform: rotate(22deg) scaleY(.62); opacity: .75; }
+.layer0-orbit__rings span:nth-child(3) { inset: 12% 28%; transform: rotate(78deg) scaleY(.42); opacity: .55; }
+.layer0-orbit__connection {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+.layer0-orbit__connection line {
+  stroke: #ffc247;
+  stroke-width: .55;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px #ffc247) drop-shadow(0 0 8px #ff8a1f);
+  stroke-dasharray: 4 2;
+  animation: layer0-orbit-thread 1.8s linear infinite;
+}
+.layer0-orbit__connection circle {
+  fill: #ffe09a;
+  filter: drop-shadow(0 0 4px #ffc247) drop-shadow(0 0 10px #ff8a1f);
+  animation: layer0-orbit-pulse 1.4s ease-in-out infinite;
+}
+@keyframes layer0-orbit-thread { to { stroke-dashoffset: -12; } }
+@keyframes layer0-orbit-pulse { 50% { opacity: .45; transform: scale(.7); transform-origin: center; } }
+.layer0-orbit__core {
+  position: absolute;
+  inset: 29%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--thread-glow) 88%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 28%, color-mix(in srgb, var(--thread-glow) 42%, transparent), color-mix(in srgb, var(--thread-core) 22%, var(--background)) 48%, color-mix(in srgb, var(--background) 94%, transparent) 78%);
+  box-shadow: 0 0 42px color-mix(in srgb, var(--thread-core) 62%, transparent), 0 0 90px color-mix(in srgb, var(--thread-core) 20%, transparent), inset 0 0 28px color-mix(in srgb, var(--thread-glow) 24%, transparent);
+  color: var(--foreground);
+  z-index: 2;
+}
+.layer0-orbit__wordmark {
+  display: block;
+  color: #fff7eb;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(1.65rem, 4vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: -.08em;
+  line-height: 1;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--thread-glow) 70%, transparent);
+}
+.layer0-orbit__nodes { position: absolute; inset: 0; }
+.layer0-orbit__node {
+  position: absolute;
+  display: flex;
+  width: 5.8rem;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  color: var(--muted-foreground);
+  font-size: .68rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  transition: color .2s ease, transform .2s ease;
+}
+.layer0-orbit__node:hover, .layer0-orbit__node:focus-visible, .layer0-orbit__node.is-active { color: var(--foreground); transform: translate(-50%, -50%) scale(1.06); }
+.layer0-orbit__node:focus-visible { outline: 2px solid var(--thread-glow); outline-offset: 6px; border-radius: 1rem; }
+.layer0-orbit__node-icon {
+  display: grid;
+  width: 5.8rem;
+  height: 5.8rem;
+  padding: .45rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--thread-glow) 84%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 28%, color-mix(in srgb, var(--thread-glow) 28%, transparent), color-mix(in srgb, var(--thread-core) 18%, var(--background)) 52%, color-mix(in srgb, var(--background) 92%, transparent) 80%);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--thread-core) 48%, transparent), inset 0 0 18px color-mix(in srgb, var(--thread-glow) 22%, transparent);
+  color: var(--foreground);
+}
+.layer0-orbit__node.is-active .layer0-orbit__node-icon { border-color: color-mix(in srgb, var(--thread-glow) 96%, transparent); box-shadow: 0 0 32px color-mix(in srgb, var(--thread-core) 62%, transparent), inset 0 0 22px color-mix(in srgb, var(--thread-glow) 28%, transparent); }
+/* Nine evenly spaced planets on one circular orbit around the central sun. */
+.layer0-orbit__node--top { left: 50%; top: 8%; }
+.layer0-orbit__node--top-right { left: 77%; top: 18%; }
+.layer0-orbit__node--right { left: 91%; top: 43%; }
+.layer0-orbit__node--bottom-right { left: 86%; top: 71%; }
+.layer0-orbit__node--bottom { left: 64%; top: 90%; }
+.layer0-orbit__node--bottom-left { left: 36%; top: 90%; }
+.layer0-orbit__node--left { left: 14%; top: 71%; }
+.layer0-orbit__node--top-left { left: 9%; top: 43%; }
+.layer0-orbit__node--upper-left { left: 23%; top: 18%; }
+.layer0-orbit__card { width: min(100% - 2rem, 34rem); min-height: 10.5rem; margin-top: 0; padding: 1rem; border-radius: 1.25rem; backdrop-filter: blur(16px); z-index: 3; }
+.layer0-orbit__card-icon { display: grid; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; place-items: center; border-radius: .75rem; background: color-mix(in srgb, var(--thread-core) 22%, var(--background)); color: var(--thread-glow); }
+.layer0-orbit__card-link { display: flex; min-height: 2.75rem; margin-top: .9rem; align-items: center; justify-content: center; gap: .5rem; border-radius: .7rem; background: linear-gradient(100deg, var(--thread-core), var(--thread-glow)); color: #160b03; font-weight: 800; transition: filter .2s ease, transform .2s ease; }
+.layer0-orbit__card-link:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+@media (max-width: 1023px) {
+  .layer0-orbit { min-height: 34rem; }
+  .layer0-orbit__stage { width: min(100%, 27rem); height: min(27rem, 78vw); }
+}
+@media (max-width: 639px) {
+  .layer0-orbit { min-height: 27rem; margin-inline: -1rem; }
+  .layer0-orbit__stage { width: min(100%, 25rem); height: 22rem; }
+  .layer0-orbit__node { width: 4.6rem; font-size: .58rem; }
+  .layer0-orbit__node-icon { width: 4.6rem; height: 4.6rem; padding: .3rem; }
+  .layer0-orbit__core { inset: 30%; }
+  .layer0-orbit__node--top { left: 50%; top: 8%; }
+  .layer0-orbit__node--top-right { left: 77%; top: 20%; }
+  .layer0-orbit__node--right { left: 91%; top: 43%; }
+  .layer0-orbit__node--bottom-right { left: 84%; top: 72%; }
+  .layer0-orbit__node--bottom { left: 64%; top: 88%; }
+  .layer0-orbit__node--bottom-left { left: 36%; top: 88%; }
+  .layer0-orbit__node--left { left: 16%; top: 72%; }
+  .layer0-orbit__node--top-left { left: 9%; top: 43%; }
+  .layer0-orbit__node--upper-left { left: 23%; top: 20%; }
+  .layer0-orbit__card { width: calc(100% - 1rem); margin-top: 0; }
+}
+
 /* The hero carries the menu bar's glow, so the two read as one lit surface.
    The chrome's own recipe is a 1px sheen line plus the theme halo; here the
    line is replaced by an inward glow that spills down from the bar. Drawing

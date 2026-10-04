@@ -16,6 +16,12 @@
     "i18n:unused": "node scripts/i18n-unused.mjs",
     "i18n:hardcoded": "node scripts/i18n-hardcoded.mjs",
     "i18n:verify": "pnpm i18n:check && pnpm i18n:unused && pnpm i18n:hardcoded",
+    "ai:models:health": "node scripts/ai-model-health.mjs",
+    "ai:models:fanout": "node scripts/ai-model-fanout.mjs",
+    "ai:route": "node scripts/ai-router.mjs",
+    "ai:route:test": "node --test scripts/ai-router.test.mjs",
+    "ai:ui-qa": "node scripts/ai-ui-qa.mjs",
+    "ai:ui-qa:test": "node --test scripts/ai-ui-qa.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -60,6 +66,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.4",
+    "playwright": "^1.63.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.3.3",
     "typescript": "5.7.3",
