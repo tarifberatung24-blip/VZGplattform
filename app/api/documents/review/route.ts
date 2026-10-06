@@ -17,6 +17,10 @@ const reviewSchema = z.object({
     cancellationDeadline: z.string().trim().max(40),
     confidence: z.number().min(0).max(1).nullable(),
     evidence: z.array(z.string().max(500)).max(10),
+    summary: z.string().max(1000).optional(),
+    recommendedNextSteps: z.array(z.string().max(260)).max(3).optional(),
+    missingInformation: z.array(z.string().max(260)).max(5).optional(),
+    riskFlags: z.array(z.string().max(260)).max(5).optional(),
   }).strict(),
   confirm: z.boolean(),
 }).strict()

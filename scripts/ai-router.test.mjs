@@ -1,6 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { hasVisualRequirement, resolveCapabilityFailure, routeTask, structuredVisionResult } from "./ai-router.mjs"
+import fs from "node:fs"
 
 const installed = ["qwen3.5:9b", "gemma4:26b", "deepseek-coder-v2:latest", "qwen2.5-coder:3b", "qwen3-vl:8b"]
 
@@ -39,4 +40,17 @@ test("vision results are normalized without inventing facts", () => {
   assert.deepEqual(result.observations, ["visible button"])
   assert.deepEqual(result.visible_text, [])
   assert.equal(result.confidence, 0.8)
+})
+
+test("router exposes an optional OpenAI-compatible gateway without replacing OpenRouter", () => {
+  const source = fs.readFileSync(new URL("./ai-router.mjs", import.meta.url), "utf8")
+  assert.match(source, /AI_GATEWAY_BASE_URL/)
+  assert.match(source, /AI_GATEWAY_API_KEY/)
+  assert.match(source, /AI_GATEWAY_MODEL/)
+})
+
+test("agent output contract is action-first and concise", () => {
+  const source = fs.readFileSync(new URL("./ai-router.mjs", import.meta.url), "utf8")
+  assert.match(source, /Lead with the next concrete action/)
+  assert.match(source, /finish with exactly one concrete next step/)
 })

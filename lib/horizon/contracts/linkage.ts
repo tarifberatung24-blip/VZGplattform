@@ -60,7 +60,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
  * free-text value is dropped rather than passed on as a string P14 would have to
  * interpret, because interpreting it is how an invented deadline appears.
  */
-function validIsoDate(value: string | null): string | null {
+export function validIsoDate(value: string | null): string | null {
   if (!value || !ISO_DATE.test(value)) return null
   const parsed = new Date(`${value}T00:00:00.000Z`)
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value

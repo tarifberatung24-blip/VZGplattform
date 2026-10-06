@@ -11,7 +11,8 @@ function error(code: string, status: number) {
 export async function GET(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return error("AUTH_REQUIRED", 401)
+  // The public wizard may load without a saved draft. Writes remain protected.
+  if (!user) return NextResponse.json({ draft: null })
   const locale = new URL(request.url).searchParams.get("locale") ?? "bg"
   if (!allowedLocales.has(locale)) return error("INVALID_LOCALE", 400)
   const { data, error: queryError } = await supabase.from("kindergeld_cases").select("id,locale,status,answers,current_step,updated_at").eq("user_id", user.id).eq("locale", locale).order("updated_at", { ascending: false }).limit(1).maybeSingle()

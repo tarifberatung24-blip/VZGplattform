@@ -23,6 +23,8 @@ export default function SignUpPage() {
         create: "Konto mit E-Mail erstellen",
         creating: "Wird erstellt...",
         passwordError: "Das Passwort muss mindestens 6 Zeichen haben.",
+        rateLimited: "Zu viele Registrierungsversuche. Bitte warte einige Minuten oder nutze die Registrierung per Google bzw. SMS.",
+        invalidEmail: "Bitte prüfe deine E-Mail-Adresse und versuche es erneut.",
         genericError: "Registrierung konnte nicht abgeschlossen werden.",
         google: "Mit Google registrieren",
         phone: "Mit Telefonnummer registrieren",
@@ -49,6 +51,8 @@ export default function SignUpPage() {
         create: "Създай акаунт с имейл",
         creating: "Създаване...",
         passwordError: "Паролата трябва да е поне 6 символа.",
+        rateLimited: "Има твърде много опити за регистрация. Изчакай няколко минути или използвай Google/SMS регистрация.",
+        invalidEmail: "Провери имейл адреса и опитай отново.",
         genericError: "Регистрацията не можа да бъде завършена.",
         google: "Регистрация с Google",
         phone: "Регистрация с телефонен номер",
@@ -90,7 +94,14 @@ export default function SignUpPage() {
         data: { first_name: name },
       },
     })
-    if (error) setEmailError(error.message.toLowerCase().includes("password") ? copy.passwordError : copy.genericError)
+    if (error) {
+      const message = error.message.toLowerCase()
+      setEmailError(error.status === 429 || message.includes("rate_limit") || message.includes("too many")
+        ? copy.rateLimited
+        : message.includes("email_address_invalid") || message.includes("invalid email")
+          ? copy.invalidEmail
+          : message.includes("password") ? copy.passwordError : copy.genericError)
+    }
     else router.push(data.session ? `/${locale}/dashboard` : `/${locale}/auth/sign-up-success`)
     setLoading(false)
   }

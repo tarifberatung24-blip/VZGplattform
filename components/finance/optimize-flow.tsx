@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CheckCircle2, ChevronDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
@@ -10,7 +10,7 @@ type Session = { id: string; status: string; filled_data: Record<string, { value
 type StartResponse = { session?: Session; missing_critical?: string[]; partner_configured?: boolean; code?: string }
 type ConfirmResponse = { redirect_url?: string | null; partner_configured?: boolean; disclosure?: string; code?: string }
 
-export function OptimizeFlow({ contract }: { contract: Contract }) {
+export function OptimizeFlow({ contract, autoStart = false }: { contract: Contract; autoStart?: boolean }) {
   const { t } = useLanguage()
   const copy = t.optimizeFlow
   const [loading, setLoading] = useState(false)
@@ -20,6 +20,10 @@ export function OptimizeFlow({ contract }: { contract: Contract }) {
   const [message, setMessage] = useState("")
   const [confirmed, setConfirmed] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
+
+  useEffect(() => {
+    if (autoStart && !session && !loading) void start()
+  }, [autoStart])
 
   async function start() {
     setLoading(true); setMessage(""); setSession(null); setMissing([]); setConfirmed(false)

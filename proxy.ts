@@ -2,6 +2,37 @@ import { updateSession } from "./lib/supabase/proxy"
 import { NextRequest, NextResponse } from "next/server"
 import { defaultLocale, isLocale, LOCALE_COOKIE_KEY, stripLocale } from "./lib/i18n/routing"
 import { legacyRedirectTarget } from "./lib/navigation/legacy-redirects"
+import { isAffiliateOfferId } from "./lib/affiliate-offers"
+
+const localizedStaticPaths = new Set([
+  "/", "/anspruch", "/kindergeld", "/za-nas", "/vertraege", "/documents", "/auth/login",
+  "/auth/sign-up", "/auth/sign-up-success", "/auth/error", "/auth/forgot-password",
+  "/auth/update-password", "/auth/mfa-verify", "/finanzamt", "/profil", "/dashboard",
+  "/protected", "/assistant", "/konto/sicherheit", "/steuer", "/steuer/providers", "/steuer/review",
+  "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/how-it-works",
+  "/affiliate-hinweis", "/widerruf", "/app", "/functions", "/anfrage", "/zayavka",
+  "/email-generator", "/pruefung", "/security", "/versicherungen",
+])
+
+function isKnownLocalizedPath(pathname: string) {
+  const [, locale, ...segments] = pathname.split("/")
+  if (!isLocale(locale)) return true
+  const path = `/${segments.join("/")}`
+  if (localizedStaticPaths.has(path)) return true
+  if (segments[0] === "angebote" && segments.length === 2) return isAffiliateOfferId(segments[1])
+  if (segments[0] === "go" && segments.length === 2) return isAffiliateOfferId(segments[1])
+  if (segments[0] === "guide" && (segments.length === 1 || segments.length === 2)) return true
+  if (segments[0] === "onboarding" && ["profile", "tour", "finish"].includes(segments[1] ?? "")) return true
+  return false
+}
+
+function localizedNotFound(locale: string) {
+  const german = locale === "de"
+  const title = german ? "Seite nicht gefunden" : "Страницата не е намерена"
+  const home = german ? "Zur Startseite" : "Към началната страница"
+  const body = `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${title}</title></head><body><main><h1>${title}</h1><a href="/${locale}">${home}</a></main></body></html>`
+  return new NextResponse(body, { status: 404, headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "noindex" } })
+}
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -39,6 +70,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isLocale(segment)) {
+    if (!isKnownLocalizedPath(pathname)) return localizedNotFound(segment)
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set("x-locale", segment)
     const localizedRequest = new NextRequest(request, { headers: requestHeaders })

@@ -56,6 +56,17 @@ const pages: Record<string, React.ComponentType> = {
   steuer: SteuerPage, "steuer/providers": ProvidersPage, "steuer/review": ReviewPage, finanzbildung: FinanzbildungPage, datenschutz: DatenschutzPage, agb: AgbPage, impressum: ImpressumPage, contact: ContactPage, "how-it-works": HowItWorksPage, "affiliate-hinweis": AffiliateNoticePage, widerruf: WithdrawalPage, app: AppInstallPage,
 }
 
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  const locales = ["bg", "de"]
+  const knownSlugs = [...Object.keys(pages), "functions"].map((path) => path.split("/"))
+  return locales.flatMap((locale) => [
+    { locale, slug: [] },
+    ...knownSlugs.map((slug) => ({ locale, slug })),
+  ])
+}
+
 export async function generateMetadata({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
   const {slug = []} = await params
   return isKintexWorkspacePath(`/${slug.join("/")}`)

@@ -14,6 +14,7 @@ const PLAN_TERMS = /(?:plan|planning|roadmap|decompose|reason|explain|strategy|s
 const ARCH_TERMS = /(?:architecture|architectural|design system|trade[- ]off|boundary|scalab|schema design)/i
 const REVIEW_TERMS = /(?:review|validate|validation|audit|check|inspect|quality|regression)/i
 const UI_TERMS = /(?:ui|ux|frontend|front[- ]end|homepage|dashboard|responsive|accessibility|layout|visual|design reference|web design)/i
+const ACTION_FIRST_OUTPUT = "Lead with the next concrete action. Use numbered steps for multi-step work. State the current status briefly, surface errors directly, and finish with exactly one concrete next step."
 
 function modelById(id) {
   return config.models.find((entry) => entry.id === id) || null
@@ -166,7 +167,7 @@ async function callModel(entry, userContent, images = [], timeoutMs = 120000, ba
       keep_alive: "10m",
       ...(requestOptions.json ? { format: "json" } : {}),
       options: { temperature: 0.1, num_ctx: 4096, num_batch: 512, num_thread: 12, num_predict: requestOptions.json ? 64 : 320 },
-      messages: [{ role: "system", content: entry.system }, { role: "user", content: userContent, ...(images.length ? { images } : {}) }]
+      messages: [{ role: "system", content: `${entry.system}${requestOptions.json ? "" : `\n\n${ACTION_FIRST_OUTPUT}`}` }, { role: "user", content: userContent, ...(images.length ? { images } : {}) }]
     })
   })
   if (!response.ok) throw new Error(`model ${entry.model} failed: HTTP ${response.status}`)
@@ -212,20 +213,35 @@ async function callGeminiAttachment({ task, images, timeoutMs }) {
   return payload.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || ""
 }
 
+function cloudGatewayBaseUrl() {
+  return (process.env.AI_GATEWAY_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/+$/, "")
+}
+
+function cloudGatewayKey() {
+  return process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY || ""
+}
+
+function cloudGatewayModel(entry) {
+  return process.env.AI_GATEWAY_MODEL || process.env.OPENROUTER_MODEL || config.cloudFreeChatModel || entry.model
+}
+
 async function callOpenRouter(entry, userContent, timeoutMs) {
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const gatewayUrl = cloudGatewayBaseUrl()
+  const response = await fetch(`${gatewayUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      "HTTP-Referer": process.env.OPENROUTER_SITE_URL || "https://horizon.vzg-consult.de",
-      "X-Title": "HORIZON by VZG"
+      authorization: `Bearer ${cloudGatewayKey()}`,
+      ...(gatewayUrl.includes("openrouter.ai") ? {
+        "HTTP-Referer": process.env.OPENROUTER_SITE_URL || "https://horizon.vzg-consult.de",
+        "X-Title": "HORIZON by VZG"
+      } : {})
     },
     signal: AbortSignal.timeout(timeoutMs),
     body: JSON.stringify({
-      model: process.env.OPENROUTER_MODEL || entry.model,
+      model: cloudGatewayModel(entry),
       temperature: 0.1,
-      messages: [{ role: "system", content: entry.system }, { role: "user", content: userContent }]
+      messages: [{ role: "system", content: `${entry.system}\n\n${ACTION_FIRST_OUTPUT}` }, { role: "user", content: userContent }]
     })
   })
   if (!response.ok) throw new Error(`OpenRouter failed: HTTP ${response.status}`)
@@ -240,7 +256,7 @@ async function callRoutedModel(entry, userContent, images = [], timeoutMs = 1200
     if (images.length && process.env.GEMINI_API_KEY) {
       return callGeminiAttachment({ task: userContent, images, timeoutMs })
     }
-    if (!images.length && process.env.OPENROUTER_API_KEY) {
+    if (!images.length && cloudGatewayKey()) {
       return callOpenRouter(entry, userContent, timeoutMs)
     }
     throw localError

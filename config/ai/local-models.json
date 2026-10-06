@@ -2,6 +2,8 @@
   "provider": "ollama",
   "baseUrl": "http://127.0.0.1:11434",
   "freeLocalOnly": true,
+  "cloudFreeChatModel": "google/gemma-4-31b-it:free",
+  "cloudFreeEscalationModel": "nvidia/nemotron-3-ultra-550b-a55b:free",
   "visualQaModel": "qwen3-vl:4b",
   "visualQaEscalationModel": "qwen3-vl:8b",
   "models": [

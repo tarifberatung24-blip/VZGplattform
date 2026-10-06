@@ -22,6 +22,7 @@
     "ai:route:test": "node --test scripts/ai-router.test.mjs",
     "ai:ui-qa": "node scripts/ai-ui-qa.mjs",
     "ai:ui-qa:test": "node --test scripts/ai-ui-qa.test.mjs",
+    "security:zap": "node scripts/security-zap.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
