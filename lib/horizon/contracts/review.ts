@@ -99,16 +99,16 @@ export function deriveMissingInfo(facts: ContractReviewFacts): ContractMissingIn
 
 export function deriveNextSteps(facts: ContractReviewFacts): ContractNextStep[] {
   const steps: ContractNextStep[] = [
-    { id: "review", view: "review_facts", titleKey: "reviewFactsTitle", detailKey: "reviewFactsDetail" },
+    { id: "review", view: "review_facts", titleKey: "stepReviewFactsTitle", detailKey: "stepReviewFactsDetail" },
   ]
   const missing = deriveMissingInfo(facts)
   if (missing.fields.length > 0) {
     steps.push({ id: "fill", view: "review_facts", titleKey: "completeFactsTitle", detailKey: "completeFactsDetail" })
   }
   if (facts.cancellationDeadline) {
-    steps.push({ id: "reminder", view: "add_reminder", titleKey: "reminderTitle", detailKey: "reminderDetail" })
+    steps.push({ id: "reminder", view: "add_reminder", titleKey: "stepReminderTitle", detailKey: "stepReminderDetail" })
   }
-  steps.push({ id: "optimize", view: "optimize_tariff", titleKey: "optimizeTitle", detailKey: "optimizeDetail" })
+  steps.push({ id: "optimize", view: "optimize_tariff", titleKey: "stepOptimizeTitle", detailKey: "stepOptimizeDetail" })
   steps.push({ id: "kuendigung", view: "prepare_kuendigung", titleKey: "kuendigungTitle", detailKey: "kuendigungDetail" })
   return steps.slice(0, 3)
 }

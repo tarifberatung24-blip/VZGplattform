@@ -83,6 +83,18 @@ describe("P17 contract review > next steps", () => {
     for (const step of deriveNextSteps(facts())) expect(allowed.has(step.view)).toBe(true)
   })
 
+  it("uses keys that exist in the contract board translations", () => {
+    const keys = deriveNextSteps(facts()).flatMap((step) => [step.titleKey, step.detailKey])
+    expect(keys).toEqual(expect.arrayContaining([
+      "stepReviewFactsTitle",
+      "stepReviewFactsDetail",
+      "stepReminderTitle",
+      "stepReminderDetail",
+      "stepOptimizeTitle",
+      "stepOptimizeDetail",
+    ]))
+  })
+
   it("never offers a step that sends anything or invents a saving", () => {
     const views = deriveNextSteps(facts()).map((step) => step.view)
     expect(views).not.toContain("send")
