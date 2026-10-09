@@ -7,6 +7,7 @@ import {
 } from "../../../../lib/affiliate/analytics"
 import { createAffiliateAnalyticsClient } from "../../../../lib/affiliate/analytics-client"
 import { affiliateRequestStatuses, canTransition, isAffiliateRequestStatus } from "../../../../lib/affiliate/lifecycle"
+import { authorizeOperator } from "../../../../lib/affiliate/operator-auth"
 
 /**
  * Operator callback: the automation/orchestrator advances a stored request
@@ -28,26 +29,10 @@ const callbackSchema = z
   })
   .strict()
 
-function readSecret() {
-  const value = process.env.AFFILIATE_OPERATOR_SECRET?.trim()
-  return value && value.length >= 16 ? value : null
-}
-
-/** Constant-time-ish comparison to avoid leaking the secret through timing. */
-function secretMatches(provided: string | null, expected: string) {
-  if (!provided || provided.length !== expected.length) return false
-  let diff = 0
-  for (let i = 0; i < expected.length; i += 1) diff |= provided.charCodeAt(i) ^ expected.charCodeAt(i)
-  return diff === 0
-}
-
 export async function POST(request: Request) {
-  const expected = readSecret()
-  if (!expected) {
-    return NextResponse.json({ code: "OPERATOR_CALLBACK_NOT_CONFIGURED" }, { status: 503 })
-  }
-  if (!secretMatches(request.headers.get("x-horizon-operator-secret"), expected)) {
-    return NextResponse.json({ code: "UNAUTHORIZED" }, { status: 401 })
+  const auth = authorizeOperator(request)
+  if (!auth.ok) {
+    return NextResponse.json({ code: auth.code }, { status: auth.status })
   }
 
   const parsed = callbackSchema.safeParse(await request.json().catch(() => null))
