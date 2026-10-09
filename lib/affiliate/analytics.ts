@@ -188,4 +188,90 @@ export async function recordAffiliateStatusEvent(
   }
 }
 
+export type CommissionRecordInput = {
+  requestId: string
+  offerId: string
+  model: string
+  status: string
+  amountCents: number
+  currency?: string | null
+  externalReference?: string | null
+  note?: string | null
+  source?: string | null
+}
+
+/**
+ * Insert one commission row, keyed by (request_id, offer_id). Returns "created",
+ * "duplicate" when the pair already exists, or "error". The distinction lets the
+ * caller answer idempotently: a repeated callback is not a failure.
+ */
+export async function createCommissionRecord(
+  client: SupabaseClient | null,
+  input: CommissionRecordInput,
+): Promise<"created" | "duplicate" | "error"> {
+  if (!client) return "error"
+  try {
+    const { error } = await client.from("affiliate_commissions").insert({
+      request_id: input.requestId,
+      offer_id: input.offerId,
+      model: input.model,
+      status: input.status,
+      amount_cents: input.amountCents,
+      currency: input.currency ?? "EUR",
+      external_reference: input.externalReference ?? null,
+      note: input.note ?? null,
+      source: input.source ?? null,
+    })
+    if (!error) return "created"
+    // 23505 = unique_violation, the (request_id, offer_id) key already exists.
+    if (error.code === "23505") return "duplicate"
+    return "error"
+  } catch {
+    return "error"
+  }
+}
+
+/** Read the current commission status for a (request, offer) pair, or null. */
+export async function findCommissionStatus(
+  client: SupabaseClient | null,
+  requestId: string,
+  offerId: string,
+): Promise<string | null> {
+  if (!client) return null
+  try {
+    const { data, error } = await client
+      .from("affiliate_commissions")
+      .select("status")
+      .eq("request_id", requestId)
+      .eq("offer_id", offerId)
+      .maybeSingle()
+    if (error || !data) return null
+    return (data as { status: string }).status
+  } catch {
+    return null
+  }
+}
+
+/** Advance the commission status. Returns true only when a row was updated. */
+export async function updateCommissionStatus(
+  client: SupabaseClient | null,
+  requestId: string,
+  offerId: string,
+  status: string,
+): Promise<boolean> {
+  if (!client) return false
+  try {
+    const { data, error } = await client
+      .from("affiliate_commissions")
+      .update({ status })
+      .eq("request_id", requestId)
+      .eq("offer_id", offerId)
+      .select("id")
+      .maybeSingle()
+    return !error && Boolean(data)
+  } catch {
+    return false
+  }
+}
+
 export { isMissingTable }
