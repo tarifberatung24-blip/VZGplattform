@@ -19,6 +19,7 @@ import "server-only"
 import type { EmailProvider, ProviderResult } from "./provider"
 import { readSmtpConfig, type SmtpConfigResult } from "./smtp-config"
 import { createSmtpProvider } from "./smtp-provider"
+import { createGoogleProvider } from "./google-provider"
 
 /**
  * Reports unavailability rather than failing.
@@ -70,7 +71,11 @@ export function smtpConfig(): SmtpConfigResult | null {
  * half-configured relay could hand a customer's documents to the wrong server or
  * send them in the clear.
  */
-export async function resolveProvider(): Promise<EmailProvider> {
+export async function resolveProvider(userId?: string): Promise<EmailProvider> {
+  if (userId) {
+    const google = await createGoogleProvider(userId)
+    if (google && await google.isAvailable()) return google
+  }
   const config = smtpConfig()
   if (!config) return unavailableProvider
   return createSmtpProvider(config)
@@ -83,7 +88,7 @@ export async function resolveProvider(): Promise<EmailProvider> {
  * produces a `PROVIDER_UNAVAILABLE` outcome with no half-written attempt, no
  * consumed idempotency key, and no misleading "queued" state.
  */
-export async function isSendProviderAvailable(): Promise<boolean> {
-  const provider = await resolveProvider()
+export async function isSendProviderAvailable(userId?: string): Promise<boolean> {
+  const provider = await resolveProvider(userId)
   return provider.isAvailable()
 }

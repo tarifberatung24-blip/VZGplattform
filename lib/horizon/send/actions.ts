@@ -94,8 +94,8 @@ async function loadSendContext(input: { caseId: string; draftId: string }) {
     engine.repository.getMissingInformation(input.caseId),
     engine.repository.getDraftAttachments(input.caseId, input.draftId),
     engine.repository.listAudit(input.caseId),
-    resolveProvider(),
-    isSendProviderAvailable(),
+    resolveProvider(engine.userId),
+    isSendProviderAvailable(engine.userId),
   ])
 
   const recorded = readRecordedAttachments(rawAttachments.data)
