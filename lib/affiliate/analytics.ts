@@ -121,4 +121,71 @@ export async function recordAffiliateClick(
   }
 }
 
+export type AffiliateStatusEventInput = {
+  requestId: string
+  status: string
+  note?: string | null
+  source?: string | null
+}
+
+/** Read the current customer-facing status, or null when the row/table is absent. */
+export async function findServiceRequestStatus(
+  client: SupabaseClient | null,
+  requestId: string,
+): Promise<string | null> {
+  if (!client) return null
+  try {
+    const { data, error } = await client
+      .from("affiliate_requests")
+      .select("status")
+      .eq("request_id", requestId)
+      .maybeSingle()
+    if (error || !data) return null
+    return (data as { status: string }).status
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Advance the customer-facing status. Returns true only when a row was actually
+ * updated, so the endpoint can distinguish "advanced" from "request not found".
+ */
+export async function markServiceRequestStatus(
+  client: SupabaseClient | null,
+  requestId: string,
+  status: string,
+): Promise<boolean> {
+  if (!client) return false
+  try {
+    const { data, error } = await client
+      .from("affiliate_requests")
+      .update({ status })
+      .eq("request_id", requestId)
+      .select("id")
+      .maybeSingle()
+    return !error && Boolean(data)
+  } catch {
+    return false
+  }
+}
+
+/** Append one lifecycle event to the append-only ledger. Best-effort. */
+export async function recordAffiliateStatusEvent(
+  client: SupabaseClient | null,
+  input: AffiliateStatusEventInput,
+): Promise<void> {
+  if (!client) return
+  try {
+    await client.from("affiliate_status_events").insert({
+      request_id: input.requestId,
+      status: input.status,
+      note: input.note ?? null,
+      source: input.source ?? null,
+    })
+  } catch {
+    // best-effort: the status update is the source of truth, the event is history
+  }
+}
+
 export { isMissingTable }
