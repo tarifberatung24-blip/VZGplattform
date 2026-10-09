@@ -1282,6 +1282,45 @@ after a module meets the full DONE definition.
 
 ---
 
+## AFFILIATE REVENUE LOOP — DURABLE REQUESTS, LIFECYCLE, COMMISSION
+
+- **ID:** outside P0–P17; monetization prerequisite for launch
+- **SYSTEM:** affiliate revenue loop
+- **TARGET ROUTES:** `/api/service-requests`, `/api/affiliate/callback`,
+  `/api/affiliate/conversions`, `/go/{offer}`
+- **CURRENT STATUS:** DONE (code + migrations + live verification)
+- **CURRENT IMPLEMENTATION:** `main` at `d35a7e6`:
+  - `lib/affiliate/analytics.ts`, `lib/affiliate/analytics-client.ts` — service-role
+    persistence for a customer request and its outbound webhook outcome; the
+    request is stored before the hand-off, so an orchestrator outage no longer
+    loses the customer.
+  - `lib/affiliate/analytics.ts` click recording + `/go/{offer}` records one
+    first-party click per outbound partner deeplink.
+  - `lib/affiliate/lifecycle.ts` + `/api/affiliate/callback` — signed operator
+    callback advances `queued → in_review → sent → waiting_customer → closed`
+    (or `cancelled`); skips rejected, repeats idempotent, terminal states frozen.
+  - `lib/affiliate/commission.ts` + `/api/affiliate/conversions` — one
+    `(request, offer)` conversion priced in integer cents (`cpa`,
+    `revenue_share`, `hybrid`), moving `pending → approved → paid` (or
+    `rejected`); duplicate callback is idempotent, never double-pays.
+  - `lib/affiliate/operator-auth.ts` — one constant-time secret guard for both
+    operator endpoints; disabled with `503` when unset.
+  - Migrations `20261009100000_affiliate_requests`,
+    `20261009120000_affiliate_status_events`,
+    `20261009140000_affiliate_commissions` — all service-role only (RLS, no
+    policy); commissions hold a FK to requests with `ON DELETE RESTRICT`.
+- **REUSE:** `lib/affiliate-offers.ts` deeplinks, the automation-webhook contract.
+- **MISSING:** nothing required for the loop to operate.
+- **DEPENDENCIES:** `AFFILIATE_OPERATOR_SECRET` set on the deployment (done on
+  Render); partner deeplink env vars; the orchestrator must call the callback.
+- **BLOCKERS:** none.
+- **DONE CRITERIA:** a request survives a webhook outage; every outbound click is
+  measured; the operator can advance the lifecycle; a commission is priced from
+  stated inputs and can be settled for payout — all verified on the live site.
+- **FROZEN:** NO
+
+---
+
 ## Standing rules for this ledger
 
 1. Update the ledger in the same change that advances a phase's real status.
