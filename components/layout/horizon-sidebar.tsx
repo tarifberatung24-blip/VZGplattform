@@ -39,9 +39,7 @@ export function HorizonSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-1 py-1.5 group-data-[collapsible=icon]:justify-center">
           <LogoMark className="shrink-0" />
-          <span className="min-w-0 truncate text-sm font-bold leading-tight group-data-[collapsible=icon]:hidden">
-            HORIZON by VZG
-          </span>
+          <span role="img" aria-label="Horizon by VZG" className="logo-mask h-5 w-auto text-foreground group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>
 

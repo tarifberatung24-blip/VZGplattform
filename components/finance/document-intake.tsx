@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { Textarea } from "@/components/ui/textarea"
 import { validateDocument, DocumentValidationError } from "@/lib/documents/validation"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export type IntakeDocument = { name: string; size: number; type: string; text: string; file?: File }
 
@@ -47,7 +48,7 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
         <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><FileUp aria-hidden="true" /></span>
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 id="intake-title" className="font-semibold text-foreground">{copy.title}</h2>
+            <h2 id="intake-title" className="font-semibold text-foreground"><BrandText text={copy.title} /></h2>
             <span className="rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{connected ? copy.badge : copy.badgeDemo}</span>
           </div>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{connected ? copy.bodyConnected : copy.bodyDemo}</p>
@@ -56,20 +57,20 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
       <input ref={inputRef} className="sr-only" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => void handleFile(event.target.files?.[0])} />
       <button type="button" className={`mt-5 flex w-full flex-col items-center justify-center rounded-md border border-dashed border-border bg-background p-6 text-center transition ${dragging ? "border-primary bg-primary/5" : ""}`} onClick={() => inputRef.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void handleFile(event.dataTransfer.files[0]) }}>
         <p className="text-sm font-medium text-foreground">{document ? document.name : copy.drop}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{copy.limits}</p>
+        <p className="mt-1 text-xs text-muted-foreground"><BrandText text={copy.limits} /></p>
       </button>
       {connected && document && document.type !== "error" && (
         <label className="mt-5 block text-sm font-medium text-foreground">
-          {copy.textLabel}
+          <BrandText text={copy.textLabel} />
           <Textarea className="mt-2 min-h-36 resize-y" value={document.text} onChange={(event) => onTextChange?.(event.target.value)} placeholder={copy.textPlaceholder} />
         </label>
       )}
       {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" variant="outline" className="rounded-md shadow-none" onClick={() => inputRef.current?.click()}>{t.cleanup.document.choose}</Button>
+        <Button type="button" variant="outline" className="rounded-md shadow-none" onClick={() => inputRef.current?.click()}><BrandText text={t.cleanup.document.choose} /></Button>
         <Button type="button" className="rounded-md shadow-none" onClick={onAnalyze} disabled={!canAnalyze || isAnalyzed || busy}>{busy ? t.cleanup.document.checking : isAnalyzed ? t.cleanup.document.checked : t.cleanup.document.prepare}</Button>
       </div>
-      <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><LockKeyhole aria-hidden="true" className="size-3.5" />{copy.footer}</p>
+      <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><LockKeyhole aria-hidden="true" className="size-3.5" /><BrandText text={copy.footer} /></p>
     </section>
   )
 }

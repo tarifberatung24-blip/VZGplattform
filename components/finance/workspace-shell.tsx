@@ -54,9 +54,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             <SidebarTrigger aria-label={toggleText} />
             {/* Brand lives in the sidebar. Shown here only while the sidebar is a
                 drawer (below md), so exactly one instance is visible per viewport. */}
-            <span className="truncate text-sm font-semibold tracking-tight md:hidden">
-              HORIZON by VZG
-            </span>
+            <span role="img" aria-label="Horizon by VZG" className="logo-mask h-5 w-auto text-foreground md:hidden" />
             <LanguageSwitcher className="ml-auto shrink-0" />
           </header>
           <div className="min-w-0 flex-1">{children}</div>

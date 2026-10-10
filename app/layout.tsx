@@ -8,6 +8,7 @@ import { PwaServiceWorker } from "@/components/pwa-service-worker"
 import { GlobalHeader } from "@/components/layout/global-header"
 import { GlobalFooter } from "@/components/layout/global-footer"
 import { NetworkThreads } from "@/components/marketing/network-threads"
+import { SmokeLayer } from "@/components/marketing/smoke-layer"
 import { LanguageProvider } from "@/lib/i18n/language-context"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/language-context"
@@ -83,6 +84,7 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider>
           <LanguageProvider initialLocale={initialLocale}>
+            <SmokeLayer />
             <NetworkThreads />
             <GlobalHeader />
             <Suspense fallback={null}><WorkspaceShell>{children}</WorkspaceShell></Suspense>

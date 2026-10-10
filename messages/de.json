@@ -7,7 +7,7 @@
     "services": "Leistungen",
     "benefits": "Staatliche Hilfen",
     "contracts": "Verträge",
-    "about": "Über HORIZON by VZG",
+    "about": "Über HORIZON",
     "help": "Hilfe",
     "login": "Anmelden",
     "register": "Registrieren",
@@ -33,21 +33,20 @@
       "navSecurity": "Sicherheit",
       "navAbout": "So funktioniert's",
       "navContact": "Kontakt",
-      "headline1": "Verstehen. Verwalten.",
-      "headline2": "Kosten senken.",
-      "subtitle": "HORIZON by VZG hilft dir, jeden Fall in Deutschland zu verstehen und zu ordnen: Dokumente, Verträge und Rechnungen, klar und professionell.",
-      "primaryCta": "Jetzt starten"
+      "headline2": "Dein digitaler Assistent in Deutschland",
+      "loginCta": "Anmelden",
+      "howCta": "So funktioniert HORIZON"
     },
     "ctaPrimary": "Möglichkeiten prüfen",
     "ctaSecondary": "Meine Kosten optimieren",
     "trust": "Kostenlos starten.",
     "promise": "Lass kein Geld liegen.",
-    "promiseSub": "HORIZON by VZG prüft Verträge, Kosten, Steuermöglichkeiten und mögliche staatliche Hilfen, die für deine Situation relevant sind.",
+    "promiseSub": "HORIZON prüft Verträge, Kosten, Steuermöglichkeiten und mögliche staatliche Hilfen, die für deine Situation relevant sind.",
     "opportunityTitle": "Wo verlierst du Geld?",
     "opportunitySub": "Wähle, wo wir mit der Prüfung beginnen.",
     "servicesTitle": "Alles für das Leben in Deutschland — an einem Ort",
     "servicesSub": "Werkzeuge, die dir helfen, mehr zu bekommen und weniger zu zahlen.",
-    "howTitle": "So funktioniert HORIZON by VZG",
+    "howTitle": "So funktioniert HORIZON",
     "howSub": "Einfach Schritt für Schritt — ohne Verwirrung.",
     "step1Title": "Beantworte ein paar Fragen",
     "step1Desc": "Erzähl uns kurz von deiner Situation. Keine Dokumente, keine Verpflichtung.",
@@ -55,13 +54,13 @@
     "step2Desc": "Wir zeigen dir Steuermöglichkeiten, Hilfen und Verträge, die sich zu prüfen lohnen.",
     "step3Title": "Handle mit Sicherheit",
     "step3Desc": "Wir bereiten Dokumente, Fristen und nächste Schritte vor — klar und verständlich.",
-    "whatTitle": "Wobei HORIZON by VZG dir hilft",
+    "whatTitle": "Wobei HORIZON dir hilft",
     "what1": "Welches Geld kann ich rechtmäßig bekommen?",
     "what2": "Wo kann ich meine Kosten senken?",
     "what3": "Wie bewältige ich schwierige Dokumente in Deutschland?",
     "what4": "Welche Verträge und Fristen muss ich im Blick behalten?",
     "finalCtaTitle": "Bereit, deine Möglichkeiten zu prüfen?",
-    "finalCtaDesc": "Erstelle ein kostenloses Profil und speichere deine Ergebnisse in HORIZON by VZG.",
+    "finalCtaDesc": "Erstelle ein kostenloses Profil und speichere deine Ergebnisse in HORIZON.",
     "disclaimer": "HORIZON by VZG bietet Informationen und Dokumentenvorbereitung. Es ist kein Steuerberater, Rechtsanwalt oder Versicherungsberater. Offizielle Entscheidungen treffen die zuständigen Behörden."
   },
   "opportunityCards": {
@@ -109,9 +108,9 @@
     }
   },
   "auth": {
-    "loginTitle": "Melde dich bei deinem HORIZON by VZG-Profil an",
+    "loginTitle": "Melde dich bei deinem HORIZON-Profil an",
     "loginSubtitle": "Mach dort weiter, wo du aufgehört hast.",
-    "registerTitle": "Erstelle ein kostenloses HORIZON by VZG-Profil",
+    "registerTitle": "Erstelle ein kostenloses HORIZON-Profil",
     "registerSubtitle": "Speichere Ergebnisse und entdecke neue Möglichkeiten.",
     "email": "E-Mail",
     "password": "Passwort",
@@ -263,8 +262,8 @@
       "description": "Fordere ein konkretes Angebot an und erhalte eine manuell geprüfte Antwort."
     },
     "about": {
-      "title": "Über HORIZON by VZG",
-      "description": "HORIZON by VZG hilft dir, deine finanzielle Situation klarer zu verstehen und gut vorbereitet zu handeln."
+      "title": "Über HORIZON",
+      "description": "HORIZON hilft dir, deine finanzielle Situation klarer zu verstehen und gut vorbereitet zu handeln."
     },
     "dashboard": {
       "nextStep": "Nächste Schritte",

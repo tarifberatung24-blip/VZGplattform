@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { AlertCircle, CheckCircle2, FileSearch, Loader2, Upload } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export type DashboardDocument = {
   id: string
@@ -111,7 +112,7 @@ export function DocumentAnalyzer({ initialDocuments }: { initialDocuments: Dashb
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{de ? "Dokumentenprüfung" : "Проверка на документ"}</p>
             <h2 id="document-analyzer-title" className="mt-1 text-lg font-semibold">{de ? "Dokumentenanalyse" : "Анализ на документ на български"}</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">{de ? "PDF, JPG oder PNG werden in einem privaten, geschützten Bereich gespeichert. Für die angeforderte Analyse kann ausgewählter Inhalt an einen externen Analyse-Dienst übermittelt werden; das Ergebnis wird in HORIZON gespeichert. Bitte keine unnötigen sensiblen Daten hochladen. Dokumente und Ergebnisse werden innerhalb von 30 Tagen nach Löschung oder Kontoschließung aus dem aktiven System entfernt, sofern keine gesetzliche Aufbewahrung entgegensteht. Alles wird von einem Menschen geprüft." : "PDF, JPG или PNG се съхраняват в частна защитена зона. За заявения анализ избрано съдържание може да бъде предадено на външна услуга за анализ; резултатът се съхранява в HORIZON. Не качвай ненужни чувствителни данни. Документите и резултатите се изтриват от активната система в рамките на 30 дни след изтриване или закриване на акаунта, освен ако законово съхранение не възпрепятства това. Всичко се проверява от човек."}</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground"><BrandText text={de ? "PDF, JPG oder PNG werden in einem privaten, geschützten Bereich gespeichert. Für die angeforderte Analyse kann ausgewählter Inhalt an einen externen Analyse-Dienst übermittelt werden; das Ergebnis wird in HORIZON gespeichert. Bitte keine unnötigen sensiblen Daten hochladen. Dokumente und Ergebnisse werden innerhalb von 30 Tagen nach Löschung oder Kontoschließung aus dem aktiven System entfernt, sofern keine gesetzliche Aufbewahrung entgegensteht. Alles wird von einem Menschen geprüft." : "PDF, JPG или PNG се съхраняват в частна защитена зона. За заявения анализ избрано съдържание може да бъде предадено на външна услуга за анализ; резултатът се съхранява в HORIZON. Не качвай ненужни чувствителни данни. Документите и резултатите се изтриват от активната система в рамките на 30 дни след изтриване или закриване на акаунта, освен ако законово съхранение не възпрепятства това. Всичко се проверява от човек."} /></p>
           </div>
         </div>
         <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
@@ -125,7 +126,7 @@ export function DocumentAnalyzer({ initialDocuments }: { initialDocuments: Dashb
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
           <label htmlFor="existing-document" className="text-sm font-medium">{de ? "Gespeichertes Dokument wählen" : "Избери качен документ"}</label>
           <select id="existing-document" value={selectedId} disabled={working} onChange={(event) => setSelectedId(event.target.value)} className="h-10 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm">
-            {documents.map((document) => <option key={document.id} value={document.id}>{document.original_filename}</option>)}
+            {documents.map((document) => <option key={document.id} value={document.id}><BrandText text={document.original_filename} /></option>)}
           </select>
           <button type="button" disabled={!selectedId || working} onClick={() => analyze(selectedId)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border px-4 text-sm font-medium transition hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50">
             {working ? <Loader2 className="size-4 animate-spin" /> : <FileSearch className="size-4" />}

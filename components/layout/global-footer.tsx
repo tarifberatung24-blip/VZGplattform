@@ -4,6 +4,7 @@ import Link from "next/link"
 import { localizedPath } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { usePathname } from "next/navigation"
+import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 export function GlobalFooter() {
   const pathname = usePathname() ?? "/"
@@ -20,36 +21,29 @@ export function GlobalFooter() {
       href: "/datenschutz",
       label: isDe ? "Datenschutz" : "Поверителност",
     },
-    { href: "/contact", label: isDe ? "Kontakt" : "Контакт" },
     { href: "/agb", label: isDe ? "AGB" : "ОУ" },
     { href: "/widerruf", label: isDe ? "Widerruf" : "Отказ" },
   ]
 
   return (
     <footer className="glass-chrome relative border-t backdrop-blur-xl backdrop-saturate-150">
-      <div className="mx-auto max-w-[1440px] px-5 py-8 lg:px-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1">
-            <span className="text-sm font-black tracking-[-0.03em] text-foreground">HORIZON by VZG</span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              VZG CONSULT · Tarifberater24
-            </span>
-          </div>
-          <nav className="flex flex-wrap gap-x-6 text-sm font-medium text-muted-foreground">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={localizedPath(link.href, locale)}
-                className="inline-flex min-h-10 items-center text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <p className="text-xs text-muted-foreground">
-            © 2024-2026 HORIZON by VZG · Tarifberater24
-          </p>
-        </div>
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-5 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8">
+        <span>
+          {"© 2026 "}
+          <HorizonWordmark />
+          {" by VZG"}
+        </span>
+        <nav className="flex flex-wrap gap-x-5">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={localizedPath(link.href, locale)}
+              className="inline-flex min-h-8 items-center transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </footer>
   )

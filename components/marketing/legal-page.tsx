@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { legalAddress, legalProfile, legalProfileMissing } from "@/lib/legal-profile"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 type LegalPageType = "privacy" | "terms" | "imprint" | "affiliate" | "withdrawal"
 
@@ -132,7 +133,7 @@ export function LegalPage({ type }: { type: LegalPageType }) {
         <header className="flex flex-col gap-3">
           <p className="text-sm font-medium text-primary">{isBg ? "Правна информация" : "Rechtliche Informationen"}</p>
           <h1 className="text-balance text-4xl font-semibold tracking-tight">{isBg ? page.titleBg : page.title}</h1>
-          <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">{isBg ? (page.introBg ?? page.intro) : page.intro}</p>
+          <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground"><BrandText text={isBg ? (page.introBg ?? page.intro) : page.intro} official /></p>
         </header>
         {hasMissingProfile && (
           <aside className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm leading-relaxed text-foreground">
@@ -150,7 +151,7 @@ export function LegalPage({ type }: { type: LegalPageType }) {
           </section>
         )}
         <div className="flex flex-col gap-6">
-          {page.sections.map(([heading, body, bodyBg]) => <section key={heading} className="flex flex-col gap-2 border-t border-border pt-6"><h2 className="text-xl font-semibold">{isBg ? (legalHeadingBg[heading] ?? heading) : heading}</h2><p className="leading-relaxed text-muted-foreground">{isBg ? (bodyBg ?? body) : body}</p></section>)}
+          {page.sections.map(([heading, body, bodyBg]) => <section key={heading} className="flex flex-col gap-2 border-t border-border pt-6"><h2 className="text-xl font-semibold">{isBg ? (legalHeadingBg[heading] ?? heading) : heading}</h2><p className="leading-relaxed text-muted-foreground"><BrandText text={isBg ? (bodyBg ?? body) : body} official /></p></section>)}
         </div>
       </article>
     </main>
