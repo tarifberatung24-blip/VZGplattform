@@ -5,6 +5,7 @@ import {
   extractCaseDocument,
   type ExtractDocumentState,
 } from "@/lib/horizon/intake/extract-actions"
+import { MAX_OCR_PAGES } from "@/lib/documents/extraction-contract"
 
 const initialState: ExtractDocumentState = { error: null, ok: false, pageCount: 0 }
 
@@ -48,6 +49,15 @@ export function DocumentExtractButton({
         documentNotFound: "Dokument nicht gefunden.",
         unsupported: "Dieser Dateityp kann nicht ausgelesen werden.",
         failed: "Auslesen fehlgeschlagen. Bitte erneut versuchen.",
+        storageRead: "Die Datei konnte gerade nicht geladen werden. Bitte gleich noch einmal versuchen.",
+        passwordProtected:
+          "Die PDF ist mit einem Passwort geschützt. Bitte eine Version ohne Passwort hochladen.",
+        unreadable:
+          "Die Datei ist beschädigt oder keine gültige PDF. Bitte neu speichern oder als Foto hochladen.",
+        tooManyScannedPages: `Die PDF hat mehr als ${MAX_OCR_PAGES} gescannte Seiten. Bitte die wichtigen Seiten einzeln hochladen.`,
+        ocrFailed: "Die Texterkennung ist fehlgeschlagen. Bitte erneut versuchen.",
+        persistFailed:
+          "Der Text wurde gelesen, konnte aber nicht gespeichert werden. Bitte erneut versuchen.",
       }
     : {
         extract: "Изчети",
@@ -61,6 +71,12 @@ export function DocumentExtractButton({
         documentNotFound: "Документът не е намерен.",
         unsupported: "Този тип файл не може да се изчете.",
         failed: "Изчитането не успя. Опитай отново.",
+        storageRead: "Файлът не можа да се зареди в момента. Опитай отново след малко.",
+        passwordProtected: "PDF файлът е защитен с парола. Качи версия без парола.",
+        unreadable: "Файлът е повреден или не е валиден PDF. Запази го наново или го качи като снимка.",
+        tooManyScannedPages: `PDF файлът има повече от ${MAX_OCR_PAGES} сканирани страници. Качи важните страници поотделно.`,
+        ocrFailed: "Разпознаването на текста не успя. Опитай отново.",
+        persistFailed: "Текстът е прочетен, но не можа да се запише. Опитай отново.",
       }
 
   const errorText = (() => {
@@ -81,6 +97,18 @@ export function DocumentExtractButton({
         return copy.documentNotFound
       case "UNSUPPORTED_TYPE":
         return copy.unsupported
+      case "STORAGE_READ_FAILED":
+        return copy.storageRead
+      case "DOCUMENT_PASSWORD_PROTECTED":
+        return copy.passwordProtected
+      case "DOCUMENT_UNREADABLE":
+        return copy.unreadable
+      case "TOO_MANY_SCANNED_PAGES":
+        return copy.tooManyScannedPages
+      case "OCR_FAILED":
+        return copy.ocrFailed
+      case "PERSIST_FAILED":
+        return copy.persistFailed
       case "EXTRACTION_FAILED":
         return copy.failed
       default:

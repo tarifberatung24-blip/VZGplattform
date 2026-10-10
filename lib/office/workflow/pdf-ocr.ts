@@ -1,14 +1,14 @@
 import { createCanvas } from '@napi-rs/canvas'
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import { TesseractOcrProvider } from './ocr-provider'
+import { MAX_OCR_PAGES, TooManyScannedPagesError } from '../../documents/extraction-contract'
 
 const MAX_BYTES = 10 * 1024 * 1024
-const MAX_OCR_PAGES = 10
 
 export async function ocrScannedPdfPages(input: Uint8Array | ArrayBuffer, pageNumbers: number[]) {
   const bytes = new Uint8Array(input instanceof Uint8Array ? input : new Uint8Array(input))
   if (bytes.byteLength < 1 || bytes.byteLength > MAX_BYTES) throw new Error('PDF must be between 1 byte and 10 MB')
-  if (pageNumbers.length > MAX_OCR_PAGES) throw new Error('OCR is limited to 10 pages per PDF')
+  if (pageNumbers.length > MAX_OCR_PAGES) throw new TooManyScannedPagesError(pageNumbers.length)
   const document = await getDocument({ data: bytes }).promise
   const provider = new TesseractOcrProvider()
   try {
