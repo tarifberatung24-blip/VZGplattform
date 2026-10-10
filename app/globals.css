@@ -90,135 +90,134 @@
 
 :root {
   color-scheme: light;
-  --background: #f5f8fd;
-  --foreground: #0b1830;
+  --background: #ffffff;
+  --foreground: #000000;
   --card: #ffffff;
-  --card-foreground: #0b1830;
+  --card-foreground: #000000;
   --popover: #ffffff;
-  --popover-foreground: #0b1830;
-  --primary: #0047b3;
+  --popover-foreground: #000000;
+  --primary: #003f88;
   --primary-foreground: #ffffff;
-  --secondary: #e8eef9;
-  --secondary-foreground: #0b1830;
-  --muted: #edf2fa;
-  --muted-foreground: #3d506e;
-  --accent: #e6f0ff;
-  --accent-foreground: #003d99;
-  --destructive: oklch(0.55 0.22 25);
-  --border: #c9d7ec;
-  --input: #b9cbe6;
-  --ring: #2f7bff;
-  --chart-1: #0047b3;
-  --chart-2: #0e9f8a;
-  --chart-3: #e08a1e;
-  --chart-4: #5b5bd6;
-  --chart-5: #00a3c4;
+  --secondary: #f8fafc;
+  --secondary-foreground: #000000;
+  --muted: #f8fafc;
+  --muted-foreground: #475569;
+  --accent: #003f88;
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.64 0.21 25.33);
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #003f88;
+  --chart-1: #003f88;
+  --chart-2: #0f172a;
+  --chart-3: #475569;
+  --chart-4: #94a3b8;
+  --chart-5: #cbd5e1;
   --sidebar: #ffffff;
-  --sidebar-foreground: #0b1830;
-  --sidebar-primary: #0047b3;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #003f88;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e8eef9;
-  --sidebar-accent-foreground: #0b1830;
-  --sidebar-border: #c9d7ec;
-  --sidebar-ring: #2f7bff;
+  --sidebar-accent: #f8fafc;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #003f88;
   --radius: 0.375rem;
-  --shadow-2xs: 0 1px 2px rgb(11 24 48 / 0.04), 0 1px 1px rgb(11 24 48 / 0.03);
-  --shadow-xs: 0 1px 2px rgb(11 24 48 / 0.05), 0 1px 1px rgb(11 24 48 / 0.03);
-  --shadow-sm: 0 1px 2px rgb(11 24 48 / 0.06), 0 2px 8px -2px rgb(11 24 48 / 0.08);
-  --shadow: 0 1px 3px rgb(11 24 48 / 0.08), 0 4px 14px -4px rgb(11 24 48 / 0.12);
-  --shadow-md: 0 2px 4px rgb(11 24 48 / 0.08), 0 8px 20px -6px rgb(11 24 48 / 0.16);
-  --shadow-lg: 0 4px 8px rgb(11 24 48 / 0.08), 0 16px 32px -10px rgb(11 24 48 / 0.22);
-  --shadow-xl: 0 8px 16px rgb(11 24 48 / 0.10), 0 24px 48px -14px rgb(11 24 48 / 0.28);
-  --shadow-2xl: 0 16px 32px rgb(11 24 48 / 0.14), 0 32px 64px -16px rgb(11 24 48 / 0.32);
-  --success: oklch(0.55 0.15 160);
+  --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
+  --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
+  --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 2px 4px -2px hsl(0 0% 0% / 0.10);
+  --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 4px 6px -2px hsl(0 0% 0% / 0.10);
+  --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
+  --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
+  --success: #287047;
   --success-foreground: #ffffff;
   --focus-ring: var(--ring);
-  --primary-hover: #00398f;
+  --primary-hover: #002f66;
 
   /* Layer 0 network threads — light theme (blue on white). */
-  --thread-core: #005bd6;
-  --thread-glow: #42a5ff;
-  --thread-edge: #eef5ff;
+  --thread-core: #003f88;
+  --thread-glow: #2f80ed;
+  --thread-edge: #ffffff;
 
   /* Layer 0 glass chrome (header, footer, buttons). The sheen is blue, not
      white: a white highlight is invisible on a white page, which is why the
      light theme had no lit edge where the dark theme gets one from its orange. */
-  --glass-bg: rgb(255 255 255 / 0.76);
-  --glass-border: rgb(0 71 179 / 0.28);
-  --glass-sheen: rgb(47 123 255 / 0.55);
-  --glass-shadow: 0 14px 38px -18px rgb(0 55 145 / 0.34);
+  --glass-bg: rgb(255 255 255 / 0.55);
+  --glass-border: rgb(0 63 136 / 0.14);
+  --glass-sheen: rgb(0 63 136 / 0.40);
+  --glass-shadow: 0 8px 30px -14px rgb(0 63 136 / 0.35);
 
   /* Card glass. Neutral, mirroring the dark theme's neutral #27272a hairline
      rather than tinting it blue: the accent belongs to the icon, and the two
      themes should agree on the card edge. The fill sits a shade below pure
      white because a white card cannot show a white top bevel, which would
      flatten the 3D edge. Near-opaque, so 10% of the backdrop shows through. */
-  --card-glass-bg: rgb(255 255 255 / 0.94);
-  --card-glass-border: rgb(0 71 179 / 0.24);
-  --card-glass-highlight: rgb(255 255 255 / 0.98);
-  --card-glass-shade: rgb(0 55 145 / 0.12);
-  --card-glass-shadow: 0 18px 42px -18px rgb(0 55 145 / 0.28);
+  --card-glass-bg: rgb(250 250 250 / 0.9);
+  --card-glass-border: rgb(0 0 0 / 0.08);
+  --card-glass-highlight: rgb(255 255 255 / 0.95);
+  --card-glass-shade: rgb(0 0 0 / 0.10);
+  --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.28);
 }
 .dark {
   color-scheme: dark;
-  --background: #070d19;
-  --foreground: #eaf1fc;
-  --card: #0d1626;
-  --card-foreground: #eaf1fc;
-  --popover: #0d1626;
-  --popover-foreground: #eaf1fc;
-  --primary: #4d8dff;
-  --primary-foreground: #061022;
-  --secondary: #16233b;
-  --secondary-foreground: #eaf1fc;
-  --muted: #101c31;
-  --muted-foreground: #9fb0cc;
-  --accent: #16355f;
-  --accent-foreground: #cfe3ff;
-  --destructive: oklch(0.63 0.22 25);
-  --border: #22324f;
-  --input: #27395a;
-  --ring: #4d8dff;
-  --chart-1: #4d8dff;
-  --chart-2: #18c4ad;
-  --chart-3: #f0a338;
-  --chart-4: #8b8bf8;
-  --chart-5: #2ecfe8;
-  --sidebar: #0d1626;
-  --sidebar-foreground: #eaf1fc;
-  --sidebar-primary: #4d8dff;
-  --sidebar-primary-foreground: #061022;
-  --sidebar-accent: #16233b;
-  --sidebar-accent-foreground: #eaf1fc;
-  --sidebar-border: #22324f;
-  --sidebar-ring: #4d8dff;
-  --success: oklch(0.72 0.14 155);
-  --success-foreground: #061022;
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #000000;
+  --card-foreground: #ffffff;
+  --popover: #000000;
+  --popover-foreground: #ffffff;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #09090b;
+  --secondary-foreground: #ffffff;
+  --muted: #09090b;
+  --muted-foreground: #a1a1aa;
+  --accent: #f97316;
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.64 0.21 25.33);
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #f97316;
+  --chart-1: #f97316;
+  --chart-2: #fb923c;
+  --chart-3: #fdba74;
+  --chart-4: #fed7aa;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #09090b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #f97316;
+  --success: oklch(0.70 0.14 155);
+  --success-foreground: oklch(0.20 0 0);
   --focus-ring: var(--ring);
-  --primary-hover: #76aaff;
+  --primary-hover: #fb923c;
 
   /* Layer 0 network threads — dark theme (orange on black). */
-  --thread-core: #4d8dff;
-  --thread-glow: #69d8ff;
-  --thread-edge: #071326;
+  --thread-core: #f97316;
+  --thread-glow: #fb923c;
+  --thread-edge: #000000;
 
   /* Layer 0 glass chrome — dark theme. Sheen and border are brighter than the
      light theme so the glass edge still reads against a black page. */
-  --glass-bg: rgb(13 22 38 / 0.82);
-  --glass-border: rgb(77 141 255 / 0.36);
-  --glass-sheen: rgb(105 216 255 / 0.42);
-  --glass-shadow: 0 14px 40px -18px rgb(0 0 0 / 0.72);
+  --glass-bg: rgb(0 0 0 / 0.45);
+  --glass-border: rgb(249 115 22 / 0.34);
+  --glass-sheen: rgb(249 115 22 / 0.30);
+  --glass-shadow: 0 8px 30px -14px rgb(249 115 22 / 0.45);
 
   /* Card glass — dark theme. Near-opaque black (10% shows through) with the
      neutral #27272a hairline measured from the reference design. The orange
      border is deliberately gone: the accent now lives only in the icon. The
      highlight is a cool white rather than orange so the 3D edge reads as glass
      catching light, not as a glow. */
-  --card-glass-bg: rgb(13 22 38 / 0.94);
-  --card-glass-border: rgb(77 141 255 / 0.30);
-  --card-glass-highlight: rgb(145 201 255 / 0.18);
+  --card-glass-bg: rgb(0 0 0 / 0.9);
+  --card-glass-border: #27272a;
+  --card-glass-highlight: rgb(255 255 255 / 0.14);
   --card-glass-shade: rgb(0 0 0 / 0.5);
-  --card-glass-shadow: 0 18px 42px -18px rgb(0 0 0 / 0.72);
+  --card-glass-shadow: 0 14px 36px -18px rgb(0 0 0 / 0.8);
 }
 @layer base {
   * {
@@ -257,7 +256,7 @@
 .layer0-orbit {
   position: relative;
   display: flex;
-  min-height: 40rem;
+  min-height: 39rem;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
@@ -276,17 +275,16 @@
   inset: 16%;
   border-radius: 999px;
   background: radial-gradient(circle, color-mix(in srgb, var(--thread-core) 24%, transparent), transparent 68%);
-  filter: blur(22px);
-  opacity: .9;
+  filter: blur(18px);
 }
 .layer0-orbit__rings,
 .layer0-orbit__rings span {
   position: absolute;
   inset: 18%;
-  border: 1px solid color-mix(in srgb, var(--thread-core) 54%, transparent);
+  border: 1px solid color-mix(in srgb, var(--thread-core) 42%, transparent);
   border-radius: 50%;
   transform: rotate(-18deg) scaleY(.55);
-  box-shadow: 0 0 28px color-mix(in srgb, var(--thread-core) 24%, transparent), inset 0 0 22px color-mix(in srgb, var(--thread-glow) 18%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--thread-core) 18%, transparent), inset 0 0 18px color-mix(in srgb, var(--thread-glow) 12%, transparent);
 }
 .layer0-orbit__rings span:nth-child(2) { inset: 25% 13%; transform: rotate(22deg) scaleY(.62); opacity: .75; }
 .layer0-orbit__rings span:nth-child(3) { inset: 12% 28%; transform: rotate(78deg) scaleY(.42); opacity: .55; }
@@ -300,16 +298,16 @@
   z-index: 1;
 }
 .layer0-orbit__connection line {
-  stroke: color-mix(in srgb, var(--thread-glow) 82%, white);
-  stroke-width: .7;
+  stroke: #ffc247;
+  stroke-width: .55;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 4px var(--thread-glow)) drop-shadow(0 0 10px var(--thread-core));
+  filter: drop-shadow(0 0 3px #ffc247) drop-shadow(0 0 8px #ff8a1f);
   stroke-dasharray: 4 2;
   animation: layer0-orbit-thread 1.8s linear infinite;
 }
 .layer0-orbit__connection circle {
-  fill: color-mix(in srgb, var(--thread-glow) 78%, white);
-  filter: drop-shadow(0 0 4px var(--thread-glow)) drop-shadow(0 0 10px var(--thread-core));
+  fill: #ffe09a;
+  filter: drop-shadow(0 0 4px #ffc247) drop-shadow(0 0 10px #ff8a1f);
   animation: layer0-orbit-pulse 1.4s ease-in-out infinite;
 }
 @keyframes layer0-orbit-thread { to { stroke-dashoffset: -12; } }
@@ -322,26 +320,26 @@
   justify-content: center;
   border: 1px solid color-mix(in srgb, var(--thread-glow) 88%, transparent);
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 24%, color-mix(in srgb, var(--thread-glow) 65%, transparent), transparent 24%), radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--thread-core) 38%, var(--background)) 0%, color-mix(in srgb, var(--background) 96%, transparent) 72%);
-  box-shadow: 0 0 48px color-mix(in srgb, var(--thread-core) 64%, transparent), 0 0 110px color-mix(in srgb, var(--thread-core) 24%, transparent), inset 0 0 34px color-mix(in srgb, var(--thread-glow) 32%, transparent);
+  background: radial-gradient(circle at 38% 28%, color-mix(in srgb, var(--thread-glow) 42%, transparent), color-mix(in srgb, var(--thread-core) 22%, var(--background)) 48%, color-mix(in srgb, var(--background) 94%, transparent) 78%);
+  box-shadow: 0 0 42px color-mix(in srgb, var(--thread-core) 62%, transparent), 0 0 90px color-mix(in srgb, var(--thread-core) 20%, transparent), inset 0 0 28px color-mix(in srgb, var(--thread-glow) 24%, transparent);
   color: var(--foreground);
   z-index: 2;
 }
 .layer0-orbit__wordmark {
   display: block;
-  color: var(--foreground);
+  color: #fff7eb;
   font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(1.65rem, 4vw, 2.8rem);
   font-weight: 900;
   letter-spacing: -.08em;
   line-height: 1;
-  text-shadow: 0 0 18px color-mix(in srgb, var(--thread-glow) 72%, transparent);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--thread-glow) 70%, transparent);
 }
 .layer0-orbit__nodes { position: absolute; inset: 0; }
 .layer0-orbit__node {
   position: absolute;
   display: flex;
-  width: 6.2rem;
+  width: 5.8rem;
   transform: translate(-50%, -50%);
   align-items: center;
   color: var(--muted-foreground);
@@ -355,16 +353,14 @@
 .layer0-orbit__node:focus-visible { outline: 2px solid var(--thread-glow); outline-offset: 6px; border-radius: 1rem; }
 .layer0-orbit__node-icon {
   display: grid;
-  width: 6.2rem;
-  height: 6.2rem;
+  width: 5.8rem;
+  height: 5.8rem;
   padding: .45rem;
   place-items: center;
-  align-content: center;
-  text-align: center;
-  border: 1px solid color-mix(in srgb, var(--thread-glow) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--thread-glow) 84%, transparent);
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 28%, color-mix(in srgb, var(--thread-glow) 34%, transparent), color-mix(in srgb, var(--thread-core) 24%, var(--background)) 52%, color-mix(in srgb, var(--background) 92%, transparent) 80%);
-  box-shadow: 0 0 30px color-mix(in srgb, var(--thread-core) 52%, transparent), inset 0 0 22px color-mix(in srgb, var(--thread-glow) 28%, transparent);
+  background: radial-gradient(circle at 38% 28%, color-mix(in srgb, var(--thread-glow) 28%, transparent), color-mix(in srgb, var(--thread-core) 18%, var(--background)) 52%, color-mix(in srgb, var(--background) 92%, transparent) 80%);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--thread-core) 48%, transparent), inset 0 0 18px color-mix(in srgb, var(--thread-glow) 22%, transparent);
   color: var(--foreground);
 }
 .layer0-orbit__node.is-active .layer0-orbit__node-icon { border-color: color-mix(in srgb, var(--thread-glow) 96%, transparent); box-shadow: 0 0 32px color-mix(in srgb, var(--thread-core) 62%, transparent), inset 0 0 22px color-mix(in srgb, var(--thread-glow) 28%, transparent); }
@@ -378,9 +374,9 @@
 .layer0-orbit__node--left { left: 14%; top: 71%; }
 .layer0-orbit__node--top-left { left: 9%; top: 43%; }
 .layer0-orbit__node--upper-left { left: 23%; top: 18%; }
-.layer0-orbit__card { width: min(100% - 2rem, 34rem); min-height: 11rem; margin-top: 0; padding: 1.25rem; border-radius: 1rem; backdrop-filter: blur(18px); z-index: 3; }
-.layer0-orbit__card-icon { display: grid; width: 2.9rem; height: 2.9rem; flex: 0 0 auto; place-items: center; border-radius: .75rem; background: color-mix(in srgb, var(--thread-core) 22%, var(--background)); color: var(--thread-glow); }
-.layer0-orbit__card-link { display: flex; min-height: 2.75rem; margin-top: 1rem; align-items: center; justify-content: center; gap: .5rem; border-radius: .65rem; background: linear-gradient(100deg, var(--primary), var(--thread-core)); color: var(--primary-foreground); font-weight: 800; transition: filter .2s ease, transform .2s ease; }
+.layer0-orbit__card { width: min(100% - 2rem, 34rem); min-height: 10.5rem; margin-top: 0; padding: 1rem; border-radius: 1.25rem; backdrop-filter: blur(16px); z-index: 3; }
+.layer0-orbit__card-icon { display: grid; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; place-items: center; border-radius: .75rem; background: color-mix(in srgb, var(--thread-core) 22%, var(--background)); color: var(--thread-glow); }
+.layer0-orbit__card-link { display: flex; min-height: 2.75rem; margin-top: .9rem; align-items: center; justify-content: center; gap: .5rem; border-radius: .7rem; background: linear-gradient(100deg, var(--thread-core), var(--thread-glow)); color: #160b03; font-weight: 800; transition: filter .2s ease, transform .2s ease; }
 .layer0-orbit__card-link:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
 @media (max-width: 1023px) {
@@ -596,46 +592,6 @@
   font-family: var(--font-inter), Arial, "Helvetica Neue", sans-serif;
 }
 
-.dark .kintex-workspace,
-.dark [data-slot="sidebar"][data-mobile="true"] {
-  color-scheme: dark;
-  --background: #070d19;
-  --foreground: #eaf1fc;
-  --card: #0d1626;
-  --card-foreground: #eaf1fc;
-  --popover: #0d1626;
-  --popover-foreground: #eaf1fc;
-  --primary: #4d8dff;
-  --primary-foreground: #061022;
-  --primary-hover: #76aaff;
-  --secondary: #16233b;
-  --secondary-foreground: #eaf1fc;
-  --muted: #101c31;
-  --muted-foreground: #9fb0cc;
-  --accent: #16355f;
-  --accent-foreground: #cfe3ff;
-  --border: #22324f;
-  --input: #27395a;
-  --ring: #4d8dff;
-  --focus-ring: #4d8dff;
-  --success: #55c28d;
-  --success-foreground: #061022;
-  --destructive: #ef6a5b;
-  --sidebar: #0d1626;
-  --sidebar-foreground: #eaf1fc;
-  --sidebar-primary: #4d8dff;
-  --sidebar-primary-foreground: #061022;
-  --sidebar-accent: #16233b;
-  --sidebar-accent-foreground: #eaf1fc;
-  --sidebar-border: #22324f;
-  --sidebar-ring: #4d8dff;
-  --chart-1: #4d8dff;
-  --chart-2: #18c4ad;
-  --chart-3: #f0a338;
-  --chart-4: #8b8bf8;
-  --chart-5: #2ecfe8;
-}
-
 .kintex-workspace :is(a, button, input, select, textarea):focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 3px;
@@ -704,15 +660,12 @@
 .kintex-marketing-item {
   border: 1px solid var(--border);
   background: var(--card);
-  border-radius: 0.625rem;
-  box-shadow: var(--shadow-sm);
-  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  border-radius: 0.25rem;
+  transition: border-color 180ms ease, background-color 180ms ease;
 }
 
 .kintex-marketing-item:hover {
   border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
 .kintex-preview-frame {
