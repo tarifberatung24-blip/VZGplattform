@@ -1,15 +1,19 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { KfzLanding } from "@/components/affiliate/kfz-landing"
-import { insuranceProductContent } from "@/components/affiliate/insurance-content"
+import { insuranceProductContent, kfzLandingCopy } from "@/components/affiliate/insurance-content"
 import { getAffiliateOffer } from "@/lib/affiliate-offers"
 import { legalProfile } from "@/lib/legal-profile"
-import { isLocale, type Locale } from "@/lib/i18n/dictionaries"
+import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/dictionaries"
 
-export const metadata: Metadata = {
-  title: "Kfz-Versicherung",
-  description:
-    "Автозастраховка на български: подготви данните за автомобила и сравни покритието при партньора. HORIZON by VZG.",
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const meta = kfzLandingCopy[isLocale(locale) ? locale : defaultLocale].meta
+  return { title: meta.title, description: meta.description }
 }
 
 export default async function KfzOfferPage({ params }: { params: Promise<{ locale: string }> }) {

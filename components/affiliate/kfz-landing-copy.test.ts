@@ -48,6 +48,15 @@ describe("Kfz landing copy", () => {
     expect(source).toMatch(/localizedPath\("\/documents", locale\)/)
   })
 
+  it("gives each locale page metadata in its own language", () => {
+    expect(kfzLandingCopy.de.meta.description).toMatch(/Kfz-Versicherung/)
+    expect(kfzLandingCopy.de.meta.description).not.toMatch(/[а-яА-Я]/)
+    expect(kfzLandingCopy.bg.meta.description).toMatch(/[а-яА-Я]/)
+    const page = read("app/[locale]/angebote/kfz/page.tsx")
+    expect(page).toMatch(/export async function generateMetadata/)
+    expect(page).not.toMatch(/export const metadata/)
+  })
+
   it("carries the approved slogan and the Bulgarian-first framing", () => {
     expect(kfzLandingCopy.bg.hero.lead).toContain("Ясни условия. Честни цени. Бързо сключване.")
     expect(kfzLandingCopy.bg.hero.titleAccent).toBe("обяснена на български")

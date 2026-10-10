@@ -20,6 +20,7 @@ type InsuranceCopy = {
 export const kfzLandingCopy: Record<
   Locale,
   {
+    meta: { title: string; description: string }
     nav: { plate: string; coverage: string; insured: string; blog: string; contact: string }
     hero: {
       eyebrow: string
@@ -48,6 +49,11 @@ export const kfzLandingCopy: Record<
   }
 > = {
   bg: {
+    meta: {
+      title: "Автозастраховка",
+      description:
+        "Автозастраховка на български: подготви данните за автомобила и сравни покритието при партньора. HORIZON by VZG.",
+    },
     nav: {
       plate: "Номер",
       coverage: "Покритие",
@@ -111,6 +117,11 @@ export const kfzLandingCopy: Record<
     processHref: "/how-it-works",
   },
   de: {
+    meta: {
+      title: "Kfz-Versicherung",
+      description:
+        "Kfz-Versicherung vorbereiten und beim Partner vergleichen. HORIZON by VZG.",
+    },
     nav: {
       plate: "Kennzeichen",
       coverage: "Deckung",
