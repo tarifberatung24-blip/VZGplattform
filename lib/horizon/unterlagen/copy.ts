@@ -24,6 +24,9 @@ export type UnterlagenCopy = {
   deadlineHeading: string
   deadlineKinds: Record<DeadlineEvidenceKind, string>
   deadlineQuote: string
+  /** Where a quote sits: page number and document name. */
+  evidenceOnPage: (pageNo: number, documentName: string) => string
+  evidenceInPastedText: string
   deadlineRule: string
   deadlineVerify: string
   riskHeading: string
@@ -72,6 +75,8 @@ export const unterlagenCopy: Record<Locale, UnterlagenCopy> = {
       unknown: "Keine Frist belegt",
     },
     deadlineQuote: "Belegstelle",
+    evidenceOnPage: (pageNo, documentName) => `Seite ${pageNo}, ${documentName}`,
+    evidenceInPastedText: "aus dem eingefügten Text",
     deadlineRule: "Angewandte Regel",
     deadlineVerify:
       "Diese Frist ist berechnet und muss von dir geprüft werden. Sie kann durch andere Stellen im Dokument eingeschränkt sein.",
@@ -137,6 +142,8 @@ export const unterlagenCopy: Record<Locale, UnterlagenCopy> = {
       unknown: "Няма доказан срок",
     },
     deadlineQuote: "Място в текста",
+    evidenceOnPage: (pageNo, documentName) => `стр. ${pageNo}, ${documentName}`,
+    evidenceInPastedText: "от поставения текст",
     deadlineRule: "Приложено правило",
     deadlineVerify:
       "Този срок е изчислен и трябва да бъде проверен от теб. Други места в документа може да го ограничават.",

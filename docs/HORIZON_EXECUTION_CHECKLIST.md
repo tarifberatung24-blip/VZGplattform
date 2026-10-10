@@ -215,8 +215,15 @@ be read as delivered because P6 is marked DONE.
   persisted and a `document_text_extracted` audit entry written; the P16 explanation then quoted
   that text and classified the letter "Behördenbescheid". A signed Hauptvordruck was read the same
   way (`UPLOADED → READY`, pages 1–2). Cross-owner isolation re-verified (RLS)
-- ⬜ Persisting a `page_no`/evidence citation on facts created by the module actions (the schema and
-  page text now support it; the module fact writers still pass `pageNo: null`)
+- ◐ Page-level evidence citation. Audit 2026-10-10: the module fact writers (Agentur, Jobcenter,
+  Steuer task/year choice, P16 user kind correction, P17 contract seeds) record **user-sourced**
+  facts, for which `pageNo: null` is correct — no document page exists. The real gap was P16: its
+  quotes (kind evidence, deadline, risk signals) were computed over the combined text and lost
+  their page. `lib/horizon/unterlagen/evidence.ts` `locateEvidence` now finds each quote again in
+  the stored pages (or pasted text) and the panel shows "Seite N, Dateiname" / "стр. N, файл";
+  a quote found nowhere gets no location rather than a guessed one. Unit-verified; production
+  verification pending. Persisting document-derived facts with `page_no` remains open until a
+  module writes document-derived facts.
 - ✅ Unified extraction contract — `lib/documents/extraction-contract.ts` (added with the
   two-stack reconciliation 2026-09-25)
 - ⬜ Explicit OCR/extraction failure states

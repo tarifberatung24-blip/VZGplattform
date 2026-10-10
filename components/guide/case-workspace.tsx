@@ -12,7 +12,7 @@ import { AgenturTaskPanel } from "@/components/agentur/agentur-task-panel"
 import { JobcenterTaskPanel } from "@/components/jobcenter/jobcenter-task-panel"
 import { KuendigungPanel } from "@/components/kuendigung/kuendigung-panel"
 import { SteuerPanel } from "@/components/steuer/steuer-panel"
-import { UnterlagenPanel } from "@/components/unterlagen/unterlagen-panel"
+import { UnterlagenPanel, type EvidenceSources } from "@/components/unterlagen/unterlagen-panel"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import {
   documentStatusLabel,
@@ -52,6 +52,8 @@ export type CaseWorkspaceProps = {
   audit: readonly CaseAuditEvent[]
   /** P16: combined extracted text of the case's documents, or "" when none. */
   documentText?: string
+  /** P16: stored pages and pasted texts, so a quote can show its page. */
+  evidenceSources?: EvidenceSources
 }
 
 function Panel({
@@ -104,6 +106,7 @@ export function CaseWorkspace({
   approvals,
   audit,
   documentText,
+  evidenceSources,
 }: CaseWorkspaceProps) {
   const de = locale === "de"
 
@@ -303,6 +306,7 @@ export function CaseWorkspace({
         documentText={documentText ?? ""}
         facts={facts}
         unconfirmedFactCount={missing?.unconfirmedCriticalFactKeys.length ?? 0}
+        evidenceSources={evidenceSources}
       />
 
       <CaseAssistantPanel caseId={caseId} module={module} locale={locale} />
