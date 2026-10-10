@@ -8,7 +8,7 @@ const source = readFileSync(join(process.cwd(), "components/marketing/animated-h
 
 describe("home hero", () => {
   it("is only the headline and two buttons", () => {
-    expect(messages("bg").headline1).toBe("HORIZON")
+    expect(source).toContain("<HorizonWordmark")
     expect(messages("bg").headline2).toBe("Твоят дигитален асистент в Германия")
     expect(source).not.toMatch(/<ol|<p /)
     expect(source.match(/<Link/g)).toHaveLength(2)

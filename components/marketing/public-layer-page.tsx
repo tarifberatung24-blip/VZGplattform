@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle2, LockKeyhole, ShieldCheck, Sparkles } from "lu
 import { Button } from "@/components/ui/button"
 import { localizedPath } from "@/lib/i18n/routing"
 import type { Locale } from "@/lib/i18n/dictionaries"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 type PublicLayerPageProps = { kind: "functions" | "security"; locale: Locale }
 
@@ -67,7 +68,7 @@ export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
         </Link>
         <section className="mt-10 max-w-3xl">
           <h1 className="text-balance text-4xl font-black tracking-[-0.05em] md:text-6xl">{content.title}</h1>
-          <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground">{content.intro}</p>
+          <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground"><BrandText text={content.intro} /></p>
         </section>
         <section className="mt-16 grid gap-4 md:grid-cols-3" aria-label={content.title}>
           {content.items.map(([title, description], index) => {
@@ -79,7 +80,7 @@ export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
                   <span className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">0{index + 1}</span>
                   <h2 className="text-xl font-bold">{title}</h2>
                 </div>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">{description}</p>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground"><BrandText text={description} /></p>
               </div>
             </article>
           })}

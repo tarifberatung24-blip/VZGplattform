@@ -2,6 +2,7 @@ import { Mail, Phone } from "lucide-react"
 import Link from "next/link"
 import { headers } from "next/headers"
 import { legalAddress, legalProfile } from "@/lib/legal-profile"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export default async function ImpressumPage() {
   const requestHeaders = await headers()
@@ -87,9 +88,14 @@ export default async function ImpressumPage() {
                 </p>
               )}
               <p className="text-sm text-muted-foreground">
-                {isBg
-                  ? "VZG CONSULT е експертният бранд, а HORIZON by VZG е продукт на Tarifberater24."
-                  : "VZG CONSULT ist die Expertenmarke; HORIZON by VZG ist ein Produkt von Tarifberater24."}
+                <BrandText
+                  official
+                  text={
+                    isBg
+                      ? "VZG CONSULT е експертният бранд, а HORIZON by VZG е продукт на Tarifberater24."
+                      : "VZG CONSULT ist die Expertenmarke; HORIZON by VZG ist ein Produkt von Tarifberater24."
+                  }
+                />
               </p>
             </div>
           </section>

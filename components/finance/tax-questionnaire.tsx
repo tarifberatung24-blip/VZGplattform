@@ -8,6 +8,7 @@ import { taxQuestionnaire2025, type TaxQuestion } from "@/lib/tax-questionnaire-
 import { createClient } from "@/lib/supabase/client"
 import { buildCanonicalTaxReturn } from "@/lib/tax-pipeline"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const categoryLabels: Record<TaxQuestion["category"], { bg: string; de: string }> = {
   personal_data: { bg: "Лични данни", de: "Persönliche Daten" },
@@ -99,7 +100,7 @@ export function TaxQuestionnaire({ initialCase }: { initialCase: { id: string; a
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{de ? "Steuererklärung 2025" : "Данъчна декларация 2025"}</p>
           <h2 id="questionnaire-title" className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{de ? "Fragebogen für Arbeitnehmer" : "Въпросник за работещи"}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">{copy.intro}</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground"><BrandText text={copy.intro} /></p>
         </div>
         <div className="min-w-40 text-right"><p className="text-2xl font-semibold text-foreground">{progress}%</p><p className="text-xs text-muted-foreground">{answered} {copy.answered} {applicable.length} {copy.answeredSuffix}</p></div>
       </div>
@@ -109,11 +110,11 @@ export function TaxQuestionnaire({ initialCase }: { initialCase: { id: string; a
           const helpOpen = openHelp === question.question_id
           return <div key={question.question_id} className="border-t border-border pt-5">
             <div className="flex items-start justify-between gap-4">
-              <div><p className="text-xs font-medium text-primary">{categoryLabels[question.category][de ? "de" : "bg"]}</p><label htmlFor={question.question_id} className="mt-1 block font-medium text-foreground">{de ? question.german_question : question.bulgarian_question}</label><p className="mt-1 text-sm text-muted-foreground">{copy.officialTerm} {question.official_german_label}</p></div>
+              <div><p className="text-xs font-medium text-primary"><BrandText text={categoryLabels[question.category][de ? "de" : "bg"]} /></p><label htmlFor={question.question_id} className="mt-1 block font-medium text-foreground">{de ? question.german_question : question.bulgarian_question}</label><p className="mt-1 text-sm text-muted-foreground">{copy.officialTerm} {question.official_german_label}</p></div>
                <span className="inline-flex items-center gap-1 rounded-sm border border-border px-2 py-1 text-[11px] font-bold text-muted-foreground"><CircleAlert className="size-3" /> {question.verification_status === "VERIFIED" ? copy.verified : copy.unverified}</span>
             </div>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row"><Input id={question.question_id} value={String(answers[question.question_id] ?? "")} onChange={(event) => setAnswers((current) => ({ ...current, [question.question_id]: event.target.value }))} placeholder={copy.placeholder} /><Button type="button" variant="ghost" size="sm" onClick={() => setOpenHelp(helpOpen ? null : question.question_id)} aria-expanded={helpOpen}>{helpOpen ? <ChevronUp /> : <ChevronDown />} {copy.help}</Button></div>
-             {helpOpen && <div className="mt-4 rounded-sm border border-border bg-background p-4 text-sm leading-7 text-muted-foreground"><p><strong>{copy.whatMeans}</strong> {de ? question.german_help : question.bulgarian_help}</p><p className="mt-2"><strong>{copy.whyRequired}</strong> {question.verification_status === "VERIFIED" ? copy.whyRequiredVerified : copy.whyRequiredUnverified}</p><p className="mt-2 text-xs">{copy.source} {question.source_form}{copy.sourceNote}</p></div>}
+             {helpOpen && <div className="mt-4 rounded-sm border border-border bg-background p-4 text-sm leading-7 text-muted-foreground"><p><strong><BrandText text={copy.whatMeans} /></strong> {de ? question.german_help : question.bulgarian_help}</p><p className="mt-2"><strong><BrandText text={copy.whyRequired} /></strong> {question.verification_status === "VERIFIED" ? copy.whyRequiredVerified : copy.whyRequiredUnverified}</p><p className="mt-2 text-xs">{copy.source} {question.source_form}{copy.sourceNote}</p></div>}
           </div>
         })}
       </div>

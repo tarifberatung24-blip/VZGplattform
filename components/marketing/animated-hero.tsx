@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 import { LetterUntangle } from "@/components/marketing/letter-untangle"
+import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 /**
  * Layer 0 home hero: headline and two buttons, nothing else.
@@ -32,7 +33,7 @@ export function AnimatedHero() {
             style={{ background: "radial-gradient(closest-side, var(--background) 72%, transparent)" }}
           />
           <h1 className="font-display text-balance text-[clamp(2.4rem,6vw,5rem)] font-black leading-[1.02] tracking-[-0.04em] text-foreground">
-            {t.home.hero.headline1}
+            <HorizonWordmark className="block h-[clamp(2.6rem,6vw,4.6rem)]" />
             <span
               className="mt-2 block text-[clamp(1.5rem,3.4vw,2.6rem)] leading-[1.1] tracking-[-0.02em]"
               style={{ color: "var(--thread-core)" }}

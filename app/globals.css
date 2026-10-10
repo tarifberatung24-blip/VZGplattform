@@ -952,3 +952,21 @@
   .letter-paper { animation: none; }
   .letter-word, .letter-card, .letter-head, .letter-meta, .letter-footer { transition: none; }
 }
+
+/* ── Product name wordmark (components/brand/horizon-wordmark.tsx) ─────── */
+.horizon-wordmark {
+  position: relative;
+  display: inline-block;
+  height: 0.8em;
+  aspect-ratio: 929 / 161;
+  vertical-align: baseline;
+  background-color: currentColor;
+  -webkit-mask-image: url("/logo-horizon-wordmark.png");
+  mask-image: url("/logo-horizon-wordmark.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: left bottom;
+  mask-position: left bottom;
+}
