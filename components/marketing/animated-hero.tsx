@@ -32,6 +32,26 @@ export function AnimatedHero() {
             </span>
           </h1>
 
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={localizedPath("/auth/login", locale)}
+              className="glass-surface inline-flex items-center gap-2 rounded-lg px-6 py-3 backdrop-blur-md text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5"
+              style={{
+                background: "color-mix(in srgb, var(--primary) 90%, transparent)",
+                borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)",
+              }}
+            >
+              {t.home.hero.loginCta}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+            <Link
+              href={localizedPath("/how-it-works", locale)}
+              className="glass-surface inline-flex items-center gap-2 rounded-lg px-6 py-3 backdrop-blur-md text-sm font-semibold text-foreground transition-transform duration-300 hover:-translate-y-0.5"
+            >
+              {t.home.hero.howCta}
+            </Link>
+          </div>
+
           <ol className="flex max-w-xl flex-col gap-3 text-pretty text-base leading-7 text-foreground sm:text-lg">
             {heroPoints.map((point, index) => (
               <li key={index} className="flex gap-3">
@@ -53,26 +73,6 @@ export function AnimatedHero() {
           <p className="max-w-xl text-pretty text-base leading-8 text-muted-foreground sm:text-lg">
             {t.home.hero.subtitle}
           </p>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href={localizedPath("/auth/sign-up", locale)}
-              className="glass-surface inline-flex items-center gap-2 rounded-lg px-6 py-3 backdrop-blur-md text-sm font-semibold text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5"
-              style={{
-                background: "color-mix(in srgb, var(--primary) 90%, transparent)",
-                borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)",
-              }}
-            >
-              {t.home.hero.primaryCta}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-            <Link
-              href={localizedPath("/how-it-works", locale)}
-              className="glass-surface inline-flex items-center gap-2 rounded-lg px-6 py-3 backdrop-blur-md text-sm font-semibold text-foreground transition-transform duration-300 hover:-translate-y-0.5"
-            >
-              {t.home.hero.navAbout}
-            </Link>
-          </div>
 
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             {t.home.trust}

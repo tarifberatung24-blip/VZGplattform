@@ -704,3 +704,23 @@
     transition: none;
   }
 }
+
+/* How-it-works connector: draws the path once when the page opens. */
+.feature-path-line {
+  stroke-dasharray: var(--feature-path-length);
+  stroke-dashoffset: var(--feature-path-length);
+  animation: feature-path-draw 1.8s ease-out 0.2s forwards;
+}
+
+@keyframes feature-path-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-path-line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
