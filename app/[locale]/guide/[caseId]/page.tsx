@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { requireGuideContext } from "@/lib/horizon/guide/guard"
 import { getGuideCopy, guideModuleLabel, caseStatusLabel } from "@/lib/horizon/guide/copy"
 import { combineAnalysisText } from "@/lib/horizon/unterlagen/analysis"
+import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { isLocale } from "@/lib/i18n/dictionaries"
 import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { CaseWorkspace } from "@/components/guide/case-workspace"
@@ -43,6 +44,32 @@ export default async function GuideCasePage({
     messages: messages.data ?? [],
   })
 
+  // The same sources, kept apart, so each P16 quote can name the page it is on.
+  // Pages follow the case's document order, then page number, so the first
+  // match is stable between renders.
+  const documentOrder = new Map((documents.data ?? []).map((doc, index) => [doc.id, index]))
+  const documentNames = new Map(
+    (documents.data ?? []).map((doc) => [doc.id, documentDisplayName(doc.path)]),
+  )
+  const evidenceSources = {
+    pages: (pages.data ?? [])
+      .filter((page) => documentNames.has(page.documentId))
+      .map((page) => ({
+        documentId: page.documentId,
+        pageNo: page.pageNo,
+        documentName: documentNames.get(page.documentId) ?? "",
+        text: page.text,
+      }))
+      .sort(
+        (a, b) =>
+          (documentOrder.get(a.documentId) ?? 0) - (documentOrder.get(b.documentId) ?? 0) ||
+          a.pageNo - b.pageNo,
+      ),
+    pastedTexts: (messages.data ?? [])
+      .filter((message) => message.role === "user")
+      .map((message) => message.content),
+  }
+
   const copy = getGuideCopy(locale)
 
   return (
@@ -78,6 +105,7 @@ export default async function GuideCasePage({
           approvals={approvals.data ?? []}
           audit={audit.data ?? []}
           documentText={documentText}
+          evidenceSources={evidenceSources}
         />
       </div>
     </WorkspacePage>

@@ -5,8 +5,11 @@ import { confirmDocumentKind, type UnterlagenState } from "@/lib/horizon/unterla
 import { getUnterlagenCopy } from "@/lib/horizon/unterlagen/copy"
 import { analyseDocumentText, DOCUMENT_KIND_FACT_KEY } from "@/lib/horizon/unterlagen/analysis"
 import { DOCUMENT_KINDS, type DocumentKind } from "@/lib/horizon/unterlagen/classify"
+import { locateEvidence, type EvidencePage } from "@/lib/horizon/unterlagen/evidence"
 
 const initialState: UnterlagenState = { error: null, ok: false }
+
+export type EvidenceSources = { pages: readonly EvidencePage[]; pastedTexts: readonly string[] }
 
 type Fact = { key: string; value?: string | null; confirmedAt?: string | null }
 
@@ -29,6 +32,7 @@ export function UnterlagenPanel({
   documentText,
   facts,
   unconfirmedFactCount,
+  evidenceSources,
 }: {
   caseId: string
   locale: string
@@ -37,6 +41,8 @@ export function UnterlagenPanel({
   documentText: string
   facts: readonly Fact[]
   unconfirmedFactCount: number
+  /** The stored pages and pasted texts, so each quote can name its page. */
+  evidenceSources?: EvidenceSources
 }) {
   const [state, action, pending] = useActionState(confirmDocumentKind, initialState)
   const copy = getUnterlagenCopy(locale === "de" ? "de" : "bg")
@@ -54,6 +60,17 @@ export function UnterlagenPanel({
     correctedKind,
     unconfirmedFactCount,
   })
+
+  const sources: EvidenceSources = evidenceSources ?? { pages: [], pastedTexts: [] }
+  const whereFound = (quote: string | null) => {
+    const location = locateEvidence(quote, sources)
+    if (!location) return null
+    const label =
+      location.kind === "page"
+        ? copy.evidenceOnPage(location.pageNo, location.documentName)
+        : copy.evidenceInPastedText
+    return <span className="ml-1 not-italic">({label})</span>
+  }
 
   const errorText =
     state.error === "invalid_kind"
@@ -80,6 +97,7 @@ export function UnterlagenPanel({
           {analysis.kindEvidence ? (
             <p className="text-xs text-muted-foreground">
               {copy.classificationEvidence}: <span className="italic">{analysis.kindEvidence}</span>
+              {whereFound(analysis.kindEvidence)}
             </p>
           ) : (
             <p className="text-xs text-muted-foreground">{copy.classificationUnclear}</p>
@@ -122,6 +140,7 @@ export function UnterlagenPanel({
           {analysis.deadline.quote ? (
             <p className="text-xs text-muted-foreground">
               {copy.deadlineQuote}: <span className="italic">{analysis.deadline.quote}</span>
+              {whereFound(analysis.deadline.quote)}
             </p>
           ) : null}
           {analysis.deadline.rule ? (
@@ -144,6 +163,7 @@ export function UnterlagenPanel({
                 {analysis.risk.signals.map((signal) => (
                   <li key={signal.id} className="text-xs text-muted-foreground">
                     {copy.riskQuoteLabel}: <span className="italic">{signal.quote}</span>
+                    {whereFound(signal.quote)}
                   </li>
                 ))}
               </ul>
