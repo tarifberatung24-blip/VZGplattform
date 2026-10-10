@@ -47,8 +47,8 @@ Several migrations were applied to production directly (SQL editor or MCP) under
 
 | Repository file | Effect when applied |
 |---|---|
-| 20261010090000_affiliate_locked_to_service_role.sql | removes anon/authenticated privileges on the 4 affiliate tables |
-| 20261010100000_fk_covering_indexes.sql | 18 covering indexes |
+| 20261010090000_affiliate_locked_to_service_role.sql | **applied 2026-10-10** (history entry 20261010125036); verified: affiliate tables no longer exposed |
+| 20261010100000_fk_covering_indexes.sql | **applied 2026-10-10** (history entry 20261010125122); verified: unindexed-FK advisor finding cleared |
 | 20261010101000_disable_unused_pg_graphql.sql | drops `pg_graphql`; also remove `graphql_public` from Settings → API → Exposed schemas |
 | 20261010110000_revoke_anon_table_grants_and_dead_storage_policies.sql | (pending PR) anon grants + dead storage policies |
 
@@ -68,8 +68,12 @@ Several migrations were applied to production directly (SQL editor or MCP) under
    supabase migration repair --status applied  20260919150000 20260920090000 20260920090100
    # D: effects already present
    supabase migration repair --status applied  20260916000000 20260916070000 20260928090000 20261009090000
-   # E: only if step 2 was done in the SQL editor instead of `db push`
-   supabase migration repair --status applied  20261010090000 20261010100000 20261010101000
+   # E: 20261010090000 and 20261010100000 were applied on 2026-10-10 through the
+   # Supabase MCP, which recorded them under new timestamps. Replace those entries:
+   supabase migration repair --status reverted 20261010125036 20261010125122
+   supabase migration repair --status applied  20261010090000 20261010100000
+   # and, once applied, 20261010101000 (pg_graphql) if it was run in the SQL editor:
+   supabase migration repair --status applied  20261010101000
    ```
 
 4. **Verify**: `supabase migration list` shows local = remote for every row; `get_advisors` (security + performance) shows the affiliate, GraphQL and unindexed-FK findings cleared.
