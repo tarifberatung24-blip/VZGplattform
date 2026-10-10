@@ -29,7 +29,7 @@ const items: Record<"bg" | "de", OrbitItem[]> = {
   bg: [
     { id: "documents", label: "Документи", description: "Качи, подреди и разбери важните документи.", href: "/documents", position: "bottom", Icon: FileCheck2 },
     { id: "taxes", label: "Данъци", description: "Подготви следващата данъчна стъпка.", href: "/steuer", position: "top", Icon: FileText },
-    { id: "tariffs", label: "Тарифи", description: "Сравни разходи, договори и възможности.", href: "/vertraege", position: "top-right", Icon: BarChart3 },
+    { id: "tariffs", label: "Тарифи", description: "Сравни разходи, договори и възможности.", href: "/versicherungen", position: "top-right", Icon: BarChart3 },
     { id: "rights", label: "Права", description: "Ориентирай се в административните възможности.", href: "/anspruch", position: "right", Icon: Scale },
     { id: "kindergeld", label: "Kindergeld", description: "Подготви информацията за семейните помощи.", href: "/kindergeld", position: "bottom-right", Icon: HeartPulse },
     { id: "jobcenter", label: "Jobcenter", description: "Организирай документи и следващи стъпки.", href: "/guide", position: "bottom-left", Icon: BriefcaseBusiness },
@@ -40,7 +40,7 @@ const items: Record<"bg" | "de", OrbitItem[]> = {
   de: [
     { id: "documents", label: "Dokumente", description: "Wichtige Dokumente hochladen, ordnen und verstehen.", href: "/documents", position: "bottom", Icon: FileCheck2 },
     { id: "taxes", label: "Steuern", description: "Den nächsten Schritt für deine Steuer vorbereiten.", href: "/steuer", position: "top", Icon: FileText },
-    { id: "tariffs", label: "Tarife", description: "Kosten, Verträge und Möglichkeiten vergleichen.", href: "/vertraege", position: "top-right", Icon: BarChart3 },
+    { id: "tariffs", label: "Tarife", description: "Kosten, Verträge und Möglichkeiten vergleichen.", href: "/versicherungen", position: "top-right", Icon: BarChart3 },
     { id: "rights", label: "Ansprüche", description: "Dich in Verwaltungsfragen orientieren.", href: "/anspruch", position: "right", Icon: Scale },
     { id: "kindergeld", label: "Kindergeld", description: "Informationen für Familienleistungen vorbereiten.", href: "/kindergeld", position: "bottom-right", Icon: HeartPulse },
     { id: "jobcenter", label: "Jobcenter", description: "Unterlagen und nächste Schritte ordnen.", href: "/guide", position: "bottom-left", Icon: BriefcaseBusiness },
@@ -57,7 +57,7 @@ const reviewedCopy: Record<"bg" | "de", Record<string, Pick<OrbitItem, "label" |
     tariffs: { label: "Договори", description: "Виж месечни разходи, срокове и възможни следващи стъпки.", href: "/vertraege" },
     rights: { label: "Държавни помощи", description: "Провери структурирано Kindergeld, Wohngeld и други помощи.", href: "/anspruch" },
     kindergeld: { label: "Kindergeld", description: "Подготви предварителна проверка на формулярите и нужните документи.", href: "/kindergeld" },
-    jobcenter: { label: "Разбери ситуацията", description: "Избери дали да разбереш документ, да отговориш на институция или да попълниш форма.", href: "/guide" },
+    jobcenter: { label: "Разбери ситуацията", description: "Избери дали да разбереш документ, да отговориш на институция или да подготвиш формуляр.", href: "/guide" },
     energy: { label: "Финансово обучение", description: "Научи повече за решенията, договорите и разходите си.", href: "/finanzbildung" },
     security: { label: "Как работи", description: "Виж как HORIZON подготвя документи, срокове и следващи стъпки.", href: "/how-it-works" },
     inkasso: { label: "Inkasso писмо", description: "Отвори Guide и избери „Разбери документ“ за структурирана подготовка.", href: "/guide" },
@@ -109,7 +109,7 @@ export function Layer0Orbit() {
         </div>
 
         <div className="layer0-orbit__nodes">
-          {orbitItems.map(({ id, label, position, Icon }) => {
+          {orbitItems.map(({ id, label, position }) => {
             const active = id === selected.id
             return (
               <button
@@ -119,10 +119,7 @@ export function Layer0Orbit() {
                 onClick={() => setSelectedId(id)}
                 aria-pressed={active}
               >
-                <span className="layer0-orbit__node-icon">
-                  <Icon className="size-5" aria-hidden="true" />
-                  <span className="mt-1 text-[.62rem] leading-tight">{label}</span>
-                </span>
+                <span className="layer0-orbit__node-icon">{label}</span>
               </button>
             )
           })}
