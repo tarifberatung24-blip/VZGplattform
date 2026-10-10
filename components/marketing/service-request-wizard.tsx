@@ -13,6 +13,7 @@ import {
   serviceRequestKinds,
   type ServiceRequestKind,
 } from "@/lib/service-request"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 type Field = {
   id: string
@@ -306,16 +307,16 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
             <Link href={localizedPath("/functions", locale)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               <ArrowLeft className="size-4" />{de ? "Alle Angebote" : "Всички предложения"}
             </Link>
-            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.eyebrow}</p>
-            <h1 className="mt-4 max-w-3xl text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{copy.title}</h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">{copy.intro}</p>
+            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-primary"><BrandText text={copy.eyebrow} /></p>
+            <h1 className="mt-4 max-w-3xl text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl"><BrandText text={copy.title} /></h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground"><BrandText text={copy.intro} /></p>
           </div>
           <aside className="glass-card rounded-lg p-5 backdrop-blur-md">
             <div className="flex items-center gap-3">
               <span className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary"><Clock3 className="size-5" /></span>
               <div>
                 <p className="text-sm font-semibold text-foreground">2h Service-SLA</p>
-                <p className="text-sm text-muted-foreground">{copy.promise}</p>
+                <p className="text-sm text-muted-foreground"><BrandText text={copy.promise} /></p>
               </div>
             </div>
             <div className="mt-5 flex items-start gap-3 rounded-md border border-border bg-secondary/50 p-4 text-sm leading-6 text-muted-foreground">
@@ -352,7 +353,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
                 >
                   <span className="text-sm font-semibold text-foreground">{de ? serviceRequestMeta[item].labelDe : serviceRequestMeta[item].labelBg}</span>
                   <span className="mt-2 block text-xs leading-5 text-muted-foreground">{de ? serviceRequestMeta[item].promiseDe : serviceRequestMeta[item].promiseBg}</span>
-                  {item === kind && <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary"><CheckCircle2 className="size-3.5" />{copy.selected}</span>}
+                  {item === kind && <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary"><CheckCircle2 className="size-3.5" /><BrandText text={copy.selected} /></span>}
                 </button>
               ))}
             </div>
@@ -414,7 +415,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
 
           <div className="mt-7 flex flex-wrap justify-between gap-3">
             <Button type="button" variant="outline" disabled={stepIndex === 0 || submitting} onClick={() => setStepIndex((value) => Math.max(value - 1, 0))}>
-              <ArrowLeft className="size-4" />{copy.back}
+              <ArrowLeft className="size-4" /><BrandText text={copy.back} />
             </Button>
             {stepIndex === steps.length - 1 ? (
               <Button type="submit" disabled={submitting || Boolean(requestId)}>
@@ -422,7 +423,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
               </Button>
             ) : (
               <Button type="button" onClick={next} disabled={submitting}>
-                {copy.next}<ArrowRight className="size-4" />
+                <BrandText text={copy.next} /><ArrowRight className="size-4" />
               </Button>
             )}
           </div>

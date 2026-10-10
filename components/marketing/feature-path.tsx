@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, type ComponentType, type CSSProperties } from "react"
 import { FolderKanban, Lightbulb, SearchCheck, Target } from "lucide-react"
 import type { HowItWorksStage, HowItWorksStageId } from "@/components/marketing/how-it-works-copy"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const stageIcons: Record<HowItWorksStageId, ComponentType<{ className?: string; "aria-hidden"?: boolean }>> = {
   understand: Lightbulb,
@@ -100,7 +101,7 @@ function StageCard({ stage, index, stepWord }: { stage: HowItWorksStage; index: 
           {stage.label}
         </h3>
         <p className="mt-2 text-base font-semibold leading-6 text-foreground [transform:translateZ(20px)]">{stage.title}</p>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground [transform:translateZ(12px)]">{stage.body}</p>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground [transform:translateZ(12px)]"><BrandText text={stage.body} /></p>
         <ul className="mt-auto flex flex-wrap gap-2 pt-5 [transform:translateZ(16px)]">
           {stage.chips.map((chip) => (
             <li key={chip} className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-foreground">

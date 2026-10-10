@@ -5,6 +5,7 @@ import { insuranceHubCopy, insuranceProductContent } from "@/components/affiliat
 import { getAffiliateOffer } from "@/lib/affiliate-offers"
 import { affiliateDisclosureFor } from "@/lib/affiliate-disclosure"
 import { isLocale, type Locale } from "@/lib/i18n/dictionaries"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export const metadata: Metadata = {
   title: "Versicherungen",
@@ -34,16 +35,16 @@ export default async function VersicherungenPage({ params }: { params: Promise<{
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-[1440px] px-5 py-16 lg:px-8 md:py-24">
         <header className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={copy.eyebrow} /></p>
           <h1 className="mt-6 text-balance text-4xl font-black tracking-[-0.05em] text-foreground md:text-6xl">
-            {copy.title}
+            <BrandText text={copy.title} />
           </h1>
-          <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground">{copy.intro}</p>
+          <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground"><BrandText text={copy.intro} /></p>
         </header>
 
         <section className="mt-16" aria-labelledby="insurance-products">
           <h2 id="insurance-products" className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            {copy.productsTitle}
+            <BrandText text={copy.productsTitle} />
           </h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {products.map((product) => (
@@ -65,11 +66,11 @@ export default async function VersicherungenPage({ params }: { params: Promise<{
 
         <section className="glass-card mt-12 flex items-start gap-3 rounded-sm p-5 text-sm leading-7 text-muted-foreground backdrop-blur-md">
           <CircleAlert className="mt-0.5 size-5 shrink-0" />
-          <span>{copy.notice}</span>
+          <span><BrandText text={copy.notice} /></span>
         </section>
 
         <p className="mt-6 max-w-3xl border-l-2 border-primary pl-4 text-sm leading-7 text-foreground">
-          {affiliateDisclosureFor(locale)}
+          <BrandText text={affiliateDisclosureFor(locale)} official />
         </p>
       </div>
     </main>

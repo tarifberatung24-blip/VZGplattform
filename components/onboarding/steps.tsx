@@ -15,6 +15,7 @@ import {
   type OnboardingStep,
 } from "@/lib/onboarding/state"
 import { getOnboardingCopy } from "./copy"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 type StepProps = { userId: string; step: OnboardingStep; previous: OnboardingStep | null }
 type PersistResult = { error: { message: string } | null }
@@ -33,11 +34,11 @@ function Frame({
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-lg rounded-md border border-border bg-card p-8 shadow-sm">
         <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">
-          {copy.brand}
-          <span className="mt-1 block text-[10px] text-muted-foreground">{copy.brandNote}</span>
+          <BrandText text={copy.brand} />
+          <span className="mt-1 block text-[10px] text-muted-foreground"><BrandText text={copy.brandNote} /></span>
         </Link>
         <p className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          {copy.stepLabel}
+          <BrandText text={copy.stepLabel} />
         </p>
         {previous ? (
           <Link
@@ -45,7 +46,7 @@ function Frame({
             className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
           >
             <ArrowLeft className="h-3 w-3" />
-            {copy.back}
+            <BrandText text={copy.back} />
           </Link>
         ) : null}
         {children}
@@ -106,12 +107,12 @@ export function ProfileStep({ userId, step, previous }: StepProps) {
 
   return (
     <Frame previous={previous}>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">{copy.profile.title}</h1>
-      <p className="mt-2 leading-6 text-muted-foreground">{copy.profile.intro}</p>
+      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground"><BrandText text={copy.profile.title} /></h1>
+      <p className="mt-2 leading-6 text-muted-foreground"><BrandText text={copy.profile.intro} /></p>
       <form onSubmit={submit} className="mt-7 space-y-4">
         <div className="space-y-2">
           <Label htmlFor="onboarding-first-name">
-            {copy.profile.firstName} <span className="text-muted-foreground">({copy.profile.required})</span>
+            <BrandText text={copy.profile.firstName} /> <span className="text-muted-foreground">({copy.profile.required})</span>
           </Label>
           <Input
             id="onboarding-first-name"
@@ -122,7 +123,7 @@ export function ProfileStep({ userId, step, previous }: StepProps) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="onboarding-last-name">
-            {copy.profile.lastName} <span className="text-muted-foreground">({copy.profile.optional})</span>
+            <BrandText text={copy.profile.lastName} /> <span className="text-muted-foreground">({copy.profile.optional})</span>
           </Label>
           <Input
             id="onboarding-last-name"
@@ -145,13 +146,13 @@ export function TourStep({ userId, step, previous }: StepProps) {
 
   return (
     <Frame previous={previous}>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">{copy.tour.title}</h1>
-      <p className="mt-2 leading-6 text-muted-foreground">{copy.tour.intro}</p>
+      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground"><BrandText text={copy.tour.title} /></h1>
+      <p className="mt-2 leading-6 text-muted-foreground"><BrandText text={copy.tour.intro} /></p>
       <ul className="mt-7 space-y-4">
         {copy.tour.items.map((item) => (
           <li key={item.title} className="rounded-lg border border-border p-4">
-            <p className="font-medium text-foreground">{item.title}</p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">{item.text}</p>
+            <p className="font-medium text-foreground"><BrandText text={item.title} /></p>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground"><BrandText text={item.text} /></p>
           </li>
         ))}
       </ul>
@@ -168,9 +169,9 @@ export function FinishStep({ userId, step, previous }: StepProps) {
 
   return (
     <Frame previous={previous}>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">{copy.finish.title}</h1>
-      <p className="mt-2 leading-6 text-muted-foreground">{copy.finish.intro}</p>
-      <p className="mt-6 text-sm text-foreground">{copy.finish.ready}</p>
+      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground"><BrandText text={copy.finish.title} /></h1>
+      <p className="mt-2 leading-6 text-muted-foreground"><BrandText text={copy.finish.intro} /></p>
+      <p className="mt-6 text-sm text-foreground"><BrandText text={copy.finish.ready} /></p>
       {error ? <p role="alert" className="mt-4 text-sm text-destructive">{error}</p> : null}
       <Button className="mt-7 w-full" disabled={busy} onClick={() => void advance()}>
         {busy ? copy.saving : copy.toDashboard}

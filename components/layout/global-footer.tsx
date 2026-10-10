@@ -4,6 +4,7 @@ import Link from "next/link"
 import { localizedPath } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { usePathname } from "next/navigation"
+import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 export function GlobalFooter() {
   const pathname = usePathname() ?? "/"
@@ -27,7 +28,11 @@ export function GlobalFooter() {
   return (
     <footer className="glass-chrome relative border-t backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-5 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8">
-        <span>{"© 2026 HORIZON by VZG"}</span>
+        <span>
+          {"© 2026 "}
+          <HorizonWordmark />
+          {" by VZG"}
+        </span>
         <nav className="flex flex-wrap gap-x-5">
           {links.map((link) => (
             <Link

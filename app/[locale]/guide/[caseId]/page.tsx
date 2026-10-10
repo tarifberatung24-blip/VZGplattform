@@ -7,6 +7,7 @@ import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { isLocale } from "@/lib/i18n/dictionaries"
 import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { CaseWorkspace } from "@/components/guide/case-workspace"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export const dynamic = "force-dynamic"
 
@@ -84,9 +85,9 @@ export default async function GuideCasePage({
 
         <header className="mt-4 border-b border-border pb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            {copy.brand}
+            <BrandText text={copy.brand} />
           </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">{loaded.data.title}</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight"><BrandText text={loaded.data.title} /></h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {copy.moduleLabel}: {guideModuleLabel(locale, loaded.data.module)} ·{" "}
             {copy.statusLabel}: {caseStatusLabel(locale, loaded.data.status)}

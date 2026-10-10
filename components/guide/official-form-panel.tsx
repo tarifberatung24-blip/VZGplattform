@@ -8,6 +8,7 @@ import {
   templatesForTaxYear,
   type OfficialPdfTemplate,
 } from "@/lib/horizon/pdf/registry"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const initialState: PdfGenerationState = { status: null, detail: null, manualPath: null }
 
@@ -141,7 +142,7 @@ export function OfficialFormPanel({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">{copy.intro}</p>
+      <p className="text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
 
       <form action={action} className="space-y-2">
         <input type="hidden" name="caseId" value={caseId} />
@@ -154,12 +155,12 @@ export function OfficialFormPanel({
 
         {isTaxModule && templates.length === 0 ? (
           <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
-            {copy.tax_year_required}
+            <BrandText text={copy.tax_year_required} />
           </p>
         ) : (
           <>
             <label className="block text-xs font-medium" htmlFor="pdf-template">
-              {copy.form}
+              <BrandText text={copy.form} />
             </label>
             <select
               id="pdf-template"
@@ -169,7 +170,7 @@ export function OfficialFormPanel({
             >
               {templates.map((template) => (
                 <option key={template.id} value={template.id}>
-                  {template.formName}
+                  <BrandText text={template.formName} />
                   {template.formId ? ` (${template.formId})` : ""} · {template.version}
                 </option>
               ))}
@@ -189,9 +190,9 @@ export function OfficialFormPanel({
       {state.status === "draft_created" ? (
         <div className="space-y-1">
           <p role="status" className="text-xs text-primary">
-            {copy.ok}
+            <BrandText text={copy.ok} />
           </p>
-          {state.detail ? <p className="text-xs text-primary">{state.detail}</p> : null}
+          {state.detail ? <p className="text-xs text-primary"><BrandText text={state.detail} /></p> : null}
         </div>
       ) : null}
 
@@ -207,7 +208,7 @@ export function OfficialFormPanel({
               rel="noreferrer noopener"
               className="inline-block text-xs font-medium text-primary hover:underline"
             >
-              {copy.manual}
+              <BrandText text={copy.manual} />
             </a>
           ) : null}
         </div>

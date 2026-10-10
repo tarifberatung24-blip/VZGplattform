@@ -4,6 +4,7 @@ import { ElsterReviewPackage } from "@/components/finance/elster-review-package"
 import { SteuerTabs } from "@/components/finance/steuer-tabs"
 import { createClient } from "@/lib/supabase/server"
 import { requestLocale } from "@/lib/i18n/server-locale"
+import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 export default async function Page() {
   const locale = await requestLocale()
@@ -17,7 +18,7 @@ export default async function Page() {
     <WorkspacePage>
       <div className="mt-6"><SteuerTabs /></div>
       <header className="mb-6 mt-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">HORIZON · Steuer 2025</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"><HorizonWordmark /> · Steuer 2025</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{de ? "Prüfung vor der Übermittlung" : "Преглед преди подаване"}</h1>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">{de ? "Kontrolliere die erfassten Angaben, bevor du sie für die zertifizierte Übermittlung vorbereitest." : "Провери въведените данни, преди да ги подготвиш за удостоверено подаване."}</p>
       </header>

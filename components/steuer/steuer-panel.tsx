@@ -15,6 +15,7 @@ import {
 import { findTemplateById } from "@/lib/horizon/pdf/registry"
 import { readFormOutputSha } from "@/lib/horizon/pdf/manifest"
 import type { CaseApproval, CaseDraft } from "@/lib/horizon/case/contract"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const initialState: SteuerYearState = { error: null, ok: false, taxYear: null }
 
@@ -89,25 +90,25 @@ export function SteuerPanel({
   return (
     <section className="rounded-md border border-border bg-card p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        {copy.heading}
+        <BrandText text={copy.heading} />
       </h2>
-      <p className="mt-3 text-xs text-muted-foreground">{copy.intro}</p>
+      <p className="mt-3 text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
 
       {definition ? (
         <div className="mt-4 space-y-4">
           <div className="rounded-md border border-primary/30 bg-primary/5 p-3">
-            <p className="text-xs font-semibold text-primary">{copy.currentYear}</p>
-            <p className="mt-1 text-sm font-medium">{definition.taxYear}</p>
+            <p className="text-xs font-semibold text-primary"><BrandText text={copy.currentYear} /></p>
+            <p className="mt-1 text-sm font-medium"><BrandText text={definition.taxYear} /></p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {copy.yearStates.supported}
+              <BrandText text={copy.yearStates.supported} />
             </p>
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold">{copy.formsHeading}</p>
+            <p className="text-xs font-semibold"><BrandText text={copy.formsHeading} /></p>
             {definition.forms.length === 0 ? (
               <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
-                {copy.noFormForYear}
+                <BrandText text={copy.noFormForYear} />
               </p>
             ) : (
               <ul className="space-y-3">
@@ -139,7 +140,7 @@ export function SteuerPanel({
                           rel="noreferrer noopener"
                           className="inline-block text-xs font-medium text-primary hover:underline"
                         >
-                          {copy.formOpenLabel}
+                          <BrandText text={copy.formOpenLabel} />
                         </a>
                       ) : null}
                     </li>
@@ -147,18 +148,18 @@ export function SteuerPanel({
                 })}
               </ul>
             )}
-            <p className="text-xs text-muted-foreground">{copy.formsBlankNote}</p>
+            <p className="text-xs text-muted-foreground"><BrandText text={copy.formsBlankNote} /></p>
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold">{copy.anlagenHeading}</p>
+            <p className="text-xs font-semibold"><BrandText text={copy.anlagenHeading} /></p>
             {anlagen.length === 0 ? (
               <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
-                {copy.anlagenNone}
+                <BrandText text={copy.anlagenNone} />
               </p>
             ) : (
               <>
-                <p className="text-xs text-muted-foreground">{copy.anlagenIntro}</p>
+                <p className="text-xs text-muted-foreground"><BrandText text={copy.anlagenIntro} /></p>
                 <ul className="space-y-1">
                   {anlagen.map((anlage) => (
                     <li key={anlage.id} className="text-xs">
@@ -178,7 +179,7 @@ export function SteuerPanel({
           </div>
 
           <div className="space-y-1 border-t border-border pt-3">
-            <p className="text-xs font-semibold">{copy.officialRouteHeading}</p>
+            <p className="text-xs font-semibold"><BrandText text={copy.officialRouteHeading} /></p>
             <div className="flex flex-wrap gap-3 text-xs">
               <a
                 href={definition.officialOnline.url}
@@ -194,10 +195,10 @@ export function SteuerPanel({
                 rel="noreferrer noopener"
                 className="font-medium text-primary hover:underline"
               >
-                {copy.officialFormsLabel}
+                <BrandText text={copy.officialFormsLabel} />
               </a>
             </div>
-            <p className="text-xs text-muted-foreground">{copy.noElsterNote}</p>
+            <p className="text-xs text-muted-foreground"><BrandText text={copy.noElsterNote} /></p>
           </div>
         </div>
       ) : null}
@@ -250,16 +251,16 @@ export function SteuerPanel({
       ) : null}
 
       <div className="mt-3 space-y-1 border-t border-border pt-3">
-        <p className="text-xs font-semibold">{copy.downloadHeading}</p>
+        <p className="text-xs font-semibold"><BrandText text={copy.downloadHeading} /></p>
         {downloadReady ? (
           <a
             href={`/api/horizon/cases/${caseId}/tax-form`}
             className="inline-block text-xs font-medium text-primary hover:underline"
           >
-            {copy.downloadHeading}
+            <BrandText text={copy.downloadHeading} />
           </a>
         ) : (
-          <p className="text-xs text-muted-foreground">{copy.downloadHint}</p>
+          <p className="text-xs text-muted-foreground"><BrandText text={copy.downloadHint} /></p>
         )}
       </div>
 

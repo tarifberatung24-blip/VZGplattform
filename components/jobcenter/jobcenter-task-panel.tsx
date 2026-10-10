@@ -10,6 +10,7 @@ import {
   isJobcenterTask,
 } from "@/lib/horizon/jobcenter/registry"
 import { findTemplateById } from "@/lib/horizon/pdf/registry"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const initialState: JobcenterTaskState = { error: null, ok: false }
 
@@ -67,15 +68,15 @@ export function JobcenterTaskPanel({
   return (
     <section className="rounded-md border border-border bg-card p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        {copy.heading}
+        <BrandText text={copy.heading} />
       </h2>
-      <p className="mt-3 text-xs text-muted-foreground">{copy.intro}</p>
+      <p className="mt-3 text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
 
       {definition ? (
         <div className="mt-4 space-y-3">
           <div className="rounded-md border border-primary/30 bg-primary/5 p-3">
-            <p className="text-xs font-semibold text-primary">{copy.currentTask}</p>
-            <p className="mt-1 text-sm font-medium">{copy.tasks[definition.task].title}</p>
+            <p className="text-xs font-semibold text-primary"><BrandText text={copy.currentTask} /></p>
+            <p className="mt-1 text-sm font-medium"><BrandText text={copy.tasks[definition.task].title} /></p>
             <p className="mt-1 text-xs text-muted-foreground">
               {copy.routeLabel}: {copy.routeKinds[definition.routeKind]}
             </p>
@@ -89,7 +90,7 @@ export function JobcenterTaskPanel({
                 rel="noreferrer noopener"
                 className="font-medium text-primary hover:underline"
               >
-                {copy.onlineLabel}
+                <BrandText text={copy.onlineLabel} />
                 {definition.official.onlineLabel ? `: ${definition.official.onlineLabel}` : ""}
               </a>
             ) : null}
@@ -99,22 +100,22 @@ export function JobcenterTaskPanel({
               rel="noreferrer noopener"
               className="font-medium text-primary hover:underline"
             >
-              {copy.infoLabel}
+              <BrandText text={copy.infoLabel} />
             </a>
           </div>
 
           {definition.forms.length === 0 ? (
             <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
-              {copy.noPaperForm}
+              <BrandText text={copy.noPaperForm} />
             </p>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs font-semibold">{copy.formHeading}</p>
+              <p className="text-xs font-semibold"><BrandText text={copy.formHeading} /></p>
               {definition.forms.map((form) => {
                 const template = findTemplateById(form.templateId)
                 return (
                   <div key={form.templateId} className="space-y-1">
-                    <p className="text-xs text-primary">{copy.formFillable}</p>
+                    <p className="text-xs text-primary"><BrandText text={copy.formFillable} /></p>
                     {template ? (
                       <a
                         href={template.officialSource}
@@ -130,19 +131,19 @@ export function JobcenterTaskPanel({
                   </div>
                 )
               })}
-              <p className="text-xs text-muted-foreground">{copy.formsBlankNote}</p>
+              <p className="text-xs text-muted-foreground"><BrandText text={copy.formsBlankNote} /></p>
             </div>
           )}
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold">{copy.anlagenHeading}</p>
+            <p className="text-xs font-semibold"><BrandText text={copy.anlagenHeading} /></p>
             {anlagen.length === 0 ? (
               <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
-                {copy.anlagenNone}
+                <BrandText text={copy.anlagenNone} />
               </p>
             ) : (
               <>
-                <p className="text-xs text-muted-foreground">{copy.anlagenIntro}</p>
+                <p className="text-xs text-muted-foreground"><BrandText text={copy.anlagenIntro} /></p>
                 <ul className="space-y-1">
                   {anlagen.map((anlage) => (
                     <li key={anlage.id} className="text-xs">
@@ -179,7 +180,7 @@ export function JobcenterTaskPanel({
           >
             {JOBCENTER_TASKS.map((task) => (
               <option key={task} value={task}>
-                {copy.tasks[task].title}
+                <BrandText text={copy.tasks[task].title} />
               </option>
             ))}
           </select>
@@ -196,7 +197,7 @@ export function JobcenterTaskPanel({
 
       {state.ok ? (
         <p role="status" className="mt-2 text-xs text-primary">
-          {copy.currentTask}
+          <BrandText text={copy.currentTask} />
         </p>
       ) : null}
 

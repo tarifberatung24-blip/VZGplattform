@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, MessagesSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FeaturePath } from "@/components/marketing/feature-path"
 import { howItWorksCopy } from "@/components/marketing/how-it-works-copy"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 
@@ -32,8 +33,8 @@ export default function HowItWorksPage() {
 
         <header className="mx-auto mt-10 max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">{copy.eyebrow}</p>
-          <h1 className="mt-3 text-balance text-4xl font-black tracking-[-0.04em] md:text-6xl">{copy.title}</h1>
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground">{copy.intro}</p>
+          <h1 className="mt-3 text-balance text-4xl font-black tracking-[-0.04em] md:text-6xl"><BrandText text={copy.title} /></h1>
+          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground"><BrandText text={copy.intro} /></p>
         </header>
 
         <div className="mt-14 md:mt-20">
@@ -56,7 +57,7 @@ export default function HowItWorksPage() {
               <h2 id="how-it-works-communicate" className="text-xl font-bold">
                 {copy.communicate.title}
               </h2>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{copy.communicate.body}</p>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground"><BrandText text={copy.communicate.body} /></p>
             </div>
           </div>
         </section>
@@ -73,7 +74,7 @@ export default function HowItWorksPage() {
           </Button>
         </div>
 
-        <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-6 text-muted-foreground">{copy.notice}</p>
+        <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-6 text-muted-foreground"><BrandText text={copy.notice} /></p>
       </div>
     </main>
   )

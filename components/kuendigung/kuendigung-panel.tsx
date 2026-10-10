@@ -13,6 +13,7 @@ import {
 } from "@/lib/horizon/kuendigung/facts"
 import { readLetterOutputSha } from "@/lib/horizon/kuendigung/manifest"
 import type { CaseApproval, CaseDraft, MissingInformation } from "@/lib/horizon/case/contract"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const initialState: KuendigungGenerationState = { status: null, detail: null }
 
@@ -88,9 +89,9 @@ export function KuendigungPanel({
   return (
     <section className="rounded-md border border-border bg-card p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        {copy.heading}
+        <BrandText text={copy.heading} />
       </h2>
-      <p className="mt-3 text-xs text-muted-foreground">{copy.intro}</p>
+      <p className="mt-3 text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
 
       <div className="mt-4 space-y-3">
         <div
@@ -105,7 +106,7 @@ export function KuendigungPanel({
           </p>
           {missingKeys.length > 0 ? (
             <>
-              <p className="mt-1 text-xs text-muted-foreground">{copy.missingIntro}</p>
+              <p className="mt-1 text-xs text-muted-foreground"><BrandText text={copy.missingIntro} /></p>
               <ul className="mt-2 space-y-1">
                 {missingKeys.map((key) => (
                   <li key={key} className="text-xs">
@@ -118,7 +119,7 @@ export function KuendigungPanel({
         </div>
 
         <div className="rounded-md border border-border p-3">
-          <p className="text-xs font-semibold">{copy.timingHeading}</p>
+          <p className="text-xs font-semibold"><BrandText text={copy.timingHeading} /></p>
           <p className="mt-1 text-xs text-muted-foreground">
             {copy.timingLabel}: {copy.timingKind[timing.kind]}
           </p>
@@ -128,13 +129,13 @@ export function KuendigungPanel({
             </p>
           ) : null}
           {timing.requiresUserVerification ? (
-            <p className="mt-1 text-xs text-destructive">{copy.requiresVerification}</p>
+            <p className="mt-1 text-xs text-destructive"><BrandText text={copy.requiresVerification} /></p>
           ) : null}
-          <p className="mt-2 text-xs text-muted-foreground">{copy.noInvention}</p>
+          <p className="mt-2 text-xs text-muted-foreground"><BrandText text={copy.noInvention} /></p>
         </div>
 
         <div className="rounded-md border border-border p-3">
-          <p className="text-xs font-semibold">{copy.notSent}</p>
+          <p className="text-xs font-semibold"><BrandText text={copy.notSent} /></p>
         </div>
       </div>
 
@@ -152,7 +153,7 @@ export function KuendigungPanel({
 
       {state.status === "draft_created" ? (
         <p role="status" className="mt-2 text-xs text-primary">
-          {copy.draftIntro}
+          <BrandText text={copy.draftIntro} />
         </p>
       ) : null}
 
@@ -161,10 +162,10 @@ export function KuendigungPanel({
           href={`/api/horizon/cases/${caseId}/letter`}
           className="mt-2 inline-block text-xs font-medium text-primary hover:underline"
         >
-          {copy.download}
+          <BrandText text={copy.download} />
         </a>
       ) : letterDraft ? (
-        <p className="mt-2 text-xs text-muted-foreground">{copy.downloadGated}</p>
+        <p className="mt-2 text-xs text-muted-foreground"><BrandText text={copy.downloadGated} /></p>
       ) : null}
 
       {errorText ? (
