@@ -41,27 +41,42 @@ export function InsuranceCalculator({
   copy,
   isOffered,
   configuredCta,
+  onChange,
+  externalPanel,
 }: {
   offerId: string
   fields: InsuranceCalculatorField[]
   copy: InsuranceCalculatorCopy
   isOffered: boolean
   configuredCta?: string
+  /** Reports the entered data to the caller; used by the hero's recommendation. */
+  onChange?: (entered: Array<{ id: string; label: string; value: string; hint?: string }>) => void
+  /**
+   * Optional content rendered between the summary and the CTA — the Kfz landing
+   * uses it for the storage note and the recommendation link.
+   */
+  externalPanel?: React.ReactNode
 }) {
   const [values, setValues] = useState<Record<string, string>>({})
 
   const setValue = (id: string, value: string) => {
     setValues((current) => {
-      if (value !== "") return { ...current, [id]: value }
       const next = { ...current }
-      delete next[id]
+      if (value !== "") next[id] = value
+      else delete next[id]
+      const entered = fields.flatMap((field) =>
+        next[field.id]
+          ? [{ id: field.id, label: field.label, value: next[field.id], hint: field.hint }]
+          : [],
+      )
+      onChange?.(entered)
       return next
     })
   }
 
   const entered = fields.flatMap((field) => {
     const value = values[field.id]
-    return value ? [{ id: field.id, label: field.label, value }] : []
+    return value ? [{ id: field.id, label: field.label, value, hint: field.hint }] : []
   })
 
   return (
@@ -128,6 +143,8 @@ export function InsuranceCalculator({
           </dl>
         )}
       </div>
+
+      {externalPanel}
 
       <div className="mt-6 flex flex-wrap gap-3">
         {isOffered ? (

@@ -3,7 +3,7 @@
 import { InsuranceCalculator, type InsuranceCalculatorCopy, type InsuranceCalculatorField } from "./insurance-calculator"
 import type { Locale } from "@/lib/i18n/dictionaries"
 
-const fields: Record<Locale, InsuranceCalculatorField[]> = {
+export const kfzCalculatorFields: Record<Locale, InsuranceCalculatorField[]> = {
   bg: [
     { id: "vehicle", label: "Марка и модел", type: "text", placeholder: "напр. VW Golf" },
     { id: "hsn", label: "HSN / TSN", type: "text", placeholder: "напр. 0603 / ABC" },
@@ -22,7 +22,7 @@ const fields: Record<Locale, InsuranceCalculatorField[]> = {
   ],
 }
 
-const copy: Record<Locale, InsuranceCalculatorCopy> = {
+export const kfzCalculatorCopy: Record<Locale, InsuranceCalculatorCopy> = {
   bg: {
     title: "Подготви данните за Kfz застраховка",
     intro:
@@ -53,8 +53,8 @@ export function KfzCalculator({ locale, isOffered }: { locale: Locale; isOffered
   return (
     <InsuranceCalculator
       offerId="kfz"
-      fields={fields[locale]}
-      copy={copy[locale]}
+      fields={kfzCalculatorFields[locale]}
+      copy={kfzCalculatorCopy[locale]}
       isOffered={isOffered}
     />
   )
