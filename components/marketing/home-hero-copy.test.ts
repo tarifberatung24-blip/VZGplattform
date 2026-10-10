@@ -30,6 +30,12 @@ describe("home hero", () => {
   })
 })
 
+describe("orbit map", () => {
+  it("is hidden from the home page until its redesign is approved", () => {
+    expect(source).not.toMatch(/Layer0Orbit/)
+  })
+})
+
 describe("global footer", () => {
   const footer = readFileSync(join(process.cwd(), "components/layout/global-footer.tsx"), "utf8")
 
