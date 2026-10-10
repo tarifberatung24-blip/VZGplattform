@@ -410,7 +410,14 @@ signatures for a joint assessment. NOT DONE, NOT FROZEN.
 - ✅ SMTP configuration validation (12 unit tests; partial/malformed config refuses rather than transmits)
 - ⬜ A real production provider configured in a running deployment (none configured; without it every send ends `PROVIDER_UNAVAILABLE` with nothing transmitted) — **re-confirmed 2026-09-25:** no `HORIZON_SMTP_*` present; empty env refuses naming all five keys, partial env names the absent ones, complete env yields a STARTTLS config. Genuine owner-only action.
 - ✅ End-to-end runtime verification against a configured transport — **PASS 2026-09-25** through the running application and the real UI with a live STARTTLS+AUTH SMTP server: generation → approval → send produced `SENT` with a provider message id, the received `DATA` decoded to the correct From/To/subject/body, duplicate send transmitted nothing, and the explicit resend transmitted exactly one more. Send-record guard wiring defect found and fixed in the same run (`pickSendableDraft`; 5 tests in `lib/horizon/send/marker.test.ts`).
-- ⬜ Committed automated test for the SMTP transport (transmits over the network; covered so far by a local live-server STARTTLS check, not by unit tests)
+- ✅ Committed automated test for the SMTP transport — `lib/horizon/send/smtp-transport.network.test.ts`
+  (2026-10-10): an in-process ESMTP server on 127.0.0.1 with a real STARTTLS upgrade and an
+  openssl-generated certificate; the production `createSmtpProvider` sends through real nodemailer
+  with certificate verification on. Proves: STARTTLS before AUTH, exactly one MAIL FROM/RCPT TO,
+  subject/body/attachment in DATA; no-STARTTLS server and untrusted certificate → `FAILED` with no
+  AUTH/MAIL/DATA; 550 recipient → `FAILED/rejected`; unconfigured → `UNAVAILABLE` with no
+  connection; provider options keep `requireTLS` and add no `tls`/`ignoreTLS` override. Runs in
+  `pnpm test` (needs `openssl`, present on CI ubuntu-latest). RED-checked by disabling `requireTLS`.
 - Gmail OAuth adapter
 - Microsoft OAuth adapter
 - ✅ Attachment handling (selected-only; SHA-256 bound to sent bytes; total-size limit refuses rather than truncates)
