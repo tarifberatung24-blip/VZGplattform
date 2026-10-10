@@ -95,6 +95,15 @@ export type AffiliateClickInput = {
   referrer?: string | null
   userAgent?: string | null
   ipHash?: string | null
+  /** Caller-generated row id, so the same value can be passed to the partner as sub-ID. */
+  id?: string | null
+  userId?: string | null
+  optimizeSessionId?: string | null
+}
+
+/** Column missing because the attribution migration is not applied yet. */
+function isMissingColumn(error: { code?: string } | null | undefined) {
+  return error?.code === "42703" || error?.code === "PGRST204"
 }
 
 /**
@@ -106,16 +115,28 @@ export async function recordAffiliateClick(
   input: AffiliateClickInput,
 ): Promise<boolean> {
   if (!client) return false
+  const base = {
+    ...(input.id ? { id: input.id } : {}),
+    offer_id: input.offerId,
+    locale: input.locale ?? null,
+    path: input.path ?? null,
+    referrer: input.referrer ?? null,
+    user_agent: input.userAgent ?? null,
+    ip_hash: input.ipHash ?? null,
+  }
+  const attribution = {
+    ...(input.userId ? { user_id: input.userId } : {}),
+    ...(input.optimizeSessionId ? { optimize_session_id: input.optimizeSessionId } : {}),
+  }
   try {
-    const { error } = await client.from("affiliate_click_events").insert({
-      offer_id: input.offerId,
-      locale: input.locale ?? null,
-      path: input.path ?? null,
-      referrer: input.referrer ?? null,
-      user_agent: input.userAgent ?? null,
-      ip_hash: input.ipHash ?? null,
-    })
-    return !error
+    const { error } = await client.from("affiliate_click_events").insert({ ...base, ...attribution })
+    if (!error) return true
+    // Before the attribution migration is applied, still count the click.
+    if (isMissingColumn(error) && Object.keys(attribution).length > 0) {
+      const retry = await client.from("affiliate_click_events").insert(base)
+      return !retry.error
+    }
+    return false
   } catch {
     return false
   }

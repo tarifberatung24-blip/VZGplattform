@@ -64,6 +64,16 @@ function asSafeExternalUrl(value: string | undefined) {
   }
 }
 
+/**
+ * Name of the sub-ID query parameter the partner program documents (for example
+ * `subid` or `clickref`), read from `<OFFER>_SUBID_PARAM`. Unset or malformed
+ * means "append nothing": HORIZON never guesses a tracking parameter.
+ */
+function subIdParamFor(envName: OfferEnvName) {
+  const value = process.env[envName.replace(/_URL$/, "_SUBID_PARAM")]?.trim()
+  return value && /^[A-Za-z0-9_]{1,40}$/.test(value) ? value : undefined
+}
+
 export function getAffiliateOffer(id: AffiliateOfferId) {
   const config = configs[id]
   const url = asSafeExternalUrl(process.env[config.envName])
@@ -71,6 +81,7 @@ export function getAffiliateOffer(id: AffiliateOfferId) {
   return {
     ...config,
     url,
+    subIdParam: subIdParamFor(config.envName),
     isConfigured,
     isActive: config.status === "active",
     // A product is only offered publicly when it is approved and a real

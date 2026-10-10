@@ -3,6 +3,8 @@ import { getAffiliateOffer, isAffiliateOfferId } from "../../../lib/affiliate-of
 import { recordAffiliateClick } from "../../../lib/affiliate/analytics"
 import { createAffiliateAnalyticsClient } from "../../../lib/affiliate/analytics-client"
 import { affiliateLocaleFromPath, affiliatePathFromRequest } from "../../../lib/affiliate/analytics-request"
+import { buildPartnerUrl, optimizeSessionFromRequest } from "../../../lib/affiliate/attribution"
+import { resolveClickOwner } from "../../../lib/affiliate/click-owner"
 
 export async function GET(request: Request, { params }: { params: Promise<{ offer: string }> }) {
   const { offer } = await params
@@ -15,15 +17,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ offe
   // Record the click, but never let analytics block the customer's redirect:
   // the redirect is the revenue-critical path, the measurement is secondary.
   const path = affiliatePathFromRequest(request)
-  await recordAffiliateClick(createAffiliateAnalyticsClient(), {
+  const owner = await resolveClickOwner(optimizeSessionFromRequest(request))
+  const clickId = crypto.randomUUID()
+  const recorded = await recordAffiliateClick(createAffiliateAnalyticsClient(), {
+    id: clickId,
     offerId: offer,
     locale: affiliateLocaleFromPath(path),
     path,
     referrer: request.headers.get("referer"),
     userAgent: request.headers.get("user-agent"),
+    userId: owner.userId,
+    optimizeSessionId: owner.optimizeSessionId,
   })
 
-  // Do not append guessed tracking parameters: use the exact deeplink supplied
-  // by the approved affiliate program so commission attribution is preserved.
-  return NextResponse.redirect(partner.url, { status: 302 })
+  // Never guess tracking parameters. The click id is appended only when the
+  // partner program documents a sub-ID parameter (`<OFFER>_SUBID_PARAM`) and the
+  // click was stored, so every sub-ID a partner reports back resolves to a row.
+  return NextResponse.redirect(buildPartnerUrl(partner.url, partner.subIdParam, recorded ? clickId : null), { status: 302 })
 }
