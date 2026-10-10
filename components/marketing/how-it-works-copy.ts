@@ -3,8 +3,7 @@ import type { Locale } from "@/lib/i18n/dictionaries"
 /**
  * Copy for the public "how it works" page.
  *
- * The four stages mirror the four numbered points of the home hero, so the
- * page explains exactly what the hero promises. Stage 4 (financial goals) is
+ * Four stages: understand, manage, analyze, plan. Stage 4 (financial goals) is
  * the Capital layer, which has no user-facing surface yet: it is shown with a
  * "coming soon" badge instead of as an available function.
  *

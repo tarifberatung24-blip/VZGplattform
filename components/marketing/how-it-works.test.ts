@@ -1,11 +1,7 @@
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 import { howItWorksCopy } from "./how-it-works-copy"
 import { buildPathGeometry } from "./feature-path"
 
-const hero = (locale: "bg" | "de") =>
-  JSON.parse(readFileSync(join(process.cwd(), `messages/${locale}.json`), "utf8")).home.hero
 
 describe("how-it-works copy", () => {
   it("has the same four stages in both locales", () => {
@@ -14,10 +10,12 @@ describe("how-it-works copy", () => {
     }
   })
 
-  it("repeats the hero's point 4 wording on the plan stage and marks it as not yet available", () => {
+  it("keeps the owner's wording on the plan stage and marks it as not yet available", () => {
+    expect(howItWorksCopy.bg.stages[3].body).toBe(
+      "Провери, след индивидуален анализ на текущата ти ситуация, как да постигнеш финансовите си цели, с ясен план, който да следваш.",
+    )
     for (const locale of ["bg", "de"] as const) {
       const plan = howItWorksCopy[locale].stages[3]
-      expect(plan.body).toBe(hero(locale).point4)
       expect(plan.soon?.trim().length).toBeGreaterThan(0)
       for (const stage of howItWorksCopy[locale].stages.slice(0, 3)) expect(stage.soon).toBeUndefined()
     }

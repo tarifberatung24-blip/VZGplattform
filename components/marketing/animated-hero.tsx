@@ -16,7 +16,6 @@ import { Layer0Orbit } from "@/components/marketing/layer0-orbit"
  */
 export function AnimatedHero() {
   const { t, locale } = useLanguage()
-  const heroPoints = [t.home.hero.point1, t.home.hero.point2, t.home.hero.point3, t.home.hero.point4]
 
   return (
     <div className="layer0-hero relative flex min-h-[100dvh] flex-col overflow-hidden">
@@ -51,32 +50,6 @@ export function AnimatedHero() {
               {t.home.hero.howCta}
             </Link>
           </div>
-
-          <ol className="flex max-w-xl flex-col gap-3 text-pretty text-base leading-7 text-foreground sm:text-lg">
-            {heroPoints.map((point, index) => (
-              <li key={index} className="flex gap-3">
-                <span
-                  aria-hidden="true"
-                  className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                  style={{
-                    color: "var(--thread-core)",
-                    border: "1px solid color-mix(in srgb, var(--thread-core) 45%, transparent)",
-                  }}
-                >
-                  {index + 1}
-                </span>
-                <span>{point}</span>
-              </li>
-            ))}
-          </ol>
-
-          <p className="max-w-xl text-pretty text-base leading-8 text-muted-foreground sm:text-lg">
-            {t.home.hero.subtitle}
-          </p>
-
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            {t.home.trust}
-          </p>
         </div>
         <Layer0Orbit />
       </main>
