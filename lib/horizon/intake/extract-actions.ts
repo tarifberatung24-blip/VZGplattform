@@ -13,6 +13,14 @@ import {
   extractionRouteFor,
   toStoredPageRows,
 } from "./extract"
+import {
+  ExtractionStageError,
+  MAX_OCR_PAGES,
+  TooManyScannedPagesError,
+  classifyExtractionFailure,
+  type ExtractionFailureCode,
+  type ExtractionStage,
+} from "@/lib/documents/extraction-contract"
 
 export type ExtractDocumentState = {
   error:
@@ -23,10 +31,19 @@ export type ExtractDocumentState = {
     | "STORAGE_NOT_CONFIGURED"
     | "DOCUMENT_NOT_FOUND"
     | "UNSUPPORTED_TYPE"
-    | "EXTRACTION_FAILED"
+    | ExtractionFailureCode
     | null
   ok: boolean
   pageCount: number
+}
+
+/** Runs one pipeline step and tags any error with that step for classification. */
+async function stage<T>(name: ExtractionStage, run: () => Promise<T>): Promise<T> {
+  try {
+    return await run()
+  } catch (error) {
+    throw error instanceof ExtractionStageError ? error : new ExtractionStageError(name, error)
+  }
 }
 
 const CASE_DOCUMENT_BUCKET = "source-documents"
@@ -74,7 +91,8 @@ export async function extractCaseDocument(
     return { error: "UNAUTHORIZED", ok: false, pageCount: 0 }
   }
 
-  const owned = await engine.repository.getMine(rawCaseId)
+  const repository = engine.repository
+  const owned = await repository.getMine(rawCaseId)
   if (owned.error || !owned.data) return { error: "CASE_NOT_FOUND", ok: false, pageCount: 0 }
 
   const admin = createAdminClient()
@@ -101,47 +119,62 @@ export async function extractCaseDocument(
     .eq("id", document.id)
     .eq("owner_id", userId)
 
-  const downloaded = await admin.storage.from(CASE_DOCUMENT_BUCKET).download(document.path)
-  if (downloaded.error) {
+  /**
+   * Every failure leaves the row `FAILED` and records why, so the user is told
+   * what actually went wrong (a locked or corrupt file needs a different file, not
+   * a retry) and the reason is in the audit trail for support.
+   */
+  const fail = async (error: unknown): Promise<ExtractDocumentState> => {
+    const reason = classifyExtractionFailure(error)
     await admin
       .from("source_documents")
       .update({ status: "FAILED" })
       .eq("id", document.id)
       .eq("owner_id", userId)
-    return { error: "EXTRACTION_FAILED", ok: false, pageCount: 0 }
+    await repository.appendAudit(rawCaseId, "document_text_extraction_failed", {
+      document_id: document.id,
+      reason,
+    })
+    return { error: reason, ok: false, pageCount: 0 }
   }
 
   try {
-    const bytes = new Uint8Array(await downloaded.data.arrayBuffer())
+    const bytes = await stage("read", async () => {
+      const downloaded = await admin.storage.from(CASE_DOCUMENT_BUCKET).download(document.path)
+      if (downloaded.error) throw downloaded.error
+      return new Uint8Array(await downloaded.data.arrayBuffer())
+    })
 
     const pages =
       route === "pdf"
         ? await extractPdfBytes(bytes)
-        : await extractImageBytes(bytes)
+        : await stage("ocr", () => extractImageBytes(bytes))
 
     const status = documentStatusAfterExtraction(pages)
 
-    const upserted = await admin
-      .from("document_pages")
-      .upsert(
-        toStoredPageRows({
-          ownerId: userId,
-          caseId: document.case_id,
-          documentId: document.id,
-          pages,
-        }),
-        { onConflict: "document_id,page_no" },
-      )
-    if (upserted.error) throw new Error(upserted.error.message)
+    await stage("persist", async () => {
+      const upserted = await admin
+        .from("document_pages")
+        .upsert(
+          toStoredPageRows({
+            ownerId: userId,
+            caseId: document.case_id,
+            documentId: document.id,
+            pages,
+          }),
+          { onConflict: "document_id,page_no" },
+        )
+      if (upserted.error) throw new Error(upserted.error.message)
 
-    const updated = await admin
-      .from("source_documents")
-      .update({ status })
-      .eq("id", document.id)
-      .eq("owner_id", userId)
-    if (updated.error) throw new Error(updated.error.message)
+      const updated = await admin
+        .from("source_documents")
+        .update({ status })
+        .eq("id", document.id)
+        .eq("owner_id", userId)
+      if (updated.error) throw new Error(updated.error.message)
+    })
 
-    await engine.repository.appendAudit(rawCaseId, "document_text_extracted", {
+    await repository.appendAudit(rawCaseId, "document_text_extracted", {
       document_id: document.id,
       pages: pages.length,
       status,
@@ -152,13 +185,9 @@ export async function extractCaseDocument(
 
     revalidatePath(`/${locale}/guide/${rawCaseId}`)
     return { error: null, ok: true, pageCount: pages.length }
-  } catch {
-    await admin
-      .from("source_documents")
-      .update({ status: "FAILED" })
-      .eq("id", document.id)
-      .eq("owner_id", userId)
-    return { error: "EXTRACTION_FAILED", ok: false, pageCount: 0 }
+  } catch (error) {
+    revalidatePath(`/${locale}/guide/${rawCaseId}`)
+    return fail(error)
   }
 }
 
@@ -166,12 +195,16 @@ export async function extractCaseDocument(
  * PDF text per page, falling back to OCR page by page only where the text layer
  * is empty. A scanned page has no embedded text, and guessing that such a page
  * says nothing would silently drop the part of the document that was a picture.
+ *
+ * The OCR page cap is checked before any page is rendered, so a long scan fails
+ * immediately with its own reason instead of after minutes of OCR work.
  */
 async function extractPdfBytes(bytes: Uint8Array) {
-  const embedded = await extractPdfPages(bytes)
+  const embedded = await stage("parse", () => extractPdfPages(bytes))
   const scanned = embedded.filter((page) => page.needsOcr).map((page) => page.pageNo)
   if (scanned.length === 0) return embedded
-  const ocr = await ocrScannedPdfPages(bytes, scanned)
+  if (scanned.length > MAX_OCR_PAGES) throw new TooManyScannedPagesError(scanned.length)
+  const ocr = await stage("ocr", () => ocrScannedPdfPages(bytes, scanned))
   return embedded.map((page) => ocr.find((entry) => entry.pageNo === page.pageNo) ?? page)
 }
 

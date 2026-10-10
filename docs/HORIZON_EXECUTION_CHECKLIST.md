@@ -219,7 +219,13 @@ be read as delivered because P6 is marked DONE.
   page text now support it; the module fact writers still pass `pageNo: null`)
 - ✅ Unified extraction contract — `lib/documents/extraction-contract.ts` (added with the
   two-stack reconciliation 2026-09-25)
-- ⬜ Explicit OCR/extraction failure states
+- ◐ Explicit OCR/extraction failure states — implemented on the HORIZON path
+  (`lib/documents/extraction-contract.ts` `classifyExtractionFailure`): storage read, password-
+  protected PDF, corrupt PDF, too many scanned pages (cap checked before OCR starts), OCR failure,
+  persist failure, generic; each leaves the row `FAILED`, audits
+  `document_text_extraction_failed` with the reason, and shows its own DE/BG message. Verified by
+  unit tests on real pdf.js bytes (corrupt + password-protected fixture); production verification
+  pending. The office-workflow path (`lib/office/workflow/documents.ts`) still returns raw messages.
 - ⬜ Benchmark before adopting advanced OCR fallback
 - ⬜ FROZEN
 
