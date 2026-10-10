@@ -9,7 +9,7 @@ import { isLocale, type Locale } from "@/lib/i18n/dictionaries"
 export const metadata: Metadata = {
   title: "Kfz-Versicherung",
   description:
-    "Автозастраховка на български: подготви данните за автомобила и сравни покритието при партньора — HORIZON by VZG.",
+    "Автозастраховка на български: подготви данните за автомобила и сравни покритието при партньора. HORIZON by VZG.",
 }
 
 export default async function KfzOfferPage({ params }: { params: Promise<{ locale: string }> }) {
