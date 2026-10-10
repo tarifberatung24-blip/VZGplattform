@@ -1,3 +1,4 @@
+import { publicUrl } from "@/lib/http/public-origin"
 import { randomBytes } from "node:crypto"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
@@ -7,7 +8,7 @@ import { googleConsentUrl, oauthStateHash } from "@/lib/horizon/email/google-oau
 export async function GET(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.redirect(new URL("/auth/login", request.url))
+  if (!user) return NextResponse.redirect(publicUrl("/auth/login", request))
   try {
     const state = randomBytes(24).toString("base64url")
     const cookieStore = await cookies()
