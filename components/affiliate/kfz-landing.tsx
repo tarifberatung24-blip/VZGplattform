@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, Phone, ShieldCheck, Sparkles, Timer } from "lucide-react"
+import { ArrowRight, CheckCircle2, FileText, ListChecks, Phone, ShieldCheck, Sparkles, Timer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InsuranceCalculator } from "@/components/affiliate/insurance-calculator"
 import { KfzHeroVisual } from "@/components/affiliate/kfz-hero-visual"
@@ -145,6 +145,67 @@ export function KfzLanding({
             ))}
           </ul>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-[1440px] px-5 py-14 lg:px-8 md:py-16">
+        <article className="glass-card rounded-sm p-6 backdrop-blur-md sm:p-10" aria-labelledby="kfz-notice-lesson">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.noticeLesson.eyebrow}</p>
+          <h2
+            id="kfz-notice-lesson"
+            className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-foreground md:text-4xl"
+          >
+            {copy.noticeLesson.title}
+          </h2>
+          <p className="mt-5 max-w-3xl text-pretty text-lg leading-8 text-muted-foreground">
+            {copy.noticeLesson.lead}
+          </p>
+
+          <div className="mt-8 grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+            <div className="flex flex-col gap-4">
+              {copy.noticeLesson.paragraphs.map((paragraph) => (
+                <p key={paragraph} className="max-w-2xl text-sm leading-7 text-foreground">
+                  {paragraph}
+                </p>
+              ))}
+              <div className="mt-2 rounded-sm border border-border p-5">
+                <div className="flex items-center gap-2">
+                  <FileText className="size-4 text-primary" aria-hidden="true" />
+                  <p className="text-sm font-semibold text-foreground">{copy.noticeLesson.documentCta}</p>
+                </div>
+                <Button asChild size="lg" className="mt-4">
+                  <Link href={localizedPath("/documents", locale)}>
+                    {copy.noticeLesson.documentCta}
+                    <ArrowRight data-icon="inline-end" />
+                  </Link>
+                </Button>
+                <p className="mt-3 text-xs leading-6 text-muted-foreground">{copy.noticeLesson.documentHint}</p>
+              </div>
+            </div>
+
+            <aside className="rounded-sm border border-border p-6">
+              <div className="flex items-center gap-2">
+                <ListChecks className="size-4 text-primary" aria-hidden="true" />
+                <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  {locale === "bg" ? "Кратка проверка" : "Kurze Prüfliste"}
+                </h3>
+              </div>
+              <ul className="mt-5 flex flex-col gap-3">
+                {copy.noticeLesson.checklist.map((item, index) => (
+                  <li key={item} className="flex gap-3 text-sm leading-6 text-foreground">
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
+                      {index + 1}
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 border-t border-border pt-4 text-xs leading-6 text-muted-foreground">
+                {copy.noticeLesson.sourceNote}
+              </p>
+              <p className="mt-3 text-xs leading-6 text-muted-foreground">{copy.noticeLesson.disclaimer}</p>
+            </aside>
+          </div>
+        </article>
       </section>
 
       <section id="kfz-calculator" className="mx-auto max-w-4xl px-5 py-14 lg:px-8 md:py-20">

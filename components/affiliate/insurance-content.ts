@@ -32,6 +32,17 @@ export const kfzLandingCopy: Record<
       cta: string
     }
     tiles: Array<{ title: string; body: string }>
+    noticeLesson: {
+      eyebrow: string
+      title: string
+      lead: string
+      paragraphs: string[]
+      checklist: string[]
+      documentCta: string
+      documentHint: string
+      sourceNote: string
+      disclaimer: string
+    }
     cta: string
     processHref: string
   }
@@ -48,34 +59,54 @@ export const kfzLandingCopy: Record<
       eyebrow: "Автозастраховка",
       titleLead: "Автозастраховка,",
       titleAccent: "обяснена на български",
-      lead: "Ясни условия. Честни цени. Бързо сключване. Подготвяш данните за автомобила и сравняваш покритието, преди да продължиш към партньора.",
+      lead: "Ясни условия. Честни цени. Бързо сключване. Подготвяш данните за автомобила и избираш покритие, преди да продължиш към партньора.",
       bullets: [
         "Сигурно и дискретно",
         "Спестяваш време",
         "Поддръжка от екипа",
       ],
       phoneBadgeTitle: "Помощ по телефона",
-      phoneBadgeHint: "Обади се — екипът помага",
+      phoneBadgeHint: "Обади се, екипът помага",
       cta: "Сравни при партньора",
     },
     tiles: [
       {
-        title: "Ясни и прозрачни условия",
-        body: "Без дребен шрифт и скрити такси. Всичко е обяснено на разбираем език.",
-      },
-      {
         title: "Сравни и спести",
-        body: "Сравняваме оферти от водещи застрахователи, за да намериш подходящото покритие.",
+        body: "Сравняваме индивидуално оферти според нуждите ти и търсим подходящото покритие сред водещи застрахователи в Германия.",
       },
       {
-        title: "Бързо и лесно онлайн",
-        body: "Попълни данните веднъж и продължи към партньора за своята застраховка.",
+        title: "Разбери какво е задължително",
+        body: "Ако караш кола в Германия, законът изисква поне застраховка „Гражданска отговорност“ (Kfz-Haftpflicht). Без нея не можеш да регистрираш и да управляваш превозното средство.",
       },
       {
-        title: "Истинска подкрепа",
-        body: "Нашият екип е тук за теб — по телефона, в чат или по имейл.",
+        title: "Разграничи покритията",
+        body: "Haftpflicht покрива щетите, които причиняваш на другите. Teilkasko добавя кражба, пожар и градушка. Vollkasko включва и щети при твоя вина.",
+      },
+      {
+        title: "Подготви се за смяна",
+        body: "За смяна ти трябват HSN/TSN от Zulassungsbescheinigung Teil I, Erstzulassung и твоят SF-клас. Проверяваш и кога изтича предизвестието.",
       },
     ],
+    noticeLesson: {
+      eyebrow: "Преди да смениш застрахователя",
+      title: "Кога тече предизвестието (Kündigungsfrist)?",
+      lead: "Когато сменяш Kfz застрахователя си, трябва да знаеш кога започва да тече предизвестието при сегашния ти застраховател. Ако го пропуснеш, договорът се подновява и плащаш още една година.",
+      paragraphs: [
+        "При Kfz застраховка предизвестието е 1 месец към края на застрахователната година (Versicherungsjahr). Решаващо е кога писмото ти пристига при застрахователя, а не когато го изпращаш. Законът позволява срок между 1 и 3 месеца (§ 11 Abs. 3 VVG), затова провери своя договор.",
+        "Застрахователната година не винаги съвпада с календарната. Ако договорът ти е стар, тя често приключва на 31 декември, но много застрахователи използват друга дата. Точната дата пише в полицата (Versicherungsschein).",
+        "Ако не знаеш кога изтича договорът ти, качи снимка или файл на полицата си в HORIZON и разбери край на срока, начина на плащане и условията за предизвестие.",
+      ],
+      checklist: [
+        "Намери застрахователната година (Versicherungsjahr) в полицата си.",
+        "Изчисли кога изтича 1-месечният срок преди края на годината.",
+        "Изпрати предизвестието така, че да пристигне навреме, и поискай потвърждение за получаване.",
+      ],
+      documentCta: "Качи полицата и разбери договора си",
+      documentHint: "Функцията за преглед на документ изисква вход.",
+      sourceNote:
+        "Източници: § 11 Abs. 3 VVG (gesetze-im-internet.de) и Verbraucherzentrale.de. Точната дата и срокът са в твоята полица; HORIZON не ги определя.",
+      disclaimer: "HORIZON by VZG не е застраховател и не дава индивидуална правна консултация.",
+    },
     cta: "Започни сравнението",
     processHref: "/how-it-works",
   },
@@ -91,34 +122,54 @@ export const kfzLandingCopy: Record<
       eyebrow: "Kfz-Versicherung",
       titleLead: "Kfz-Versicherung,",
       titleAccent: "klar erklärt",
-      lead: "Klare Bedingungen. Faire Preise. Schneller Abschluss. Du bereitest die Fahrzeugdaten vor und vergleichst die Deckung, bevor du zum Partner gehst.",
+      lead: "Klare Bedingungen. Faire Preise. Schneller Abschluss. Du bereitest die Fahrzeugdaten vor und wählst die Deckung, bevor du zum Partner gehst.",
       bullets: [
         "Sicher und diskret",
         "Du sparst Zeit",
         "Unterstützung vom Team",
       ],
       phoneBadgeTitle: "Hilfe am Telefon",
-      phoneBadgeHint: "Ruf an — das Team hilft",
+      phoneBadgeHint: "Ruf an, das Team hilft",
       cta: "Beim Partner vergleichen",
     },
     tiles: [
       {
-        title: "Klare und transparente Bedingungen",
-        body: "Kein Kleingedrucktes und keine versteckten Gebühren. Alles verständlich erklärt.",
-      },
-      {
         title: "Vergleichen und sparen",
-        body: "Wir stellen Angebote führender Versicherer gegenüber, damit du die passende Deckung findest.",
+        body: "Wir vergleichen Angebote individuell nach deinem Bedarf und suchen die passende Deckung unter führenden Versicherern in Deutschland.",
       },
       {
-        title: "Schnell und einfach online",
-        body: "Daten einmal eingeben und beim Partner für deine Versicherung fortfahren.",
+        title: "Verstehe, was Pflicht ist",
+        body: "Wer in Deutschland ein Auto fährt, braucht mindestens eine Kfz-Haftpflichtversicherung. Ohne sie kannst du dein Fahrzeug nicht zulassen und nicht fahren.",
       },
       {
-        title: "Echte Unterstützung",
-        body: "Unser Team ist für dich da — telefonisch, im Chat oder per E-Mail.",
+        title: "Unterscheide die Deckungen",
+        body: "Haftpflicht zahlt Schäden, die du anderen zufügst. Teilkasko ergänzt Diebstahl, Brand und Hagel. Vollkasko deckt auch Schäden bei eigener Schuld.",
+      },
+      {
+        title: "Bereite den Wechsel vor",
+        body: "Für den Wechsel brauchst du HSN/TSN aus der Zulassungsbescheinigung Teil I, die Erstzulassung und deine SF-Klasse. Prüfe auch das Ende der Kündigungsfrist.",
       },
     ],
+    noticeLesson: {
+      eyebrow: "Bevor du den Versicherer wechselst",
+      title: "Wann läuft die Kündigungsfrist?",
+      lead: "Wenn du deine Kfz-Versicherung wechselst, musst du wissen, wann die Kündigungsfrist bei deinem aktuellen Versicherer beginnt. Verpasst du sie, verlängert sich der Vertrag und du zahlst ein weiteres Jahr.",
+      paragraphs: [
+        "Bei einer Kfz-Versicherung beträgt die Kündigungsfrist 1 Monat zum Ende des Versicherungsjahres. Entscheidend ist, wann dein Schreiben beim Versicherer eingeht, nicht wann du es absendest. Das Gesetz erlaubt eine Frist zwischen 1 und 3 Monaten (§ 11 Abs. 3 VVG), deshalb prüfe deinen Vertrag.",
+        "Das Versicherungsjahr ist nicht immer das Kalenderjahr. Bei älteren Verträgen endet es oft am 31. Dezember, aber viele Versicherer nutzen einen anderen Stichtag. Das genaue Datum steht im Versicherungsschein.",
+        "Wenn du nicht weißt, wann dein Vertrag endet, lade ein Foto oder eine Datei deiner Police in HORIZON hoch und finde Laufzeitende, Zahlungsweise und Kündigungsbedingungen.",
+      ],
+      checklist: [
+        "Versicherungsjahr im Versicherungsschein finden.",
+        "Berechnen, wann die 1-Monats-Frist vor Jahresende endet.",
+        "Kündigung so absenden, dass sie rechtzeitig eingeht, und den Eingang bestätigen lassen.",
+      ],
+      documentCta: "Police hochladen und Vertrag verstehen",
+      documentHint: "Die Dokumentenprüfung erfordert eine Anmeldung.",
+      sourceNote:
+        "Quellen: § 11 Abs. 3 VVG (gesetze-im-internet.de) und Verbraucherzentrale.de. Das genaue Datum und die Frist stehen in deiner Police; HORIZON legt sie nicht fest.",
+      disclaimer: "HORIZON by VZG ist kein Versicherer und gibt keine individuelle Rechtsberatung.",
+    },
     cta: "Vergleich starten",
     processHref: "/how-it-works",
   },

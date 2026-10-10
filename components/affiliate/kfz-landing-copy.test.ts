@@ -21,6 +21,33 @@ describe("Kfz landing copy", () => {
     }
   })
 
+  it("teaches the notice period with the missing Versicherungsjahr condition", () => {
+    for (const locale of ["bg", "de"] as const) {
+      const lesson = kfzLandingCopy[locale].noticeLesson
+      expect(lesson.title).toMatch(/Kündigungsfrist/)
+      expect(lesson.paragraphs.join(" ")).toMatch(/Versicherungsjahr/)
+      expect(lesson.checklist.length).toBeGreaterThanOrEqual(3)
+      expect(lesson.documentCta.trim().length).toBeGreaterThan(0)
+    }
+  })
+
+  it("cites a real legal basis for the notice-period claim", () => {
+    for (const locale of ["bg", "de"] as const) {
+      expect(kfzLandingCopy[locale].noticeLesson.sourceNote).toMatch(/§ 11 Abs\. 3 VVG/)
+    }
+  })
+
+  it("keeps prose free of em and en dashes (Humanizer)", () => {
+    for (const locale of ["bg", "de"] as const) {
+      expect(JSON.stringify(kfzLandingCopy[locale])).not.toMatch(/[—–]/)
+    }
+  })
+
+  it("links the lesson to the document intake route", () => {
+    const source = read("components/affiliate/kfz-landing.tsx")
+    expect(source).toMatch(/localizedPath\("\/documents", locale\)/)
+  })
+
   it("carries the approved slogan and the Bulgarian-first framing", () => {
     expect(kfzLandingCopy.bg.hero.lead).toContain("Ясни условия. Честни цени. Бързо сключване.")
     expect(kfzLandingCopy.bg.hero.titleAccent).toBe("обяснена на български")
