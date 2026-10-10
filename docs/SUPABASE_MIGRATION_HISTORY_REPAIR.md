@@ -49,7 +49,7 @@ Several migrations were applied to production directly (SQL editor or MCP) under
 |---|---|
 | 20261010090000_affiliate_locked_to_service_role.sql | **applied 2026-10-10** (history entry 20261010125036); verified: affiliate tables no longer exposed |
 | 20261010100000_fk_covering_indexes.sql | **applied 2026-10-10** (history entry 20261010125122); verified: unindexed-FK advisor finding cleared |
-| 20261010101000_disable_unused_pg_graphql.sql | drops `pg_graphql`; also remove `graphql_public` from Settings → API → Exposed schemas |
+| 20261010101000_disable_unused_pg_graphql.sql | **applied 2026-10-10 in the SQL editor** (no history entry) and `graphql_public` removed from Data API exposed schemas; verified: 81 GraphQL exposure warnings cleared |
 | 20261010110000_revoke_anon_table_grants_and_dead_storage_policies.sql | (pending PR) anon grants + dead storage policies |
 
 ## Proposed procedure (owner-run, in order)
