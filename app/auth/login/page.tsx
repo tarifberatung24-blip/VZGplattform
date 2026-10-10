@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { sanitizeNextPath } from "@/lib/supabase/auth-routing"
 import { isSupportedMobile, normalizeGermanMobile, phoneAuthMessage } from "@/lib/supabase/phone-auth"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 export default function LoginPage() {
   const { locale } = useLanguage()
@@ -139,11 +140,11 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="glass-card w-full max-w-md rounded-lg p-8 backdrop-blur-md">
         <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">
-          HORIZON by VZG
+          <HorizonWordmark className="h-[1.1em]" />
           <span className="mt-1 block text-[10px] text-muted-foreground">VZG CONSULT</span>
         </Link>
         <h1 className="mt-8 text-3xl font-bold tracking-tight text-foreground">{copy.title}</h1>
-        <p className="mt-2 text-muted-foreground">{copy.intro}</p>
+        <p className="mt-2 text-muted-foreground"><BrandText text={copy.intro} /></p>
 
         {phoneMode ? <form onSubmit={submitPhone} className="mt-8 space-y-4">
           <div className="space-y-2">

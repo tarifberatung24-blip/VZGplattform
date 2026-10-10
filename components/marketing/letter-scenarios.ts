@@ -91,7 +91,7 @@ export const letterScenarioOrder: LetterScenarioId[] = ["tax", "jobcenter", "ene
 
 export const letterHeroCopy: Record<Locale, LetterHeroCopy> = {
   bg: {
-    regionLabel: "Пример: как HORIZON обяснява немско писмо",
+    regionLabel: "Пример: как Horizon обяснява немско писмо",
     sample: "Пример",
     labels: { what: "Какво пише", deadline: "Срок", action: "Какво да направиш" },
     show: (index) => `Покажи пример ${index}`,
@@ -114,7 +114,7 @@ export const letterHeroCopy: Record<Locale, LetterHeroCopy> = {
     },
   },
   de: {
-    regionLabel: "Beispiel: So erklärt HORIZON einen deutschen Brief",
+    regionLabel: "Beispiel: So erklärt Horizon einen deutschen Brief",
     sample: "Beispiel",
     labels: { what: "Was drinsteht", deadline: "Frist", action: "Was du tun kannst" },
     show: (index) => `Beispiel ${index} zeigen`,

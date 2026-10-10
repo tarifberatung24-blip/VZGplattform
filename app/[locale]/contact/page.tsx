@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { legalAddress, legalProfile } from "@/lib/legal-profile"
 import ContactForm from "./contact-form"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export default function ContactPage() {
   const { locale } = useLanguage()
@@ -26,9 +27,13 @@ export default function ContactPage() {
             {isBg ? "Контакт" : "Kontakt"}
           </h1>
           <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            {isBg
-              ? "Свържете се с HORIZON by VZG. Използвайте формата по-долу или директно телефон и email."
-              : "Treten Sie mit HORIZON by VZG in Kontakt. Nutzen Sie das Formular unten oder telefonisch bzw. per E-Mail."}
+            <BrandText
+              text={
+                isBg
+                  ? "Свържете се с HORIZON. Използвайте формата по-долу или директно телефон и email."
+                  : "Treten Sie mit HORIZON in Kontakt. Nutzen Sie das Formular unten oder telefonisch bzw. per E-Mail."
+              }
+            />
           </p>
         </div>
 

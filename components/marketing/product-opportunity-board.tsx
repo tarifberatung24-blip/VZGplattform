@@ -6,6 +6,7 @@ import { ArrowUpRight, Check, ChevronRight, CircleDollarSign, FileSearch, Gauge,
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 type Product = {
   id: string
@@ -89,7 +90,7 @@ export function ProductOpportunityBoard() {
             Finde die Hebel, die <span className="text-primary">wirklich zählen.</span>
           </h1>
           <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
-            HORIZON by VZG sammelt nur die Angaben, die fuer ein echtes Angebot gebraucht werden. Danach wird die Anfrage strukturiert erfasst und manuell bearbeitet.
+            <BrandText text="HORIZON sammelt nur die Angaben, die fuer ein echtes Angebot gebraucht werden. Danach wird die Anfrage strukturiert erfasst und manuell bearbeitet." />
           </p>
         </div>
 
@@ -111,8 +112,8 @@ export function ProductOpportunityBoard() {
                     <Icon aria-hidden="true" className="size-5" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-foreground">{product.label}</span>
-                    <span className="mt-1 block truncate text-sm text-muted-foreground">{product.title}</span>
+                    <span className="block text-sm font-semibold text-foreground"><BrandText text={product.label} /></span>
+                    <span className="mt-1 block truncate text-sm text-muted-foreground"><BrandText text={product.title} /></span>
                   </span>
                   <ChevronRight aria-hidden="true" className={`size-4 shrink-0 text-primary transition-transform ${isActive ? "translate-x-0.5" : "group-hover:translate-x-0.5"}`} />
                 </button>
@@ -126,11 +127,11 @@ export function ProductOpportunityBoard() {
                 <span className={`flex size-14 items-center justify-center rounded-sm ${active.accent}`}>
                   <ActiveIcon aria-hidden="true" className="size-7" />
                 </span>
-                <Badge variant="default">{t.cleanup.opportunity.sla}</Badge>
+                <Badge variant="default"><BrandText text={t.cleanup.opportunity.sla} /></Badge>
               </div>
-              <p className="mt-10 text-xs font-semibold uppercase tracking-[0.18em] text-primary">{active.eyebrow}</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{active.title}</h2>
-              <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">{active.description}</p>
+              <p className="mt-10 text-xs font-semibold uppercase tracking-[0.18em] text-primary"><BrandText text={active.eyebrow} /></p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"><BrandText text={active.title} /></h2>
+              <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground"><BrandText text={active.description} /></p>
 
               <ul className="mt-8 grid gap-3 sm:grid-cols-3">
                 {active.detail.map((item) => (
@@ -144,7 +145,7 @@ export function ProductOpportunityBoard() {
               <div className="mt-auto flex flex-col gap-3 pt-10 sm:flex-row sm:items-center">
                 <Button asChild size="lg">
                     <Link href={localizedHref(active.href)}>
-                      {active.action}
+                      <BrandText text={active.action} />
                       <ArrowUpRight data-icon="inline-end" />
                     </Link>
                   </Button>

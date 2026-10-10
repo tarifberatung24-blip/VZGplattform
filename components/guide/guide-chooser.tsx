@@ -16,6 +16,7 @@ import { useLanguage } from "@/lib/i18n/language-context"
 import { guideIntentIcon, guideIntents } from "@/lib/horizon/guide/intents"
 import { caseStatusLabel, getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
 import { startGuideCase } from "@/lib/horizon/guide/actions"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const icons: Record<string, LucideIcon> = {
   FileSearch,
@@ -53,10 +54,10 @@ export function GuideChooser({
     <WorkspacePage>
       <div className="mx-auto max-w-3xl">
         <header className="border-b border-border pb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.brand}</p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{copy.brandNote}</p>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight">{copy.title}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{copy.intro}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"><BrandText text={copy.brand} /></p>
+          <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><BrandText text={copy.brandNote} /></p>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight"><BrandText text={copy.title} /></h1>
+          <p className="mt-2 text-sm text-muted-foreground"><BrandText text={copy.intro} /></p>
         </header>
 
         {errorCode ? (
@@ -64,7 +65,7 @@ export function GuideChooser({
             role="alert"
             className="mt-6 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
           >
-            {copy.startError}
+            <BrandText text={copy.startError} />
           </p>
         ) : null}
 
@@ -73,7 +74,7 @@ export function GuideChooser({
             id="guide-choose"
             className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
           >
-            {copy.chooseLabel}
+            <BrandText text={copy.chooseLabel} />
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {guideIntents.map((entry) => {
@@ -100,13 +101,13 @@ export function GuideChooser({
             id="guide-cases"
             className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
           >
-            {copy.openCasesTitle}
+            <BrandText text={copy.openCasesTitle} />
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">{copy.openCasesHint}</p>
+          <p className="mt-1 text-xs text-muted-foreground"><BrandText text={copy.openCasesHint} /></p>
           <div className="mt-4 space-y-2">
             {openCases.length === 0 ? (
               <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-                {copy.openCasesEmpty}
+                <BrandText text={copy.openCasesEmpty} />
               </p>
             ) : (
               openCases.map((item) => (
@@ -116,13 +117,13 @@ export function GuideChooser({
                   className="flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card px-4 py-3 transition hover:border-primary/40 hover:bg-primary/5"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium">{item.title}</span>
+                    <span className="block truncate text-sm font-medium"><BrandText text={item.title} /></span>
                     <span className="block text-xs text-muted-foreground">
                       {copy.moduleLabel}: {guideModuleLabel(locale, item.module)} ·{" "}
                       {caseStatusLabel(locale, item.status)}
                     </span>
                   </span>
-                  <span className="text-xs text-primary">{copy.continueLabel}</span>
+                  <span className="text-xs text-primary"><BrandText text={copy.continueLabel} /></span>
                 </Link>
               ))
             )}

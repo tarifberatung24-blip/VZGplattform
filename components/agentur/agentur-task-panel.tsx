@@ -5,6 +5,7 @@ import { selectAgenturTask, type AgenturTaskState } from "@/lib/horizon/agentur/
 import { getAgenturCopy } from "@/lib/horizon/agentur/copy"
 import { AGENTUR_TASKS, agenturTaskDefinition, isAgenturTask } from "@/lib/horizon/agentur/registry"
 import { findTemplateById } from "@/lib/horizon/pdf/registry"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const initialState: AgenturTaskState = { error: null, ok: false }
 
@@ -55,15 +56,15 @@ export function AgenturTaskPanel({
   return (
     <section className="rounded-md border border-border bg-card p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        {copy.heading}
+        <BrandText text={copy.heading} />
       </h2>
-      <p className="mt-3 text-xs text-muted-foreground">{copy.intro}</p>
+      <p className="mt-3 text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
 
       {definition ? (
         <div className="mt-4 space-y-3">
           <div className="rounded-md border border-primary/30 bg-primary/5 p-3">
-            <p className="text-xs font-semibold text-primary">{copy.currentTask}</p>
-            <p className="mt-1 text-sm font-medium">{copy.tasks[definition.task].title}</p>
+            <p className="text-xs font-semibold text-primary"><BrandText text={copy.currentTask} /></p>
+            <p className="mt-1 text-sm font-medium"><BrandText text={copy.tasks[definition.task].title} /></p>
             <p className="mt-1 text-xs text-muted-foreground">
               {copy.routeLabel}: {copy.routeKinds[definition.routeKind]}
             </p>
@@ -77,7 +78,7 @@ export function AgenturTaskPanel({
                 rel="noreferrer noopener"
                 className="font-medium text-primary hover:underline"
               >
-                {copy.onlineLabel}
+                <BrandText text={copy.onlineLabel} />
                 {definition.official.onlineLabel ? `: ${definition.official.onlineLabel}` : ""}
               </a>
             ) : null}
@@ -87,7 +88,7 @@ export function AgenturTaskPanel({
               rel="noreferrer noopener"
               className="font-medium text-primary hover:underline"
             >
-              {copy.infoLabel}
+              <BrandText text={copy.infoLabel} />
             </a>
             {definition.official.phoneNote ? (
               <span className="text-muted-foreground">
@@ -98,11 +99,11 @@ export function AgenturTaskPanel({
 
           {definition.forms.length === 0 ? (
             <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
-              {copy.noPaperForm}
+              <BrandText text={copy.noPaperForm} />
             </p>
           ) : (
             <div className="space-y-2">
-              <p className="text-xs font-semibold">{copy.formHeading}</p>
+              <p className="text-xs font-semibold"><BrandText text={copy.formHeading} /></p>
               {definition.forms.map((form) => {
                 const template = findTemplateById(form.templateId)
                 return (
@@ -152,7 +153,7 @@ export function AgenturTaskPanel({
           >
             {AGENTUR_TASKS.map((task) => (
               <option key={task} value={task}>
-                {copy.tasks[task].title}
+                <BrandText text={copy.tasks[task].title} />
               </option>
             ))}
           </select>
@@ -169,7 +170,7 @@ export function AgenturTaskPanel({
 
       {state.ok ? (
         <p role="status" className="mt-2 text-xs text-primary">
-          {copy.currentTask}
+          <BrandText text={copy.currentTask} />
         </p>
       ) : null}
 

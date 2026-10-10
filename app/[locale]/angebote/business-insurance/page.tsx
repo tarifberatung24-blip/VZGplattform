@@ -5,6 +5,7 @@ import { BusinessInsuranceCalculator } from "@/components/affiliate/business-ins
 import { getAffiliateOffer } from "@/lib/affiliate-offers"
 import { affiliateDisclosureFor } from "@/lib/affiliate-disclosure"
 import { isLocale, type Locale } from "@/lib/i18n/dictionaries"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export const metadata: Metadata = {
   title: "Firmenversicherung",
@@ -23,7 +24,7 @@ export default async function BusinessInsuranceOfferPage({ params }: { params: P
       <div className="mx-auto max-w-4xl px-4 pb-20 sm:px-6 lg:px-8">
         <BusinessInsuranceCalculator locale={locale} isOffered={offer.isOffered} />
         <p className="mt-6 max-w-3xl border-l-2 border-primary pl-4 text-sm leading-7 text-foreground">
-          {affiliateDisclosureFor(locale)}
+          <BrandText text={affiliateDisclosureFor(locale)} official />
         </p>
       </div>
     </main>

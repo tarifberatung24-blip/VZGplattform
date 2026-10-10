@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
+import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 export default function UpdatePasswordPage() {
   const router = useRouter()
@@ -81,7 +82,7 @@ export default function UpdatePasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="glass-card w-full max-w-md rounded-md p-8 backdrop-blur-md">
-        <Link href="/" className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">HORIZON by VZG<span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span></Link>
+        <Link href="/" className="text-sm font-semibold uppercase tracking-[0.16em] text-primary"><HorizonWordmark className="h-[1.1em]" /><span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span></Link>
         <h1 className="mt-8 text-3xl font-bold text-foreground">Нова парола</h1>
         <p className="mt-2 leading-6 text-muted-foreground">Избери нова парола с поне 8 знака.</p>
         {checkingSession ? (

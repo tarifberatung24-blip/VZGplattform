@@ -2,6 +2,7 @@
 
 import { useActionState } from "react"
 import { signGeneratedDocument, type SignatureState } from "@/lib/horizon/pdf/signature-actions"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const initialState: SignatureState = { status: null, detail: null, manualPath: null }
 
@@ -109,15 +110,15 @@ export function SignaturePanel({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs font-medium">{copy.title}</p>
-      <p className="text-xs text-muted-foreground">{copy.intro}</p>
+      <p className="text-xs font-medium"><BrandText text={copy.title} /></p>
+      <p className="text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
 
       <form action={action} className="space-y-2">
         <input type="hidden" name="caseId" value={caseId} />
         <input type="hidden" name="locale" value={locale} />
 
         <label className="block text-xs font-medium" htmlFor="signature-image">
-          {copy.image}
+          <BrandText text={copy.image} />
         </label>
         <input
           id="signature-image"
@@ -129,7 +130,7 @@ export function SignaturePanel({
         />
 
         <label className="block text-xs font-medium" htmlFor="signature-date">
-          {copy.date}
+          <BrandText text={copy.date} />
         </label>
         <input
           id="signature-date"
@@ -141,7 +142,7 @@ export function SignaturePanel({
 
         <label className="flex items-start gap-2 text-xs" htmlFor="signature-confirm">
           <input id="signature-confirm" name="confirmSignature" type="checkbox" required className="mt-0.5" />
-          <span>{copy.confirm}</span>
+          <span><BrandText text={copy.confirm} /></span>
         </label>
 
         <button
@@ -155,7 +156,7 @@ export function SignaturePanel({
 
       {state.status === "signed" ? (
         <p role="status" className="text-xs text-primary">
-          {copy.ok}
+          <BrandText text={copy.ok} />
         </p>
       ) : null}
 
@@ -171,7 +172,7 @@ export function SignaturePanel({
               rel="noreferrer noopener"
               className="inline-block text-xs font-medium text-primary hover:underline"
             >
-              {copy.manual}
+              <BrandText text={copy.manual} />
             </a>
           ) : null}
         </div>

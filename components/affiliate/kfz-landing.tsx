@@ -11,6 +11,7 @@ import { affiliateDisclosureFor } from "@/lib/affiliate-disclosure"
 import { localizedPath } from "@/lib/i18n/routing"
 import type { Locale } from "@/lib/i18n/dictionaries"
 import { useState } from "react"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 type KfzProductCopy = { name: string; summary: string; details: string[]; cta: string }
 
@@ -47,12 +48,12 @@ export function KfzLanding({
         />
         <div className="relative mx-auto grid max-w-[1440px] gap-12 px-5 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8 md:py-24">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4d8dff]">{copy.hero.eyebrow}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4d8dff]"><BrandText text={copy.hero.eyebrow} /></p>
             <h1 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.05] tracking-[-0.05em] sm:text-6xl">
               {copy.hero.titleLead}{" "}
-              <span className="text-[#4d8dff]">{copy.hero.titleAccent}</span>
+              <span className="text-[#4d8dff]"><BrandText text={copy.hero.titleAccent} /></span>
             </h1>
-            <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-white/75">{copy.hero.lead}</p>
+            <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-white/75"><BrandText text={copy.hero.lead} /></p>
 
             <ul className="mt-8 flex flex-wrap gap-3">
               {copy.hero.bullets.map((bullet) => (
@@ -69,7 +70,7 @@ export function KfzLanding({
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Button asChild size="lg" className="bg-[#0047b3] text-white hover:bg-[#0047b3]/90">
                 <a href="#kfz-calculator">
-                  {copy.hero.cta}
+                  <BrandText text={copy.hero.cta} />
                   <ArrowRight data-icon="inline-end" />
                 </a>
               </Button>
@@ -91,12 +92,12 @@ export function KfzLanding({
                     {locale === "bg" ? "Избрано покритие" : "Gewählte Deckung"}
                   </p>
                   <p className="mt-2 text-lg font-bold text-white">{coverage}</p>
-                  <p className="mt-2 text-xs leading-6 text-white/60">{calcCopy.limits}</p>
+                  <p className="mt-2 text-xs leading-6 text-white/60"><BrandText text={calcCopy.limits} /></p>
                 </>
               ) : (
                 <>
-                  <p className="text-sm font-bold text-white">{copy.hero.phoneBadgeTitle}</p>
-                  <p className="mt-1 text-sm text-white/70">{copy.hero.phoneBadgeHint}</p>
+                  <p className="text-sm font-bold text-white"><BrandText text={copy.hero.phoneBadgeTitle} /></p>
+                  <p className="mt-1 text-sm text-white/70"><BrandText text={copy.hero.phoneBadgeHint} /></p>
                   {phone && (
                     <a
                       href={`tel:${phone}`}
@@ -122,8 +123,8 @@ export function KfzLanding({
                 <span className="flex size-11 items-center justify-center border border-border text-primary">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
-                <h2 className="mt-5 text-lg font-black tracking-[-0.03em] text-foreground">{tile.title}</h2>
-                <p className="mt-2 text-sm leading-7 text-muted-foreground">{tile.body}</p>
+                <h2 className="mt-5 text-lg font-black tracking-[-0.03em] text-foreground"><BrandText text={tile.title} /></h2>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground"><BrandText text={tile.body} /></p>
               </article>
             )
           })}
@@ -133,8 +134,8 @@ export function KfzLanding({
       <section className="mx-auto max-w-[1440px] px-5 pb-8 lg:px-8">
         <div className="grid gap-8 rounded-sm border border-border p-6 sm:p-8 lg:grid-cols-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{product.name}</p>
-            <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground">{product.summary}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={product.name} /></p>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground"><BrandText text={product.summary} /></p>
           </div>
           <ul className="flex flex-col gap-3">
             {product.details.map((detail) => (
@@ -149,15 +150,15 @@ export function KfzLanding({
 
       <section className="mx-auto max-w-[1440px] px-5 py-14 lg:px-8 md:py-16">
         <article className="glass-card rounded-sm p-6 backdrop-blur-md sm:p-10" aria-labelledby="kfz-notice-lesson">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.noticeLesson.eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={copy.noticeLesson.eyebrow} /></p>
           <h2
             id="kfz-notice-lesson"
             className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-foreground md:text-4xl"
           >
-            {copy.noticeLesson.title}
+            <BrandText text={copy.noticeLesson.title} />
           </h2>
           <p className="mt-5 max-w-3xl text-pretty text-lg leading-8 text-muted-foreground">
-            {copy.noticeLesson.lead}
+            <BrandText text={copy.noticeLesson.lead} />
           </p>
 
           <div className="mt-8 grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-start">
@@ -170,15 +171,15 @@ export function KfzLanding({
               <div className="mt-2 rounded-sm border border-border p-5">
                 <div className="flex items-center gap-2">
                   <FileText className="size-4 text-primary" aria-hidden="true" />
-                  <p className="text-sm font-semibold text-foreground">{copy.noticeLesson.documentCta}</p>
+                  <p className="text-sm font-semibold text-foreground"><BrandText text={copy.noticeLesson.documentCta} /></p>
                 </div>
                 <Button asChild size="lg" className="mt-4">
                   <Link href={localizedPath("/documents", locale)}>
-                    {copy.noticeLesson.documentCta}
+                    <BrandText text={copy.noticeLesson.documentCta} />
                     <ArrowRight data-icon="inline-end" />
                   </Link>
                 </Button>
-                <p className="mt-3 text-xs leading-6 text-muted-foreground">{copy.noticeLesson.documentHint}</p>
+                <p className="mt-3 text-xs leading-6 text-muted-foreground"><BrandText text={copy.noticeLesson.documentHint} /></p>
               </div>
             </div>
 
@@ -200,9 +201,9 @@ export function KfzLanding({
                 ))}
               </ul>
               <p className="mt-6 border-t border-border pt-4 text-xs leading-6 text-muted-foreground">
-                {copy.noticeLesson.sourceNote}
+                <BrandText text={copy.noticeLesson.sourceNote} />
               </p>
-              <p className="mt-3 text-xs leading-6 text-muted-foreground">{copy.noticeLesson.disclaimer}</p>
+              <p className="mt-3 text-xs leading-6 text-muted-foreground"><BrandText text={copy.noticeLesson.disclaimer} official /></p>
             </aside>
           </div>
         </article>
@@ -224,7 +225,7 @@ export function KfzLanding({
                 href={localizedPath("/contact", locale)}
                 className="text-sm font-semibold text-primary hover:underline"
               >
-                {hub.contactCta}
+                <BrandText text={hub.contactCta} />
               </Link>
             </div>
           }
@@ -233,10 +234,10 @@ export function KfzLanding({
 
       <section className="mx-auto max-w-4xl px-5 pb-20 lg:px-8">
         <div className="glass-card rounded-sm p-5 text-sm leading-7 text-muted-foreground backdrop-blur-md">
-          {hub.notice}
+          <BrandText text={hub.notice} />
         </div>
         <p className="mt-6 max-w-3xl border-l-2 border-primary pl-4 text-sm leading-7 text-foreground">
-          {affiliateDisclosureFor(locale)}
+          <BrandText text={affiliateDisclosureFor(locale)} official />
         </p>
       </section>
     </div>

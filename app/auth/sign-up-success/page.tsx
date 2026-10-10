@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 export default function SignUpSuccessPage() {
   const { locale, t } = useLanguage()
@@ -9,7 +10,7 @@ export default function SignUpSuccessPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="glass-card max-w-md rounded-lg p-8 text-center backdrop-blur-md">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">HORIZON by VZG</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><HorizonWordmark className="h-[1.1em]" /></p>
         <p className="mt-1 text-[10px] text-muted-foreground">BY VZG CONSULT</p>
         <h1 className="mt-8 text-2xl font-bold text-foreground">{t.auth.checkEmailTitle}</h1>
         <p className="mt-3 leading-relaxed text-muted-foreground">{t.auth.checkEmailDesc}</p>

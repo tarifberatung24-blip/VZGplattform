@@ -6,6 +6,7 @@ import { getUnterlagenCopy } from "@/lib/horizon/unterlagen/copy"
 import { analyseDocumentText, DOCUMENT_KIND_FACT_KEY } from "@/lib/horizon/unterlagen/analysis"
 import { DOCUMENT_KINDS, type DocumentKind } from "@/lib/horizon/unterlagen/classify"
 import { locateEvidence, type EvidencePage } from "@/lib/horizon/unterlagen/evidence"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const initialState: UnterlagenState = { error: null, ok: false }
 
@@ -86,28 +87,28 @@ export function UnterlagenPanel({
   return (
     <section className="rounded-md border border-border bg-card p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        {copy.heading}
+        <BrandText text={copy.heading} />
       </h2>
-      <p className="mt-3 text-xs text-muted-foreground">{copy.intro}</p>
+      <p className="mt-3 text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
 
       <div className="mt-4 space-y-4">
         <div className="space-y-1">
-          <p className="text-xs font-semibold">{copy.classificationHeading}</p>
-          <p className="text-sm font-medium">{copy.kinds[analysis.kind]}</p>
+          <p className="text-xs font-semibold"><BrandText text={copy.classificationHeading} /></p>
+          <p className="text-sm font-medium"><BrandText text={copy.kinds[analysis.kind]} /></p>
           {analysis.kindEvidence ? (
             <p className="text-xs text-muted-foreground">
-              {copy.classificationEvidence}: <span className="italic">{analysis.kindEvidence}</span>
+              {copy.classificationEvidence}: <span className="italic"><BrandText text={analysis.kindEvidence} /></span>
               {whereFound(analysis.kindEvidence)}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">{copy.classificationUnclear}</p>
+            <p className="text-xs text-muted-foreground"><BrandText text={copy.classificationUnclear} /></p>
           )}
 
           <form action={action} className="mt-2 space-y-2">
             <input type="hidden" name="caseId" value={caseId} />
             <input type="hidden" name="locale" value={locale} />
             <label htmlFor="document-kind" className="block text-xs font-medium">
-              {copy.classificationCorrect}
+              <BrandText text={copy.classificationCorrect} />
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <select
@@ -118,7 +119,7 @@ export function UnterlagenPanel({
               >
                 {DOCUMENT_KINDS.map((kind) => (
                   <option key={kind} value={kind}>
-                    {copy.kinds[kind]}
+                    <BrandText text={copy.kinds[kind]} />
                   </option>
                 ))}
               </select>
@@ -127,19 +128,19 @@ export function UnterlagenPanel({
                 disabled={pending}
                 className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
               >
-                {copy.classificationCorrect}
+                <BrandText text={copy.classificationCorrect} />
               </button>
             </div>
           </form>
         </div>
 
         <div className="space-y-1 border-t border-border pt-3">
-          <p className="text-xs font-semibold">{copy.deadlineHeading}</p>
-          <p className="text-sm font-medium">{copy.deadlineKinds[analysis.deadline.kind]}</p>
-          {analysis.deadline.date ? <p className="text-sm">{analysis.deadline.date}</p> : null}
+          <p className="text-xs font-semibold"><BrandText text={copy.deadlineHeading} /></p>
+          <p className="text-sm font-medium"><BrandText text={copy.deadlineKinds[analysis.deadline.kind]} /></p>
+          {analysis.deadline.date ? <p className="text-sm"><BrandText text={analysis.deadline.date} /></p> : null}
           {analysis.deadline.quote ? (
             <p className="text-xs text-muted-foreground">
-              {copy.deadlineQuote}: <span className="italic">{analysis.deadline.quote}</span>
+              {copy.deadlineQuote}: <span className="italic"><BrandText text={analysis.deadline.quote} /></span>
               {whereFound(analysis.deadline.quote)}
             </p>
           ) : null}
@@ -149,20 +150,20 @@ export function UnterlagenPanel({
             </p>
           ) : null}
           {analysis.deadline.requiresUserVerification && analysis.deadline.kind !== "unknown" ? (
-            <p className="text-xs text-destructive">{copy.deadlineVerify}</p>
+            <p className="text-xs text-destructive"><BrandText text={copy.deadlineVerify} /></p>
           ) : null}
         </div>
 
         <div className="space-y-1 border-t border-border pt-3">
-          <p className="text-xs font-semibold">{copy.riskHeading}</p>
-          <p className="text-xs text-muted-foreground">{copy.riskStates[analysis.risk.state]}</p>
+          <p className="text-xs font-semibold"><BrandText text={copy.riskHeading} /></p>
+          <p className="text-xs text-muted-foreground"><BrandText text={copy.riskStates[analysis.risk.state]} /></p>
           {analysis.risk.signals.length > 0 ? (
             <div className="space-y-1">
-              <p className="text-xs font-semibold">{copy.riskSignalsHeading}</p>
+              <p className="text-xs font-semibold"><BrandText text={copy.riskSignalsHeading} /></p>
               <ul className="space-y-1">
                 {analysis.risk.signals.map((signal) => (
                   <li key={signal.id} className="text-xs text-muted-foreground">
-                    {copy.riskQuoteLabel}: <span className="italic">{signal.quote}</span>
+                    {copy.riskQuoteLabel}: <span className="italic"><BrandText text={signal.quote} /></span>
                     {whereFound(signal.quote)}
                   </li>
                 ))}
@@ -172,8 +173,8 @@ export function UnterlagenPanel({
         </div>
 
         <div className="space-y-1 border-t border-border pt-3">
-          <p className="text-xs font-semibold">{copy.nextActionHeading}</p>
-          <p className="text-sm font-medium">{copy.nextActions[analysis.nextAction]}</p>
+          <p className="text-xs font-semibold"><BrandText text={copy.nextActionHeading} /></p>
+          <p className="text-sm font-medium"><BrandText text={copy.nextActions[analysis.nextAction]} /></p>
         </div>
       </div>
 

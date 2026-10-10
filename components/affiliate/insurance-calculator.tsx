@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export type InsuranceCalculatorField = {
   id: string
@@ -87,16 +88,16 @@ export function InsuranceCalculator({
         </span>
         <div>
           <h2 id={`calculator-${offerId}`} className="text-xl font-black tracking-[-0.03em] text-foreground">
-            {copy.title}
+            <BrandText text={copy.title} />
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">{copy.intro}</p>
+          <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground"><BrandText text={copy.intro} /></p>
         </div>
       </div>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         {fields.map((field) => (
           <div key={field.id} className="flex flex-col gap-2">
-            <Label htmlFor={`${offerId}-${field.id}`}>{field.label}</Label>
+            <Label htmlFor={`${offerId}-${field.id}`}><BrandText text={field.label} /></Label>
             {field.type === "select" ? (
               <select
                 id={`${offerId}-${field.id}`}
@@ -121,23 +122,23 @@ export function InsuranceCalculator({
                 onChange={(event) => setValue(field.id, event.target.value)}
               />
             )}
-            {field.hint && <p className="text-xs leading-5 text-muted-foreground">{field.hint}</p>}
+            {field.hint && <p className="text-xs leading-5 text-muted-foreground"><BrandText text={field.hint} /></p>}
           </div>
         ))}
       </div>
 
       <div className="glass-card mt-8 rounded-sm p-5 backdrop-blur-md">
         <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          {copy.summaryTitle}
+          <BrandText text={copy.summaryTitle} />
         </h3>
         {entered.length === 0 ? (
-          <p className="mt-3 text-sm leading-7 text-muted-foreground">{copy.summaryEmpty}</p>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground"><BrandText text={copy.summaryEmpty} /></p>
         ) : (
           <dl className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
             {entered.map((item) => (
               <div key={item.id} className="flex items-baseline justify-between gap-4 border-b border-border pb-2">
-                <dt className="text-xs text-muted-foreground">{item.label}</dt>
-                <dd className="text-sm font-medium text-foreground">{item.value}</dd>
+                <dt className="text-xs text-muted-foreground"><BrandText text={item.label} /></dt>
+                <dd className="text-sm font-medium text-foreground"><BrandText text={item.value} /></dd>
               </div>
             ))}
           </dl>
@@ -155,15 +156,15 @@ export function InsuranceCalculator({
             </a>
           </Button>
         ) : (
-          <p className="max-w-xl text-sm leading-7 text-muted-foreground">{copy.unavailable}</p>
+          <p className="max-w-xl text-sm leading-7 text-muted-foreground"><BrandText text={copy.unavailable} /></p>
         )}
       </div>
 
       <div className="mt-6 flex items-start gap-3 border-l-2 border-border pl-4">
         <CircleAlert className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
         <div className="flex flex-col gap-2">
-          <p className="text-xs leading-6 text-muted-foreground">{copy.limits}</p>
-          <p className="text-xs leading-6 text-muted-foreground">{copy.privacy}</p>
+          <p className="text-xs leading-6 text-muted-foreground"><BrandText text={copy.limits} /></p>
+          <p className="text-xs leading-6 text-muted-foreground"><BrandText text={copy.privacy} official /></p>
         </div>
       </div>
     </section>
