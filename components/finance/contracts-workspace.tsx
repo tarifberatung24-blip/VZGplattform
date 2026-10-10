@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { AlertTriangle, Bell, FileText, Pencil, Radar, Save, Trash2, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -54,6 +54,13 @@ export function ContractsWorkspace({ householdId, initialContracts, loadError }:
   const [optimizeId, setOptimizeId] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selectedContract = contracts.find((contract) => contract.id === selectedId) ?? contracts[0] ?? null
+
+  // Deep link from the dashboard Grundversorgungs-Check: `/vertraege?optimize=<contractId>`
+  // opens that contract and starts its Optimize flow. Unknown ids are ignored.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("optimize")
+    if (id && initialContracts.some((contract) => contract.id === id)) { setSelectedId(id); setOptimizeId(id) }
+  }, [initialContracts])
   const monthlyTotal = useMemo(() => contracts.reduce((sum, contract) => sum + (Number(contract.monthly_cost) || 0), 0), [contracts])
   const missingCost = contracts.filter((contract) => contract.monthly_cost == null).length
 

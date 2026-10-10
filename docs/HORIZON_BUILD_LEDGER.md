@@ -1355,6 +1355,29 @@ after a module meets the full DONE definition.
 
 ---
 
+## YOUR VALUE + GRUNDVERSORGUNGS-CHECK — DASHBOARD
+
+- **ID:** outside P0–P17; first step of the subscription plan (owner-approved 2026-10-11)
+- **SYSTEM:** dashboard value view
+- **TARGET ROUTES:** `/{locale}/dashboard`, `/{locale}/vertraege?optimize={contractId}`
+- **CURRENT STATUS:** IMPLEMENTED (code + tests); depends on the revenue-attribution migration
+  for savings, degrades to "no savings yet" without it
+- **CURRENT IMPLEMENTATION:** branch `feat/your-value` (stacked on `feat/revenue-attribution`):
+  - `lib/value/your-value.ts` — deadlines in the next 90 days, next deadline, secured and
+    realized annual savings from `household_savings` only.
+  - `lib/value/grundversorgung.ts` — evidence-only detection: an electricity/gas contract whose
+    title, notes or extracted facts say Grundversorgung/Ersatzversorgung. No guessed tariff, no
+    estimated saving.
+  - `components/dashboard/your-value-card.tsx` on the dashboard; the Grundversorgung CTA deep
+    links into the existing Optimize flow, which leaves through `/go/{offer}`.
+- **MISSING:** owner review of the BG/DE copy (including the statement that Grundversorgung is
+  usually among the most expensive tariffs); Humanizer pass; live visual verification.
+- **OWNER DECISIONS RECORDED:** subscription via Stripe; 30-day trial without card; free tier
+  after the trial follows option A (up to 3 contracts) unless the owner says otherwise.
+- **FROZEN:** NO
+
+---
+
 ## Standing rules for this ledger
 
 1. Update the ledger in the same change that advances a phase's real status.
