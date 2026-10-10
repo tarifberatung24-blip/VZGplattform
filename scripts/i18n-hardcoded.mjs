@@ -24,5 +24,6 @@ for (const file of files) {
 console.log(`i18n:hardcoded scanned ${files.length} source files`)
 if (findings.length) {
   console.log(findings.join("\n"))
-  console.log(`Review required: ${findings.length} possible user-facing literals (report-only).`)
+  console.error(`i18n:hardcoded found ${findings.length} possible user-facing literals. Move user-facing strings into messages/bg.json and messages/de.json, or add a justified entry to the allowlist.`)
+  process.exit(1)
 }

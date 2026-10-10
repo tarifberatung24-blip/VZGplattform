@@ -9,6 +9,6 @@
   "background_color": "#0d1526",
   "theme_color": "#69d8c0",
   "icons": [
-    { "src": "/icons/finanzbg-512.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/icons/horizon-512.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any maskable" }
   ]
 }

@@ -2,7 +2,7 @@ import { daysUntil } from "@/lib/format"
 import type { DataStatus } from "@/lib/status"
 
 /**
- * FinanzBG Opportunity Engine (deterministic).
+ * HORIZON Opportunity Engine (deterministic).
  *
  * PRINCIPLE: this engine NEVER invents government benefits, eligibility, tax
  * deductions, savings, or euro amounts. It only surfaces actions that can be

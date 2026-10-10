@@ -40,5 +40,8 @@ jobs:
       - name: Tests
         run: pnpm run --if-present test
 
+      - name: i18n checks
+        run: pnpm run i18n:verify
+
       - name: Production build
         run: pnpm run build
