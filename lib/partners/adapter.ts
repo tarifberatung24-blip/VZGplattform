@@ -1,7 +1,7 @@
 /**
- * FinanzBG partner / affiliate adapter architecture.
+ * HORIZON partner / affiliate adapter architecture.
  *
- * PRINCIPLE: FinanzBG never fabricates tariff prices, insurance offers, credit
+ * PRINCIPLE: HORIZON never fabricates tariff prices, insurance offers, credit
  * offers, or savings. A partner connector may only return offers when it is
  * `approved` AND has the credentials/API it needs. Until then, the adapter
  * MUST return a `NOT_CONFIGURED` result — never a fake successful quote.
