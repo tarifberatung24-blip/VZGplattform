@@ -4,6 +4,17 @@ import { getSupabaseConfig, hasSupabaseConfig, missingConfigurationMessage } fro
 import { isProtectedAppPath, isOnboardingComplete, isKnownOnboardingStep, normalizeOnboardingStep, isOnboardingPath, isAuthFlowPath, pathLocale, requiresMfa } from './auth-routing'
 import { stripLocale } from '../i18n/routing'
 
+/**
+ * A redirect built after `getUser()` must carry the cookies a token refresh may just have set on
+ * `supabaseResponse`. Without them the browser keeps the old, already-rotated refresh token, and the
+ * next request ends the session ("users being randomly logged out").
+ */
+function redirectWithSession(url: URL, supabaseResponse: NextResponse) {
+  const response = NextResponse.redirect(url)
+  supabaseResponse.cookies.getAll().forEach((cookie) => response.cookies.set(cookie))
+  return response
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -63,7 +74,7 @@ export async function updateSession(request: NextRequest) {
     url.pathname = '/auth/login'
     url.search = ''
     url.searchParams.set('next', `${stripLocale(request.nextUrl.pathname)}${request.nextUrl.search}`)
-    return NextResponse.redirect(url)
+    return redirectWithSession(url, supabaseResponse)
   }
 
   if (isProtectedAppPath(request.nextUrl.pathname) && user) {
@@ -73,7 +84,7 @@ export async function updateSession(request: NextRequest) {
       url.pathname = '/auth/mfa-verify'
       url.search = ''
       url.searchParams.set('next', `${stripLocale(request.nextUrl.pathname)}${request.nextUrl.search}`)
-      return NextResponse.redirect(url)
+      return redirectWithSession(url, supabaseResponse)
     }
   }
 
@@ -112,7 +123,7 @@ export async function updateSession(request: NextRequest) {
         const url = request.nextUrl.clone()
         url.pathname = `/${pathLocale(request.nextUrl.pathname)}/onboarding/${step}`
         url.search = ''
-        return NextResponse.redirect(url)
+        return redirectWithSession(url, supabaseResponse)
       }
     }
   }
