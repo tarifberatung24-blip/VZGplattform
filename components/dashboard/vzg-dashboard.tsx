@@ -1,20 +1,15 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import Link from "next/link"
-import { Bell, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, Clock, FilePlus2, FileText, Plus, Receipt, UserRound, WalletCards } from "lucide-react"
+import { Bell, CalendarDays, CheckCircle2, ChevronRight, Clock, FilePlus2, FileText, Plus, Receipt, UserRound, WalletCards } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
-import { WorkplaceActionCenter } from "@/components/dashboard/workplace-action-center"
-import { DocumentAnalyzer, type DashboardDocument } from "@/components/dashboard/document-analyzer"
-import { getSmartDashboardNextAction } from "@/lib/kintex-smart-dashboard"
+import type { DashboardDocument } from "@/components/dashboard/document-analyzer"
 import { formatMoney, formatShortDate } from "@/lib/dashboard/contracts-data"
 import { buildAttentionItems, type AttentionKind, type AttentionTone } from "@/lib/dashboard/attention"
 import { HorizonHome } from "@/components/horizon/horizon-home"
-import { ContractsChart } from "./charts/contracts-chart"
-import { TimelineChart } from "./charts/timeline-chart"
-import { ContractsTable } from "./charts/contracts-table"
 import { YourValueCard } from "./your-value-card"
 import { NotificationInbox, type InboxNotification } from "./notification-inbox"
 import type { YourValue } from "@/lib/value/your-value"
@@ -61,21 +56,17 @@ function copyFor(de: boolean) {
         summary: (n: number) => (n === 0 ? "Nichts Dringendes heute." : n === 1 ? "1 Punkt braucht deine Aufmerksamkeit." : `${n} Punkte brauchen deine Aufmerksamkeit.`),
         attention: "Braucht Aufmerksamkeit",
         allClear: "Keine dringenden Fristen und keine Dokumente zur Prüfung.",
+        firstContract: "Ersten Vertrag hinzufügen",
         more: (n: number) => `und ${n} weitere`,
         addDocument: "Dokument hinzufügen",
         startCase: "Vorgang starten",
-        addContract: "Vertrag hinzufügen",
-        metrics: "Kennzahlen",
-        showDetails: "Diagramme und Tabellen anzeigen",
-        hideDetails: "Diagramme und Tabellen ausblenden",
-        charts: "Diagramme",
-        contractsLabel: "Verträge",
+        metrics: "Überblick",
         noData: "Keine Daten",
         monthly: "Monatliche Kosten",
         monthlyNote: "Nur eingetragene Beträge",
-        active: "Aktive Verträge",
-        activeNote: "Alle gespeicherten Verträge",
-        next: "Nächster Termin",
+        active: "Verträge",
+        activeNote: "Alle ansehen und hinzufügen",
+        next: "Nächste Frist",
         nextNone: "Keine Frist erfasst",
         review: "Zur Prüfung",
         reviewNote: "Dokumente und fehlende Beträge",
@@ -85,20 +76,16 @@ function copyFor(de: boolean) {
         summary: (n: number) => (n === 0 ? "Днес няма нищо спешно." : n === 1 ? "1 нещо иска вниманието ти." : `${n} неща искат вниманието ти.`),
         attention: "Иска внимание",
         allClear: "Няма спешни срокове и няма документи за проверка.",
+        firstContract: "Добави първия си договор",
         more: (n: number) => `и още ${n}`,
         addDocument: "Добави документ",
         startCase: "Започни случай",
-        addContract: "Добави договор",
-        metrics: "Основни числа",
-        showDetails: "Покажи графики и таблици",
-        hideDetails: "Скрий графиките и таблиците",
-        charts: "Графики",
-        contractsLabel: "Договори",
+        metrics: "Преглед",
         noData: "Няма данни",
         monthly: "Месечни разходи",
         monthlyNote: "Само въведени суми",
-        active: "Активни договори",
-        activeNote: "Всички записани договори",
+        active: "Договори",
+        activeNote: "Виж всички и добави нов",
         next: "Следващ срок",
         nextNone: "Няма записан срок",
         review: "За проверка",
@@ -107,18 +94,18 @@ function copyFor(de: boolean) {
 }
 
 /**
- * The customer home, built for a phone first: a greeting card with the main actions, what needs
- * the user today, four key numbers, then modules. Charts, the contract table and the document
- * analyzer are one tap away on a phone and always visible from the `md` breakpoint. The layered
- * look (tinted page, lifted cards, larger corners) comes from the `.horizon-dashboard` scope in
- * globals.css, so the cards of the embedded sections match without changes of their own.
+ * The customer home: one screen with what needs the user today and a way into everything else.
+ * Built for a phone first. The greeting card holds the main action, the attention list says what
+ * to do, the four number tiles open the matching pages, then the inbox and the modules. Charts,
+ * the contract table and the document analyzer live on the Contracts and Documents pages; the home
+ * links there instead of repeating them. The layered look comes from `.horizon-dashboard` in
+ * globals.css.
  */
-export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders, caseCounts, moduleError, yourValue, grundversorgung, notifications, notificationsEmailEnabled }: VzgDashboardProps) {
+export function VzgDashboard({ firstName, profile, contracts, reviewCount, reminders, caseCounts, moduleError, yourValue, grundversorgung, notifications, notificationsEmailEnabled }: VzgDashboardProps) {
   const { locale } = useLanguage()
   const de = locale === "de"
   const lang: "bg" | "de" = de ? "de" : "bg"
   const copy = copyFor(de)
-  const [showDetails, setShowDetails] = useState(false)
 
   const documentsHref = localizedPath("/documents", locale)
   const contractsHref = localizedPath("/vertraege", locale)
@@ -135,16 +122,15 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
   const monthlyTotal = contracts.reduce((sum, item) => sum + (Number(item.monthly_amount) || 0), 0)
   const missingCosts = contracts.filter((item) => item.monthly_amount == null).length
   const nextReminder = reminders.find((item) => item.due_at) ?? null
-  const nextAction = getSmartDashboardNextAction({ profileCompleteness: completeness, contracts: contracts.length, documents: documents.length, documentsNeedingReview: reviewCount, contractsNeedingInfo: missingCosts }, lang)
-  const metrics = [
-    { icon: WalletCards, label: copy.monthly, value: monthlyTotal ? formatMoney(monthlyTotal, lang) : copy.noData, note: copy.monthlyNote },
-    { icon: Receipt, label: copy.active, value: String(contracts.length), note: copy.activeNote },
-    { icon: CalendarDays, label: copy.next, value: formatShortDate(nextReminder?.due_at ?? null, lang) ?? copy.noData, note: nextReminder?.title ?? copy.nextNone },
-    { icon: Bell, label: copy.review, value: String(reviewCount + missingCosts), note: copy.reviewNote },
+  const tiles = [
+    { icon: WalletCards, label: copy.monthly, value: monthlyTotal ? formatMoney(monthlyTotal, lang) : copy.noData, note: copy.monthlyNote, href: contractsHref },
+    { icon: Receipt, label: copy.active, value: String(contracts.length), note: copy.activeNote, href: contractsHref },
+    { icon: CalendarDays, label: copy.next, value: formatShortDate(nextReminder?.due_at ?? null, lang) ?? copy.noData, note: nextReminder?.title ?? copy.nextNone, href: contractsHref },
+    { icon: Bell, label: copy.review, value: String(reviewCount + missingCosts), note: copy.reviewNote, href: documentsHref },
   ]
 
   return <div className="horizon-dashboard relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-24 pt-4 text-foreground sm:px-6 sm:pt-6 md:pb-8 lg:px-8">
-    <div className="relative z-10 mx-auto min-w-0 max-w-[1440px]">
+    <div className="relative z-10 mx-auto min-w-0 max-w-[1200px]">
       <header className="relative overflow-hidden rounded-[24px] border border-border bg-card p-5 sm:p-6">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.14] via-primary/[0.04] to-transparent" />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -158,10 +144,9 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
             </div>
           </div>
           {/* Adding a document is the everyday task (a letter arrived), so it is the one primary button. */}
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            <Button asChild className="col-span-2 h-12 rounded-full px-5 shadow-sm sm:col-span-1 sm:h-11"><Link href={documentsHref}><FilePlus2 className="mr-2 size-4" />{copy.addDocument}</Link></Button>
-            <Button asChild variant="outline" className="h-12 rounded-full bg-background/60 sm:h-11"><Link href={`/${locale}/guide`}><Plus className="mr-2 size-4" />{copy.startCase}</Link></Button>
-            <Button asChild variant="outline" className="h-12 rounded-full bg-background/60 sm:h-11"><Link href={contractsHref}>{copy.addContract}</Link></Button>
+          <div className="grid gap-2 sm:flex">
+            <Button asChild className="h-12 rounded-full px-6 shadow-sm sm:h-11"><Link href={documentsHref}><FilePlus2 className="mr-2 size-4" />{copy.addDocument}</Link></Button>
+            <Button asChild variant="outline" className="h-12 rounded-full bg-background/60 px-6 sm:h-11"><Link href={`/${locale}/guide`}><Plus className="mr-2 size-4" />{copy.startCase}</Link></Button>
           </div>
         </div>
       </header>
@@ -188,12 +173,15 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
                 </Link>
               </li>
             })}
-          </ul> : <div className="mx-2 mb-2 flex items-center gap-3 rounded-[16px] bg-muted px-4 py-5 text-sm text-muted-foreground"><CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden="true" />{copy.allClear}</div>}
+          </ul> : <div className="mx-2 mb-2 rounded-[16px] bg-muted px-4 py-5 text-sm text-muted-foreground">
+            <p className="flex items-center gap-3"><CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden="true" />{copy.allClear}</p>
+            {contracts.length === 0 ? <Link href={contractsHref} className="mt-3 inline-flex min-h-10 items-center gap-1 font-medium text-primary">{copy.firstContract}<ChevronRight className="size-4" aria-hidden="true" /></Link> : null}
+          </div>}
           {items.length > VISIBLE_ITEMS ? <p className="px-5 pb-4 text-xs text-muted-foreground">{copy.more(items.length - VISIBLE_ITEMS)}</p> : null}
         </section>
 
-        <section aria-label={copy.metrics} className="grid grid-cols-2 content-start gap-3">
-          {metrics.map(({ icon: Icon, label, value, note }) => <article key={label} className="relative min-w-0 overflow-hidden rounded-[20px] border border-border bg-card p-4">
+        <nav aria-label={copy.metrics} className="grid grid-cols-2 content-start gap-3">
+          {tiles.map(({ icon: Icon, label, value, note, href }) => <Link key={label} href={href} className="group relative min-w-0 overflow-hidden rounded-[20px] border border-border bg-card p-4 transition-colors hover:border-primary/30">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/[0.07] to-transparent" />
             <div className="relative">
               {/* Labels wrap to two lines instead of being cut off on a phone-width card. */}
@@ -202,37 +190,17 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 text-primary sm:size-8"><Icon className="size-3.5 sm:size-4" aria-hidden="true" /></span>
               </div>
               <p className="mt-2 break-words text-xl font-semibold leading-tight tabular-nums tracking-tight sm:mt-3 sm:text-3xl">{value}</p>
-              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{note}</p>
+              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground group-hover:text-primary">{note}</p>
             </div>
-          </article>)}
-        </section>
+          </Link>)}
+        </nav>
       </div>
-
-      {/* The state-derived next step is shown only when nothing above needs the user, so the home never offers two competing "do this first" surfaces. */}
-      {items.length === 0 ? <WorkplaceActionCenter nextAction={nextAction} /> : null}
 
       <NotificationInbox initial={notifications ?? []} emailEnabled={notificationsEmailEnabled !== false} />
 
-      {yourValue ? <YourValueCard value={yourValue} grundversorgung={grundversorgung ?? []} /> : null}
-
       <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} />
 
-      <div className="mt-6 md:hidden">
-        <Button type="button" variant="outline" className="h-12 w-full justify-between rounded-full bg-card px-5" aria-expanded={showDetails} aria-controls="dashboard-details" onClick={() => setShowDetails((value) => !value)}>
-          {showDetails ? copy.hideDetails : copy.showDetails}
-          <ChevronDown className={`size-4 transition-transform ${showDetails ? "rotate-180" : ""}`} aria-hidden="true" />
-        </Button>
-      </div>
-      <div id="dashboard-details" className={showDetails ? "block" : "hidden md:block"}>
-        <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,0.8fr)]" aria-label={copy.charts}>
-          <ContractsChart contracts={contracts} />
-          <TimelineChart deadlines={reminders} />
-        </section>
-        <section className="mt-6" aria-label={copy.contractsLabel}>
-          <ContractsTable contracts={contracts} />
-        </section>
-        <DocumentAnalyzer initialDocuments={documents} />
-      </div>
+      {yourValue ? <YourValueCard value={yourValue} grundversorgung={grundversorgung ?? []} /> : null}
     </div>
   </div>
 }
