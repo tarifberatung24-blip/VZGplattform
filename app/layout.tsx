@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { WorkspaceShell } from "@/components/finance/workspace-shell"
 import { PwaServiceWorker } from "@/components/pwa-service-worker"
 import { GlobalHeader } from "@/components/layout/global-header"
+import { JourneyTracker } from "@/components/journey/journey-tracker"
 import { GlobalFooter } from "@/components/layout/global-footer"
 import { NetworkThreads } from "@/components/marketing/network-threads"
 import { SmokeLayer } from "@/components/marketing/smoke-layer"
@@ -89,6 +90,7 @@ export default async function RootLayout({
             <GlobalHeader />
             <Suspense fallback={null}><WorkspaceShell>{children}</WorkspaceShell></Suspense>
             <PwaServiceWorker />
+            <JourneyTracker />
             <GlobalFooter />
           </LanguageProvider>
         </ThemeProvider>

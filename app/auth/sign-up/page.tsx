@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { isSupportedMobile, normalizeGermanMobile, phoneAuthMessage } from "@/lib/supabase/phone-auth"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
+import { JOURNEY_SIGNUP_COOKIE } from "@/lib/journey/keys"
 
 export default function SignUpPage() {
   const { locale } = useLanguage()
@@ -42,6 +43,7 @@ export default function SignUpPage() {
         authError: "Diese Registrierungsmethode ist derzeit nicht verfügbar.",
         existing: "Schon registriert?",
         login: "Anmelden",
+        journeyConsent: "Ich möchte persönliche Hilfe. Ich willige ein, dass VZG CONSULT sieht, welche Funktionen ich nutze und wo ich nicht weiterkomme (nur Bildschirmnamen und Fehler, keine Dokumentinhalte), um mir zu helfen und die Plattform zu verbessern. Ich kann das jederzeit in meinem Profil ausschalten.",
       }
     : {
         title: "Създай акаунт",
@@ -70,6 +72,7 @@ export default function SignUpPage() {
         authError: "Този начин за регистрация временно не е достъпен.",
         existing: "Вече си регистриран?",
         login: "Вход",
+        journeyConsent: "Искам лична помощ. Давам съгласие VZG CONSULT да вижда кои функции използвам и къде се затруднявам (само имена на екрани и грешки, без съдържание на документи), за да ми помага и да подобрява платформата. Мога да го изключа по всяко време в профила си.",
       }
   const router = useRouter()
   const [name, setName] = useState("")
@@ -81,6 +84,9 @@ export default function SignUpPage() {
   const [phoneMode, setPhoneMode] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  // Opt-in, unchecked by default. Sent as account metadata (e-mail, phone) or a short-lived cookie
+  // (Google) and applied on the first onboarding page; nothing is recorded without it.
+  const [journeyConsent, setJourneyConsent] = useState(false)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -92,7 +98,7 @@ export default function SignUpPage() {
       password,
       options: {
         emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ?? redirectTo,
-        data: { first_name: name },
+        data: { first_name: name, ...(journeyConsent ? { journey_consent: true } : {}) },
       },
     })
     if (error) {
@@ -110,6 +116,7 @@ export default function SignUpPage() {
   async function signUpWithGoogle() {
     setLoading(true)
     setEmailError(null)
+    if (journeyConsent) document.cookie = `${JOURNEY_SIGNUP_COOKIE}=1; Max-Age=3600; Path=/; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/${locale}/dashboard`)}`
     const { error } = await createClient().auth.signInWithOAuth({ provider: "google", options: { redirectTo } })
     if (error) {
@@ -132,7 +139,7 @@ export default function SignUpPage() {
     if (phoneStep === "start") {
       const { error } = await createClient().auth.signInWithOtp({
         phone: normalizedPhone,
-        options: { shouldCreateUser: true, data: { first_name: name } },
+        options: { shouldCreateUser: true, data: { first_name: name, ...(journeyConsent ? { journey_consent: true } : {}) } },
       })
       if (error) setEmailError(de ? phoneAuthMessage(error.message) : copy.authError)
       else setPhoneStep("verify")
@@ -146,6 +153,13 @@ export default function SignUpPage() {
     }
     setLoading(false)
   }
+
+  const consentField = (
+    <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-6 text-muted-foreground">
+      <input type="checkbox" className="mt-1 size-5 shrink-0 accent-primary" checked={journeyConsent} onChange={(event) => setJourneyConsent(event.target.checked)} />
+      <span>{copy.journeyConsent}</span>
+    </label>
+  )
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -171,6 +185,7 @@ export default function SignUpPage() {
             <Input id="otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} required value={otp} onChange={(event) => setOtp(event.target.value)} />
           </div>}
           {phoneStep === "verify" && <p className="text-sm text-muted-foreground">{copy.codeSent}</p>}
+          {consentField}
           {emailError && <p role="alert" className="text-sm text-destructive">{emailError}</p>}
           <Button className="w-full" disabled={loading}>{loading ? copy.creating : phoneStep === "start" ? copy.sendCode : copy.verifyCode}</Button>
         </form> : <form onSubmit={submit} className="mt-8 space-y-5">
@@ -186,6 +201,7 @@ export default function SignUpPage() {
             <Label htmlFor="password">{copy.password}</Label>
             <Input id="password" type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(event) => setPassword(event.target.value)} />
           </div>
+          {consentField}
           {emailError && <p role="alert" className="text-sm text-destructive">{emailError}</p>}
           <Button className="w-full" disabled={loading}>{loading ? copy.creating : copy.create}</Button>
         </form>}
