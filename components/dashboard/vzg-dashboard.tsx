@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, ChevronRight, Plus } from "lucide-react"
+import { ArrowRight, CheckCircle2, ChevronRight, Plus, UserRound } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 import type { DashboardDocument } from "@/components/dashboard/document-analyzer"
@@ -134,16 +134,16 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
         <div className="relative">
           <div className="flex items-center gap-3">
             <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] ${TAG[status]}`}>{copy.status[status]}</span>
-            <span aria-hidden="true" className="ml-auto grid size-10 place-items-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">{initials ?? "H"}</span>
+            <span aria-hidden="true" className="ml-auto grid size-10 place-items-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">{initials ?? <UserRound className="size-5" />}</span>
           </div>
           <h1 id="today-title" className="mt-3 text-[26px] font-extrabold leading-tight tracking-[-0.01em] text-[#0f1722] sm:text-[32px]">{name ? `${copy.hello}, ${name}` : copy.hello}</h1>
           <p className="mt-1 text-[15px] text-[#3d4652]">{copy.summary(items.length)}</p>
 
-          <ul className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-            {figures.map((figure) => <li key={figure.label}>
+          <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+            {figures.map((figure, index) => <li key={figure.label} className={index === 0 ? "col-span-2 sm:col-span-1" : undefined}>
               <Link href={figure.href} className={`block h-full rounded-[14px] border px-3 py-2.5 shadow-[0_6px_16px_-12px_rgb(15_23_34/0.35)] transition-colors hover:border-primary/40 ${FIGURE[figure.tone].box}`}>
                 <span className="block text-[11px] font-semibold leading-tight text-[#6b7480] sm:text-xs">{figure.label}</span>
-                <span className={`mt-1 block break-words text-lg font-extrabold leading-tight tabular-nums sm:text-2xl ${FIGURE[figure.tone].value}`}>{figure.value}</span>
+                <span className={`mt-1 block whitespace-nowrap text-lg font-extrabold leading-tight tabular-nums sm:text-2xl ${FIGURE[figure.tone].value}`}>{figure.value}</span>
               </Link>
             </li>)}
           </ul>
