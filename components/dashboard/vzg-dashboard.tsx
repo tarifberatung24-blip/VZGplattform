@@ -15,6 +15,7 @@ import { ContractsChart } from "./charts/contracts-chart"
 import { TimelineChart } from "./charts/timeline-chart"
 import { ContractsTable } from "./charts/contracts-table"
 import { YourValueCard } from "./your-value-card"
+import { NotificationInbox, type InboxNotification } from "./notification-inbox"
 import type { YourValue } from "@/lib/value/your-value"
 import type { GrundversorgungMatch } from "@/lib/value/grundversorgung"
 
@@ -28,6 +29,8 @@ export type VzgDashboardProps = {
   caseCounts?: Record<string, number>
   moduleError?: string | null
   yourValue?: YourValue | null
+  notifications?: InboxNotification[]
+  notificationsEmailEnabled?: boolean
   grundversorgung?: GrundversorgungMatch[]
 }
 
@@ -37,7 +40,7 @@ function date(value: string | null, locale: "bg" | "de") {
   return formatShortDate(value, locale) ?? (locale === "de" ? "Keine Daten" : "Няма данни")
 }
 
-export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders, caseCounts, moduleError, yourValue, grundversorgung }: VzgDashboardProps) {
+export function VzgDashboard({ firstName, profile, contracts, documents, reviewCount, reminders, caseCounts, moduleError, yourValue, grundversorgung, notifications, notificationsEmailEnabled }: VzgDashboardProps) {
   const { locale } = useLanguage()
   const de = locale === "de"
   const missingData = de ? "Keine Daten" : "Няма данни"
@@ -69,6 +72,8 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
       </header>
 
       <WorkplaceActionCenter nextAction={nextAction} />
+
+      <NotificationInbox initial={notifications ?? []} emailEnabled={notificationsEmailEnabled !== false} />
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard metrics">
         {[{ icon: WalletCards, label: de ? "Monatliche Kosten" : "Месечни разходи", value: monthlyTotal ? money(monthlyTotal, locale) : missingData, note: de ? "Nur eingetragene Beträge" : "Само въведени суми" }, { icon: Receipt, label: de ? "Aktive Verträge" : "Активни договори", value: String(contracts.length), note: de ? "Alle gespeicherten Verträge" : "Всички записани договори" }, { icon: CalendarDays, label: de ? "Nächster Termin" : "Следващ срок", value: date(nextReminder?.due_at ?? null, locale), note: nextReminder?.title ?? (de ? "Keine Frist erfasst" : "Няма записан срок") }, { icon: Bell, label: de ? "Zur Prüfung" : "За проверка", value: String(reviewCount + missingCosts), note: de ? "Dokumente und fehlende Beträge" : "Документи и липсващи суми" }].map(({ icon: Icon, label, value, note }) => <article key={label} className="rounded-md border border-border bg-card p-4 shadow-none"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-md bg-primary/5 text-primary"><Icon className="size-5" /></span><p className="text-sm font-medium text-muted-foreground">{label}</p></div><p className="mt-4 text-2xl font-semibold tracking-tight">{value}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></article>)}
