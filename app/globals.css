@@ -1365,6 +1365,132 @@
   .env-stage[data-stage="open"] .env-envelope-button { display: none; animation: none; }
 }
 
+/* ── How-it-works stage sheets (components/marketing/feature-path.tsx) ─── */
+/* Each stage is a sheet of the same paper as the home hero letter. */
+.hiw-sheet-wrap {
+  perspective: 1400px;
+  container-type: inline-size;
+}
+.hiw-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 9% 9% 11%;
+  border-radius: 3px;
+  background: linear-gradient(170deg, #ffffff 0%, #fbfaf7 55%, #f2f0ea 100%);
+  color: #22272e;
+  font-family: var(--font-sans);
+  font-size: clamp(13px, 5.1cqi, 15.5px);
+  line-height: 1.5;
+  transform: rotate(var(--tilt, 0deg));
+  transform-style: preserve-3d;
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.08),
+    0 18px 36px -16px rgb(8 30 70 / 0.35),
+    0 50px 90px -40px rgb(8 30 70 / 0.4);
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.6s ease;
+}
+.hiw-sheet-wrap:is(:hover, :focus-within) .hiw-sheet {
+  transform: rotate(0deg) rotateX(6deg) rotateY(-8deg) translateY(-8px);
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.08),
+    0 28px 50px -18px rgb(8 30 70 / 0.42),
+    0 70px 120px -40px rgb(8 30 70 / 0.45);
+}
+/* Tri-fold crease, as on a posted letter. */
+.hiw-sheet::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 33.3%;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.9));
+}
+/* Turned-down corner. */
+.hiw-sheet::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 9%;
+  aspect-ratio: 1;
+  background: linear-gradient(225deg, var(--background) 50%, #e4e0d7 50%, #f4f2ec 100%);
+  box-shadow: -2px 2px 4px rgb(0 0 0 / 0.08);
+  border-bottom-left-radius: 3px;
+}
+.hiw-sheet-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.8em;
+  padding-bottom: 0.7em;
+  margin-bottom: 1.1em;
+  border-bottom: 1px solid #e3e5e9;
+}
+.hiw-sheet-mark { height: 0.95em; color: #10294f; }
+.hiw-sheet-ref { font-size: 0.74em; color: #7a828c; white-space: nowrap; }
+.hiw-sheet-subject { display: flex; align-items: center; gap: 0.6em; }
+.hiw-sheet-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.2em;
+  height: 2.2em;
+  flex-shrink: 0;
+  border-radius: 0.6em;
+  background: color-mix(in srgb, var(--thread-core) 10%, #ffffff);
+  color: var(--thread-core);
+}
+.hiw-sheet-label {
+  font-size: 1.3em;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--thread-core);
+}
+.hiw-sheet-title { margin-top: 0.75em; font-size: 1.05em; font-weight: 750; line-height: 1.35; color: #151a20; }
+.hiw-sheet-body { margin-top: 0.55em; color: #3d4652; }
+.hiw-sheet-rows { margin-top: auto; padding-top: 1em; font-size: 0.9em; color: #2a3038; }
+.hiw-sheet-rows li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.35em 0;
+  border-bottom: 1px dotted #d3d7dd;
+  font-weight: 600;
+}
+.hiw-sheet-rows li:last-child { border-bottom: 0; }
+.hiw-sheet-rows svg { color: var(--thread-core); }
+/* Rubber stamp for the stage that is not available yet. */
+.hiw-sheet-stamp {
+  margin-left: auto;
+  padding: 0.15em 0.55em;
+  border: 2px solid currentColor;
+  border-radius: 0.35em;
+  color: color-mix(in srgb, var(--thread-core) 85%, #000000);
+  font-size: 0.78em;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.8;
+  transform: rotate(-9deg);
+  mix-blend-mode: multiply;
+}
+.dark .hiw-sheet {
+  background: linear-gradient(170deg, #f6f5f1 0%, #eeece6 60%, #e4e1da 100%);
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.3),
+    0 26px 50px -20px rgb(0 0 0 / 0.75),
+    0 50px 120px -40px color-mix(in srgb, var(--thread-core) 40%, transparent);
+}
+.dark .hiw-sheet::before { background: linear-gradient(225deg, var(--background) 50%, #d8d4ca 50%, #ecebe5 100%); }
+@media (prefers-reduced-motion: reduce) {
+  .hiw-sheet { transition: none; }
+  .hiw-sheet-wrap:is(:hover, :focus-within) .hiw-sheet { transform: rotate(var(--tilt, 0deg)); }
+}
+
 /* ── Product name wordmark (components/brand/horizon-wordmark.tsx) ─────── */
 .horizon-wordmark {
   position: relative;

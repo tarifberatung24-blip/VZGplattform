@@ -32,14 +32,6 @@ export function AnimatedHero() {
             className="pointer-events-none absolute -inset-x-24 -inset-y-20 -z-10 rounded-full blur-3xl"
             style={{ background: "radial-gradient(closest-side, var(--background) 72%, transparent)" }}
           />
-          <Link
-            href={localizedPath("/auth/sign-up", locale)}
-            className="glass-surface inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-foreground backdrop-blur-md transition-transform duration-300 hover:-translate-y-0.5"
-            style={{ borderColor: "color-mix(in srgb, var(--thread-core) 35%, transparent)" }}
-          >
-            <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: "var(--thread-core)" }} />
-            {t.home.hero.trialBadge}
-          </Link>
           <h1 className="font-display text-balance text-[clamp(2.4rem,6vw,5rem)] font-black leading-[1.02] tracking-[-0.04em] text-foreground">
             <HorizonWordmark className="block h-[clamp(2.6rem,6vw,4.6rem)]" />
             <span className="mt-3 block text-[clamp(1.5rem,3.4vw,2.6rem)] font-semibold leading-[1.15] tracking-[-0.015em] text-muted-foreground">

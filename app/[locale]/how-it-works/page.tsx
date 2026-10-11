@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, MessagesSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FeaturePath } from "@/components/marketing/feature-path"
 import { howItWorksCopy } from "@/components/marketing/how-it-works-copy"
-import { BrandText } from "@/components/brand/horizon-wordmark"
+import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 
@@ -33,7 +33,9 @@ export default function HowItWorksPage() {
 
         <header className="mx-auto mt-10 max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">{copy.eyebrow}</p>
-          <h1 className="mt-3 text-balance text-4xl font-black tracking-[-0.04em] md:text-6xl"><BrandText text={copy.title} /></h1>
+          <h1 className="mt-4 flex justify-center text-[clamp(3.2rem,7vw,5.5rem)] leading-none text-foreground">
+            <HorizonWordmark />
+          </h1>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-8 text-muted-foreground"><BrandText text={copy.intro} /></p>
         </header>
 
