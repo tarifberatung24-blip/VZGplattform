@@ -17,7 +17,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { LogoMark } from "@/components/brand/logo"
 import { navIcons } from "@/components/navigation/nav-icons"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
@@ -37,9 +36,9 @@ export function HorizonSidebar() {
   return (
     <Sidebar collapsible="icon" aria-label={de ? "Hauptnavigation" : "Основна навигация"}>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-1 py-1.5 group-data-[collapsible=icon]:justify-center">
-          <LogoMark className="shrink-0" />
-          <span role="img" aria-label="Horizon by VZG" className="logo-mask h-5 w-auto text-foreground group-data-[collapsible=icon]:hidden" />
+        {/* The real wordmark only. The old "V" tile was a placeholder, not part of the brand. */}
+        <div className="flex h-10 items-center px-2 group-data-[collapsible=icon]:hidden">
+          <span role="img" aria-label="Horizon by VZG" className="logo-mask h-5 w-auto text-foreground" />
         </div>
       </SidebarHeader>
 

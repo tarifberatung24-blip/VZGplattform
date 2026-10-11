@@ -575,13 +575,13 @@
   --success-foreground: #ffffff;
   /* Spec DANGER. Mapped to --destructive, the token Tailwind actually registers. */
   --destructive: #B42318;
-  --sidebar: #0B1F33;
-  --sidebar-foreground: #EAF0F6;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #17202A;
   --sidebar-primary: #174A7E;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #14304F;
-  --sidebar-accent-foreground: #EAF0F6;
-  --sidebar-border: #1E3A5C;
+  --sidebar-accent: #EEF3F9;
+  --sidebar-accent-foreground: #174A7E;
+  --sidebar-border: #E6EAF0;
   --sidebar-ring: #174A7E;
   --chart-1: #174A7E;
   --chart-2: #102A43;
@@ -1539,4 +1539,19 @@
 
 .horizon-dashboard .bg-card {
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.12);
+}
+
+/* A thin, quiet scrollbar for the workspace sidebar instead of the system one with arrows. */
+.kintex-workspace :is([data-sidebar="content"], [data-slot="sidebar-content"]) {
+  scrollbar-width: thin;
+  scrollbar-color: #d8dee6 transparent;
+}
+
+.kintex-workspace :is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar {
+  width: 6px;
+}
+
+.kintex-workspace :is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #d8dee6;
 }

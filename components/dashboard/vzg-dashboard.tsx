@@ -2,12 +2,11 @@
 
 import { useMemo } from "react"
 import Link from "next/link"
-import { Bell, CalendarDays, CheckCircle2, ChevronRight, Clock, FilePlus2, FileText, Plus, Receipt, UserRound, WalletCards } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ArrowRight, CheckCircle2, ChevronRight, Plus } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 import type { DashboardDocument } from "@/components/dashboard/document-analyzer"
-import { formatMoney, formatShortDate } from "@/lib/dashboard/contracts-data"
+import { formatMoney } from "@/lib/dashboard/contracts-data"
 import { buildAttentionItems, type AttentionKind, type AttentionTone } from "@/lib/dashboard/attention"
 import { HorizonHome } from "@/components/horizon/horizon-home"
 import { YourValueCard } from "./your-value-card"
@@ -30,76 +29,69 @@ export type VzgDashboardProps = {
   grundversorgung?: GrundversorgungMatch[]
 }
 
-const VISIBLE_ITEMS = 5
+type Tone = "urgent" | "warn" | "good" | "neutral"
 
-const TONE_STYLE: Record<AttentionTone, { icon: string; pill: string }> = {
-  urgent: { icon: "bg-destructive/10 text-destructive", pill: "bg-destructive/10 text-destructive" },
-  soon: { icon: "bg-amber-500/15 text-amber-600 dark:text-amber-400", pill: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
-  info: { icon: "bg-primary/10 text-primary", pill: "bg-muted text-muted-foreground" },
+// The colours of the product preview on the home page (`.env-dash` in globals.css), so the real
+// dashboard looks like the one people were shown.
+const TAG: Record<Tone, string> = {
+  urgent: "bg-[#fde8e8] text-[#b42318]",
+  warn: "bg-[#fff1dc] text-[#b54708]",
+  good: "bg-[#e3f6ea] text-[#067647]",
+  neutral: "bg-[#eef2f7] text-[#475467]",
 }
-
-const KIND_ICON: Record<AttentionKind, typeof Clock> = {
-  deadline: Clock,
-  cancellation: CalendarDays,
-  review: FileText,
-  missing_amount: WalletCards,
-  profile: UserRound,
+const FIGURE: Record<Tone, { box: string; value: string }> = {
+  urgent: { box: "border-[#e6eaf0] bg-white", value: "text-[#b42318]" },
+  warn: { box: "border-[#e6eaf0] bg-white", value: "text-[#b54708]" },
+  good: { box: "border-[#b7ebc9] bg-[#ecfbf2]", value: "text-[#067647]" },
+  neutral: { box: "border-[#e6eaf0] bg-white", value: "text-[#0f1722]" },
 }
-
-// Dated items carry a short "in 3 days" label that fits a pill; the others explain themselves in a line below.
+const TONE_OF: Record<AttentionTone, Tone> = { urgent: "urgent", soon: "warn", info: "neutral" }
 const DATED: ReadonlySet<AttentionKind> = new Set(["deadline", "cancellation"])
+const VISIBLE_STEPS = 4
 
 function copyFor(de: boolean) {
   return de
     ? {
         hello: "Hallo",
-        summary: (n: number) => (n === 0 ? "Nichts Dringendes heute." : n === 1 ? "1 Punkt braucht deine Aufmerksamkeit." : `${n} Punkte brauchen deine Aufmerksamkeit.`),
-        attention: "Braucht Aufmerksamkeit",
-        allClear: "Keine dringenden Fristen und keine Dokumente zur Prüfung.",
-        firstContract: "Ersten Vertrag hinzufügen",
+        summary: (n: number) => (n === 0 ? "Heute ist nichts dringend." : n === 1 ? "1 Punkt braucht deine Aufmerksamkeit." : `${n} Punkte brauchen deine Aufmerksamkeit.`),
+        status: { urgent: "Dringend", warn: "Bald fällig", neutral: "Offen", good: "Alles im Griff" },
+        stepsTitle: "Nächste Schritte",
         more: (n: number) => `und ${n} weitere`,
         addDocument: "Dokument hinzufügen",
         startCase: "Vorgang starten",
-        metrics: "Überblick",
-        noData: "Keine Daten",
+        note: "Nur bestätigte Daten. Nichts wird ohne dich verschickt.",
         monthly: "Monatliche Kosten",
-        monthlyNote: "Nur eingetragene Beträge",
-        active: "Verträge",
-        activeNote: "Alle ansehen und hinzufügen",
-        next: "Nächste Frist",
-        nextNone: "Keine Frist erfasst",
+        contracts: "Verträge",
         review: "Zur Prüfung",
-        reviewNote: "Dokumente und fehlende Beträge",
+        firstContract: "Ersten Vertrag hinzufügen",
+        firstContractDetail: "Wir behalten Fristen und Preis für dich im Blick",
+        upload: "Brief oder Dokument hochladen",
+        uploadDetail: "Wir erklären, was drinsteht und bis wann du handeln musst",
       }
     : {
         hello: "Здравей",
         summary: (n: number) => (n === 0 ? "Днес няма нищо спешно." : n === 1 ? "1 нещо иска вниманието ти." : `${n} неща искат вниманието ти.`),
-        attention: "Иска внимание",
-        allClear: "Няма спешни срокове и няма документи за проверка.",
-        firstContract: "Добави първия си договор",
+        status: { urgent: "Спешно", warn: "Скоро", neutral: "За довършване", good: "Всичко е наред" },
+        stepsTitle: "Следващи стъпки",
         more: (n: number) => `и още ${n}`,
         addDocument: "Добави документ",
         startCase: "Започни случай",
-        metrics: "Преглед",
-        noData: "Няма данни",
+        note: "Само потвърдени данни. Нищо не се изпраща без теб.",
         monthly: "Месечни разходи",
-        monthlyNote: "Само въведени суми",
-        active: "Договори",
-        activeNote: "Виж всички и добави нов",
-        next: "Следващ срок",
-        nextNone: "Няма записан срок",
+        contracts: "Договори",
         review: "За проверка",
-        reviewNote: "Документи и липсващи суми",
+        firstContract: "Добави първия си договор",
+        firstContractDetail: "Ще следим сроковете и цената вместо теб",
+        upload: "Качи писмо или документ",
+        uploadDetail: "Ще ти обясним какво пише и докога трябва да действаш",
       }
 }
 
 /**
- * The customer home: one screen with what needs the user today and a way into everything else.
- * Built for a phone first. The greeting card holds the main action, the attention list says what
- * to do, the four number tiles open the matching pages, then the inbox and the modules. Charts,
- * the contract table and the document analyzer live on the Contracts and Documents pages; the home
- * links there instead of repeating them. The layered look comes from `.horizon-dashboard` in
- * globals.css.
+ * The customer home, in the look of the product preview on the home page: one "today" card with a
+ * status tag, the greeting, three figures, the next steps and one strong action, then the inbox and
+ * the modules. Built for a phone first. Charts, the contract table and the document analyzer live on
+ * the Contracts and Documents pages. The page tint comes from `.horizon-dashboard` in globals.css.
  */
 export function VzgDashboard({ firstName, profile, contracts, reviewCount, reminders, caseCounts, moduleError, yourValue, grundversorgung, notifications, notificationsEmailEnabled }: VzgDashboardProps) {
   const { locale } = useLanguage()
@@ -115,86 +107,69 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
     () => buildAttentionItems({ locale: lang, now: new Date(), reminders, contracts, reviewCount, profileCompleteness: completeness, paths: { documents: documentsHref, contracts: contractsHref, profile: profileHref } }),
     [lang, reminders, contracts, reviewCount, completeness, documentsHref, contractsHref, profileHref],
   )
-  const visible = items.slice(0, VISIBLE_ITEMS)
 
   const name = firstName?.trim() || null
-  const initial = name ? name.charAt(0).toUpperCase() : null
+  const initials = name ? name.slice(0, 2).toUpperCase() : null
+  const status: Tone = items.some((item) => item.tone === "urgent") ? "urgent" : items.some((item) => item.tone === "soon") ? "warn" : items.length ? "neutral" : "good"
   const monthlyTotal = contracts.reduce((sum, item) => sum + (Number(item.monthly_amount) || 0), 0)
-  const missingCosts = contracts.filter((item) => item.monthly_amount == null).length
-  const nextReminder = reminders.find((item) => item.due_at) ?? null
-  const tiles = [
-    { icon: WalletCards, label: copy.monthly, value: monthlyTotal ? formatMoney(monthlyTotal, lang) : copy.noData, note: copy.monthlyNote, href: contractsHref },
-    { icon: Receipt, label: copy.active, value: String(contracts.length), note: copy.activeNote, href: contractsHref },
-    { icon: CalendarDays, label: copy.next, value: formatShortDate(nextReminder?.due_at ?? null, lang) ?? copy.noData, note: nextReminder?.title ?? copy.nextNone, href: contractsHref },
-    { icon: Bell, label: copy.review, value: String(reviewCount + missingCosts), note: copy.reviewNote, href: documentsHref },
+  const toReview = reviewCount + contracts.filter((item) => item.monthly_amount == null).length
+  const figures: Array<{ label: string; value: string; tone: Tone; href: string }> = [
+    { label: copy.monthly, value: monthlyTotal ? formatMoney(monthlyTotal, lang) : "–", tone: "neutral", href: contractsHref },
+    { label: copy.contracts, value: String(contracts.length), tone: "neutral", href: contractsHref },
+    { label: copy.review, value: String(toReview), tone: toReview > 0 ? "warn" : "good", href: documentsHref },
   ]
 
+  // With nothing to do, the steps suggest the two ways to get value out of Horizon.
+  const steps = items.length
+    ? items.slice(0, VISIBLE_STEPS).map((item) => ({ id: item.id, title: item.title, detail: DATED.has(item.kind) ? null : item.detail, pill: DATED.has(item.kind) ? item.detail : null, tone: TONE_OF[item.tone], href: item.href }))
+    : [
+        ...(contracts.length === 0 ? [{ id: "first-contract", title: copy.firstContract, detail: copy.firstContractDetail, pill: null, tone: "neutral" as Tone, href: contractsHref }] : []),
+        { id: "upload", title: copy.upload, detail: copy.uploadDetail, pill: null, tone: "neutral" as Tone, href: documentsHref },
+      ]
+
   return <div className="horizon-dashboard relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-24 pt-4 text-foreground sm:px-6 sm:pt-6 md:pb-8 lg:px-8">
-    <div className="relative z-10 mx-auto min-w-0 max-w-[1200px]">
-      <header className="relative overflow-hidden rounded-[24px] border border-border bg-card p-5 sm:p-6">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.14] via-primary/[0.04] to-transparent" />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 items-center gap-4">
-            <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-full bg-primary text-lg font-semibold text-primary-foreground shadow-sm">
-              {initial ?? <UserRound className="size-5" />}
-            </span>
-            <div className="min-w-0">
-              <h1 className="truncate text-2xl font-semibold tracking-tight sm:text-3xl">{name ? `${copy.hello}, ${name}` : copy.hello}</h1>
-              <p className="mt-0.5 text-sm text-muted-foreground">{copy.summary(items.length)}</p>
-            </div>
+    <div className="relative z-10 mx-auto min-w-0 max-w-[1100px]">
+      <section aria-labelledby="today-title" className="relative overflow-hidden rounded-[22px] border border-[#e6eaf0] bg-gradient-to-b from-white to-[#f4f6fa] p-5 text-[#0f1722] shadow-[0_24px_48px_-32px_rgb(15_23_34/0.35)] sm:p-7">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_60%_at_100%_0%,rgb(23_74_126/0.10),transparent_60%)]" />
+        <div className="relative">
+          <div className="flex items-center gap-3">
+            <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] ${TAG[status]}`}>{copy.status[status]}</span>
+            <span aria-hidden="true" className="ml-auto grid size-10 place-items-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">{initials ?? "H"}</span>
           </div>
-          {/* Adding a document is the everyday task (a letter arrived), so it is the one primary button. */}
-          <div className="grid gap-2 sm:flex">
-            <Button asChild className="h-12 rounded-full px-6 shadow-sm sm:h-11"><Link href={documentsHref}><FilePlus2 className="mr-2 size-4" />{copy.addDocument}</Link></Button>
-            <Button asChild variant="outline" className="h-12 rounded-full bg-background/60 px-6 sm:h-11"><Link href={`/${locale}/guide`}><Plus className="mr-2 size-4" />{copy.startCase}</Link></Button>
+          <h1 id="today-title" className="mt-3 text-[26px] font-extrabold leading-tight tracking-[-0.01em] text-[#0f1722] sm:text-[32px]">{name ? `${copy.hello}, ${name}` : copy.hello}</h1>
+          <p className="mt-1 text-[15px] text-[#3d4652]">{copy.summary(items.length)}</p>
+
+          <ul className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+            {figures.map((figure) => <li key={figure.label}>
+              <Link href={figure.href} className={`block h-full rounded-[14px] border px-3 py-2.5 shadow-[0_6px_16px_-12px_rgb(15_23_34/0.35)] transition-colors hover:border-primary/40 ${FIGURE[figure.tone].box}`}>
+                <span className="block text-[11px] font-semibold leading-tight text-[#6b7480] sm:text-xs">{figure.label}</span>
+                <span className={`mt-1 block break-words text-lg font-extrabold leading-tight tabular-nums sm:text-2xl ${FIGURE[figure.tone].value}`}>{figure.value}</span>
+              </Link>
+            </li>)}
+          </ul>
+
+          <p className="mt-6 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#6b7480]">{copy.stepsTitle}</p>
+          <ol className="mt-2 grid gap-1">
+            {steps.map((step) => <li key={step.id}>
+              <Link href={step.href} className="flex min-h-11 items-start gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-[#eef2f7]">
+                <CheckCircle2 className="mt-0.5 size-[18px] shrink-0 text-primary" aria-hidden="true" />
+                <span className="min-w-0 flex-1 text-[15px] leading-snug text-[#0f1722]">
+                  {step.title}
+                  {step.detail ? <span className="mt-0.5 block text-xs text-[#6b7480]">{step.detail}</span> : null}
+                </span>
+                {step.pill ? <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TAG[step.tone]}`}>{step.pill}</span> : <ChevronRight className="mt-0.5 size-4 shrink-0 text-[#98a2b3]" aria-hidden="true" />}
+              </Link>
+            </li>)}
+          </ol>
+          {items.length > VISIBLE_STEPS ? <p className="px-2 pt-1 text-xs text-[#6b7480]">{copy.more(items.length - VISIBLE_STEPS)}</p> : null}
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Link href={documentsHref} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-primary px-5 font-bold text-primary-foreground shadow-[0_10px_20px_-10px_var(--primary)] transition-colors hover:bg-[var(--primary-hover)] sm:flex-none">{copy.addDocument}<ArrowRight className="size-4" aria-hidden="true" /></Link>
+            <Link href={`/${locale}/guide`} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-[#e6eaf0] bg-white px-5 font-semibold text-[#0f1722] transition-colors hover:bg-[#eef2f7] sm:flex-none"><Plus className="size-4" aria-hidden="true" />{copy.startCase}</Link>
+            <p className="w-full text-xs text-[#6b7480] sm:w-auto sm:flex-1">{copy.note}</p>
           </div>
         </div>
-      </header>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
-        <section aria-labelledby="attention-title" className="overflow-hidden rounded-[24px] border border-border bg-card">
-          <div className="flex items-center justify-between gap-3 px-5 pb-2 pt-4">
-            <h2 id="attention-title" className="text-base font-semibold tracking-tight">{copy.attention}</h2>
-            {items.length ? <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold tabular-nums text-primary-foreground">{items.length}</span> : null}
-          </div>
-          {visible.length ? <ul className="px-2 pb-2">
-            {visible.map((item) => {
-              const Icon = KIND_ICON[item.kind]
-              const tone = TONE_STYLE[item.tone]
-              const dated = DATED.has(item.kind)
-              return <li key={item.id}>
-                <Link href={item.href} className="flex min-h-14 items-center gap-3 rounded-[16px] px-3 py-2.5 transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none">
-                  <span className={`grid size-10 shrink-0 place-items-center rounded-full ${tone.icon}`}><Icon className="size-[18px]" aria-hidden="true" /></span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-foreground">{item.title}</span>
-                    {dated ? null : <span className="block truncate text-xs text-muted-foreground">{item.detail}</span>}
-                  </span>
-                  {dated ? <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${tone.pill}`}>{item.detail}</span> : <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
-                </Link>
-              </li>
-            })}
-          </ul> : <div className="mx-2 mb-2 rounded-[16px] bg-muted px-4 py-5 text-sm text-muted-foreground">
-            <p className="flex items-center gap-3"><CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden="true" />{copy.allClear}</p>
-            {contracts.length === 0 ? <Link href={contractsHref} className="mt-3 inline-flex min-h-10 items-center gap-1 font-medium text-primary">{copy.firstContract}<ChevronRight className="size-4" aria-hidden="true" /></Link> : null}
-          </div>}
-          {items.length > VISIBLE_ITEMS ? <p className="px-5 pb-4 text-xs text-muted-foreground">{copy.more(items.length - VISIBLE_ITEMS)}</p> : null}
-        </section>
-
-        <nav aria-label={copy.metrics} className="grid grid-cols-2 content-start gap-3">
-          {tiles.map(({ icon: Icon, label, value, note, href }) => <Link key={label} href={href} className="group relative min-w-0 overflow-hidden rounded-[20px] border border-border bg-card p-4 transition-colors hover:border-primary/30">
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/[0.07] to-transparent" />
-            <div className="relative">
-              {/* Labels wrap to two lines instead of being cut off on a phone-width card. */}
-              <div className="flex items-start justify-between gap-2">
-                <p className="line-clamp-2 text-xs font-medium leading-snug text-muted-foreground sm:text-sm">{label}</p>
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 text-primary sm:size-8"><Icon className="size-3.5 sm:size-4" aria-hidden="true" /></span>
-              </div>
-              <p className="mt-2 break-words text-xl font-semibold leading-tight tabular-nums tracking-tight sm:mt-3 sm:text-3xl">{value}</p>
-              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground group-hover:text-primary">{note}</p>
-            </div>
-          </Link>)}
-        </nav>
-      </div>
+      </section>
 
       <NotificationInbox initial={notifications ?? []} emailEnabled={notificationsEmailEnabled !== false} />
 
