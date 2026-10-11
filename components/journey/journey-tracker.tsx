@@ -2,76 +2,69 @@
 
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { JOURNEY_STATUS_KEY } from "@/lib/journey/keys"
 
-const SESSION_KEY = "horizon.journey.session"
-const STATUS_TTL_MS = 10 * 60_000
 const MAX_ERRORS_PER_LOAD = 5
+const NEGATIVE_TTL_MS = 30_000
 
-function readStorage(key: string): string | null {
-  try {
-    return window.sessionStorage.getItem(key)
-  } catch {
-    return null
-  }
+// Everything here lives in memory only. Nothing is written to cookies, localStorage or sessionStorage.
+let status: { enabled: boolean; at: number } | null = null
+let pending: Promise<boolean> | null = null
+let visitId: string | null = null
+
+/** Forgets the cached answer, so a changed preference applies on the next page view. */
+export function resetJourneyStatus() {
+  status = null
 }
 
-function writeStorage(key: string, value: string) {
-  try {
-    window.sessionStorage.setItem(key, value)
-  } catch {
-    // Storage can be blocked; the tracker then simply asks the server again.
+function currentVisitId(): string {
+  if (!visitId) {
+    visitId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}${Math.random().toString(36).slice(2, 10)}`
   }
+  return visitId
 }
 
-function sessionId(): string {
-  const existing = readStorage(SESSION_KEY)
-  if (existing) return existing
-  const id = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `${Date.now()}${Math.random().toString(36).slice(2, 10)}`
-  writeStorage(SESSION_KEY, id)
-  return id
-}
-
-/** Asks the server once per tab session whether this account opted in. Signed-out visitors cause no request. */
-async function isEnabled(): Promise<boolean> {
-  const cached = readStorage(JOURNEY_STATUS_KEY)
-  if (cached) {
-    try {
-      const { enabled, at } = JSON.parse(cached) as { enabled?: boolean; at?: number }
-      if (typeof at === "number" && Date.now() - at < STATUS_TTL_MS) return enabled === true
-    } catch {
-      // A malformed cache entry is ignored and replaced below.
-    }
-  }
+async function fetchEnabled(): Promise<boolean> {
   try {
-    const { data } = await createClient().auth.getSession()
-    if (!data.session) return false
     const response = await fetch("/api/journey", { cache: "no-store" })
     if (!response.ok) return false
-    const enabled = ((await response.json()) as { enabled?: boolean }).enabled === true
-    writeStorage(JOURNEY_STATUS_KEY, JSON.stringify({ enabled, at: Date.now() }))
-    return enabled
+    const body = (await response.json()) as { enabled?: boolean }
+    return body.enabled === true
   } catch {
     return false
   }
+}
+
+/**
+ * Asks the server whether this visitor is signed in and has recording on. A "yes" is kept for the
+ * page load; a "no" is kept for 30 seconds, so signing in without a reload is noticed quickly.
+ */
+function isEnabled(): Promise<boolean> {
+  if (status && (status.enabled || Date.now() - status.at < NEGATIVE_TTL_MS)) return Promise.resolve(status.enabled)
+  if (!pending) {
+    pending = fetchEnabled().then((enabled) => {
+      status = { enabled, at: Date.now() }
+      pending = null
+      return enabled
+    })
+  }
+  return pending
 }
 
 function send(payload: { event: "page_view" | "client_error"; path: string; code?: string }) {
   void fetch("/api/journey", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ ...payload, sessionId: sessionId() }),
+    body: JSON.stringify({ ...payload, sessionId: currentVisitId() }),
     keepalive: true,
   }).catch(() => undefined)
 }
 
 /**
- * Reports which screen a consenting user is on and when a script error happens. It sends the
- * pathname (the server reduces it to a module and step) and an error name; never page content,
- * form values, or error messages.
+ * Reports which screen a signed-in user is on and when a script error happens, unless the user has
+ * switched recording off. It sends the pathname (the server reduces it to a module and step) and an
+ * error name; never page content, form values, or error messages.
  */
 export function JourneyTracker() {
   const pathname = usePathname()

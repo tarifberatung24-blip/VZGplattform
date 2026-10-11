@@ -4,7 +4,12 @@ import { EditorClient } from "./editor-client"
 
 export const dynamic = "force-dynamic"
 
-export default async function AdminEditorPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ slug?: string }> }) {
+type Props = {
+  params: Promise<{ locale: string }>
+  searchParams: Promise<{ slug?: string }>
+}
+
+export default async function AdminEditorPage({ params, searchParams }: Props) {
   const { locale } = await params
   const { slug = "home" } = await searchParams
   if (locale !== "bg" && locale !== "de") notFound()

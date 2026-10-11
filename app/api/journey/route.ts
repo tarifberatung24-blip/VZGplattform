@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { hasJourneyConsent } from "@/lib/journey/consent"
+import { isJourneyRecordingEnabled } from "@/lib/journey/recording"
 import { createJourneyDb } from "@/lib/journey/db"
 import { journeyEventSchema } from "@/lib/journey/events"
 import { normalizeJourneyPath } from "@/lib/journey/paths"
@@ -12,7 +12,11 @@ const buckets = new Map<string, { count: number; resetAt: number }>()
 function withinRateLimit(userId: string, now = Date.now()): boolean {
   const bucket = buckets.get(userId)
   if (!bucket || bucket.resetAt <= now) {
-    if (buckets.size > 5000) for (const [key, value] of buckets) if (value.resetAt <= now) buckets.delete(key)
+    if (buckets.size > 5000) {
+      for (const [key, value] of buckets) {
+        if (value.resetAt <= now) buckets.delete(key)
+      }
+    }
     buckets.set(userId, { count: 1, resetAt: now + 60_000 })
     return true
   }
@@ -39,16 +43,16 @@ async function currentUserId(): Promise<string | null> {
 
 const status = (code: number) => new NextResponse(null, { status: code })
 
-/** Tells the browser whether this account has opted in, so it sends nothing when it has not. */
+/** Tells the browser whether to send anything: true for a signed-in user who has not switched recording off. */
 export async function GET() {
   const userId = await currentUserId()
-  const enabled = userId ? await hasJourneyConsent(userId) : false
+  const enabled = userId ? await isJourneyRecordingEnabled(userId) : false
   return NextResponse.json({ enabled }, { headers: { "Cache-Control": "no-store" } })
 }
 
 /**
- * Records one usage event for a user who has opted in. The consent check happens here, on the
- * server, for every event: without a current opt-in nothing is stored, whatever the browser sends.
+ * Records one usage event for a signed-in user. The preference is checked here, on the server, for
+ * every event: once a user has switched recording off, nothing is stored, whatever the browser sends.
  */
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return status(403)
@@ -64,7 +68,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return status(400)
 
   const userId = await currentUserId()
-  if (!userId || !(await hasJourneyConsent(userId))) return status(204)
+  if (!userId || !(await isJourneyRecordingEnabled(userId))) return status(204)
   if (!withinRateLimit(userId)) return status(429)
 
   const route = normalizeJourneyPath(parsed.data.path)

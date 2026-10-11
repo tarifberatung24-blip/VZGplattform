@@ -7,8 +7,8 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({ auth: { getUser: async () => ({ data: { user: currentUser } }) } }),
 }))
 
-const hasJourneyConsent = vi.fn()
-vi.mock("@/lib/journey/consent", () => ({ hasJourneyConsent: (...args: unknown[]) => hasJourneyConsent(...args) }))
+const isJourneyRecordingEnabled = vi.fn()
+vi.mock("@/lib/journey/recording", () => ({ isJourneyRecordingEnabled: (...args: unknown[]) => isJourneyRecordingEnabled(...args) }))
 
 const insert = vi.fn()
 vi.mock("@/lib/journey/db", () => ({ createJourneyDb: () => ({ from: () => ({ insert: (...args: unknown[]) => insert(...args) }) }) }))
@@ -28,12 +28,12 @@ const view = { event: "page_view", path: "/de/steuer/review", sessionId: "sessio
 beforeEach(() => {
   vi.clearAllMocks()
   currentUser = { id: "user-1" }
-  hasJourneyConsent.mockResolvedValue(true)
+  isJourneyRecordingEnabled.mockResolvedValue(true)
   insert.mockResolvedValue({ error: null })
 })
 
 describe("POST /api/journey", () => {
-  it("stores a normalized event for a user who opted in", async () => {
+  it("stores a normalized event for a signed-in user", async () => {
     const response = await post(view)
     expect(response.status).toBe(204)
     expect(insert).toHaveBeenCalledWith({
@@ -41,8 +41,8 @@ describe("POST /api/journey", () => {
     })
   })
 
-  it("stores nothing without a current opt-in", async () => {
-    hasJourneyConsent.mockResolvedValue(false)
+  it("stores nothing once the user has switched recording off", async () => {
+    isJourneyRecordingEnabled.mockResolvedValue(false)
     expect((await post(view)).status).toBe(204)
     expect(insert).not.toHaveBeenCalled()
   })
@@ -50,7 +50,7 @@ describe("POST /api/journey", () => {
   it("stores nothing for a signed-out visitor", async () => {
     currentUser = null
     expect((await post(view)).status).toBe(204)
-    expect(hasJourneyConsent).not.toHaveBeenCalled()
+    expect(isJourneyRecordingEnabled).not.toHaveBeenCalled()
     expect(insert).not.toHaveBeenCalled()
   })
 
@@ -88,9 +88,9 @@ describe("POST /api/journey", () => {
 })
 
 describe("GET /api/journey", () => {
-  it("reports whether the signed-in user opted in", async () => {
+  it("reports whether recording is on for the signed-in user", async () => {
     expect(await (await GET()).json()).toEqual({ enabled: true })
-    hasJourneyConsent.mockResolvedValue(false)
+    isJourneyRecordingEnabled.mockResolvedValue(false)
     expect(await (await GET()).json()).toEqual({ enabled: false })
   })
 
