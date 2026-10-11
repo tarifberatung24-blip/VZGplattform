@@ -41,7 +41,7 @@ export function TimelineChart({ deadlines }: { deadlines: DeadlineLike[] }) {
   const markerLabel = currentMonthLabel(data)
 
   return (
-    <Card className="border-border bg-card shadow-none">
+    <Card>
       <CardHeader>
         <CardTitle className="text-lg font-semibold tracking-tight">
           {de ? "Fristen-Übersicht" : "Срокове — преглед"}
@@ -49,7 +49,7 @@ export function TimelineChart({ deadlines }: { deadlines: DeadlineLike[] }) {
       </CardHeader>
       <CardContent>
         {!hasDeadlines ? (
-          <p className="flex min-h-[120px] items-center justify-center rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+          <p className="paper paper-empty flex min-h-[120px] items-center justify-center px-4 py-8 text-center text-sm text-muted-foreground">
             {de
               ? "Keine Fristen erfasst. Die nächsten zwölf Monate erscheinen, sobald Fristen vorliegen."
               : "Няма записани срокове. Следващите дванадесет месеца се показват, когато има срокове."}

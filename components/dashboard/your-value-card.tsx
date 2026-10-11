@@ -43,12 +43,12 @@ export function YourValueCard({ value, grundversorgung }: YourValueCardProps) {
     },
   ]
 
-  return <section className="mt-6 rounded-md border border-border bg-card p-5 shadow-none" aria-labelledby="your-value-title">
+  return <section className="paper mt-6 p-5" aria-labelledby="your-value-title">
     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{de ? "Dein Nutzen" : "Твоята стойност"}</p>
     <h2 id="your-value-title" className="mt-1 text-xl font-semibold tracking-tight"><BrandText text={de ? "Was HORIZON für dich im Blick behält" : "Какво HORIZON следи за теб"} /></h2>
 
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
-      {metrics.map(({ icon: Icon, label, value: metric, note }) => <article key={label} className="rounded-md border border-border bg-background p-4">
+      {metrics.map(({ icon: Icon, label, value: metric, note }) => <article key={label} className="paper paper-inset p-4">
         <div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-md bg-primary/5 text-primary"><Icon className="size-5" /></span><p className="text-sm font-medium text-muted-foreground">{label}</p></div>
         <p className="mt-4 text-2xl font-semibold tracking-tight">{metric}</p>
         <p className="mt-1 text-xs text-muted-foreground">{note}</p>
@@ -57,7 +57,7 @@ export function YourValueCard({ value, grundversorgung }: YourValueCardProps) {
 
     {grundversorgung.length > 0
       ? <div className="mt-4 space-y-3">
-        {grundversorgung.map((match) => <div key={match.id} className="rounded-md border border-primary/40 bg-primary/5 p-4">
+        {grundversorgung.map((match) => <div key={match.id} className="paper paper-note p-4">
           <div className="flex items-start gap-3">
             <span className="grid size-10 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"><Zap className="size-5" /></span>
             <div className="min-w-0">

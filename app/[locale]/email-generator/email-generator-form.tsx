@@ -36,7 +36,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
   const letter = isLetterResult ? output : null
 
   return (
-    <section className="glass-card flex flex-col gap-10 rounded-sm p-8 md:p-10 backdrop-blur-md">
+    <section className="paper flex flex-col gap-10 p-8 md:p-10">
       <form
         className="flex flex-col gap-6"
         onSubmit={(event) => {
@@ -133,7 +133,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
             />
           </div>
 
-          <div className="flex flex-col gap-2 rounded-sm border border-border bg-background p-5 text-sm text-muted-foreground">
+          <div className="paper paper-inset flex flex-col gap-2 p-5 text-sm text-muted-foreground">
             <span className="font-medium text-foreground">
               {isBg ? "Използвани заместители:" : "Verwendete Platzhalter:"}
             </span>
@@ -190,7 +190,7 @@ function LetterCard({
           </button>
         )}
       </div>
-      <div className="max-h-96 overflow-auto rounded-sm border border-border bg-background p-5 text-sm leading-7 whitespace-pre-wrap break-words">
+      <div className="paper paper-inset max-h-96 overflow-auto p-5 text-sm leading-7 whitespace-pre-wrap break-words">
         {displayContent}
       </div>
     </div>

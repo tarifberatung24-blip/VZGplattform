@@ -87,7 +87,7 @@ export function KuendigungPanel({
   const missingKeys = missing?.missingFactKeys ?? []
 
   return (
-    <section className="rounded-md border border-border bg-card p-4 sm:p-5">
+    <section className="paper p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <BrandText text={copy.heading} />
       </h2>
@@ -97,8 +97,8 @@ export function KuendigungPanel({
         <div
           className={
             missingKeys.length === 0
-              ? "rounded-md border border-primary/30 bg-primary/5 p-3"
-              : "rounded-md border border-dashed border-border p-3"
+              ? "paper paper-note p-3"
+              : "paper paper-empty p-3"
           }
         >
           <p className="text-xs font-semibold">
@@ -118,7 +118,7 @@ export function KuendigungPanel({
           ) : null}
         </div>
 
-        <div className="rounded-md border border-border p-3">
+        <div className="paper paper-inset p-3">
           <p className="text-xs font-semibold"><BrandText text={copy.timingHeading} /></p>
           <p className="mt-1 text-xs text-muted-foreground">
             {copy.timingLabel}: {copy.timingKind[timing.kind]}
@@ -134,7 +134,7 @@ export function KuendigungPanel({
           <p className="mt-2 text-xs text-muted-foreground"><BrandText text={copy.noInvention} /></p>
         </div>
 
-        <div className="rounded-md border border-border p-3">
+        <div className="paper paper-inset p-3">
           <p className="text-xs font-semibold"><BrandText text={copy.notSent} /></p>
         </div>
       </div>

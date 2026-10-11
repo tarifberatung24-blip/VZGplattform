@@ -85,23 +85,23 @@ export function KfzLanding({
 
           <div className="relative">
             <KfzHeroVisual />
-            <div className="mx-auto mt-4 w-full max-w-sm rounded-md border border-white/12 bg-white/5 p-5 backdrop-blur-md">
+            <div className="paper paper-inset mx-auto mt-4 w-full max-w-sm p-5">
               {coverage ? (
                 <>
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/60">
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     {locale === "bg" ? "Избрано покритие" : "Gewählte Deckung"}
                   </p>
-                  <p className="mt-2 text-lg font-bold text-white">{coverage}</p>
-                  <p className="mt-2 text-xs leading-6 text-white/60"><BrandText text={calcCopy.limits} /></p>
+                  <p className="mt-2 text-lg font-bold text-foreground">{coverage}</p>
+                  <p className="mt-2 text-xs leading-6 text-muted-foreground"><BrandText text={calcCopy.limits} /></p>
                 </>
               ) : (
                 <>
-                  <p className="text-sm font-bold text-white"><BrandText text={copy.hero.phoneBadgeTitle} /></p>
-                  <p className="mt-1 text-sm text-white/70"><BrandText text={copy.hero.phoneBadgeHint} /></p>
+                  <p className="text-sm font-bold text-foreground"><BrandText text={copy.hero.phoneBadgeTitle} /></p>
+                  <p className="mt-1 text-sm text-muted-foreground"><BrandText text={copy.hero.phoneBadgeHint} /></p>
                   {phone && (
                     <a
                       href={`tel:${phone}`}
-                      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#4d8dff] hover:underline"
+                      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
                     >
                       <Phone className="size-4" aria-hidden="true" />
                       {phone}
@@ -119,7 +119,7 @@ export function KfzLanding({
           {copy.tiles.map((tile, index) => {
             const Icon = tileIcons[index] ?? Sparkles
             return (
-              <article key={tile.title} className="glass-card rounded-sm p-6 backdrop-blur-md">
+              <article key={tile.title} className="paper p-6">
                 <span className="flex size-11 items-center justify-center border border-border text-primary">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
@@ -132,7 +132,7 @@ export function KfzLanding({
       </section>
 
       <section className="mx-auto max-w-[1440px] px-5 pb-8 lg:px-8">
-        <div className="grid gap-8 rounded-sm border border-border p-6 sm:p-8 lg:grid-cols-2">
+        <div className="paper paper-inset grid gap-8 p-6 sm:p-8 lg:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={product.name} /></p>
             <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground"><BrandText text={product.summary} /></p>
@@ -149,7 +149,7 @@ export function KfzLanding({
       </section>
 
       <section className="mx-auto max-w-[1440px] px-5 py-14 lg:px-8 md:py-16">
-        <article className="glass-card rounded-sm p-6 backdrop-blur-md sm:p-10" aria-labelledby="kfz-notice-lesson">
+        <article className="paper p-6 sm:p-10" aria-labelledby="kfz-notice-lesson">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={copy.noticeLesson.eyebrow} /></p>
           <h2
             id="kfz-notice-lesson"
@@ -168,7 +168,7 @@ export function KfzLanding({
                   {paragraph}
                 </p>
               ))}
-              <div className="mt-2 rounded-sm border border-border p-5">
+              <div className="paper paper-inset mt-2 p-5">
                 <div className="flex items-center gap-2">
                   <FileText className="size-4 text-primary" aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground"><BrandText text={copy.noticeLesson.documentCta} /></p>
@@ -183,7 +183,7 @@ export function KfzLanding({
               </div>
             </div>
 
-            <aside className="rounded-sm border border-border p-6">
+            <aside className="paper paper-inset p-6">
               <div className="flex items-center gap-2">
                 <ListChecks className="size-4 text-primary" aria-hidden="true" />
                 <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -233,7 +233,7 @@ export function KfzLanding({
       </section>
 
       <section className="mx-auto max-w-4xl px-5 pb-20 lg:px-8">
-        <div className="glass-card rounded-sm p-5 text-sm leading-7 text-muted-foreground backdrop-blur-md">
+        <div className="paper p-5 text-sm leading-7 text-muted-foreground">
           <BrandText text={hub.notice} />
         </div>
         <p className="mt-6 max-w-3xl border-l-2 border-primary pl-4 text-sm leading-7 text-foreground">

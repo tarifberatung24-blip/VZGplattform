@@ -38,7 +38,7 @@ export function ContractsChart({ contracts }: { contracts: ContractLike[] }) {
   const data = useMemo(() => groupContractsByCategory(contracts, locale), [contracts, locale])
 
   return (
-    <Card className="border-border bg-card shadow-none">
+    <Card>
       <CardHeader>
         <CardTitle className="text-lg font-semibold tracking-tight">
           {de ? "Monatliche Kosten nach Kategorie" : "Месечни разходи по категория"}
@@ -46,7 +46,7 @@ export function ContractsChart({ contracts }: { contracts: ContractLike[] }) {
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <p className="flex min-h-[120px] items-center justify-center rounded-md border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+          <p className="paper paper-empty flex min-h-[120px] items-center justify-center px-4 py-8 text-center text-sm text-muted-foreground">
             {de
               ? "Noch keine Beträge erfasst. Kategorien erscheinen, sobald Verträge Beträge haben."
               : "Още няма въведени суми. Категориите се показват, когато договорите имат суми."}

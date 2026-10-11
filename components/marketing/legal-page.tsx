@@ -136,7 +136,7 @@ export function LegalPage({ type }: { type: LegalPageType }) {
           <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground"><BrandText text={isBg ? (page.introBg ?? page.intro) : page.intro} official /></p>
         </header>
         {hasMissingProfile && (
-          <aside className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm leading-relaxed text-foreground">
+          <aside className="paper paper-note paper-note-warn p-4 text-sm leading-relaxed text-foreground">
             {isBg ? "Правните данни на доставчика все още не са попълнени в production configuration. Страницата не е готова за партньорски кандидатури." : "Die Pflichtangaben des Anbieters sind noch nicht in den Production-Einstellungen hinterlegt. Diese Seite ist noch nicht bereit für Partnerbewerbungen."}
           </aside>
         )}

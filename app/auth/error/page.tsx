@@ -9,7 +9,7 @@ export default function AuthErrorPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="glass-card max-w-md rounded-lg p-8 text-center backdrop-blur-md">
+      <div className="paper max-w-md p-8 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><HorizonWordmark className="h-[1.1em]" /></p>
         <p className="mt-1 text-[10px] text-muted-foreground">BY VZG CONSULT</p>
         <h1 className="mt-8 text-2xl font-bold text-foreground">{t.auth.expiredTitle}</h1>

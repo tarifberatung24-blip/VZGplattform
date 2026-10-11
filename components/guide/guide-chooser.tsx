@@ -63,7 +63,7 @@ export function GuideChooser({
         {errorCode ? (
           <p
             role="alert"
-            className="mt-6 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            className="paper paper-note paper-note-danger mt-6 px-4 py-3 text-sm text-destructive"
           >
             <BrandText text={copy.startError} />
           </p>
@@ -106,7 +106,7 @@ export function GuideChooser({
           <p className="mt-1 text-xs text-muted-foreground"><BrandText text={copy.openCasesHint} /></p>
           <div className="mt-4 space-y-2">
             {openCases.length === 0 ? (
-              <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+              <p className="paper paper-empty px-4 py-6 text-center text-sm text-muted-foreground">
                 <BrandText text={copy.openCasesEmpty} />
               </p>
             ) : (
@@ -114,7 +114,7 @@ export function GuideChooser({
                 <Link
                   key={item.id}
                   href={`/${locale}/guide/${item.id}`}
-                  className="flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card px-4 py-3 transition hover:border-primary/40 hover:bg-primary/5"
+                  className="paper paper-inset paper-link flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-3"
                 >
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-medium"><BrandText text={item.title} /></span>

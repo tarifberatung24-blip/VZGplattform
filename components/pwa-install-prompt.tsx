@@ -75,7 +75,7 @@ export function PwaInstallPrompt() {
   const message = mode === "ios" ? copy.ios : mode === "android" && prompt ? copy.android : copy.browser
 
   return (
-    <aside className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-md rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg sm:inset-x-auto sm:right-4 sm:left-auto">
+    <aside className="paper fixed inset-x-3 bottom-3 z-50 mx-auto max-w-md p-4 sm:inset-x-auto sm:right-4 sm:left-auto">
       <div className="flex items-start gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary"><Download className="size-5" aria-hidden="true" /></div>
         <div className="min-w-0 flex-1"><p className="font-semibold">{copy.title}</p><p className="mt-1 text-sm leading-5 text-muted-foreground">{message}</p></div>

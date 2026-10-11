@@ -154,7 +154,7 @@ export function OfficialFormPanel({
         ) : null}
 
         {isTaxModule && templates.length === 0 ? (
-          <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
+          <p className="paper paper-empty px-3 py-3 text-xs text-muted-foreground">
             <BrandText text={copy.tax_year_required} />
           </p>
         ) : (

@@ -40,10 +40,10 @@ const TAG: Record<Tone, string> = {
   neutral: "bg-[#eef2f7] text-[#475467]",
 }
 const FIGURE: Record<Tone, { box: string; value: string }> = {
-  urgent: { box: "border-[#e6eaf0] bg-white", value: "text-[#b42318]" },
-  warn: { box: "border-[#e6eaf0] bg-white", value: "text-[#b54708]" },
-  good: { box: "border-[#b7ebc9] bg-[#ecfbf2]", value: "text-[#067647]" },
-  neutral: { box: "border-[#e6eaf0] bg-white", value: "text-[#0f1722]" },
+  urgent: { box: "", value: "text-[#b42318]" },
+  warn: { box: "", value: "text-[#b54708]" },
+  good: { box: "paper-note paper-note-success", value: "text-[#067647]" },
+  neutral: { box: "", value: "text-[#0f1722]" },
 }
 const TONE_OF: Record<AttentionTone, Tone> = { urgent: "urgent", soon: "warn", info: "neutral" }
 const DATED: ReadonlySet<AttentionKind> = new Set(["deadline", "cancellation"])
@@ -129,8 +129,7 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
 
   return <div className="horizon-dashboard relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-24 pt-4 text-foreground sm:px-6 sm:pt-6 md:pb-8 lg:px-8">
     <div className="relative z-10 mx-auto min-w-0 max-w-[1100px]">
-      <section aria-labelledby="today-title" className="relative overflow-hidden rounded-[22px] border border-[#e6eaf0] bg-gradient-to-b from-white to-[#f4f6fa] p-5 text-[#0f1722] shadow-[0_24px_48px_-32px_rgb(15_23_34/0.35)] sm:p-7">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_60%_at_100%_0%,rgb(23_74_126/0.10),transparent_60%)]" />
+      <section aria-labelledby="today-title" className="paper p-5 text-[#0f1722] sm:p-7">
         <div className="relative">
           <div className="flex items-center gap-3">
             <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] ${TAG[status]}`}>{copy.status[status]}</span>
@@ -141,7 +140,7 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
 
           <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
             {figures.map((figure, index) => <li key={figure.label} className={index === 0 ? "col-span-2 sm:col-span-1" : undefined}>
-              <Link href={figure.href} className={`block h-full rounded-[14px] border px-3 py-2.5 shadow-[0_6px_16px_-12px_rgb(15_23_34/0.35)] transition-colors hover:border-primary/40 ${FIGURE[figure.tone].box}`}>
+              <Link href={figure.href} className={`paper paper-inset paper-link block h-full px-3 py-2.5 ${FIGURE[figure.tone].box}`}>
                 <span className="block text-[11px] font-semibold leading-tight text-[#6b7480] sm:text-xs">{figure.label}</span>
                 <span className={`mt-1 block whitespace-nowrap text-lg font-extrabold leading-tight tabular-nums sm:text-2xl ${FIGURE[figure.tone].value}`}>{figure.value}</span>
               </Link>

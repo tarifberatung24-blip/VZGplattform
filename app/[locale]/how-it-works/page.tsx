@@ -44,7 +44,7 @@ export default function HowItWorksPage() {
         </div>
 
         <section className="mx-auto mt-12 max-w-4xl" aria-labelledby="how-it-works-communicate">
-          <div className="glass-card flex flex-col items-start gap-5 rounded-3xl p-7 backdrop-blur-md md:flex-row md:items-center md:p-9">
+          <div className="paper flex flex-col items-start gap-5 p-7 md:flex-row md:items-center md:p-9">
             <span
               className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl"
               style={{

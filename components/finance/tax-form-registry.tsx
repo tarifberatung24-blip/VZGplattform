@@ -77,7 +77,7 @@ export function TaxFormRegistry({ forms, locale = "bg" }: { forms: FormRow[]; lo
         validated: "Валидиран",
       }
   return (
-    <section className="mt-10 rounded-md border border-border bg-muted/40 p-5" aria-labelledby="registry-title">
+    <section className="paper paper-inset mt-10 p-5" aria-labelledby="registry-title">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={copy.eyebrow} /></p>
@@ -85,8 +85,8 @@ export function TaxFormRegistry({ forms, locale = "bg" }: { forms: FormRow[]; lo
         </div>
         <Badge variant="outline">{forms.length} {copy.badge}</Badge>
       </div>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground"><BrandText text={copy.intro} /></p><div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs leading-5 text-emerald-200">{copy.sourcePrefix} {forms.filter((form) => form.source_retrieval_status === "RETRIEVED").length} {copy.sourceOf} {forms.length} {copy.sourceSuffix}</div>
-      <div className="mt-5 overflow-x-auto rounded-md border border-border bg-card">
+      <p className="mt-3 text-sm leading-6 text-muted-foreground"><BrandText text={copy.intro} /></p><div className="paper paper-note paper-note-success mt-3 px-3 py-2 text-xs leading-5 text-foreground">{copy.sourcePrefix} {forms.filter((form) => form.source_retrieval_status === "RETRIEVED").length} {copy.sourceOf} {forms.length} {copy.sourceSuffix}</div>
+      <div className="paper mt-5 overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-border bg-muted/60 text-xs text-muted-foreground">
             <tr><th className="px-4 py-3 font-medium"><BrandText text={copy.colForm} /></th><th className="px-4 py-3 font-medium"><BrandText text={copy.colYear} /></th><th className="px-4 py-3 font-medium"><BrandText text={copy.colStatus} /></th><th className="px-4 py-3 font-medium"><BrandText text={copy.colMapping} /></th><th className="px-4 py-3 font-medium"><BrandText text={copy.colPdf} /></th></tr>

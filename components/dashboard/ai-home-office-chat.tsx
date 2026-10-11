@@ -42,7 +42,7 @@ export function AiHomeOfficeChat() {
     }
   }
 
-  return <section className="border border-border bg-card p-4" aria-label="AI чат">
+  return <section className="paper p-4" aria-label="AI чат">
     <div className="flex items-center gap-2"><Bot className="size-4 text-primary" /><h3 className="text-sm font-semibold">Реален AI чат</h3></div>
     <div className="mt-3 max-h-52 space-y-2 overflow-y-auto text-sm">
       {messages.length === 0 && <p className="text-xs leading-5 text-muted-foreground">Попитай за въведените договори, документи или следваща стъпка.</p>}

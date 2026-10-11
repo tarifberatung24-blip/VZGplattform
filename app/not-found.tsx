@@ -4,7 +4,7 @@ import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
 export default function NotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-16">
-      <section className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+      <section className="paper w-full max-w-lg p-8 text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary"><HorizonWordmark className="h-[1.1em]" /></p>
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">Страницата не е намерена</h1>
         <p className="mt-3 text-muted-foreground">Diese Seite wurde nicht gefunden.</p>

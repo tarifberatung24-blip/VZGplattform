@@ -32,7 +32,7 @@ function Frame({
   const copy = getOnboardingCopy(locale)
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-lg rounded-md border border-border bg-card p-8 shadow-sm">
+      <div className="paper w-full max-w-lg p-8">
         <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">
           <BrandText text={copy.brand} />
           <span className="mt-1 block text-[10px] text-muted-foreground"><BrandText text={copy.brandNote} /></span>
@@ -150,7 +150,7 @@ export function TourStep({ userId, step, previous }: StepProps) {
       <p className="mt-2 leading-6 text-muted-foreground"><BrandText text={copy.tour.intro} /></p>
       <ul className="mt-7 space-y-4">
         {copy.tour.items.map((item) => (
-          <li key={item.title} className="rounded-lg border border-border p-4">
+          <li key={item.title} className="paper paper-inset p-4">
             <p className="font-medium text-foreground"><BrandText text={item.title} /></p>
             <p className="mt-1 text-sm leading-6 text-muted-foreground"><BrandText text={item.text} /></p>
           </li>

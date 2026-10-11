@@ -28,7 +28,7 @@ export function ProviderAuditTimeline({
 
   if (!events || events.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="paper p-6">
         <p className="text-sm text-muted-foreground">Няма история на подадени заявки към {providerName}.</p>
       </div>
     )
@@ -36,7 +36,7 @@ export function ProviderAuditTimeline({
 
   return (
     <div className="space-y-8">
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="paper p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Статус на подаването</p>

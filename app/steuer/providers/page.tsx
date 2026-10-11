@@ -82,7 +82,7 @@ export default async function Page() {
       />
       <div className="mt-6"><SteuerTabs /></div>
       <div className="mt-6 space-y-8">
-        <div className="rounded-lg border border-border bg-card p-6">
+        <div className="paper p-6">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{copy.availability}</p>
           <h2 className="mt-2 text-xl font-semibold text-foreground">ELSTER / ERiC</h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -113,11 +113,11 @@ export default async function Page() {
             providerName="ELSTER"
           />
         ) : (
-          <p className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">{copy.none}</p>
+          <p className="paper p-6 text-sm text-muted-foreground">{copy.none}</p>
         )}
 
         {elsterAttempts.length > 0 && (
-          <div className="rounded-lg border border-border bg-card p-6">
+          <div className="paper p-6">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{copy.history}</p>
             <h3 className="mt-2 text-lg font-semibold text-foreground">{copy.recent}</h3>
             <div className="mt-4 space-y-2">

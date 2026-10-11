@@ -105,7 +105,7 @@ export function DocumentAnalyzer({ initialDocuments }: { initialDocuments: Dashb
   }
 
   return (
-    <section className="mt-6 rounded-md border border-border bg-card p-4 shadow-none sm:p-5" aria-labelledby="document-analyzer-title">
+    <section className="paper mt-6 p-4 sm:p-5" aria-labelledby="document-analyzer-title">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="flex gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-md bg-primary/5 text-primary"><FileSearch className="size-5" /></span>
@@ -135,7 +135,7 @@ export function DocumentAnalyzer({ initialDocuments }: { initialDocuments: Dashb
         </div>
       )}
 
-      {message && <div role="alert" className="mt-5 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"><AlertCircle className="mt-0.5 size-4 shrink-0" />{message}</div>}
+      {message && <div role="alert" className="paper paper-note paper-note-danger mt-5 flex items-start gap-2 p-3 text-sm text-destructive"><AlertCircle className="mt-0.5 size-4 shrink-0" />{message}</div>}
 
       {analysis && (
         <article className="mt-6 border-t border-border pt-5">
@@ -148,7 +148,7 @@ export function DocumentAnalyzer({ initialDocuments }: { initialDocuments: Dashb
             <div><h4 className="text-sm font-semibold">{de ? "Erkannte Angaben" : "Разпознати данни"}</h4><dl className="mt-2 space-y-2 text-sm text-muted-foreground"><div className="flex justify-between gap-3 border-b border-border/70 pb-2"><dt>{de ? "Dokumenttyp" : "Тип документ"}</dt><dd className="text-right text-foreground">{analysis.documentType || (de ? "Nicht erkannt" : "Не е разпознат")}</dd></div><div className="flex justify-between gap-3 border-b border-border/70 pb-2"><dt>{de ? "Frist" : "Срок"}</dt><dd className="text-right text-foreground">{analysis.deadline || (de ? "Nicht erkannt" : "Не е разпознат")}</dd></div><div className="flex justify-between gap-3 border-b border-border/70 pb-2"><dt>{de ? "Beträge" : "Суми"}</dt><dd className="text-right text-foreground">{analysis.amounts?.join(", ") || (de ? "Keine" : "Няма")}</dd></div></dl></div>
             <div><h4 className="text-sm font-semibold">{de ? "Nächste Schritte" : "Следващи стъпки"}</h4><ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-muted-foreground">{(analysis.recommendedNextSteps?.length ? analysis.recommendedNextSteps : [de ? "Prüfe das Ergebnis gegen das Originaldokument." : "Провери резултата спрямо оригиналния документ."]).map((item) => <li key={item}>{item}</li>)}</ul></div>
           </div>
-          {(analysis.risks?.length || analysis.missingInformation?.length) ? <div className="mt-5 rounded-md border border-border bg-secondary p-4 text-sm leading-6"><h4 className="font-semibold">{de ? "Achtung" : "Внимание"}</h4><ul className="mt-2 list-disc space-y-1 pl-5">{[...(analysis.risks ?? []), ...(analysis.missingInformation ?? []).map((item) => de ? `Fehlt: ${item}` : `Липсва: ${item}`)].map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
+          {(analysis.risks?.length || analysis.missingInformation?.length) ? <div className="paper paper-inset mt-5 p-4 text-sm leading-6"><h4 className="font-semibold">{de ? "Achtung" : "Внимание"}</h4><ul className="mt-2 list-disc space-y-1 pl-5">{[...(analysis.risks ?? []), ...(analysis.missingInformation ?? []).map((item) => de ? `Fehlt: ${item}` : `Липсва: ${item}`)].map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
           <p className="mt-4 text-xs leading-5 text-muted-foreground">{de ? "Das AI-Ergebnis ist eine vorläufige Information und keine Steuer-, Rechts- oder Finanzberatung. Prüfe das Original und ziehe bei wichtigen Fristen eine qualifizierte Beratung hinzu." : "AI резултатът е предварителен информационен преглед, а не данъчен, правен или финансов съвет. Провери оригинала и при важни срокове потърси квалифициран консултант."}</p>
         </article>
       )}

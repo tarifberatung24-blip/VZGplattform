@@ -85,7 +85,7 @@ export function UnterlagenPanel({
             : null
 
   return (
-    <section className="rounded-md border border-border bg-card p-4 sm:p-5">
+    <section className="paper p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <BrandText text={copy.heading} />
       </h2>

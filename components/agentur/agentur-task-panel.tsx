@@ -54,7 +54,7 @@ export function AgenturTaskPanel({
             : null
 
   return (
-    <section className="rounded-md border border-border bg-card p-4 sm:p-5">
+    <section className="paper p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <BrandText text={copy.heading} />
       </h2>
@@ -62,7 +62,7 @@ export function AgenturTaskPanel({
 
       {definition ? (
         <div className="mt-4 space-y-3">
-          <div className="rounded-md border border-primary/30 bg-primary/5 p-3">
+          <div className="paper paper-note p-3">
             <p className="text-xs font-semibold text-primary"><BrandText text={copy.currentTask} /></p>
             <p className="mt-1 text-sm font-medium"><BrandText text={copy.tasks[definition.task].title} /></p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -98,7 +98,7 @@ export function AgenturTaskPanel({
           </div>
 
           {definition.forms.length === 0 ? (
-            <p className="rounded-md border border-dashed border-border px-3 py-3 text-xs text-muted-foreground">
+            <p className="paper paper-empty px-3 py-3 text-xs text-muted-foreground">
               <BrandText text={copy.noPaperForm} />
             </p>
           ) : (

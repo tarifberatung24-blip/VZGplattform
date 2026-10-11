@@ -64,7 +64,7 @@ export function NotificationInbox({ initial, emailEnabled: initialEmail }: { ini
 
   const dateFormat = new Intl.DateTimeFormat(locale === "bg" ? "bg-BG" : "de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })
 
-  return <section id="notifications" className="mt-6 rounded-md border border-border bg-card p-5" aria-labelledby="inbox-title">
+  return <section id="notifications" className="paper mt-6 p-5" aria-labelledby="inbox-title">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         <span className="relative grid size-10 place-items-center rounded-md bg-primary/10 text-primary">

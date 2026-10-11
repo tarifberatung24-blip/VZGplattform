@@ -94,7 +94,7 @@ export function CaseAssistantPanel({ caseId, module, locale }: { caseId: string;
   }
 
   return (
-    <section className="space-y-3 rounded-lg border border-border p-4">
+    <section className="paper paper-inset space-y-3 p-4">
       <div>
         <h2 className="text-sm font-semibold">{copy.title}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{copy.hint}</p>

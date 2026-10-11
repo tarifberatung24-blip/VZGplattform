@@ -38,12 +38,12 @@ export default function ContactPage() {
         </div>
 
         <div className="flex flex-col gap-8">
-          <section className="flex flex-col gap-6 glass-card rounded-md px-6 py-8 backdrop-blur-md">
+          <section className="paper flex flex-col gap-6 px-6 py-8">
             <h2 className="text-xl font-semibold">
               {isBg ? "Контактни данни" : "Kontaktdaten"}
             </h2>
 
-            <div className="flex flex-col gap-4 glass-card rounded-md p-5 backdrop-blur-md">
+            <div className="paper flex flex-col gap-4 p-5">
               {address.length > 0 && (
                 <address className="not-italic leading-relaxed text-muted-foreground">
                   {address.map((line) => (

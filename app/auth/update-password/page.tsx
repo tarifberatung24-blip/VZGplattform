@@ -81,14 +81,14 @@ export default function UpdatePasswordPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="glass-card w-full max-w-md rounded-md p-8 backdrop-blur-md">
+      <div className="paper w-full max-w-md p-8">
         <Link href="/" className="text-sm font-semibold uppercase tracking-[0.16em] text-primary"><HorizonWordmark className="h-[1.1em]" /><span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span></Link>
         <h1 className="mt-8 text-3xl font-bold text-foreground">Нова парола</h1>
         <p className="mt-2 leading-6 text-muted-foreground">Избери нова парола с поне 8 знака.</p>
         {checkingSession ? (
           <p className="mt-7 text-sm text-muted-foreground" role="status">Проверка на защитения линк…</p>
         ) : success ? (
-          <p className="mt-7 rounded-xl border border-success/30 bg-success/10 p-4 text-sm leading-6 text-foreground" role="status">
+          <p className="paper paper-note paper-note-success mt-7 p-4 text-sm leading-6 text-foreground" role="status">
             Паролата е променена успешно. Пренасочваме те към таблото.
           </p>
         ) : sessionValid ? (

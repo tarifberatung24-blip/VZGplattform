@@ -43,7 +43,7 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
   }
 
   return (
-    <section className="rounded-md border border-border bg-card p-6" aria-labelledby="intake-title">
+    <section className="paper p-6" aria-labelledby="intake-title">
       <div className="flex items-start gap-4">
         <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"><FileUp aria-hidden="true" /></span>
         <div>
@@ -55,7 +55,7 @@ export function DocumentIntake({ document, onSelect, onTextChange, onAnalyze, ca
         </div>
       </div>
       <input ref={inputRef} className="sr-only" type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => void handleFile(event.target.files?.[0])} />
-      <button type="button" className={`mt-5 flex w-full flex-col items-center justify-center rounded-md border border-dashed border-border bg-background p-6 text-center transition ${dragging ? "border-primary bg-primary/5" : ""}`} onClick={() => inputRef.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void handleFile(event.dataTransfer.files[0]) }}>
+      <button type="button" className={`paper ${dragging ? "paper-note" : "paper-empty"} paper-link mt-5 flex w-full flex-col items-center justify-center p-6 text-center`} onClick={() => inputRef.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void handleFile(event.dataTransfer.files[0]) }}>
         <p className="text-sm font-medium text-foreground">{document ? document.name : copy.drop}</p>
         <p className="mt-1 text-xs text-muted-foreground"><BrandText text={copy.limits} /></p>
       </button>
