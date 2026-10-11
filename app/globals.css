@@ -1541,17 +1541,18 @@
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.12);
 }
 
-/* A thin, quiet scrollbar for the workspace sidebar instead of the system one with arrows. */
-.kintex-workspace :is([data-sidebar="content"], [data-slot="sidebar-content"]) {
+/* A thin, quiet scrollbar for the sidebar (desktop and the phone drawer, which renders outside
+   .kintex-workspace) instead of the system one with arrows. */
+:is([data-sidebar="content"], [data-slot="sidebar-content"]) {
   scrollbar-width: thin;
   scrollbar-color: #d8dee6 transparent;
 }
 
-.kintex-workspace :is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar {
+:is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar {
   width: 6px;
 }
 
-.kintex-workspace :is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar-thumb {
+:is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: #d8dee6;
 }
