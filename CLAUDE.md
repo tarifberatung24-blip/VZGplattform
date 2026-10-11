@@ -45,6 +45,21 @@ pnpm i18n:verify      # when copy changes
 pnpm build            # needs network for Google Fonts; CI is authoritative
 ```
 
+## Working style (adapted from karpathy-skills, awesome-claude-code)
+
+1. **Think before coding:** restate the goal and the done-criterion in one line; read the code you will touch first.
+2. **Simplest thing that works:** no new dependency, abstraction or migration without a demonstrated need.
+3. **Surgical changes:** touch only what the task needs; no drive-by refactors of frozen phases.
+4. **Verify, then claim:** run `/verify`; report only what was actually run and observed.
+
+## Project commands and guard
+
+- `/verify` runs every gate and prints the report block; `/ship` commits by name, pushes and opens the PR via REST;
+  `/migration-review` and `/security-review` are the HORIZON checklists.
+- `scripts/claude-guard.mjs` runs before every Bash/Write/Edit call and blocks hard-stop violations anywhere in a
+  command (force push, `reset --hard`, `git add .`, reading `.env`, `supabase db push`, secrets in files). It is
+  tested by `scripts/claude-guard.test.mjs`. If it blocks something legitimate, ask the owner; do not bypass it.
+
 ## Hard stops (also enforced in `.claude/settings.json`)
 
 - No merge, deploy, env/secret, schema/RLS or production change without explicit owner approval.
