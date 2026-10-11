@@ -34,8 +34,8 @@ export function AnimatedHero() {
           />
           <Link
             href={localizedPath("/auth/sign-up", locale)}
-            className="glass-surface inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold backdrop-blur-md transition-transform duration-300 hover:-translate-y-0.5"
-            style={{ color: "var(--thread-core)", borderColor: "color-mix(in srgb, var(--thread-core) 35%, transparent)" }}
+            className="glass-surface inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-foreground backdrop-blur-md transition-transform duration-300 hover:-translate-y-0.5"
+            style={{ borderColor: "color-mix(in srgb, var(--thread-core) 35%, transparent)" }}
           >
             <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: "var(--thread-core)" }} />
             {t.home.hero.trialBadge}
