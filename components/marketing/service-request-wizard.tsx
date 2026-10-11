@@ -311,7 +311,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
             <h1 className="mt-4 max-w-3xl text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl"><BrandText text={copy.title} /></h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground"><BrandText text={copy.intro} /></p>
           </div>
-          <aside className="glass-card rounded-lg p-5 backdrop-blur-md">
+          <aside className="paper p-5">
             <div className="flex items-center gap-3">
               <span className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary"><Clock3 className="size-5" /></span>
               <div>
@@ -319,7 +319,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
                 <p className="text-sm text-muted-foreground"><BrandText text={copy.promise} /></p>
               </div>
             </div>
-            <div className="mt-5 flex items-start gap-3 rounded-md border border-border bg-secondary/50 p-4 text-sm leading-6 text-muted-foreground">
+            <div className="paper paper-inset mt-5 flex items-start gap-3 p-4 text-sm leading-6 text-muted-foreground">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
               {de ? "Keine automatische Entscheidung, kein erfundener Preis. Ein Mensch prueft die Anfrage und bereitet die naechste Aktion vor." : "Без автоматично решение и без измислена цена. Човек проверява заявката и подготвя следващото действие."}
             </div>
@@ -335,7 +335,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
           <span className="text-sm font-medium text-muted-foreground">{progress}%</span>
         </div>
 
-        <form onSubmit={submit} className="glass-card rounded-lg p-5 backdrop-blur-md sm:p-7">
+        <form onSubmit={submit} className="paper p-5 sm:p-7">
           <div className="rounded-lg bg-secondary/60 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.request} {stepIndex + 1} / {steps.length}</p>
             <h2 className="mt-3 text-2xl font-semibold text-foreground">{de ? current.questionDe : current.questionBg}</h2>
@@ -410,8 +410,8 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
             </p>
           )}
 
-          {requestId && <p className="mt-5 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">{de ? "Referenz" : "Референция"}: {requestId}</p>}
-          {message && <p className="mt-5 rounded-md border border-border bg-background p-3 text-sm text-muted-foreground" role="status">{message}</p>}
+          {requestId && <p className="paper paper-note paper-note-success mt-5 p-3 text-sm text-foreground">{de ? "Referenz" : "Референция"}: {requestId}</p>}
+          {message && <p className="paper paper-inset mt-5 p-3 text-sm text-muted-foreground" role="status">{message}</p>}
 
           <div className="mt-7 flex flex-wrap justify-between gap-3">
             <Button type="button" variant="outline" disabled={stepIndex === 0 || submitting} onClick={() => setStepIndex((value) => Math.max(value - 1, 0))}>

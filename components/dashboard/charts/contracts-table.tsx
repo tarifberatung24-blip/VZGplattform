@@ -144,7 +144,7 @@ export function ContractsTable({ contracts }: { contracts: ContractLike[] }) {
   const pageCount = table.getPageCount()
 
   return (
-    <div className="rounded-md border border-border bg-card shadow-none">
+    <div className="paper">
       <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-semibold tracking-tight">
           {de ? "Deine erfassten Verträge" : "Записани ангажименти"}

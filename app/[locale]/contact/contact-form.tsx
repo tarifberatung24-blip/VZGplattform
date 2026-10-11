@@ -14,7 +14,7 @@ export default function ContactForm({ locale }: { locale: string }) {
   const [state, setState] = useState<LeadSubmitResult>(null)
 
   return (
-    <section className="flex flex-col gap-6 glass-card rounded-md px-6 py-8 backdrop-blur-md">
+    <section className="paper flex flex-col gap-6 px-6 py-8">
       <h2 className="text-xl font-semibold">
         {locale === "bg" ? "Изпратете съобщение" : "Nachricht senden"}
       </h2>

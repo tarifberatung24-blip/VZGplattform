@@ -118,7 +118,7 @@ export function DraftReviewPanel({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border border-border p-3">
+      <div className="paper paper-inset p-3">
         <p className="text-sm font-medium">{draft.subject}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">
           {copy.version} {draft.version} ·{" "}

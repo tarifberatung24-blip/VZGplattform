@@ -272,7 +272,7 @@ export function InkassoWizard() {
       </ol>
 
       {error && (
-        <p className="mt-6 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p className="paper paper-note paper-note-danger mt-6 px-4 py-3 text-sm text-destructive">
           {error}
         </p>
       )}
@@ -305,7 +305,7 @@ export function InkassoWizard() {
       {step === 1 && (
         <section className="mt-8 flex flex-col gap-5">
           {needsReview.length > 0 && (
-            <div className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm">
+            <div className="paper paper-note px-4 py-3 text-sm">
               <p className="font-semibold">{c.needsReview}</p>
               <ul className="mt-1 list-inside list-disc text-muted-foreground">
                 {needsReview.map((f) => (
@@ -361,7 +361,7 @@ export function InkassoWizard() {
 
           <ul className="flex flex-col gap-3">
             {evaluation.positions.map((p) => (
-              <li key={p.rule} className="glass-surface rounded-xl p-4">
+              <li key={p.rule} className="paper p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="text-sm font-semibold">
                     <span className="text-muted-foreground">{p.rule}</span> · {p.label}
@@ -396,7 +396,7 @@ export function InkassoWizard() {
       {(step === 3 || step === 4) && (
         <section className="mt-8 flex flex-col gap-6">
           {drafts.map((d) => (
-            <article key={d.action} className="glass-surface rounded-xl p-5">
+            <article key={d.action} className="paper p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold">{d.title}</h2>
                 {d.approved ? (
@@ -477,7 +477,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: str
   const color =
     tone === "high" ? "text-destructive" : tone === "medium" ? "text-primary" : "text-foreground"
   return (
-    <div className="glass-surface rounded-xl p-4">
+    <div className="paper p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className={`mt-1 text-lg font-bold ${color}`}>{value}</p>
     </div>

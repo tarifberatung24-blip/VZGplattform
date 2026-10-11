@@ -126,7 +126,7 @@ export function Layer0Orbit() {
         </div>
       </div>
 
-      <div className="layer0-orbit__card glass-card">
+      <div className="paper layer0-orbit__card">
         <div className="flex items-start gap-3">
           <span className="layer0-orbit__card-icon"><SelectedIcon className="size-5" aria-hidden="true" /></span>
           <div className="min-w-0">

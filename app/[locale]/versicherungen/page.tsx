@@ -64,7 +64,7 @@ export default async function VersicherungenPage({ params }: { params: Promise<{
           </div>
         </section>
 
-        <section className="glass-card mt-12 flex items-start gap-3 rounded-sm p-5 text-sm leading-7 text-muted-foreground backdrop-blur-md">
+        <section className="paper mt-12 flex items-start gap-3 p-5 text-sm leading-7 text-muted-foreground">
           <CircleAlert className="mt-0.5 size-5 shrink-0" />
           <span><BrandText text={copy.notice} /></span>
         </section>

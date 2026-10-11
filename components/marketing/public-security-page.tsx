@@ -34,7 +34,7 @@ export default function PublicSecurityPage({ locale }: PublicSecurityPageProps) 
         <section className="mt-16 grid gap-4 md:grid-cols-3">
           {items.map(([title, description], index) => {
             const Icon = icons[index]
-            return <article key={title} className="glass-card flex h-full flex-col rounded-sm p-7 backdrop-blur-md md:p-8"><Icon className="size-5 text-primary" aria-hidden="true" /><p className="mt-8 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">0{index + 1}</p><h2 className="mt-3 text-xl font-bold">{title}</h2><p className="mt-3 text-sm leading-7 text-muted-foreground"><BrandText text={description} /></p></article>
+            return <article key={title} className="paper flex h-full flex-col p-7 md:p-8"><Icon className="size-5 text-primary" aria-hidden="true" /><p className="mt-8 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">0{index + 1}</p><h2 className="mt-3 text-xl font-bold">{title}</h2><p className="mt-3 text-sm leading-7 text-muted-foreground"><BrandText text={description} /></p></article>
           })}
         </section>
         <div className="mt-10 flex flex-wrap gap-3"><Link href={localizedPath("/auth/sign-up", locale)} className="inline-flex items-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">{isBg ? "Регистрация" : "Registrieren"}</Link><Link href={localizedPath("/contact", locale)} className="inline-flex items-center rounded-md border border-border px-5 py-3 text-sm font-semibold">{isBg ? "Свържи се с нас" : "Kontakt aufnehmen"}</Link></div>

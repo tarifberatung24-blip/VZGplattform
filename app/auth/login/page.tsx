@@ -138,7 +138,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="glass-card w-full max-w-md rounded-lg p-8 backdrop-blur-md">
+      <div className="paper w-full max-w-md p-8">
         <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">
           <HorizonWordmark className="h-[1.1em]" />
           <span className="mt-1 block text-[10px] text-muted-foreground">VZG CONSULT</span>

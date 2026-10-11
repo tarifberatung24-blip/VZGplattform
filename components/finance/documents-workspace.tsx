@@ -80,7 +80,7 @@ export function DocumentsWorkspace({ initialDocuments, loadError }: { initialDoc
           <input className="sr-only" type="file" accept="application/pdf,image/jpeg,image/png" disabled={uploading} onChange={(event) => upload(event.target.files?.[0])} />
         </label>
       </div>
-      {message && <p role="status" className="mt-5 border border-border bg-secondary p-3 text-sm text-muted-foreground">{message}</p>}
+      {message && <p role="status" className="paper paper-inset mt-5 p-3 text-sm text-muted-foreground">{message}</p>}
       <div className="mt-6 divide-y divide-border border-y border-border">
         {documents.length === 0 ? <p className="py-6 text-sm text-muted-foreground">{de ? "Es wurden noch keine Dokumente hochgeladen." : "Все още няма качени документи."}</p> : documents.map((document) => (
           <div key={document.id} className="flex items-center justify-between gap-4 py-4">

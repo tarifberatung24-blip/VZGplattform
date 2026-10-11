@@ -144,14 +144,14 @@ export function MfaSettings() {
   return (
     <div className="mt-6">
       {activeFactorId ? (
-        <div className="rounded-xl border border-success/30 bg-success/10 p-5">
+        <div className="paper paper-note paper-note-success p-5">
           <div className="flex items-center gap-3"><CheckCircle2 className="size-5 text-success" /><p className="font-semibold text-foreground">{copy.enabledTitle}</p></div>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.enabledBody}</p>
           <Button type="button" variant="outline" className="mt-4" disabled={loading} onClick={disable}>{copy.disable}</Button>
         </div>
       ) : enrollment ? (
         <form onSubmit={verify} className="space-y-5">
-          <div className="rounded-xl border border-border bg-background p-5 text-center">
+          <div className="paper paper-inset p-5 text-center">
             {/* Supabase returns the QR code as a data URL for authenticator apps. */}
             <img src={enrollment.qrCode} alt={de ? "QR-Code für Google Authenticator" : "QR код за Google Authenticator"} className="mx-auto size-52 rounded-lg bg-white p-2" />
             <p className="mt-4 text-sm text-muted-foreground">{copy.scanHint}</p>
@@ -161,7 +161,7 @@ export function MfaSettings() {
           <div className="flex flex-wrap gap-3"><Button disabled={loading}>{loading ? copy.verifying : copy.activate}</Button><Button type="button" variant="ghost" disabled={loading} onClick={() => { setEnrollment(null); setCode(""); setError(null) }}>{copy.cancel}</Button></div>
         </form>
       ) : (
-        <div className="rounded-xl border border-primary/25 bg-primary/5 p-5">
+        <div className="paper paper-note p-5">
           <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" /><div><p className="font-semibold text-foreground">{copy.recommendTitle}</p><p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.recommendBody}</p></div></div>
           <Button type="button" className="mt-4" disabled={loading} onClick={startEnrollment}>{copy.setup}</Button>
         </div>

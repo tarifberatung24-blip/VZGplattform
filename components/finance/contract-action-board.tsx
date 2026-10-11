@@ -147,7 +147,7 @@ export function ContractActionBoard({
 
   const stepLabel = (key: string) => copy[key] ?? key
 
-  return <section className="mt-4 space-y-4 rounded-md border border-border bg-card p-5">
+  return <section className="paper mt-4 space-y-4 p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{copy.eyebrow}</p>
@@ -162,30 +162,30 @@ export function ContractActionBoard({
     <p className="text-xs leading-5 text-muted-foreground">{copy.boardHint[board]}</p>
 
     <div className="grid gap-4 md:grid-cols-2">
-      <div className="border border-border p-4">
+      <div className="paper paper-inset p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{copy.summaryLabel}</p>
         <p className="mt-2 text-sm leading-6">{facts.summary || copy.summaryEmpty}</p>
         <p className="mt-3 text-xs text-muted-foreground">{copy.confidence}: {facts.confidence == null ? "—" : `${Math.round(facts.confidence * 100)}%`}</p>
       </div>
-      <div className="border border-border p-4">
+      <div className="paper paper-inset p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{copy.missingLabel}</p>
         {missing.complete ? <p className="mt-2 text-sm text-muted-foreground">{copy.missingComplete}</p> : <div className="mt-2 flex flex-wrap gap-2">{missing.fields.map((field) => <span key={field} className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs text-primary">{copy.missingFields[field] ?? field}</span>)}</div>}
       </div>
     </div>
 
-    <div className="border border-border p-4">
+    <div className="paper paper-inset p-4">
       <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><Sparkles className="size-4 text-primary" aria-hidden="true" />{copy.nextStepsLabel}</p>
-      {steps.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{copy.nextStepsEmpty}</p> : <ul className="mt-3 space-y-2">{steps.map((step) => <li key={step.id} className="flex flex-wrap items-center justify-between gap-2 border border-border bg-background/40 p-3"><div><p className="text-sm font-medium">{stepLabel(step.titleKey)}</p><p className="text-xs text-muted-foreground">{stepLabel(step.detailKey)}</p></div><Button size="sm" variant="outline" onClick={() => runStep(step.view)} disabled={busy}>{stepLabel(step.titleKey)}</Button></li>)}</ul>}
+      {steps.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{copy.nextStepsEmpty}</p> : <ul className="mt-3 space-y-2">{steps.map((step) => <li key={step.id} className="paper paper-inset flex flex-wrap items-center justify-between gap-2 p-3"><div><p className="text-sm font-medium">{stepLabel(step.titleKey)}</p><p className="text-xs text-muted-foreground">{stepLabel(step.detailKey)}</p></div><Button size="sm" variant="outline" onClick={() => runStep(step.view)} disabled={busy}>{stepLabel(step.titleKey)}</Button></li>)}</ul>}
     </div>
 
     <div className="grid gap-4 md:grid-cols-2">
-      <div className="border border-border p-4">
+      <div className="paper paper-inset p-4">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><Quote className="size-4 text-primary" aria-hidden="true" />{copy.evidenceLabel}</p>
         {facts.evidence.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{copy.evidenceEmpty}</p> : <ul className="mt-2 space-y-2">{facts.evidence.map((snippet, index) => <li key={index} className="border-l-2 border-primary/40 pl-3 text-sm italic text-muted-foreground">„{snippet}“</li>)}</ul>}
       </div>
-      <div className="border border-border p-4">
+      <div className="paper paper-inset p-4">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><ShieldCheck className="size-4 text-primary" aria-hidden="true" />{copy.risksLabel}</p>
-        {risks.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{copy.risksEmpty}</p> : <ul className="mt-2 space-y-2">{risks.map((risk) => <li key={risk.id} className="border border-border bg-background/40 p-3"><p className="text-sm font-medium">{stepLabel(risk.titleKey)}</p><p className="text-xs text-muted-foreground">{stepLabel(risk.detailKey)}</p></li>)}</ul>}
+        {risks.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{copy.risksEmpty}</p> : <ul className="mt-2 space-y-2">{risks.map((risk) => <li key={risk.id} className="paper paper-inset p-3"><p className="text-sm font-medium">{stepLabel(risk.titleKey)}</p><p className="text-xs text-muted-foreground">{stepLabel(risk.detailKey)}</p></li>)}</ul>}
       </div>
     </div>
 
@@ -195,7 +195,7 @@ export function ContractActionBoard({
       <Button size="sm" variant="outline" onClick={() => void remove()} disabled={busy}><Trash2 className="mr-2 size-4" aria-hidden="true" />{busy ? copy.deleting : copy.delete}</Button>
     </div>
 
-    {editing && <div className="space-y-3 border border-primary/40 bg-primary/5 p-4">
+    {editing && <div className="paper paper-note space-y-3 p-4">
       <p className="flex items-center gap-2 text-sm font-semibold"><FileText className="size-4 text-primary" aria-hidden="true" />{copy.editTitle}</p>
       <div className="grid gap-3 md:grid-cols-2">
         <Input aria-label={copy.editTitle} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
@@ -214,6 +214,6 @@ export function ContractActionBoard({
       <div className="flex flex-wrap gap-2"><Button size="sm" onClick={() => void save()} disabled={busy}>{busy ? copy.saving : copy.save}</Button><Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={busy}>{copy.cancel}</Button></div>
     </div>}
 
-    {notice && <p role="status" className="border border-border bg-secondary p-3 text-sm text-muted-foreground">{notice}</p>}
+    {notice && <p role="status" className="paper paper-inset p-3 text-sm text-muted-foreground">{notice}</p>}
   </section>
 }

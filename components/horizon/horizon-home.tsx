@@ -38,9 +38,9 @@ function ModuleButton({
   return (
     <Button
       type="submit"
-      variant="outline"
+      variant="ghost"
       disabled={pending}
-      className="h-full min-h-[112px] w-full flex-col items-start justify-between gap-3 whitespace-normal rounded-[18px] bg-card p-4 text-left hover:bg-muted"
+      className="paper paper-link h-full min-h-[112px] w-full flex-col items-start justify-between gap-3 whitespace-normal p-4 text-left"
     >
       <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
         <Icon className="size-[18px]" aria-hidden="true" />
@@ -86,7 +86,7 @@ export function HorizonHome({
       {errorCode ? (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+          className="paper paper-note paper-note-danger mt-4 px-4 py-3 text-sm text-destructive"
         >
           {de
             ? "Der Vorgang konnte nicht geöffnet werden. Bitte erneut versuchen."

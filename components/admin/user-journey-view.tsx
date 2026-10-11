@@ -46,7 +46,7 @@ export function AdminUserJourneyView({ locale, row, events }: { locale: AdminLoc
 
       <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {facts.map((fact) => (
-          <div key={fact.label} className="rounded-lg border border-border bg-card p-3">
+          <div key={fact.label} className="paper paper-inset p-3">
             <dt className="text-xs text-muted-foreground">{fact.label}</dt>
             <dd className="mt-1 text-sm font-medium">{fact.value}</dd>
           </div>

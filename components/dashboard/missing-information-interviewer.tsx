@@ -22,7 +22,7 @@ export function MissingInformationInterviewer({ questions }: Props) {
   if (visibleQuestions.length === 0) return null
 
   return (
-    <section className="mt-4 rounded-md border border-border bg-secondary p-5 text-foreground" aria-labelledby="missing-info-title">
+    <section className="paper paper-inset mt-4 p-5 text-foreground" aria-labelledby="missing-info-title">
       <div className="flex items-start gap-3">
         <CircleHelp className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
         <div>
@@ -33,7 +33,7 @@ export function MissingInformationInterviewer({ questions }: Props) {
       </div>
       <ol className="mt-4 grid gap-2">
         {visibleQuestions.map((question, index) => (
-          <li key={question.id} className="flex items-center justify-between gap-3 rounded-md border border-border bg-card p-3">
+          <li key={question.id} className="paper paper-inset flex items-center justify-between gap-3 p-3">
             <div className="min-w-0">
               <p className="text-xs font-semibold text-primary">{de ? `Frage ${index + 1}` : `Въпрос ${index + 1}`}</p>
               <p className="mt-0.5 font-medium">{question.label}</p>

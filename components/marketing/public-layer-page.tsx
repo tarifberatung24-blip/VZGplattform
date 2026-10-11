@@ -73,7 +73,7 @@ export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
         <section className="mt-16 grid gap-4 md:grid-cols-3" aria-label={content.title}>
           {content.items.map(([title, description], index) => {
             const Icon = icons[index]
-            return <article key={title} className="glass-card flex h-full items-start gap-4 rounded-sm p-7 backdrop-blur-md md:p-8">
+            return <article key={title} className="paper flex h-full items-start gap-4 p-7 md:p-8">
               <Icon className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
               <div className="min-w-0">
                 <div className="flex items-baseline gap-4">

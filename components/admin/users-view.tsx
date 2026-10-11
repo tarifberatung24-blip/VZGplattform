@@ -22,12 +22,12 @@ export function AdminUsersView({ locale, rows, error }: { locale: AdminLocale; r
         <p className="mt-2 text-sm font-medium">{copy.stats(rows.length, needHelp)}</p>
         <p className="mt-1 text-xs text-muted-foreground">{copy.privacy}</p>
       </header>
-      {error ? <p role="alert" className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{`${copy.partial} ${error}`}</p> : null}
+      {error ? <p role="alert" className="paper paper-note paper-note-danger mt-4 p-3 text-sm text-destructive">{`${copy.partial} ${error}`}</p> : null}
       {rows.length === 0 ? <p className="mt-6 text-sm text-muted-foreground">{copy.empty}</p> : (
         <ul className="mt-4 space-y-3">
           {rows.map((row) => (
             <li key={row.id}>
-              <Link href={`/${locale}/admin/users/${row.id}`} className="block rounded-lg border border-border bg-card p-4 transition-colors hover:bg-muted/40">
+              <Link href={`/${locale}/admin/users/${row.id}`} className="paper paper-link block p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-foreground">{row.name ?? row.email ?? row.id}</p>

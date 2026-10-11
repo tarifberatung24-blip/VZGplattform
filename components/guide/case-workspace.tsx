@@ -69,7 +69,7 @@ function Panel({
 }) {
   const hasContent = Array.isArray(children) ? children.length > 0 : Boolean(children)
   return (
-    <section id={id} className="rounded-md border border-border bg-card p-4 sm:p-5">
+    <section id={id} className="paper p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         {title}
       </h2>
@@ -77,7 +77,7 @@ function Panel({
         {hasContent ? (
           children
         ) : (
-          <p className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
+          <p className="paper paper-empty px-3 py-4 text-center text-xs text-muted-foreground">
             {empty}
           </p>
         )}
@@ -235,7 +235,7 @@ export function CaseWorkspace({
 
   return (
     <div className="mt-6 space-y-4">
-      <section className="rounded-md border border-border bg-card p-4 sm:p-5" aria-label={de ? "Vorgangsstatus" : "Състояние на случая"}>
+      <section className="paper p-4 sm:p-5" aria-label={de ? "Vorgangsstatus" : "Състояние на случая"}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -252,7 +252,7 @@ export function CaseWorkspace({
         </div>
         <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {steps.map((step) => (
-            <div key={step.label} className="rounded-md border border-border bg-background p-3">
+            <div key={step.label} className="paper paper-inset p-3">
               <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 {step.label}
               </dt>
