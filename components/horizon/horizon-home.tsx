@@ -27,10 +27,12 @@ function ModuleButton({
   Icon,
   label,
   pendingLabel,
+  status,
 }: {
   Icon: LucideIcon
   label: string
   pendingLabel: string
+  status: string
 }) {
   const { pending } = useFormStatus()
   return (
@@ -38,12 +40,15 @@ function ModuleButton({
       type="submit"
       variant="outline"
       disabled={pending}
-      className="h-auto min-h-20 w-full justify-start gap-3 whitespace-normal px-4 py-4 text-left"
+      className="h-full min-h-[112px] w-full flex-col items-start justify-between gap-3 whitespace-normal rounded-[18px] bg-card p-4 text-left hover:bg-muted"
     >
-      <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary/5 text-primary">
-        <Icon className="size-4" />
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+        <Icon className="size-[18px]" aria-hidden="true" />
       </span>
-      <span className="text-sm font-medium">{pending ? pendingLabel : label}</span>
+      <span className="block">
+        <span className="block text-sm font-semibold leading-snug">{pending ? pendingLabel : label}</span>
+        <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">{status}</span>
+      </span>
     </Button>
   )
 }
@@ -89,7 +94,8 @@ export function HorizonHome({
         </p>
       ) : null}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {/* Two columns on a phone, so the five modules fit on about one screen instead of a long list. */}
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {homeModules.map((definition) => {
           const Icon = icons[homeModuleIcon[definition.module]] ?? FileSearch
           const count = caseCounts[definition.module] ?? 0
@@ -101,19 +107,8 @@ export function HorizonHome({
                 Icon={Icon}
                 label={guideModuleLabel(locale, definition.module)}
                 pendingLabel={copy.starting}
+                status={count > 0 ? `${count} ${caseCountNoun(locale, count)}` : notStartedLabel(locale)}
               />
-              <p className="mt-1 flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground">
-                {count > 0 ? (
-                  <>
-                    <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-foreground">
-                      {count}
-                    </span>
-                    <span>{caseCountNoun(locale, count)}</span>
-                  </>
-                ) : (
-                  <span>{notStartedLabel(locale)}</span>
-                )}
-              </p>
             </form>
           )
         })}
