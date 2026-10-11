@@ -1508,3 +1508,42 @@
   -webkit-mask-position: left bottom;
   mask-position: left bottom;
 }
+
+/*
+ * Customer dashboard surface (after shadcn/ui's dashboard-01 block, MIT).
+ * The global theme paints page and cards the same colour, with 4-6px corners and
+ * no shadow. Inside `.horizon-dashboard` only: a tinted page, lifted cards, lighter
+ * borders, larger corners and a soft shadow. Colour utilities read the variables,
+ * so redefining them here restyles every card on the dashboard; corner utilities
+ * are compiled to fixed values, so they are overridden by class. Other pages keep
+ * the global theme.
+ */
+.horizon-dashboard {
+  --background: #f4f6fa;
+  --card: #ffffff;
+  --border: rgb(15 23 42 / 0.08);
+  --muted: #eef1f6;
+}
+
+.dark .horizon-dashboard {
+  --background: #050507;
+  --card: #111115;
+  --border: rgb(255 255 255 / 0.08);
+  --muted: #1a1a1f;
+}
+
+.horizon-dashboard .rounded-md {
+  border-radius: 12px;
+}
+
+.horizon-dashboard .rounded-lg {
+  border-radius: 18px;
+}
+
+.horizon-dashboard .bg-card {
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.12);
+}
+
+.dark .horizon-dashboard .bg-card {
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
+}
