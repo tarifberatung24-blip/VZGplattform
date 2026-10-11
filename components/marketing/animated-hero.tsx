@@ -4,14 +4,14 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
-import { LetterUntangle } from "@/components/marketing/letter-untangle"
-import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
+import { LetterEnvelope } from "@/components/marketing/letter-envelope"
+import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 /**
  * Layer 0 home hero: headline and two buttons, nothing else.
  *
- * Next to it, `LetterUntangle` shows what the product does: a German letter
- * that turns into three plain cards. The orbit map (`layer0-orbit.tsx`) is kept
+ * Next to it, `LetterEnvelope` shows what the product does: a German letter
+ * in its envelope and the same case in the HORIZON dashboard. The orbit map (`layer0-orbit.tsx`) is kept
  * in the repository but not shown until its redesign is approved by the owner.
  *
  * The animated network is no longer owned by this component: it lives in the
@@ -23,8 +23,8 @@ export function AnimatedHero() {
   const { t, locale } = useLanguage()
 
   return (
-    <div className="layer0-hero relative flex min-h-[100dvh] flex-col overflow-hidden">
-      <main className="relative z-10 grid flex-1 items-center gap-14 px-6 pt-28 pb-20 sm:px-12 sm:pt-32 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:px-20">
+    <div className="layer0-hero relative flex min-h-[calc(100dvh-5rem)] flex-col overflow-hidden">
+      <main className="relative z-10 grid flex-1 items-center gap-14 px-6 pt-28 pb-16 sm:px-12 sm:pt-28 lg:pt-10 lg:pb-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12 lg:px-20">
         <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center lg:mx-0 lg:items-start lg:text-left">
           {/* Soft halo so the background threads never run through the headline. */}
           <div
@@ -58,11 +58,11 @@ export function AnimatedHero() {
               href={localizedPath("/how-it-works", locale)}
               className="glass-surface inline-flex items-center gap-2 rounded-lg px-6 py-3 backdrop-blur-md text-sm font-semibold text-foreground transition-transform duration-300 hover:-translate-y-0.5"
             >
-              {t.home.hero.howCta}
+              <BrandText text={t.home.hero.howCta} />
             </Link>
           </div>
         </div>
-        <LetterUntangle locale={locale} />
+        <LetterEnvelope locale={locale} />
       </main>
     </div>
   )
