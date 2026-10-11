@@ -11,7 +11,7 @@ const localizedStaticPaths = new Set([
   "/protected", "/assistant", "/konto/sicherheit", "/steuer", "/steuer/providers", "/steuer/review",
   "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/how-it-works",
   "/affiliate-hinweis", "/widerruf", "/app", "/functions", "/anfrage", "/zayavka",
-  "/email-generator", "/pruefung", "/security", "/versicherungen", "/admin/editor",
+  "/email-generator", "/pruefung", "/security", "/versicherungen", "/admin/editor", "/admin/users",
 ])
 
 function isKnownLocalizedPath(pathname: string) {
@@ -22,6 +22,7 @@ function isKnownLocalizedPath(pathname: string) {
   if (segments[0] === "angebote" && segments.length === 2) return isAffiliateOfferId(segments[1])
   if (segments[0] === "go" && segments.length === 2) return isAffiliateOfferId(segments[1])
   if (segments[0] === "p" && segments.length === 2) return true
+  if (segments[0] === "admin" && segments[1] === "users" && segments.length === 3) return true
   if (segments[0] === "guide" && (segments.length === 1 || segments.length === 2)) return true
   if (segments[0] === "onboarding" && ["profile", "tour", "finish"].includes(segments[1] ?? "")) return true
   return false
