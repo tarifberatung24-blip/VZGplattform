@@ -34,10 +34,7 @@ export function AnimatedHero() {
           />
           <h1 className="font-display text-balance text-[clamp(2.4rem,6vw,5rem)] font-black leading-[1.02] tracking-[-0.04em] text-foreground">
             <HorizonWordmark className="block h-[clamp(2.6rem,6vw,4.6rem)]" />
-            <span
-              className="mt-2 block text-[clamp(1.5rem,3.4vw,2.6rem)] leading-[1.1] tracking-[-0.02em]"
-              style={{ color: "var(--thread-core)" }}
-            >
+            <span className="mt-3 block text-[clamp(1.5rem,3.4vw,2.6rem)] font-semibold leading-[1.15] tracking-[-0.015em] text-muted-foreground">
               {t.home.hero.headline2}
             </span>
           </h1>
