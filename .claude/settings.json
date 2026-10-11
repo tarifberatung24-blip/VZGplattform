@@ -41,6 +41,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/claude-guard.mjs"
+          }
+        ]
+      }
     ]
   }
 }
