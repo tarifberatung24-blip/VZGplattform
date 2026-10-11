@@ -1,9 +1,9 @@
 "use client"
 
 import { useLayoutEffect, useRef, useState, type ComponentType, type CSSProperties } from "react"
-import { FolderKanban, Lightbulb, SearchCheck, Target } from "lucide-react"
+import { Check, FolderKanban, Lightbulb, SearchCheck, Target } from "lucide-react"
 import type { HowItWorksStage, HowItWorksStageId } from "@/components/marketing/how-it-works-copy"
-import { BrandText } from "@/components/brand/horizon-wordmark"
+import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 
 const stageIcons: Record<HowItWorksStageId, ComponentType<{ className?: string; "aria-hidden"?: boolean }>> = {
   understand: Lightbulb,
@@ -62,49 +62,29 @@ export function buildPathGeometry({ width, height }: Size, columns: number) {
 function StageCard({ stage, index, stepWord }: { stage: HowItWorksStage; index: number; stepWord: string }) {
   const Icon = stageIcons[stage.id]
   return (
-    <div className="group h-full [perspective:1200px]">
-      <article
-        className="relative flex h-full flex-col rounded-3xl border border-border/70 bg-card/85 p-6 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_18px_40px_-18px_rgba(0,40,100,0.35)] backdrop-blur-md transition-transform duration-500 ease-out [transform-style:preserve-3d] group-hover:[transform:rotateX(7deg)_rotateY(-9deg)_translateY(-6px)] group-focus-within:[transform:rotateX(7deg)_rotateY(-9deg)_translateY(-6px)] motion-reduce:transition-none motion-reduce:group-hover:[transform:none] motion-reduce:group-focus-within:[transform:none]"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 translate-y-3 scale-[0.96] rounded-3xl opacity-70 blur-md"
-          style={{ background: "color-mix(in srgb, var(--thread-core) 22%, transparent)" }}
-        />
-        <div className="flex items-center justify-between gap-3 [transform:translateZ(42px)]">
-          <span
-            className="inline-flex size-14 items-center justify-center rounded-2xl shadow-[0_12px_24px_-12px_rgba(0,40,100,0.55)]"
-            style={{
-              color: "var(--thread-core)",
-              background: "color-mix(in srgb, var(--thread-core) 10%, var(--card))",
-              border: "1px solid color-mix(in srgb, var(--thread-core) 30%, transparent)",
-            }}
-          >
-            <Icon className="size-7" aria-hidden={true} />
+    <div className="hiw-sheet-wrap group h-full" style={{ "--tilt": `${[-1.4, 1, -0.8, 1.3][index % 4]}deg` } as CSSProperties}>
+      <article className="hiw-sheet">
+        <header className="hiw-sheet-head">
+          <HorizonWordmark className="hiw-sheet-mark" />
+          <span className="hiw-sheet-ref">
+            {stepWord} {index + 1} / 4
           </span>
-          {stage.soon ? (
-            <span
-              className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em]"
-              style={{
-                color: "var(--thread-core)",
-                background: "color-mix(in srgb, var(--thread-core) 12%, transparent)",
-              }}
-            >
-              {stage.soon}
-            </span>
-          ) : null}
+        </header>
+        <div className="hiw-sheet-subject">
+          <span className="hiw-sheet-icon">
+            <Icon className="size-[1.35em]" aria-hidden={true} />
+          </span>
+          <h3 className="hiw-sheet-label">{stage.label}</h3>
+          {stage.soon ? <span className="hiw-sheet-stamp">{stage.soon}</span> : null}
         </div>
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground [transform:translateZ(28px)]">
-          {stepWord} {index + 1}
+        <p className="hiw-sheet-title">{stage.title}</p>
+        <p className="hiw-sheet-body">
+          <BrandText text={stage.body} />
         </p>
-        <h3 className="mt-1 text-2xl font-black uppercase tracking-[0.04em] [transform:translateZ(28px)]" style={{ color: "var(--thread-core)" }}>
-          {stage.label}
-        </h3>
-        <p className="mt-2 text-base font-semibold leading-6 text-foreground [transform:translateZ(20px)]">{stage.title}</p>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground [transform:translateZ(12px)]"><BrandText text={stage.body} /></p>
-        <ul className="mt-auto flex flex-wrap gap-2 pt-5 [transform:translateZ(16px)]">
+        <ul className="hiw-sheet-rows">
           {stage.chips.map((chip) => (
-            <li key={chip} className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-foreground">
+            <li key={chip}>
+              <Check className="size-[1.05em] shrink-0" aria-hidden={true} />
               {chip}
             </li>
           ))}
