@@ -25,6 +25,17 @@ function currentVisitId(): string {
   return visitId
 }
 
+async function fetchEnabled(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/journey", { cache: "no-store" })
+    if (!response.ok) return false
+    const body = (await response.json()) as { enabled?: boolean }
+    return body.enabled === true
+  } catch {
+    return false
+  }
+}
+
 /**
  * Asks the server whether this visitor is signed in and has recording on. A "yes" is kept for the
  * page load; a "no" is kept for 30 seconds, so signing in without a reload is noticed quickly.
@@ -32,15 +43,11 @@ function currentVisitId(): string {
 function isEnabled(): Promise<boolean> {
   if (status && (status.enabled || Date.now() - status.at < NEGATIVE_TTL_MS)) return Promise.resolve(status.enabled)
   if (!pending) {
-    pending = fetch("/api/journey", { cache: "no-store" })
-      .then((response) => (response.ok ? (response.json() as Promise<{ enabled?: boolean }>) : { enabled: false }))
-      .then((body) => body.enabled === true)
-      .catch(() => false)
-      .then((enabled) => {
-        status = { enabled, at: Date.now() }
-        pending = null
-        return enabled
-      })
+    pending = fetchEnabled().then((enabled) => {
+      status = { enabled, at: Date.now() }
+      pending = null
+      return enabled
+    })
   }
   return pending
 }

@@ -12,7 +12,11 @@ const buckets = new Map<string, { count: number; resetAt: number }>()
 function withinRateLimit(userId: string, now = Date.now()): boolean {
   const bucket = buckets.get(userId)
   if (!bucket || bucket.resetAt <= now) {
-    if (buckets.size > 5000) for (const [key, value] of buckets) if (value.resetAt <= now) buckets.delete(key)
+    if (buckets.size > 5000) {
+      for (const [key, value] of buckets) {
+        if (value.resetAt <= now) buckets.delete(key)
+      }
+    }
     buckets.set(userId, { count: 1, resetAt: now + 60_000 })
     return true
   }
