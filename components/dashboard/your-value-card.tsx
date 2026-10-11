@@ -8,6 +8,7 @@ import { localizedPath } from "@/lib/i18n/routing"
 import { formatMoney, formatShortDate } from "@/lib/dashboard/contracts-data"
 import type { YourValue } from "@/lib/value/your-value"
 import type { GrundversorgungMatch } from "@/lib/value/grundversorgung"
+import { BrandText } from "@/components/brand/horizon-wordmark"
 
 export type YourValueCardProps = {
   value: YourValue
@@ -44,7 +45,7 @@ export function YourValueCard({ value, grundversorgung }: YourValueCardProps) {
 
   return <section className="mt-6 rounded-md border border-border bg-card p-5 shadow-none" aria-labelledby="your-value-title">
     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{de ? "Dein Nutzen" : "Твоята стойност"}</p>
-    <h2 id="your-value-title" className="mt-1 text-xl font-semibold tracking-tight">{de ? "Was HORIZON für dich im Blick behält" : "Какво HORIZON следи за теб"}</h2>
+    <h2 id="your-value-title" className="mt-1 text-xl font-semibold tracking-tight"><BrandText text={de ? "Was HORIZON für dich im Blick behält" : "Какво HORIZON следи за теб"} /></h2>
 
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
       {metrics.map(({ icon: Icon, label, value: metric, note }) => <article key={label} className="rounded-md border border-border bg-background p-4">
@@ -78,7 +79,7 @@ export function YourValueCard({ value, grundversorgung }: YourValueCardProps) {
       </p>}
 
     <p className="mt-4 text-xs text-muted-foreground">{de
-      ? "Nur bestätigte Daten. Eine Ersparnis zeigen wir erst, wenn ein echtes Angebot vorliegt."
-      : "Само потвърдени данни. Спестяване показваме едва когато има реална оферта."}</p>
+      ? "Nur bestätigte Daten. Eine Ersparnis zeigen wir erst, wenn der Wechsel zu einem niedrigeren Preis bestätigt ist."
+      : "Само потвърдени данни. Спестяване показваме едва когато смяната към по-ниска цена е потвърдена."}</p>
   </section>
 }
