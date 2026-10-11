@@ -9,6 +9,8 @@ import { LOCALE_COOKIE_KEY } from "@/lib/i18n/language-context"
 import { isLocale, defaultLocale } from "@/lib/i18n/dictionaries"
 import { createCaseEngine } from "@/lib/horizon/case"
 import { resolveCaseModule } from "@/lib/horizon/case/module"
+import { computeYourValue, type ValueSaving } from "@/lib/value/your-value"
+import { findGrundversorgung, type GrundversorgungInput } from "@/lib/value/grundversorgung"
 
 export default async function DashboardPage({
   searchParams,
@@ -35,7 +37,7 @@ export default async function DashboardPage({
 
   const householdId = await ensureHousehold(supabase)
   const engine = await createCaseEngine()
-  const [profileResult, contractsResult, documentsResult, reviewDocumentsResult, deadlinesResult, casesResult, errorParam] = await Promise.all([
+  const [profileResult, contractsResult, documentsResult, reviewDocumentsResult, deadlinesResult, casesResult, errorParam, energyResult, savingsResult] = await Promise.all([
     supabase.from("profiles").select("completeness,employment_status,household_size,monthly_income,monthly_fixed_costs").eq("id", user.id).maybeSingle(),
     supabase.from("contracts").select("id,title,category,provider_name,monthly_amount,status,created_at,end_date,cancellation_deadline,review_status").eq("household_id", householdId).order("created_at", { ascending: false }).limit(100),
     supabase.from("documents").select("id,original_filename,processing_status,created_at,size_bytes").eq("household_id", householdId).order("created_at", { ascending: false }).limit(6),
@@ -43,6 +45,9 @@ export default async function DashboardPage({
     supabase.from("deadlines").select("id,title,due_at,status,created_at").eq("user_id", user.id).order("due_at", { ascending: true, nullsFirst: false }).limit(5),
     engine.repository ? engine.repository.listMine(100) : Promise.resolve({ data: [], error: null }),
     searchParams ? searchParams : Promise.resolve({} as { error?: string }),
+    supabase.from("contracts").select("id,title,category,provider_name,notes,extracted_facts").eq("household_id", householdId).in("category", ["electricity", "gas", "energy", "strom"]).limit(50),
+    // Before the revenue-attribution migration this table is absent; the error is treated as "no savings yet".
+    supabase.from("household_savings").select("status,annual_saving_cents").eq("user_id", user.id),
   ])
 
   // Counted by resolved module, so a pre-P5 row without `horizon_module` is
@@ -53,6 +58,9 @@ export default async function DashboardPage({
     caseCounts[key] = (caseCounts[key] ?? 0) + 1
   }
 
+  const yourValue = computeYourValue(contractsResult.data ?? [], savingsResult.error ? [] : ((savingsResult.data ?? []) as ValueSaving[]))
+  const grundversorgung = findGrundversorgung((energyResult.data ?? []) as GrundversorgungInput[])
+
   return <VzgDashboard
     firstName={user.user_metadata?.first_name}
     profile={profileResult.data}
@@ -62,5 +70,7 @@ export default async function DashboardPage({
     reminders={deadlinesResult.data ?? []}
     caseCounts={caseCounts}
     moduleError={errorParam.error ?? null}
+    yourValue={yourValue}
+    grundversorgung={grundversorgung}
   />
 }

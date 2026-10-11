@@ -9,12 +9,19 @@ vi.mock("../../../lib/affiliate/analytics", () => ({
 vi.mock("../../../lib/affiliate/analytics-client", () => ({
   createAffiliateAnalyticsClient: () => ({ __fake: true }),
 }))
+const resolveClickOwner = vi.fn().mockResolvedValue({ userId: null, optimizeSessionId: null })
+vi.mock("../../../lib/affiliate/click-owner", () => ({
+  resolveClickOwner: (...args: unknown[]) => resolveClickOwner(...args),
+}))
 
 import { GET } from "./route"
 
 afterEach(() => {
   vi.unstubAllEnvs()
   recordAffiliateClick.mockClear()
+  recordAffiliateClick.mockResolvedValue(true)
+  resolveClickOwner.mockClear()
+  resolveClickOwner.mockResolvedValue({ userId: null, optimizeSessionId: null })
 })
 
 function params(offer: string) {
@@ -70,5 +77,47 @@ describe("affiliate go redirect", () => {
     expect(response.status).toBe(404)
     expect(response.headers.get("location")).toBeNull()
     expect(recordAffiliateClick).not.toHaveBeenCalled()
+  })
+
+  it("attributes the click to the signed-in user and the Optimize session", async () => {
+    vi.stubEnv("AFFILIATE_ENERGY_URL", "https://partner.example/energy")
+    const sessionId = "11111111-2222-4333-8444-555555555555"
+    resolveClickOwner.mockResolvedValue({ userId: "user-1", optimizeSessionId: sessionId })
+
+    const response = await GET(new Request(`http://localhost/go/energy?s=${sessionId}`), { params: params("energy") })
+
+    expect(response.status).toBe(302)
+    expect(resolveClickOwner).toHaveBeenCalledWith(sessionId)
+    expect(recordAffiliateClick.mock.calls[0][1]).toMatchObject({ offerId: "energy", userId: "user-1", optimizeSessionId: sessionId })
+    // Without a documented sub-ID parameter the deeplink stays exactly as configured.
+    expect(response.headers.get("location")).toBe("https://partner.example/energy")
+  })
+
+  it("ignores a malformed session parameter", async () => {
+    vi.stubEnv("AFFILIATE_ENERGY_URL", "https://partner.example/energy")
+    await GET(new Request("http://localhost/go/energy?s=not-a-uuid"), { params: params("energy") })
+    expect(resolveClickOwner).toHaveBeenCalledWith(null)
+  })
+
+  it("appends the click id under the partner's documented sub-ID parameter", async () => {
+    vi.stubEnv("AFFILIATE_ENERGY_URL", "https://partner.example/energy?aff=42")
+    vi.stubEnv("AFFILIATE_ENERGY_SUBID_PARAM", "subid")
+
+    const response = await GET(new Request("http://localhost/go/energy"), { params: params("energy") })
+
+    const clickId = recordAffiliateClick.mock.calls[0][1].id as string
+    expect(clickId).toMatch(/^[0-9a-f-]{36}$/)
+    expect(response.headers.get("location")).toBe(`https://partner.example/energy?aff=42&subid=${clickId}`)
+  })
+
+  it("does not append a sub-ID when the click could not be stored", async () => {
+    vi.stubEnv("AFFILIATE_ENERGY_URL", "https://partner.example/energy")
+    vi.stubEnv("AFFILIATE_ENERGY_SUBID_PARAM", "subid")
+    recordAffiliateClick.mockResolvedValue(false)
+
+    const response = await GET(new Request("http://localhost/go/energy"), { params: params("energy") })
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get("location")).toBe("https://partner.example/energy")
   })
 })

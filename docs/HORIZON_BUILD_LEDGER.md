@@ -1321,6 +1321,63 @@ after a module meets the full DONE definition.
 
 ---
 
+## REVENUE ATTRIBUTION — CLICK OWNER, SAVINGS LEDGER, OPERATOR SUMMARY
+
+- **ID:** outside P0–P17; follows the affiliate revenue loop (owner-approved 2026-10-11)
+- **SYSTEM:** revenue attribution
+- **TARGET ROUTES:** `/go/{offer}`, `/api/optimize/{sessionId}/confirm`,
+  `/api/affiliate/savings`, `/api/affiliate/summary`
+- **CURRENT STATUS:** IMPLEMENTED (code + tests); migration written, NOT applied
+- **CURRENT IMPLEMENTATION:** branch `feat/revenue-attribution`:
+  - Optimize confirm now redirects through `/go/{offer}?s={sessionId}` instead of the raw
+    partner URL, so the signed-in, highest-intent path is measured.
+  - `/go/{offer}` records the signed-in user and the Optimize session (ownership checked under
+    the user's RLS, `lib/affiliate/click-owner.ts`); anonymous clicks stay anonymous.
+  - The click id is appended to the deeplink only under a partner-documented
+    `<OFFER>_SUBID_PARAM`, and only when the click was stored; otherwise the exact deeplink.
+  - `lib/affiliate/savings.ts` + `POST/PATCH /api/affiliate/savings` — evidenced savings
+    (`partner_confirmation` / `new_contract_document`), real reductions only, `secured →
+    realized | cancelled`, one row per Optimize session.
+  - `lib/affiliate/summary.ts` + `GET /api/affiliate/summary?days=` — clicks (attributed vs
+    anonymous), commissions by status, secured/realized savings, per offer.
+  - Migration `20261011090000_revenue_attribution` — additive: nullable `user_id` and
+    `optimize_session_id` on `affiliate_click_events`; new `household_savings` (owner `SELECT`
+    under RLS, writes service-role only). Code degrades safely until it is applied.
+- **MISSING:** owner-side migration apply; partner sub-ID parameter names; Datenschutz text
+  for linking a signed-in user's click to their account; the user-facing "your value" view
+  (next phase).
+- **DEPENDENCIES:** `AFFILIATE_OPERATOR_SECRET`; partner deeplinks.
+- **BLOCKERS:** migration apply is an owner action.
+- **DONE CRITERIA:** a signed-in Optimize click is stored with user and session; a partner
+  conversion reported by sub-ID resolves to that click; an evidenced saving is stored and shown
+  in the operator summary — verified on the live site.
+- **FROZEN:** NO
+
+---
+
+## YOUR VALUE + GRUNDVERSORGUNGS-CHECK — DASHBOARD
+
+- **ID:** outside P0–P17; first step of the subscription plan (owner-approved 2026-10-11)
+- **SYSTEM:** dashboard value view
+- **TARGET ROUTES:** `/{locale}/dashboard`, `/{locale}/vertraege?optimize={contractId}`
+- **CURRENT STATUS:** IMPLEMENTED (code + tests); depends on the revenue-attribution migration
+  for savings, degrades to "no savings yet" without it
+- **CURRENT IMPLEMENTATION:** branch `feat/your-value` (stacked on `feat/revenue-attribution`):
+  - `lib/value/your-value.ts` — deadlines in the next 90 days, next deadline, secured and
+    realized annual savings from `household_savings` only.
+  - `lib/value/grundversorgung.ts` — evidence-only detection: an electricity/gas contract whose
+    title, notes or extracted facts say Grundversorgung/Ersatzversorgung. No guessed tariff, no
+    estimated saving.
+  - `components/dashboard/your-value-card.tsx` on the dashboard; the Grundversorgung CTA deep
+    links into the existing Optimize flow, which leaves through `/go/{offer}`.
+- **MISSING:** owner review of the BG/DE copy (including the statement that Grundversorgung is
+  usually among the most expensive tariffs); Humanizer pass; live visual verification.
+- **OWNER DECISIONS RECORDED:** subscription via Stripe; 30-day trial without card; free tier
+  after the trial follows option A (up to 3 contracts) unless the owner says otherwise.
+- **FROZEN:** NO
+
+---
+
 ## Standing rules for this ledger
 
 1. Update the ledger in the same change that advances a phase's real status.

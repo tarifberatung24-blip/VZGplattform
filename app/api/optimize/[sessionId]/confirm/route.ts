@@ -3,6 +3,7 @@ import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { ensureHousehold } from "@/lib/supabase/household"
 import { partnerDetails, type OptimizeCategory } from "@/lib/optimize/flow"
+import { optimizeGoPath } from "@/lib/affiliate/attribution"
 
 const bodySchema = z.object({ confirm: z.literal(true) }).strict()
 const sessionIdSchema = z.string().uuid()
@@ -25,7 +26,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ses
     if (updateError || !updated) return NextResponse.json({ code: "OPTIMIZE_CONFIRM_FAILED" }, { status: 502 })
     const householdId = await ensureHousehold(supabase)
     await supabase.from("platform_audit_events").insert({ household_id: householdId, actor_user_id: user.id, entity_type: "optimize_session", entity_id: sessionId, event_type: "optimize.confirmed", event_summary: "User confirmed Optimize Flow", metadata: { partner_id: partner.id, partner_configured: partner.configured } })
-    return NextResponse.json({ session: updated, partner_configured: partner.configured, redirect_url: partner.url, disclosure: partner.url ? "The final contract is concluded with the partner." : "No approved partner link is configured. No redirect was performed." })
+    return NextResponse.json({ session: updated, partner_configured: partner.configured, redirect_url: partner.url ? optimizeGoPath(partner.id, sessionId) : null, disclosure: partner.url ? "The final contract is concluded with the partner." : "No approved partner link is configured. No redirect was performed." })
   } catch {
     return NextResponse.json({ code: "OPTIMIZE_CONFIRM_FAILED" }, { status: 502 })
   }
