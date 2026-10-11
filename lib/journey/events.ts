@@ -1,8 +1,8 @@
 import { z } from "zod"
 
 export const JOURNEY_PURPOSE = "product_journey" as const
-/** Bump when the consent wording changes, so each consent row names the text it was given for. */
-export const JOURNEY_TEXT_VERSION = "2026-10-11" as const
+/** Bump when the wording of the notice about the usage log changes. */
+export const JOURNEY_NOTICE_VERSION = "2026-10-11" as const
 
 export const JOURNEY_EVENTS = ["page_view", "client_error"] as const
 
