@@ -1517,19 +1517,16 @@
  * so redefining them here restyles every card on the dashboard; corner utilities
  * are compiled to fixed values, so they are overridden by class. Other pages keep
  * the global theme.
+ *
+ * Light values only, on purpose: the logged-in workspace (`.kintex-workspace`) sets a
+ * light palette, including a dark text colour, even when the site is in dark mode. A
+ * dark surface here would put that dark text on a dark card.
  */
 .horizon-dashboard {
   --background: #f4f6fa;
   --card: #ffffff;
   --border: rgb(15 23 42 / 0.08);
   --muted: #eef1f6;
-}
-
-.dark .horizon-dashboard {
-  --background: #050507;
-  --card: #111115;
-  --border: rgb(255 255 255 / 0.08);
-  --muted: #1a1a1f;
 }
 
 .horizon-dashboard .rounded-md {
@@ -1542,8 +1539,4 @@
 
 .horizon-dashboard .bg-card {
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.12);
-}
-
-.dark .horizon-dashboard .bg-card {
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
 }

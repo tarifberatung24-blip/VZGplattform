@@ -196,12 +196,13 @@ export function VzgDashboard({ firstName, profile, contracts, documents, reviewC
           {metrics.map(({ icon: Icon, label, value, note }) => <article key={label} className="relative min-w-0 overflow-hidden rounded-[20px] border border-border bg-card p-4">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/[0.07] to-transparent" />
             <div className="relative">
-              <div className="flex items-center justify-between gap-2">
-                <p className="truncate text-xs font-medium text-muted-foreground sm:text-sm">{label}</p>
-                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary"><Icon className="size-4" aria-hidden="true" /></span>
+              {/* Labels wrap to two lines instead of being cut off on a phone-width card. */}
+              <div className="flex items-start justify-between gap-2">
+                <p className="line-clamp-2 text-xs font-medium leading-snug text-muted-foreground sm:text-sm">{label}</p>
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 text-primary sm:size-8"><Icon className="size-3.5 sm:size-4" aria-hidden="true" /></span>
               </div>
-              <p className="mt-3 truncate text-2xl font-semibold tabular-nums tracking-tight sm:text-3xl">{value}</p>
-              <p className="mt-1 truncate text-xs text-muted-foreground">{note}</p>
+              <p className="mt-2 break-words text-xl font-semibold leading-tight tabular-nums tracking-tight sm:mt-3 sm:text-3xl">{value}</p>
+              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{note}</p>
             </div>
           </article>)}
         </section>
