@@ -3,6 +3,7 @@
 import { type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
+import { CookieNotice } from "@/components/horizon/cookie-notice"
 import { HorizonSidebar } from "@/components/layout/horizon-sidebar"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
@@ -62,6 +63,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           <div className="h-16 md:hidden" aria-hidden="true" />
         </SidebarInset>
         <MobileBottomNav />
+        <CookieNotice />
       </SidebarProvider>
     </TooltipProvider>
   )
