@@ -11,6 +11,8 @@ import { createCaseEngine } from "@/lib/horizon/case"
 import { resolveCaseModule } from "@/lib/horizon/case/module"
 import { computeYourValue, type ValueSaving } from "@/lib/value/your-value"
 import { findGrundversorgung, type GrundversorgungInput } from "@/lib/value/grundversorgung"
+import { createNotificationsServiceClient, syncNotifications } from "@/lib/notifications/service"
+import type { InboxNotification } from "@/components/dashboard/notification-inbox"
 
 export default async function DashboardPage({
   searchParams,
@@ -37,7 +39,11 @@ export default async function DashboardPage({
 
   const householdId = await ensureHousehold(supabase)
   const engine = await createCaseEngine()
-  const [profileResult, contractsResult, documentsResult, reviewDocumentsResult, deadlinesResult, casesResult, errorParam, energyResult, savingsResult] = await Promise.all([
+  // Fill the inbox from the user's own data on every visit, so reports and
+  // deadline reminders appear even before the daily e-mail run. Bounded and
+  // best-effort: the dashboard never waits on it for long or fails because of it.
+  await refreshNotifications(user.id)
+  const [profileResult, contractsResult, documentsResult, reviewDocumentsResult, deadlinesResult, casesResult, errorParam, energyResult, savingsResult, notificationsResult, preferenceResult] = await Promise.all([
     supabase.from("profiles").select("completeness,employment_status,household_size,monthly_income,monthly_fixed_costs").eq("id", user.id).maybeSingle(),
     supabase.from("contracts").select("id,title,category,provider_name,monthly_amount,status,created_at,end_date,cancellation_deadline,review_status").eq("household_id", householdId).order("created_at", { ascending: false }).limit(100),
     supabase.from("documents").select("id,original_filename,processing_status,created_at,size_bytes").eq("household_id", householdId).order("created_at", { ascending: false }).limit(6),
@@ -48,6 +54,9 @@ export default async function DashboardPage({
     supabase.from("contracts").select("id,title,category,provider_name,notes,extracted_facts").eq("household_id", householdId).in("category", ["electricity", "gas", "energy", "strom"]).limit(50),
     // Before the revenue-attribution migration this table is absent; the error is treated as "no savings yet".
     supabase.from("household_savings").select("status,annual_saving_cents").eq("user_id", user.id),
+    // Absent until the notifications migration is applied; an error means an empty inbox.
+    supabase.from("user_notifications").select("id,kind,payload,created_at,read_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("notification_preferences").select("email_enabled").eq("user_id", user.id).maybeSingle(),
   ])
 
   // Counted by resolved module, so a pre-P5 row without `horizon_module` is
@@ -72,5 +81,17 @@ export default async function DashboardPage({
     moduleError={errorParam.error ?? null}
     yourValue={yourValue}
     grundversorgung={grundversorgung}
+    notifications={notificationsResult.error ? [] : ((notificationsResult.data ?? []) as InboxNotification[])}
+    notificationsEmailEnabled={preferenceResult.data?.email_enabled !== false}
   />
+}
+
+async function refreshNotifications(userId: string) {
+  const client = createNotificationsServiceClient()
+  if (!client) return
+  try {
+    await Promise.race([syncNotifications(client, userId), new Promise((resolve) => setTimeout(resolve, 1500))])
+  } catch {
+    // The inbox is a convenience; a failure here must not break the dashboard.
+  }
 }
