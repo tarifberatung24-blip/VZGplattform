@@ -1927,6 +1927,7 @@
 
 .kfz-visual-stage { perspective: 900px; }
 .kfz-visual-orb { background: rgb(0 119 255 / 0.55); box-shadow: 0 0 55px 18px rgb(0 119 255 / 0.22); }
+.kfz-hero-car { filter: drop-shadow(0 26px 24px rgb(0 0 0 / 0.42)) drop-shadow(0 0 28px rgb(0 128 255 / 0.22)); }
 .kfz-visual-grid {
   opacity: 0.45;
   background-image: radial-gradient(circle at center, rgb(113 190 255 / 0.45) 1px, transparent 1px);
