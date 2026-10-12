@@ -1876,8 +1876,7 @@
   outline-offset: 3px;
 }
 
-.kfz-contact-card,
-.kfz-visual-card {
+.kfz-contact-card {
   border: 1px solid rgb(94 164 245 / 0.3);
   border-radius: 18px;
   background: linear-gradient(145deg, rgb(13 42 78 / 0.88), rgb(4 17 36 / 0.92));
@@ -1934,11 +1933,6 @@
   background-size: 22px 22px;
   mask-image: radial-gradient(ellipse at center, #000, transparent 72%);
 }
-
-.kfz-visual-card { transform: rotate(5deg); }
-.kfz-visual-card span { display: flex; align-items: center; }
-.kfz-visual-card i { width: 0.48rem; height: 0.48rem; border: 1px solid #5dbbff; border-radius: 999px; box-shadow: 0 0 8px rgb(93 187 255 / 0.7); }
-.kfz-visual-card b { height: 0.3rem; flex: 1; border-radius: 999px; background: rgb(255 255 255 / 0.23); }
 
 @media (max-width: 640px) {
   .kfz-hero-frame { border-radius: 22px; }
