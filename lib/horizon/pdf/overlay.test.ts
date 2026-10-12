@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import {
@@ -582,6 +582,54 @@ describe("end-to-end: template → verify → plan → write → manifest", () =
     // Same plan over the same template is deterministic: the output hash is a
     // faithful identity for what was approved.
     expect(await computeSha256(first.bytes)).toBe(await computeSha256(second.bytes))
+  })
+
+  // pdf-lib stamps ModDate (and CreationDate when the template has none) from the
+  // wall clock when it loads a document, at one-second resolution. Two renders that
+  // straddle a second boundary then differ, which made the test above flaky on CI.
+  // The clock is moved between the renders here so the failure is deterministic.
+  it("renders the same bytes when the clock moves between two renders", async () => {
+    const plan = await planWith([confirmed("last_name", "Müller")], ["last_name"])
+    if (!plan.ok) throw new Error("plan failed")
+    const render = () =>
+      generateOverlayPdf({ templateBytes: estBytes(), mapping: EST_1_A_2025_MAPPING, plan })
+
+    vi.useFakeTimers({ toFake: ["Date"] })
+    try {
+      vi.setSystemTime(new Date("2026-03-01T12:00:00.000Z"))
+      const first = await render()
+      vi.setSystemTime(new Date("2026-03-01T12:00:01.000Z"))
+      const second = await render()
+      if (!first.ok || !second.ok) throw new Error("write failed")
+      expect(await computeSha256(first.bytes)).toBe(await computeSha256(second.bytes))
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("records the caller's timestamp and a fixed producer, never the wall clock", async () => {
+    const plan = await planWith([confirmed("last_name", "Müller")], ["last_name"])
+    if (!plan.ok) throw new Error("plan failed")
+    const modifiedAt = new Date("2026-03-01T12:00:00.000Z")
+
+    vi.useFakeTimers({ toFake: ["Date"] })
+    try {
+      vi.setSystemTime(new Date("2031-07-04T08:30:00.000Z"))
+      const written = await generateOverlayPdf({
+        templateBytes: estBytes(),
+        mapping: EST_1_A_2025_MAPPING,
+        plan,
+        modifiedAt,
+      })
+      if (!written.ok) throw new Error("write failed")
+
+      const { PDFDocument } = await import("pdf-lib")
+      const reloaded = await PDFDocument.load(written.bytes, { updateMetadata: false })
+      expect(reloaded.getModificationDate()).toEqual(modifiedAt)
+      expect(reloaded.getProducer()).toBe("HORIZON by VZG")
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
 
