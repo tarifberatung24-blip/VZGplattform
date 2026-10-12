@@ -22,12 +22,20 @@ export type OverlayWriteResult =
   | { ok: true; bytes: Uint8Array; filledCount: number }
   | { ok: false; code: "winansi_unsupported" | "write_failed"; detail: string }
 
+/** Constant, so it never varies between renders. Matches the letter writer's creator. */
+const OVERLAY_PRODUCER = "HORIZON by VZG"
 
 /**
  * Writes the placements into a copy of the template.
  *
  * Page count is checked against the mapping: drawing onto a page the mapping was
  * not measured against would place values at unverified positions.
+ *
+ * **Deterministic output.** The bytes depend only on the template, the plan, `shade`
+ * and `modifiedAt`. pdf-lib otherwise stamps Producer and ModDate (and CreationDate
+ * when the template has none) from `new Date()` on load, so two renders that straddle
+ * a second boundary would hash differently and the output hash could not identify
+ * what was approved. The template's own Creator and CreationDate are kept.
  */
 export async function writeOverlay(input: {
   templateBytes: Uint8Array
@@ -35,6 +43,11 @@ export async function writeOverlay(input: {
   plan: Extract<OverlayPlan, { ok: true }>
   /** Draw a light background behind values so they read as entered data. */
   shade?: boolean
+  /**
+   * ModDate to record, supplied by the caller (the manifest's `generatedAt`).
+   * Left out, the template's own ModDate is kept; the clock is never read.
+   */
+  modifiedAt?: Date
 }): Promise<OverlayWriteResult> {
   const { plan } = input
 
@@ -49,7 +62,11 @@ export async function writeOverlay(input: {
   }
 
   try {
-    const document = await PDFDocument.load(input.templateBytes)
+    const document = await PDFDocument.load(input.templateBytes, { updateMetadata: false })
+    document.setProducer(OVERLAY_PRODUCER)
+    if (input.modifiedAt && !Number.isNaN(input.modifiedAt.getTime())) {
+      document.setModificationDate(input.modifiedAt)
+    }
     const pages = document.getPages()
     const font = await document.embedFont(StandardFonts.Helvetica)
 
