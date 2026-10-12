@@ -1,0 +1,46 @@
+name: affiliate-reconcile
+
+# Daily Awin reconciliation: stores the transactions Awin reports and ties them
+# to HORIZON clicks, so declined switches never count as savings.
+# Uses the same repository secrets as the notifications run: HORIZON_BASE_URL and
+# NOTIFICATIONS_CRON_SECRET. AWIN_PUBLISHER_ID and AWIN_API_TOKEN live only in
+# Render. Without the secrets the job does nothing.
+
+on:
+  schedule:
+    - cron: "40 5 * * *" # 05:40 UTC, before the 06:00 notifications run
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "How many days back to read (1-93)"
+        required: false
+        default: "31"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: affiliate-reconcile
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Call /api/affiliate/reconcile
+        env:
+          BASE_URL: ${{ secrets.HORIZON_BASE_URL }}
+          CRON_SECRET: ${{ secrets.NOTIFICATIONS_CRON_SECRET }}
+          DAYS: ${{ github.event.inputs.days || '31' }}
+        run: |
+          if [ -z "$BASE_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "::notice::HORIZON_BASE_URL or NOTIFICATIONS_CRON_SECRET not set; skipping."
+            exit 0
+          fi
+          case "$DAYS" in ''|*[!0-9]*) DAYS=31 ;; esac
+          # Render's free plan sleeps; the first request can take about a minute.
+          curl --fail-with-body --silent --show-error --retry 3 --retry-delay 20 --retry-all-errors \
+            --max-time 180 -X POST "${BASE_URL%/}/api/affiliate/reconcile?days=${DAYS}" \
+            -H "x-horizon-cron-secret: ${CRON_SECRET}"
+          echo

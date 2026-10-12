@@ -247,6 +247,7 @@ export async function prepareOfficialForm(
       mapping: staticMapping,
       plan: overlay,
       shade: true,
+      modifiedAt: new Date(generatedAt),
     })
     if (!written.ok) {
       return { status: "failed", detail: written.detail, manualPath: template.officialSource }

@@ -115,12 +115,14 @@ export async function generateOverlayPdf(input: {
   mapping: StaticTemplateMapping
   plan: Extract<OverlayPlan, { ok: true }>
   shade?: boolean
+  modifiedAt?: Date
 }): Promise<GeneratedPdf> {
   const written: OverlayWriteResult = await writeOverlay({
     templateBytes: input.templateBytes,
     mapping: input.mapping,
     plan: input.plan,
     shade: input.shade,
+    modifiedAt: input.modifiedAt,
   })
   if (!written.ok) return written
   return { ok: true, bytes: written.bytes, filledCount: written.filledCount }

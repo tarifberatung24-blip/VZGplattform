@@ -85,6 +85,27 @@ export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
             </article>
           })}
         </section>
+        {kind === "functions" ? (
+          <section className="paper mt-6 flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between md:p-8" aria-labelledby="inkasso-check-title">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Inkasso Check</p>
+              <h2 id="inkasso-check-title" className="mt-2 text-2xl font-bold">
+                {isBg ? "Провери писмо от Inkasso или Mahnbescheid." : "Prüfe ein Inkassoschreiben oder einen Mahnbescheid."}
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                {isBg
+                  ? "Постави текста, потвърди извлечените факти и получи структурирана оценка и чернови за преглед."
+                  : "Text einfügen, extrahierte Fakten bestätigen und eine strukturierte Bewertung mit Entwürfen zur Prüfung erhalten."}
+              </p>
+            </div>
+            <Button asChild size="lg" className="shrink-0">
+              <Link href={localizedPath("/pruefung", locale)}>
+                {isBg ? "Отвори Inkasso Check" : "Inkasso Check öffnen"}
+                <ArrowRight className="ml-1 size-4" />
+              </Link>
+            </Button>
+          </section>
+        ) : null}
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild size="lg"><Link href={localizedPath("/auth/sign-up", locale)}>{content.cta}<ArrowRight className="ml-1 size-4" /></Link></Button>
           <Button asChild size="lg" variant="outline"><Link href={localizedPath(kind === "functions" ? "/how-it-works" : "/contact", locale)}>{content.secondary}</Link></Button>
