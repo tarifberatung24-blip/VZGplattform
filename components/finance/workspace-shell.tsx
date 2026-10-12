@@ -3,12 +3,14 @@
 import { type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
-import { CookieNotice } from "@/components/horizon/cookie-notice"
+import { Cookie } from "lucide-react"
+import { cookieNoticeCopy } from "@/components/horizon/cookie-notice-copy"
 import { HorizonSidebar } from "@/components/layout/horizon-sidebar"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { openCookieSettings } from "@/lib/cookies/consent"
 import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
 
 /**
@@ -33,6 +35,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
   const de = pathname === "/de" || pathname.startsWith("/de/")
   const skipText = de ? "Zum Inhalt" : "Към съдържанието"
   const toggleText = de ? "Navigation ein- oder ausblenden" : "Покажи или скрий навигацията"
+  const cookieLabel = cookieNoticeCopy[de ? "de" : "bg"].settingsLink
 
   return (
     <TooltipProvider delay={0}>
@@ -56,14 +59,24 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             {/* Brand lives in the sidebar. Shown here only while the sidebar is a
                 drawer (below md), so exactly one instance is visible per viewport. */}
             <span role="img" aria-label="Horizon by VZG" className="logo-mask h-5 w-auto text-foreground md:hidden" />
-            <LanguageSwitcher className="ml-auto shrink-0" />
+            <div className="ml-auto flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                onClick={openCookieSettings}
+                aria-label={cookieLabel}
+                title={cookieLabel}
+                className="inline-flex size-9 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <Cookie className="size-4" aria-hidden="true" />
+              </button>
+              <LanguageSwitcher className="shrink-0" />
+            </div>
           </header>
           <div className="min-w-0 flex-1">{children}</div>
           {/* Space for the fixed bottom bar on mobile so content is not covered. */}
           <div className="h-16 md:hidden" aria-hidden="true" />
         </SidebarInset>
         <MobileBottomNav />
-        <CookieNotice />
       </SidebarProvider>
     </TooltipProvider>
   )

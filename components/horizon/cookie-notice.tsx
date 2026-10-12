@@ -9,7 +9,9 @@ import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 import { cookieNoticeCopy } from "@/components/horizon/cookie-notice-copy"
 import {
   LIVE_OPTIONAL_COOKIES,
+  OPEN_COOKIE_SETTINGS_EVENT,
   buildChoice,
+  hasOptionalConsent,
   needsNotice,
   readStoredChoice,
   storeChoice,
@@ -21,12 +23,14 @@ import { localizedPath } from "@/lib/i18n/routing"
 type Picks = Partial<Record<OptionalCookieId, boolean>>
 
 /**
- * The cookie notice, shown on the first workspace page after sign-in until it has been
- * answered on this device. It is a sheet of paper like every other card.
+ * The cookie notice, shown on the first page a visitor opens until it has been answered on this
+ * device, and again whenever the "Cookie settings" link fires OPEN_COOKIE_SETTINGS_EVENT. It is a
+ * sheet of paper like every other card.
  *
- * With no optional category in use it is information only and has one button. As soon as
- * LIVE_OPTIONAL_COOKIES lists a category, the same dialog offers the choice: only the
- * necessary ones, accept all, or settings. Closing it any other way counts as "only necessary".
+ * With no optional category in use it is information only and has one button. While
+ * LIVE_OPTIONAL_COOKIES lists a category (it does), the same dialog offers the choice: only the
+ * necessary ones, accept all, or details with a switch. Closing it on the first visit counts as
+ * "only necessary"; closing it after it was reopened from the settings link changes nothing.
  */
 export function CookieNotice() {
   const { locale } = useLanguage()
@@ -34,23 +38,56 @@ export function CookieNotice() {
   const [open, setOpen] = useState(false)
   const [details, setDetails] = useState(false)
   const [picks, setPicks] = useState<Picks>({})
+  const [reopened, setReopened] = useState(false)
   const primaryRef = useRef<HTMLButtonElement>(null)
   const optional = LIVE_OPTIONAL_COOKIES
   const hasOptional = optional.length > 0
 
   useEffect(() => {
-    if (needsNotice(readStoredChoice())) setOpen(true)
+    // Opened shortly after the page has loaded, not on first render: a modal marks the rest of the
+    // page inert, which must not happen while that page is still hydrating.
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const show = () => {
+      timer = setTimeout(() => { if (needsNotice(readStoredChoice())) setOpen(true) }, 400)
+    }
+    if (document.readyState === "complete") show()
+    else window.addEventListener("load", show, { once: true })
+    const reopen = () => {
+      setPicks({ ...(readStoredChoice()?.optional ?? {}) })
+      setDetails(true)
+      setReopened(true)
+      setOpen(true)
+    }
+    window.addEventListener(OPEN_COOKIE_SETTINGS_EVENT, reopen)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener("load", show)
+      window.removeEventListener(OPEN_COOKIE_SETTINGS_EVENT, reopen)
+    }
   }, [])
 
   function decide(answer: Picks) {
+    const hadPartner = hasOptionalConsent(readStoredChoice(), "partner")
     storeChoice(buildChoice(answer))
     setOpen(false)
+    setReopened(false)
+    // A script cannot be unloaded from a running page, so a withdrawn consent takes effect after a reload.
+    if (hadPartner && answer.partner !== true) window.location.reload()
+  }
+
+  function dismiss() {
+    if (reopened) {
+      setOpen(false)
+      setReopened(false)
+    } else {
+      decide({})
+    }
   }
 
   const everything = Object.fromEntries(optional.map((id) => [id, true])) as Picks
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) decide({}) }}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) dismiss() }}>
       <DialogContent
         showCloseButton={false}
         initialFocus={primaryRef}

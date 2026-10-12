@@ -5,6 +5,8 @@ import { localizedPath } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { usePathname } from "next/navigation"
 import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
+import { cookieNoticeCopy } from "@/components/horizon/cookie-notice-copy"
+import { openCookieSettings } from "@/lib/cookies/consent"
 
 export function GlobalFooter() {
   const pathname = usePathname() ?? "/"
@@ -43,6 +45,13 @@ export function GlobalFooter() {
               {link.label}
             </Link>
           ))}
+          <button
+            type="button"
+            onClick={openCookieSettings}
+            className="inline-flex min-h-8 items-center transition-colors hover:text-foreground"
+          >
+            {cookieNoticeCopy[locale].settingsLink}
+          </button>
         </nav>
       </div>
     </footer>

@@ -20,11 +20,11 @@ describe("cookie notice copy", () => {
     }
   })
 
-  it("says only what the privacy policy says: necessary storage now, no analysis, consent later", () => {
-    expect(cookieNoticeCopy.bg.intro).toMatch(/Към момента не използваме бисквитки за реклама или анализ/)
-    expect(cookieNoticeCopy.de.intro).toMatch(/Aktuell setzen wir keine Cookies für Werbung oder Analyse ein/)
-    expect(cookieNoticeCopy.bg.optionalBody).toMatch(/само с твоето съгласие/)
-    expect(cookieNoticeCopy.de.optionalBody).toMatch(/nur mit deiner Einwilligung/)
+  it("says what the privacy policy says: necessary storage always, everything else only with consent", () => {
+    expect(cookieNoticeCopy.bg.intro).toMatch(/Всичко останало се включва само с твоето съгласие/)
+    expect(cookieNoticeCopy.de.intro).toMatch(/nur mit deiner Einwilligung/)
+    expect(cookieNoticeCopy.bg.partnerBody).toMatch(/impact.com.*Без твоето съгласие скриптът не се зарежда/)
+    expect(cookieNoticeCopy.de.partnerBody).toMatch(/impact.com.*Ohne deine Einwilligung wird das Skript nicht geladen/)
   })
 })
 
@@ -48,7 +48,7 @@ describe("cookie choice", () => {
     expect(hasOptionalConsent({ ...buildChoice({ partner: true }), version: COOKIE_NOTICE_VERSION + 1 }, "partner")).toBe(false)
   })
 
-  it("lists no optional category while nothing is tracked", () => {
-    expect(LIVE_OPTIONAL_COOKIES).toEqual([])
+  it("offers the partner category, which the impact.com script needs", () => {
+    expect(LIVE_OPTIONAL_COOKIES).toEqual(["partner"])
   })
 })

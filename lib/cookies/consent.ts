@@ -6,19 +6,23 @@
  * the notice is information only. Optional categories are listed in
  * `LIVE_OPTIONAL_COOKIES` once they exist; the notice then offers the choice.
  *
- * To switch on partner measurement later:
- *   1. add "partner" to LIVE_OPTIONAL_COOKIES,
- *   2. bump COOKIE_NOTICE_VERSION, so everybody is asked again with the new wording,
- *   3. make the measurement code check `hasOptionalConsent(readStoredChoice(), "partner")`.
+ * "partner" is live since impact.com (Shopify affiliate programme) was added: the script loads only
+ * after a yes (see impact.ts and ImpactTracking). Whenever a category is added, bump
+ * COOKIE_NOTICE_VERSION so everybody is asked again with the new wording, and make the new code
+ * check `hasOptionalConsent(readStoredChoice(), id)`.
  * Consent is never assumed for a category that was not shown when the answer was given.
  */
-export const COOKIE_NOTICE_VERSION = 1
+export const COOKIE_NOTICE_VERSION = 2
 export const COOKIE_NOTICE_STORAGE_KEY = "horizon_cookie_notice"
+/** Fired on window after an answer is stored, so tracking can start without a reload. */
+export const COOKIE_CHOICE_EVENT = "horizon:cookie-choice"
+/** Fired on window to reopen the notice, for the "Cookie settings" links. */
+export const OPEN_COOKIE_SETTINGS_EVENT = "horizon:cookie-settings"
 
 export type OptionalCookieId = "partner"
 
-/** Optional categories that are actually in use. Empty today: no tracking exists yet. */
-export const LIVE_OPTIONAL_COOKIES: readonly OptionalCookieId[] = []
+/** Optional categories that are actually in use. */
+export const LIVE_OPTIONAL_COOKIES: readonly OptionalCookieId[] = ["partner"]
 
 export type CookieChoice = {
   version: number
@@ -66,4 +70,9 @@ export function storeChoice(choice: CookieChoice): void {
   } catch {
     // Storage can be blocked. The notice then shows again on the next visit, which is harmless.
   }
+  window.dispatchEvent(new Event(COOKIE_CHOICE_EVENT))
+}
+
+export function openCookieSettings(): void {
+  window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS_EVENT))
 }

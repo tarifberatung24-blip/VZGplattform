@@ -4,8 +4,8 @@ import type { Locale } from "@/lib/i18n/dictionaries"
  * Copy for the cookie notice shown right after sign-in.
  *
  * Facts it states, all from the privacy policy (components/marketing/legal-page.tsx):
- * only technically necessary storage is used; no marketing, analysis or affiliate
- * tracking is integrated at the moment; a later activation needs its own consent.
+ * technically necessary storage is always used; the impact.com measurement script of the
+ * affiliate programme loads only after consent and sends nothing before that.
  * It deliberately makes no legal claim beyond that.
  *
  * Humanizer standard: no em or en dashes, no exclamation marks. A test locks these rules.
@@ -28,6 +28,7 @@ export type CookieNoticeCopy = {
   save: string
   partnerTitle: string
   partnerBody: string
+  settingsLink: string
 }
 
 export const cookieNoticeCopy: Record<Locale, CookieNoticeCopy> = {
@@ -36,7 +37,7 @@ export const cookieNoticeCopy: Record<Locale, CookieNoticeCopy> = {
     privacy: "Поверителност",
     imprint: "Импресум",
     intro:
-      "HORIZON използва технически необходими бисквитки и локално съхранение, за да работят входът, езикът и външният вид. Без тях приложението не може да работи. Към момента не използваме бисквитки за реклама или анализ.",
+      "HORIZON използва технически необходими бисквитки и локално съхранение, за да работят входът, езикът и външният вид. Без тях приложението не може да работи. Всичко останало се включва само с твоето съгласие.",
     necessaryTitle: "Технически необходими",
     necessaryBody: "Вход и сесия, избран език, светла или тъмна тема и състояние на страничното меню.",
     optionalTitle: "Ако добавим още",
@@ -50,14 +51,16 @@ export const cookieNoticeCopy: Record<Locale, CookieNoticeCopy> = {
     acceptAll: "Приеми всички",
     save: "Запази избора",
     partnerTitle: "Партньорски предложения и измерване",
-    partnerBody: "Показва ни дали си стигнал до партньор през наш линк, за да отчитаме правилно препоръките.",
+    partnerBody:
+      "Зарежда скрипта на impact.com, който отчита препратките от HORIZON към партньори. Без твоето съгласие скриптът не се зарежда и към impact.com не се изпращат данни.",
+    settingsLink: "Настройки за бисквитки",
   },
   de: {
     title: "Deine Cookie-Einstellungen",
     privacy: "Datenschutz",
     imprint: "Impressum",
     intro:
-      "HORIZON nutzt technisch notwendige Cookies und lokalen Speicher, damit Anmeldung, Sprache und Darstellung funktionieren. Ohne sie läuft die Anwendung nicht. Aktuell setzen wir keine Cookies für Werbung oder Analyse ein.",
+      "HORIZON nutzt technisch notwendige Cookies und lokalen Speicher, damit Anmeldung, Sprache und Darstellung funktionieren. Ohne sie läuft die Anwendung nicht. Alles Weitere schalten wir nur mit deiner Einwilligung ein.",
     necessaryTitle: "Technisch notwendig",
     necessaryBody: "Anmeldung und Sitzung, gewählte Sprache, helles oder dunkles Design und Zustand des Seitenmenüs.",
     optionalTitle: "Falls wir mehr ergänzen",
@@ -71,6 +74,8 @@ export const cookieNoticeCopy: Record<Locale, CookieNoticeCopy> = {
     acceptAll: "Alle annehmen",
     save: "Auswahl speichern",
     partnerTitle: "Partnerangebote und Messung",
-    partnerBody: "Zeigt uns, ob du über einen unserer Links bei einem Partner gelandet bist, damit wir Empfehlungen richtig zuordnen.",
+    partnerBody:
+      "Lädt das Skript von impact.com, das Weiterleitungen von HORIZON zu Partnern erfasst. Ohne deine Einwilligung wird das Skript nicht geladen und es gehen keine Daten an impact.com.",
+    settingsLink: "Cookie-Einstellungen",
   },
 }
