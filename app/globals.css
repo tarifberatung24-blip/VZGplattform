@@ -1,8 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* dark: does not apply inside a paper card, which stays light in both themes (see .paper). */
-@custom-variant dark (&:is(.dark *):not(:is(.paper *)));
+@custom-variant dark (&:is(.dark *));
 
 /* Institutional Minimalist Finance System */
 @theme inline {
@@ -430,9 +429,14 @@
    and leave the element's position, overflow and children alone. The corner is
    cut out with --paper-cut, the page background.
 
-   Paper is light in both themes, like the stage sheets. The colour tokens are
-   re-declared on the sheet so text, borders and muted copy stay readable on it
-   in the dark theme too, and the dark: variant is switched off inside it.
+   In the light theme a sheet is paper: the colour tokens are re-declared on it so
+   text, borders and muted copy are the same on the public site and in the workspace.
+   In the dark theme every sheet, public and workspace, takes the look of the product
+   preview on the home page: navy gradient, rounded corners, a hairline border and an
+   orange glow in the top right corner instead of the fold and the crease. The dark
+   tokens come from the dark workspace palette below; the dark look is the block
+   "Dark sheets" right after the modifiers. Everything that differs between the two
+   is a --paper-* variable.
 
    Modifiers, always used together with .paper:
    .paper-inset  a slip on a sheet: rows, tiles and boxes inside a card. No corner or crease.
@@ -464,16 +468,33 @@
   --chart-3: #475569;
   --chart-4: #94a3b8;
   --chart-5: #cbd5e1;
+  --paper-hi: #ffffff;
+  --paper-mid: #fbfaf7;
+  --paper-lo: #f2f0ea;
+  --paper-tint: #f4f2ec;
+  --paper-fold: #e4e0d7;
+  --paper-crease-1: rgb(0 0 0 / 0.05);
+  --paper-crease-2: rgb(255 255 255 / 0.9);
+  --paper-ring: rgb(8 30 70 / 0.06);
+  --paper-ring-inset: rgb(8 30 70 / 0.08);
+  --paper-edge: rgb(0 0 0 / 0.08);
+  --paper-lift: rgb(8 30 70 / 0.32);
+  --paper-lift-far: rgb(8 30 70 / 0.34);
+  --paper-soft: rgb(8 30 70 / 0.1);
+  --paper-soft-lift: rgb(8 30 70 / 0.28);
+  --paper-dash: #c3c8d0;
+  --paper-empty-hi: #fdfcfa;
+  --paper-empty-lo: #f7f5f0;
   border-radius: 3px;
   background:
-    linear-gradient(225deg, var(--paper-cut) 50%, #e4e0d7 50%, #f4f2ec 100%) top right / 22px 22px no-repeat,
-    linear-gradient(180deg, rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.9)) 0 33.3% / 100% 2px no-repeat,
-    linear-gradient(170deg, #ffffff 0%, #fbfaf7 55%, #f2f0ea 100%);
+    linear-gradient(225deg, var(--paper-cut) 50%, var(--paper-fold) 50%, var(--paper-tint) 100%) top right / 22px 22px no-repeat,
+    linear-gradient(180deg, var(--paper-crease-1), var(--paper-crease-2)) 0 33.3% / 100% 2px no-repeat,
+    linear-gradient(170deg, var(--paper-hi) 0%, var(--paper-mid) 55%, var(--paper-lo) 100%);
   box-shadow:
-    0 0 0 1px rgb(8 30 70 / 0.06),
-    0 1px 1px rgb(0 0 0 / 0.08),
-    0 14px 28px -16px rgb(8 30 70 / 0.32),
-    0 34px 64px -36px rgb(8 30 70 / 0.34);
+    0 0 0 1px var(--paper-ring),
+    0 1px 1px var(--paper-edge),
+    0 14px 28px -16px var(--paper-lift),
+    0 34px 64px -36px var(--paper-lift-far);
 }
 /* In the components layer, so a text-* utility on the same element still wins. */
 @layer components {
@@ -481,30 +502,23 @@
     color: var(--foreground);
   }
 }
-/* The dark theme's orange accent is too light for text on white paper. */
-.dark .paper {
-  --primary: #c2410c;
-  --primary-hover: #9a3412;
-  --accent: #c2410c;
-  --ring: #c2410c;
-}
 .paper .paper,
 .paper.paper-inset {
-  background: linear-gradient(170deg, #ffffff 0%, #fbfaf7 60%, #f4f2ec 100%);
+  background: linear-gradient(170deg, var(--paper-hi) 0%, var(--paper-mid) 60%, var(--paper-tint) 100%);
   box-shadow:
-    0 0 0 1px rgb(8 30 70 / 0.08),
-    0 1px 2px rgb(8 30 70 / 0.1),
-    0 8px 16px -12px rgb(8 30 70 / 0.28);
+    0 0 0 1px var(--paper-ring-inset),
+    0 1px 2px var(--paper-soft),
+    0 8px 16px -12px var(--paper-soft-lift);
 }
 .paper.paper-note {
   --note: var(--primary);
   background:
     linear-gradient(color-mix(in srgb, var(--note) 8%, transparent), color-mix(in srgb, var(--note) 8%, transparent)),
-    linear-gradient(170deg, #ffffff 0%, #fbfaf7 60%, #f4f2ec 100%);
+    linear-gradient(170deg, var(--paper-hi) 0%, var(--paper-mid) 60%, var(--paper-tint) 100%);
   box-shadow:
     inset 3px 0 0 var(--note),
     0 0 0 1px color-mix(in srgb, var(--note) 24%, transparent),
-    0 1px 2px rgb(8 30 70 / 0.08);
+    0 1px 2px var(--paper-soft);
 }
 .paper.paper-note-danger {
   --note: var(--destructive);
@@ -516,8 +530,8 @@
   --note: #b45309;
 }
 .paper.paper-empty {
-  border: 1.5px dashed #c3c8d0;
-  background: linear-gradient(170deg, #fdfcfa 0%, #f7f5f0 100%);
+  border: 1.5px dashed var(--paper-dash);
+  background: linear-gradient(170deg, var(--paper-empty-hi) 0%, var(--paper-empty-lo) 100%);
   box-shadow: none;
 }
 .paper.paper-link {
@@ -526,10 +540,10 @@
 .paper.paper-link:is(:hover, :focus-visible) {
   translate: 0 -3px;
   box-shadow:
-    0 0 0 1px rgb(8 30 70 / 0.1),
-    0 1px 1px rgb(0 0 0 / 0.08),
-    0 22px 40px -18px rgb(8 30 70 / 0.42),
-    0 48px 80px -40px rgb(8 30 70 / 0.4);
+    0 0 0 1px var(--paper-ring-inset),
+    0 1px 1px var(--paper-edge),
+    0 22px 40px -18px var(--paper-lift),
+    0 48px 80px -40px var(--paper-lift-far);
 }
 @media (prefers-reduced-motion: reduce) {
   .paper.paper-link {
@@ -538,6 +552,50 @@
   .paper.paper-link:is(:hover, :focus-visible) {
     translate: none;
   }
+}
+
+/* Dark sheets: the product preview card of the home page, on every sheet. */
+.dark .paper {
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 60% at 100% 0%, color-mix(in srgb, var(--thread-core) 18%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--paper-mid), var(--paper-lo));
+  box-shadow:
+    0 0 0 1px var(--paper-ring),
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 24px 48px -28px var(--paper-lift);
+}
+.dark .paper .paper,
+.dark .paper.paper-inset {
+  border-radius: 12px;
+  background: var(--paper-hi);
+  box-shadow:
+    0 0 0 1px var(--paper-ring-inset),
+    inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+.dark .paper.paper-note {
+  border-radius: 12px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--note) 12%, transparent), color-mix(in srgb, var(--note) 12%, transparent)),
+    linear-gradient(var(--paper-hi), var(--paper-hi));
+  box-shadow:
+    inset 3px 0 0 var(--note),
+    0 0 0 1px color-mix(in srgb, var(--note) 30%, transparent);
+}
+.dark .paper.paper-note-warn {
+  --note: #fdb022;
+}
+.dark .paper.paper-empty {
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--paper-empty-hi), var(--paper-empty-lo));
+  box-shadow: none;
+}
+.dark .paper.paper-link:is(:hover, :focus-visible) {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--thread-core) 45%, var(--paper-ring)),
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 30px 56px -26px var(--paper-lift-far),
+    0 0 48px -22px color-mix(in srgb, var(--thread-core) 40%, transparent);
 }
 
 /* Header wordmark. The supplied PNG is a solid-black monochrome mark, so it is
@@ -650,6 +708,73 @@
   --chart-5: #BCCCDC;
   --radius: 0.5rem;
   font-family: var(--font-inter), Arial, "Helvetica Neue", sans-serif;
+}
+
+/* The notch of a paper corner is cut with the page colour of the surface it sits on. */
+.kintex-workspace {
+  --paper-cut: var(--background);
+}
+
+/* Dark workspace. The light palette above is the default; in the dark theme the logged-in
+   workspace gets the dark Horizon design instead of staying light: the navy of the product
+   preview on the home page, with the orange accent. The same values reach the phone drawer
+   and every paper sheet, in the workspace and on the public site (see "Dark sheets"). */
+.dark .kintex-workspace,
+.dark [data-slot="sidebar"][data-mobile="true"],
+.dark .paper {
+  color-scheme: dark;
+  --background: #0b0f17;
+  --foreground: #e8edf5;
+  --card: #131824;
+  --card-foreground: #e8edf5;
+  --popover: #131824;
+  --popover-foreground: #e8edf5;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --primary-hover: #fb923c;
+  --secondary: #1b2230;
+  --secondary-foreground: #e8edf5;
+  --muted: #1b2230;
+  --muted-foreground: #98a2b3;
+  --accent: #1b2230;
+  --accent-foreground: #e8edf5;
+  --border: #232b3a;
+  --input: #2a3344;
+  --ring: #f97316;
+  --focus-ring: #f97316;
+  --success: #47cd89;
+  --success-foreground: #0b0f17;
+  --destructive: #ff8a80;
+  --sidebar: #0f1420;
+  --sidebar-foreground: #e8edf5;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1b2230;
+  --sidebar-accent-foreground: #f97316;
+  --sidebar-border: #232b3a;
+  --sidebar-ring: #f97316;
+  --chart-1: #f97316;
+  --chart-2: #fb923c;
+  --chart-3: #fdba74;
+  --chart-4: #fed7aa;
+  --chart-5: #7c8aa0;
+  --paper-hi: #161c28;
+  --paper-mid: #131824;
+  --paper-lo: #0b0f17;
+  --paper-tint: #1b2230;
+  --paper-fold: #2a3447;
+  --paper-crease-1: rgb(0 0 0 / 0.35);
+  --paper-crease-2: rgb(255 255 255 / 0.06);
+  --paper-ring: #232b3a;
+  --paper-ring-inset: #232b3a;
+  --paper-edge: rgb(0 0 0 / 0.45);
+  --paper-lift: rgb(0 0 0 / 0.7);
+  --paper-lift-far: rgb(0 0 0 / 0.6);
+  --paper-soft: rgb(0 0 0 / 0.4);
+  --paper-soft-lift: rgb(0 0 0 / 0.5);
+  --paper-dash: #364156;
+  --paper-empty-hi: #161c28;
+  --paper-empty-lo: #121723;
 }
 
 .kintex-workspace :is(a, button, input, select, textarea):focus-visible {
@@ -1489,7 +1614,7 @@
   margin-bottom: 1.1em;
   border-bottom: 1px solid #e3e5e9;
 }
-.hiw-sheet-mark { height: 0.95em; color: #10294f; }
+.hiw-sheet-mark { height: 0.95em; color: #151a20; }
 .hiw-sheet-ref { font-size: 0.74em; color: #7a828c; white-space: nowrap; }
 .hiw-sheet-subject { display: flex; align-items: center; gap: 0.6em; }
 .hiw-sheet-icon {
@@ -1538,17 +1663,54 @@
   transform: rotate(-9deg);
   mix-blend-mode: multiply;
 }
+
+/* Dark theme: the stage sheets take the same look as every other card (see "Dark sheets"). */
 .dark .hiw-sheet {
-  background: linear-gradient(170deg, #f6f5f1 0%, #eeece6 60%, #e4e1da 100%);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 60% at 100% 0%, color-mix(in srgb, var(--thread-core) 18%, transparent), transparent 60%),
+    linear-gradient(180deg, #131824, #0b0f17);
+  color: #e8edf5;
   box-shadow:
-    0 1px 1px rgb(0 0 0 / 0.3),
-    0 26px 50px -20px rgb(0 0 0 / 0.75),
-    0 50px 120px -40px color-mix(in srgb, var(--thread-core) 40%, transparent);
+    0 0 0 1px #232b3a,
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 24px 48px -28px rgb(0 0 0 / 0.7);
 }
-.dark .hiw-sheet::before { background: linear-gradient(225deg, var(--background) 50%, #d8d4ca 50%, #ecebe5 100%); }
+.dark .hiw-sheet-wrap:is(:hover, :focus-within) .hiw-sheet {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--thread-core) 45%, #232b3a),
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 30px 56px -26px rgb(0 0 0 / 0.8),
+    0 0 48px -22px color-mix(in srgb, var(--thread-core) 40%, transparent);
+}
+.dark .hiw-sheet::before,
+.dark .hiw-sheet::after {
+  display: none;
+}
+.dark .hiw-sheet-head { border-bottom-color: #232b3a; }
+.dark .hiw-sheet-mark { color: #e8edf5; }
+.dark .hiw-sheet-ref { color: #98a2b3; }
+.dark .hiw-sheet-icon { background: color-mix(in srgb, var(--thread-core) 16%, #131824); }
+.dark .hiw-sheet-title { color: #e8edf5; }
+.dark .hiw-sheet-body { color: #c6cdd8; }
+.dark .hiw-sheet-rows { color: #c6cdd8; }
+.dark .hiw-sheet-rows li { border-bottom-color: #2a3344; }
+.dark .hiw-sheet-stamp {
+  color: var(--thread-glow);
+  mix-blend-mode: normal;
+  opacity: 0.95;
+}
 @media (prefers-reduced-motion: reduce) {
   .hiw-sheet { transition: none; }
   .hiw-sheet-wrap:is(:hover, :focus-within) .hiw-sheet { transform: rotate(var(--tilt, 0deg)); }
+}
+
+/* The product name is black on light surfaces and white on dark ones, never the accent
+   colour: inside text that is painted with the accent (an eyebrow, a link) the logo and
+   the wordmark go back to the text colour. */
+:is(.text-primary, .text-sidebar-primary, .text-accent, .nm-brand-highlight) :is(.logo-mask, .horizon-wordmark),
+:is(.text-primary, .text-sidebar-primary, .text-accent).logo-mask {
+  color: var(--foreground);
 }
 
 /* ── Product name wordmark (components/brand/horizon-wordmark.tsx) ─────── */
@@ -1578,15 +1740,38 @@
  * are compiled to fixed values, so they are overridden by class. Other pages keep
  * the global theme.
  *
- * Light values only, on purpose: the logged-in workspace (`.kintex-workspace`) sets a
- * light palette, including a dark text colour, even when the site is in dark mode. A
- * dark surface here would put that dark text on a dark card.
+ * Light and dark: the workspace (`.kintex-workspace`) has a light palette and, in the dark
+ * theme, a dark one; the tint below follows it.
  */
 .horizon-dashboard {
   --background: #f4f6fa;
   --card: #ffffff;
   --border: rgb(15 23 42 / 0.08);
   --muted: #eef1f6;
+  --paper-cut: var(--background);
+  /* Status colours of the tags and figures: the product preview's tones, light and dark. */
+  --tone-urgent-bg: #fde8e8;
+  --tone-urgent-fg: #b42318;
+  --tone-warn-bg: #fff1dc;
+  --tone-warn-fg: #b54708;
+  --tone-good-bg: #e3f6ea;
+  --tone-good-fg: #067647;
+  --tone-neutral-bg: #eef2f7;
+  --tone-neutral-fg: #475467;
+}
+.dark .horizon-dashboard {
+  --background: #0b0f17;
+  --card: #131824;
+  --border: #232b3a;
+  --muted: #1b2230;
+  --tone-urgent-bg: rgb(240 68 56 / 0.16);
+  --tone-urgent-fg: #ff8a80;
+  --tone-warn-bg: rgb(247 144 9 / 0.16);
+  --tone-warn-fg: #fdb022;
+  --tone-good-bg: rgb(18 183 106 / 0.16);
+  --tone-good-fg: #47cd89;
+  --tone-neutral-bg: #1b2230;
+  --tone-neutral-fg: #c6cdd8;
 }
 
 .horizon-dashboard .rounded-md {
@@ -1615,4 +1800,12 @@
 :is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: #d8dee6;
+}
+
+.dark :is([data-sidebar="content"], [data-slot="sidebar-content"]) {
+  scrollbar-color: #2a3344 transparent;
+}
+
+.dark :is([data-sidebar="content"], [data-slot="sidebar-content"])::-webkit-scrollbar-thumb {
+  background: #2a3344;
 }

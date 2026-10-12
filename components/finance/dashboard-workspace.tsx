@@ -38,7 +38,7 @@ export function DashboardWorkspace({ userId, firstName, initialDeadlines }: Prop
     <main className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/90">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-          <Link href="/" aria-label="Horizon by VZG" className="text-primary"><span className="logo-mask h-5 w-auto" /></Link>
+          <Link href="/" aria-label="Horizon by VZG" className="text-foreground"><span className="logo-mask h-5 w-auto" /></Link>
           <div className="flex items-center gap-2"><Button asChild variant="ghost" size="sm"><Link href="/security"><ShieldCheck className="size-4" /> {de ? "Sicherheit" : "Сигурност"}</Link></Button><form action="/auth/logout" method="post"><Button variant="outline" size="sm">{de ? "Abmelden" : "Изход"}</Button></form></div>
         </div>
       </header>

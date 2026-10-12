@@ -68,7 +68,7 @@ export function DocumentsWorkspace({ initialDocuments, loadError }: { initialDoc
   }
 
   return (
-    <section className="kintex-panel p-6" aria-labelledby="documents-workspace-title">
+    <section className="paper p-6" aria-labelledby="documents-workspace-title">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{de ? "Dokumente" : "Документи"}</p>

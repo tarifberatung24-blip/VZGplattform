@@ -29,7 +29,7 @@ export default async function AccountSecurityPage() {
         <Link href="/dashboard" className="inline-flex min-h-9 items-center gap-2 text-sm font-medium text-primary"><ArrowLeft className="size-4" /> {de ? "Zum Dashboard" : "Към таблото"}</Link>
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-foreground">{de ? "Kontosicherheit" : "Сигурност на профила"}</h1>
         <p className="mt-3 leading-7 text-muted-foreground">{de ? "Verwalte den zusätzlichen Schutz beim Login. Die Einrichtung ist freiwillig und empfohlen." : "Управлявай допълнителната защита при вход. Настройката е доброволна и препоръчителна."}</p>
-        <section className="kintex-panel mt-8 p-6" aria-labelledby="mfa-title">
+        <section className="paper mt-8 p-6" aria-labelledby="mfa-title">
           <h2 id="mfa-title" className="text-xl font-semibold text-foreground">{de ? "Zwei-Faktor-Authentifizierung (2FA)" : "Двуфакторна автентикация (2FA)"}</h2>
           <MfaSettings />
         </section>

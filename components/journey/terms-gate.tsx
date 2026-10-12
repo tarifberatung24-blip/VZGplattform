@@ -45,7 +45,7 @@ export function TermsGate({ locale }: { locale: "bg" | "de" }) {
 
   return (
     <div className="mx-auto flex min-h-[60svh] max-w-md items-center px-4 py-10">
-      <form onSubmit={submit} className="kintex-panel w-full space-y-5 p-6">
+      <form onSubmit={submit} className="paper w-full space-y-5 p-6">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{copy.title}</h1>
         <p className="text-sm leading-6 text-muted-foreground">{copy.intro}</p>
         <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-6 text-muted-foreground">
