@@ -14,22 +14,11 @@ export function KfzHeroVisual() {
       <Image
         src="/images/kfz-hero-car.png"
         alt=""
-        width={620}
-        height={540}
+        width={980}
+        height={640}
         priority
         className="kfz-hero-car relative z-10 mx-auto h-full w-full object-contain object-center"
       />
-
-      <div className="kfz-visual-card absolute right-2 top-4 z-20 hidden w-32 p-3 sm:block">
-        <div className="mb-3 h-1.5 w-10 rounded-full bg-[#5dbbff]" />
-        <div className="h-2 w-20 rounded-full bg-white/70" />
-        <div className="mt-2 h-1.5 w-24 rounded-full bg-white/20" />
-        <div className="mt-5 space-y-2.5">
-          <span className="flex items-center gap-2"><i /><b /></span>
-          <span className="flex items-center gap-2"><i /><b /></span>
-          <span className="flex items-center gap-2"><i /><b /></span>
-        </div>
-      </div>
     </div>
   )
 }
