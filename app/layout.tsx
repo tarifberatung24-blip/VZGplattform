@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { WorkspaceShell } from "@/components/finance/workspace-shell"
 import { CookieNotice } from "@/components/horizon/cookie-notice"
 import { ImpactTracking } from "@/components/horizon/impact-tracking"
-import { IMPACT_VERIFICATION_SNIPPET } from "@/lib/cookies/impact"
+import { IMPACT_SITE_VERIFICATION_ID, IMPACT_SITE_VERIFICATION_TEXT, IMPACT_VERIFICATION_SNIPPET } from "@/lib/cookies/impact"
 import { PwaServiceWorker } from "@/components/pwa-service-worker"
 import { GlobalHeader } from "@/components/layout/global-header"
 import { JourneyTracker } from "@/components/journey/journey-tracker"
@@ -89,6 +89,9 @@ export default async function RootLayout({
         {/* impact.com's snippet, inert (never executed) so its "Add website" check can find it.
             The script itself loads only after consent, see ImpactTracking. */}
         <script type="text/plain" data-consent="partner" dangerouslySetInnerHTML={{ __html: IMPACT_VERIFICATION_SNIPPET }} />
+        {/* impact.com site verification: the same id as a meta tag and as the plain text segment. */}
+        <meta name="Impact-Site-Verification" content={IMPACT_SITE_VERIFICATION_ID} />
+        <script type="text/plain" data-impact-site-verification dangerouslySetInnerHTML={{ __html: IMPACT_SITE_VERIFICATION_TEXT }} />
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider>

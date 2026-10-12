@@ -1,11 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { IMPACT_SCRIPT_URL, IMPACT_VERIFICATION_SNIPPET, loadImpact } from "./impact"
+import { IMPACT_SCRIPT_URL, IMPACT_SITE_VERIFICATION_TEXT, IMPACT_VERIFICATION_SNIPPET, loadImpact } from "./impact"
 
 describe("impact.com snippet", () => {
   it("is the snippet impact.com handed out, with the account's script address", () => {
     expect(IMPACT_SCRIPT_URL).toBe("https://utt.impactcdn.com/P-A7950557-e342-4625-872f-e947bd3cf9e11.js")
     expect(IMPACT_VERIFICATION_SNIPPET).toContain(`('${IMPACT_SCRIPT_URL}','script','impactStat',document,window)`)
     expect(IMPACT_VERIFICATION_SNIPPET).toContain("impactStat('transformLinks');impactStat('trackImpression');")
+  })
+})
+
+describe("impact.com site verification", () => {
+  it("is the text segment impact.com handed out", () => {
+    expect(IMPACT_SITE_VERIFICATION_TEXT).toBe("Impact-Site-Verification: dd538627-44a2-40d2-88a1-df8d8b1ac9ac")
   })
 })
 

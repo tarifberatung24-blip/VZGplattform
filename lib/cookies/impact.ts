@@ -9,6 +9,14 @@
  * can find it. The code that runs after consent is `loadImpact` below, which does the same
  * thing as the snippet.
  */
+/**
+ * Site verification for impact.com's "Add website" check. It is a public identifier, not a secret:
+ * it has to be readable on the site. It sits in the head of every page as a meta tag and as the
+ * plain text segment impact.com hands out.
+ */
+export const IMPACT_SITE_VERIFICATION_ID = "dd538627-44a2-40d2-88a1-df8d8b1ac9ac"
+export const IMPACT_SITE_VERIFICATION_TEXT = `Impact-Site-Verification: ${IMPACT_SITE_VERIFICATION_ID}`
+
 export const IMPACT_SCRIPT_URL = "https://utt.impactcdn.com/P-A7950557-e342-4625-872f-e947bd3cf9e11.js"
 
 export const IMPACT_VERIFICATION_SNIPPET =
