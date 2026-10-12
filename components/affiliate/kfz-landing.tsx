@@ -36,35 +36,37 @@ export function KfzLanding({
   const hub = insuranceHubCopy[locale]
 
   return (
-    <div className="bg-background text-foreground">
-      <section className="relative overflow-hidden bg-[#070d19] text-white">
+    <div className="kfz-page bg-[#020817] text-[#eef5ff]">
+      <section className="kfz-hero relative overflow-hidden text-white">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_80%_-10%,rgba(77,141,255,0.28),transparent_55%)]"
         />
-        <div className="relative mx-auto grid max-w-[1440px] gap-12 px-5 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8 md:py-24">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4d8dff]"><BrandText text={copy.hero.eyebrow} /></p>
-            <h1 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.05] tracking-[-0.05em] sm:text-6xl">
+        <div className="kfz-hero-frame relative mx-auto grid max-w-[1440px] gap-12 px-5 py-12 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-12 lg:py-20">
+          <div className="relative z-10">
+            <p className="kfz-eyebrow text-xs font-semibold uppercase tracking-[0.18em] text-[#62a5ff]"><BrandText text={copy.hero.eyebrow} /></p>
+            <h1 className="mt-6 max-w-3xl text-balance text-4xl font-black leading-[1.05] tracking-[-0.05em] sm:text-6xl lg:text-[4.65rem]">
               {copy.hero.titleLead}{" "}
-              <span className="text-[#4d8dff]"><BrandText text={copy.hero.titleAccent} /></span>
+              <span className="kfz-title-accent text-[#62a5ff]"><BrandText text={copy.hero.titleAccent} /></span>
             </h1>
-            <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-white/75"><BrandText text={copy.hero.lead} /></p>
+            <p className="mt-6 max-w-2xl text-pretty text-base leading-8 text-[#b9c9df] sm:text-lg"><BrandText text={copy.hero.lead} /></p>
 
-            <ul className="mt-8 flex flex-wrap gap-3">
+            <ul className="mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
               {copy.hero.bullets.map((bullet) => (
                 <li
                   key={bullet}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/85"
+                  className="kfz-hero-bullet inline-flex items-center gap-2 text-sm text-white/85"
                 >
-                  <CheckCircle2 className="size-4 text-[#4d8dff]" aria-hidden="true" />
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-[#1684ff]/70 bg-[#0b3e83]/35">
+                    <CheckCircle2 className="size-3.5 text-[#62b0ff]" aria-hidden="true" />
+                  </span>
                   {bullet}
                 </li>
               ))}
             </ul>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" className="bg-[#0047b3] text-white hover:bg-[#0047b3]/90">
+              <Button asChild size="lg" className="kfz-primary-cta bg-[#087cff] text-white shadow-[0_14px_34px_-16px_#087cff] hover:bg-[#2d91ff]">
                 <a href="#kfz-calculator">
                   <BrandText text={copy.hero.cta} />
                   <ArrowRight data-icon="inline-end" />
@@ -72,7 +74,7 @@ export function KfzLanding({
               </Button>
               <Link
                 href={localizedPath(copy.processHref, locale)}
-                className="inline-flex items-center px-2 text-sm font-semibold text-white/80 hover:text-white"
+                className="inline-flex items-center rounded-full px-3 py-2 text-sm font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
               >
                 {locale === "bg" ? "Как работи" : "So funktioniert es"}
               </Link>
@@ -81,7 +83,7 @@ export function KfzLanding({
 
           <div className="relative">
             <KfzHeroVisual />
-            <div className="paper paper-inset mx-auto mt-4 w-full max-w-sm p-5">
+            <div className="kfz-contact-card mx-auto mt-4 w-full max-w-sm p-5">
               <>
                 <p className="text-sm font-bold text-foreground"><BrandText text={copy.hero.phoneBadgeTitle} /></p>
                 <p className="mt-1 text-sm text-muted-foreground"><BrandText text={copy.hero.phoneBadgeHint} /></p>
@@ -100,13 +102,13 @@ export function KfzLanding({
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-5 py-14 lg:px-8 md:py-20">
+      <section className="kfz-section mx-auto max-w-[1440px] px-5 py-14 lg:px-8 md:py-20">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {copy.tiles.map((tile, index) => {
             const Icon = tileIcons[index] ?? ShieldCheck
             return (
-              <article key={tile.title} className="paper p-6">
-                <span className="flex size-11 items-center justify-center border border-border text-primary">
+              <article key={tile.title} className="kfz-feature-card paper p-6">
+                <span className="kfz-icon-box flex size-11 items-center justify-center border border-border text-primary">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
                 <h2 className="mt-5 text-lg font-black tracking-[-0.03em] text-foreground"><BrandText text={tile.title} /></h2>
@@ -117,8 +119,8 @@ export function KfzLanding({
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-5 pb-8 lg:px-8">
-        <div className="paper paper-inset grid gap-8 p-6 sm:p-8 lg:grid-cols-2">
+      <section className="kfz-section mx-auto max-w-[1440px] px-5 pb-8 lg:px-8">
+        <div className="kfz-summary-card paper paper-inset grid gap-8 p-6 sm:p-8 lg:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={product.name} /></p>
             <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground"><BrandText text={product.summary} /></p>
@@ -134,8 +136,8 @@ export function KfzLanding({
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-5 py-14 lg:px-8 md:py-16">
-        <article className="paper p-6 sm:p-10" aria-labelledby="kfz-notice-lesson">
+      <section className="kfz-section mx-auto max-w-[1440px] px-5 py-14 lg:px-8 md:py-16">
+        <article className="kfz-content-card paper p-6 sm:p-10" aria-labelledby="kfz-notice-lesson">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={copy.noticeLesson.eyebrow} /></p>
           <h2
             id="kfz-notice-lesson"
@@ -154,7 +156,7 @@ export function KfzLanding({
                   {paragraph}
                 </p>
               ))}
-              <div className="paper paper-inset mt-2 p-5">
+              <div className="kfz-inner-card paper paper-inset mt-2 p-5">
                 <div className="flex items-center gap-2">
                   <FileText className="size-4 text-primary" aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground"><BrandText text={copy.noticeLesson.documentCta} /></p>
@@ -169,7 +171,7 @@ export function KfzLanding({
               </div>
             </div>
 
-            <aside className="paper paper-inset p-6">
+            <aside className="kfz-inner-card paper paper-inset p-6">
               <div className="flex items-center gap-2">
                 <ListChecks className="size-4 text-primary" aria-hidden="true" />
                 <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -195,7 +197,7 @@ export function KfzLanding({
         </article>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-5 pb-14 lg:px-8 md:pb-16" aria-labelledby="kfz-documents">
+      <section className="kfz-section mx-auto max-w-[1440px] px-5 pb-14 lg:px-8 md:pb-16" aria-labelledby="kfz-documents">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={copy.documents.eyebrow} /></p>
         <h2 id="kfz-documents" className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-foreground md:text-4xl">
           <BrandText text={copy.documents.title} />
@@ -203,7 +205,7 @@ export function KfzLanding({
         <p className="mt-4 max-w-3xl text-pretty text-lg leading-8 text-muted-foreground"><BrandText text={copy.documents.lead} /></p>
         <ol className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {copy.documents.items.map((item, index) => (
-            <li key={item.title} className="paper flex flex-col p-6">
+            <li key={item.title} className="kfz-feature-card paper flex flex-col p-6">
               <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
                 {index + 1}
               </span>
@@ -226,7 +228,7 @@ export function KfzLanding({
         </ol>
       </section>
 
-      <section id="kfz-calculator" className="mx-auto max-w-5xl scroll-mt-24 px-5 py-14 lg:px-8 md:py-20" aria-labelledby="kfz-widget">
+      <section id="kfz-calculator" className="kfz-section mx-auto max-w-5xl scroll-mt-24 px-5 py-14 lg:px-8 md:py-20" aria-labelledby="kfz-widget">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary"><BrandText text={copy.widget.eyebrow} /></p>
         <h2 id="kfz-widget" className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-foreground md:text-4xl">
           <BrandText text={copy.widget.title} />
@@ -242,8 +244,8 @@ export function KfzLanding({
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-5 pb-20 lg:px-8">
-        <div className="paper p-5 text-sm leading-7 text-muted-foreground">
+      <section className="kfz-section mx-auto max-w-4xl px-5 pb-20 lg:px-8">
+        <div className="kfz-disclosure-card paper p-5 text-sm leading-7 text-muted-foreground">
           <BrandText text={hub.notice} />
         </div>
         <p className="mt-6 max-w-3xl border-l-2 border-primary pl-4 text-sm leading-7 text-foreground">
