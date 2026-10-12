@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { FileText, Upload } from "lucide-react"
+import { FileText, Trash2, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
@@ -32,6 +32,9 @@ const errorLabel: Record<string, { bg: string; de: string }> = {
   FILE_INVALID_SIGNATURE: { bg: "Файлът не съвпада с очаквания формат.", de: "Die Datei passt nicht zum erwarteten Format." },
   STORAGE_NOT_CONFIGURED: { bg: "Хранилището за документи не е свързано правилно.", de: "Der Dokumentenspeicher ist nicht korrekt verbunden." },
   SCHEMA_NOT_VERIFIED: { bg: "Обработката на документи не е налична в момента.", de: "Die Dokumentenverarbeitung ist derzeit nicht verfügbar." },
+  DOCUMENT_NOT_FOUND: { bg: "Документът вече не съществува.", de: "Das Dokument existiert nicht mehr." },
+  DELETE_FAILED: { bg: "Документът не можа да бъде изтрит. Опитай пак след малко.", de: "Das Dokument konnte nicht gelöscht werden. Bitte versuche es gleich noch einmal." },
+  DELETE_NOT_AUTHENTICATED: { bg: "Влез отново, за да изтриеш документа.", de: "Bitte melde dich erneut an, um das Dokument zu löschen." },
 }
 
 export function DocumentsWorkspace({ initialDocuments, loadError }: { initialDocuments: StoredDocument[]; loadError?: string | null }) {
@@ -40,6 +43,8 @@ export function DocumentsWorkspace({ initialDocuments, loadError }: { initialDoc
   const [documents, setDocuments] = useState(initialDocuments)
   const [message, setMessage] = useState(loadError ?? "")
   const [uploading, setUploading] = useState(false)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   function localize(labels: Record<string, { bg: string; de: string }>, code: string) {
     return labels[code]?.[de ? "de" : "bg"] ?? code
@@ -67,6 +72,28 @@ export function DocumentsWorkspace({ initialDocuments, loadError }: { initialDoc
     }
   }
 
+  async function remove(id: string) {
+    setDeletingId(id)
+    setMessage("")
+    try {
+      const response = await fetch(`/api/documents/${id}`, { method: "DELETE" })
+      const payload = await response.json().catch(() => ({})) as { code?: string }
+      if (response.ok || payload.code === "DOCUMENT_NOT_FOUND") {
+        setDocuments((current) => current.filter((item) => item.id !== id))
+        setMessage(response.ok
+          ? (de ? "Dokument und Datei wurden gelöscht." : "Документът и файлът са изтрити.")
+          : localize(errorLabel, "DOCUMENT_NOT_FOUND"))
+      } else {
+        setMessage(errorLabel[payload.code ?? ""] ? localize(errorLabel, payload.code ?? "") : localize(errorLabel, "DELETE_FAILED"))
+      }
+    } catch {
+      setMessage(localize(errorLabel, "DELETE_FAILED"))
+    } finally {
+      setDeletingId(null)
+      setConfirmingId(null)
+    }
+  }
+
   return (
     <section className="paper p-6" aria-labelledby="documents-workspace-title">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
@@ -83,9 +110,20 @@ export function DocumentsWorkspace({ initialDocuments, loadError }: { initialDoc
       {message && <p role="status" className="paper paper-inset mt-5 p-3 text-sm text-muted-foreground">{message}</p>}
       <div className="mt-6 divide-y divide-border border-y border-border">
         {documents.length === 0 ? <p className="py-6 text-sm text-muted-foreground">{de ? "Es wurden noch keine Dokumente hochgeladen." : "Все още няма качени документи."}</p> : documents.map((document) => (
-          <div key={document.id} className="flex items-center justify-between gap-4 py-4">
+          <div key={document.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-4">
             <div className="flex min-w-0 items-center gap-3"><FileText className="size-4 shrink-0 text-primary" aria-hidden="true" /><div className="min-w-0"><p className="truncate text-sm font-medium text-foreground">{document.original_filename}</p><p className="text-xs text-muted-foreground">{document.size_bytes ? `${Math.round(document.size_bytes / 1024)} KB` : (de ? "Größe unbekannt" : "размерът е неизвестен")}</p></div></div>
             <span className="shrink-0 border border-border px-2 py-1 text-xs text-muted-foreground">{localize(statusLabel, document.processing_status ?? "") === (document.processing_status ?? "") ? (de ? "Hochgeladen" : "Качено") : localize(statusLabel, document.processing_status ?? "")}</span>
+            {confirmingId === document.id ? (
+              <div className="flex w-full flex-wrap items-center justify-end gap-2" role="group" aria-label={de ? "Löschen bestätigen" : "Потвърди изтриването"}>
+                <p className="mr-auto text-xs text-muted-foreground">{de ? "Dokument und Datei endgültig löschen?" : "Да изтрия ли документа и файла завинаги?"}</p>
+                <Button type="button" variant="outline" size="sm" disabled={deletingId === document.id} onClick={() => setConfirmingId(null)}>{de ? "Abbrechen" : "Отказ"}</Button>
+                <Button type="button" variant="destructive" size="sm" disabled={deletingId === document.id} onClick={() => remove(document.id)}>{deletingId === document.id ? (de ? "Wird gelöscht…" : "Изтриване…") : (de ? "Endgültig löschen" : "Изтрий завинаги")}</Button>
+              </div>
+            ) : (
+              <Button type="button" variant="outline" size="sm" aria-label={`${de ? "Löschen" : "Изтрий"}: ${document.original_filename}`} disabled={deletingId !== null} onClick={() => setConfirmingId(document.id)}>
+                <Trash2 className="size-4" aria-hidden="true" />{de ? "Löschen" : "Изтрий"}
+              </Button>
+            )}
           </div>
         ))}
       </div>
