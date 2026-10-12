@@ -154,7 +154,7 @@ export function ContractsWorkspace({ householdId, initialContracts, loadError }:
     setSaving(false)
   }
 
-  return <section className="kintex-panel mt-8 space-y-6 p-6">
+  return <section className="paper mt-8 space-y-6 p-6">
     <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary"><BrandText text={copy.eyebrow} /></p><h2 className="mt-2 text-2xl font-semibold"><BrandText text={copy.title} /></h2><p className="mt-2 text-sm leading-6 text-muted-foreground"><BrandText text={copy.description} /></p></div>
     <div className="grid gap-4 sm:grid-cols-3"><div className="paper paper-inset p-4"><p className="text-xs text-muted-foreground"><BrandText text={copy.contracts} /></p><p className="mt-2 text-2xl font-semibold"><BrandText text={contracts.length} /></p></div><div className="paper paper-inset p-4"><p className="text-xs text-muted-foreground"><BrandText text={copy.monthly} /></p><p className="mt-2 text-2xl font-semibold">{monthlyTotal ? `${monthlyTotal.toFixed(2)} €` : copy.missingData}</p></div><div className="paper paper-inset p-4"><p className="text-xs text-muted-foreground"><BrandText text={copy.missingCosts} /></p><p className="mt-2 text-2xl font-semibold">{missingCost}</p></div></div>
     <label className="inline-flex cursor-pointer items-center gap-2 border border-primary bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"><Upload className="size-4" aria-hidden="true" /> <BrandText text={copy.reviewFile} /><input className="sr-only" type="file" accept="application/pdf,image/jpeg,image/png" disabled={saving} onChange={(event) => void upload(event.target.files?.[0])} /></label>

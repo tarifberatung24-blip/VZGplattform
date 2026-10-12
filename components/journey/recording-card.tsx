@@ -43,7 +43,7 @@ export function JourneyRecordingCard({ initialEnabled, locale }: { initialEnable
   }
 
   return (
-    <section className="kintex-panel mx-auto mt-6 max-w-2xl p-5 sm:p-6" aria-labelledby="journey-recording-title">
+    <section className="paper mx-auto mt-6 max-w-2xl p-5 sm:p-6" aria-labelledby="journey-recording-title">
       <h2 id="journey-recording-title" className="text-lg font-semibold text-foreground">{copy.title}</h2>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.body}</p>
       <label className="mt-4 flex min-h-11 cursor-pointer items-start gap-3 text-sm text-foreground">

@@ -14,7 +14,7 @@ function tokens(selector: string): Set<string> {
 }
 
 const light = tokens('.kintex-workspace,\n[data-slot="sidebar"][data-mobile="true"] {')
-const dark = tokens('.dark .kintex-workspace,\n.dark [data-slot="sidebar"][data-mobile="true"],\n.dark .kintex-workspace .paper {')
+const dark = tokens('.dark .kintex-workspace,\n.dark [data-slot="sidebar"][data-mobile="true"],\n.dark .paper {')
 const paper = tokens("\n.paper {")
 
 describe("workspace palette", () => {
