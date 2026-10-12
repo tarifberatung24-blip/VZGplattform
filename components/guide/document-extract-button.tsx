@@ -132,7 +132,7 @@ export function DocumentExtractButton({
         <span className="ml-2 text-xs text-muted-foreground">{copy.done(state.pageCount)}</span>
       ) : null}
       {errorText ? (
-        <span role="alert" className="ml-2 text-xs text-red-700">
+        <span role="alert" className="ml-2 text-xs text-destructive">
           {errorText}
         </span>
       ) : null}

@@ -34,16 +34,16 @@ type Tone = "urgent" | "warn" | "good" | "neutral"
 // The colours of the product preview on the home page (`.env-dash` in globals.css), so the real
 // dashboard looks like the one people were shown.
 const TAG: Record<Tone, string> = {
-  urgent: "bg-[#fde8e8] text-[#b42318]",
-  warn: "bg-[#fff1dc] text-[#b54708]",
-  good: "bg-[#e3f6ea] text-[#067647]",
-  neutral: "bg-[#eef2f7] text-[#475467]",
+  urgent: "bg-[var(--tone-urgent-bg)] text-[var(--tone-urgent-fg)]",
+  warn: "bg-[var(--tone-warn-bg)] text-[var(--tone-warn-fg)]",
+  good: "bg-[var(--tone-good-bg)] text-[var(--tone-good-fg)]",
+  neutral: "bg-[var(--tone-neutral-bg)] text-[var(--tone-neutral-fg)]",
 }
 const FIGURE: Record<Tone, { box: string; value: string }> = {
-  urgent: { box: "", value: "text-[#b42318]" },
-  warn: { box: "", value: "text-[#b54708]" },
-  good: { box: "paper-note paper-note-success", value: "text-[#067647]" },
-  neutral: { box: "", value: "text-[#0f1722]" },
+  urgent: { box: "", value: "text-[var(--tone-urgent-fg)]" },
+  warn: { box: "", value: "text-[var(--tone-warn-fg)]" },
+  good: { box: "paper-note paper-note-success", value: "text-[var(--tone-good-fg)]" },
+  neutral: { box: "", value: "text-foreground" },
 }
 const TONE_OF: Record<AttentionTone, Tone> = { urgent: "urgent", soon: "warn", info: "neutral" }
 const DATED: ReadonlySet<AttentionKind> = new Set(["deadline", "cancellation"])
@@ -129,43 +129,43 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
 
   return <div className="horizon-dashboard relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-24 pt-4 text-foreground sm:px-6 sm:pt-6 md:pb-8 lg:px-8">
     <div className="relative z-10 mx-auto min-w-0 max-w-[1100px]">
-      <section aria-labelledby="today-title" className="paper p-5 text-[#0f1722] sm:p-7">
+      <section aria-labelledby="today-title" className="paper p-5 sm:p-7">
         <div className="relative">
           <div className="flex items-center gap-3">
             <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] ${TAG[status]}`}>{copy.status[status]}</span>
             <span aria-hidden="true" className="ml-auto grid size-10 place-items-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">{initials ?? <UserRound className="size-5" />}</span>
           </div>
-          <h1 id="today-title" className="mt-3 text-[26px] font-extrabold leading-tight tracking-[-0.01em] text-[#0f1722] sm:text-[32px]">{name ? `${copy.hello}, ${name}` : copy.hello}</h1>
-          <p className="mt-1 text-[15px] text-[#3d4652]">{copy.summary(items.length)}</p>
+          <h1 id="today-title" className="mt-3 text-[26px] font-extrabold leading-tight tracking-[-0.01em] text-foreground sm:text-[32px]">{name ? `${copy.hello}, ${name}` : copy.hello}</h1>
+          <p className="mt-1 text-[15px] text-muted-foreground">{copy.summary(items.length)}</p>
 
           <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
             {figures.map((figure, index) => <li key={figure.label} className={index === 0 ? "col-span-2 sm:col-span-1" : undefined}>
               <Link href={figure.href} className={`paper paper-inset paper-link block h-full px-3 py-2.5 ${FIGURE[figure.tone].box}`}>
-                <span className="block text-[11px] font-semibold leading-tight text-[#6b7480] sm:text-xs">{figure.label}</span>
+                <span className="block text-[11px] font-semibold leading-tight text-muted-foreground sm:text-xs">{figure.label}</span>
                 <span className={`mt-1 block whitespace-nowrap text-lg font-extrabold leading-tight tabular-nums sm:text-2xl ${FIGURE[figure.tone].value}`}>{figure.value}</span>
               </Link>
             </li>)}
           </ul>
 
-          <p className="mt-6 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#6b7480]">{copy.stepsTitle}</p>
+          <p className="mt-6 text-[11px] font-extrabold uppercase tracking-[0.08em] text-muted-foreground">{copy.stepsTitle}</p>
           <ol className="mt-2 grid gap-1">
             {steps.map((step) => <li key={step.id}>
-              <Link href={step.href} className="flex min-h-11 items-start gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-[#eef2f7]">
+              <Link href={step.href} className="flex min-h-11 items-start gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-muted">
                 <CheckCircle2 className="mt-0.5 size-[18px] shrink-0 text-primary" aria-hidden="true" />
-                <span className="min-w-0 flex-1 text-[15px] leading-snug text-[#0f1722]">
+                <span className="min-w-0 flex-1 text-[15px] leading-snug text-foreground">
                   {step.title}
-                  {step.detail ? <span className="mt-0.5 block text-xs text-[#6b7480]">{step.detail}</span> : null}
+                  {step.detail ? <span className="mt-0.5 block text-xs text-muted-foreground">{step.detail}</span> : null}
                 </span>
-                {step.pill ? <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TAG[step.tone]}`}>{step.pill}</span> : <ChevronRight className="mt-0.5 size-4 shrink-0 text-[#98a2b3]" aria-hidden="true" />}
+                {step.pill ? <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TAG[step.tone]}`}>{step.pill}</span> : <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
               </Link>
             </li>)}
           </ol>
-          {items.length > VISIBLE_STEPS ? <p className="px-2 pt-1 text-xs text-[#6b7480]">{copy.more(items.length - VISIBLE_STEPS)}</p> : null}
+          {items.length > VISIBLE_STEPS ? <p className="px-2 pt-1 text-xs text-muted-foreground">{copy.more(items.length - VISIBLE_STEPS)}</p> : null}
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link href={documentsHref} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-primary px-5 font-bold text-primary-foreground shadow-[0_10px_20px_-10px_var(--primary)] transition-colors hover:bg-[var(--primary-hover)] sm:flex-none">{copy.addDocument}<ArrowRight className="size-4" aria-hidden="true" /></Link>
-            <Link href={`/${locale}/guide`} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-[#e6eaf0] bg-white px-5 font-semibold text-[#0f1722] transition-colors hover:bg-[#eef2f7] sm:flex-none"><Plus className="size-4" aria-hidden="true" />{copy.startCase}</Link>
-            <p className="w-full text-xs text-[#6b7480] sm:w-auto sm:flex-1">{copy.note}</p>
+            <Link href={`/${locale}/guide`} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-border bg-card px-5 font-semibold text-foreground transition-colors hover:bg-muted sm:flex-none"><Plus className="size-4" aria-hidden="true" />{copy.startCase}</Link>
+            <p className="w-full text-xs text-muted-foreground sm:w-auto sm:flex-1">{copy.note}</p>
           </div>
         </div>
       </section>
