@@ -35,7 +35,7 @@ const items: Record<"bg" | "de", OrbitItem[]> = {
     { id: "jobcenter", label: "Jobcenter", description: "Организирай документи и следващи стъпки.", href: "/guide", position: "bottom-left", Icon: BriefcaseBusiness },
     { id: "energy", label: "Енергия", description: "Събери данните за текущите разходи.", href: "/guide", position: "left", Icon: Zap },
     { id: "security", label: "Сигурност", description: "Разбери какво се случва с твоите данни.", href: "/security", position: "top-left", Icon: ShieldCheck },
-    { id: "inkasso", label: "Inkasso", description: "Провери дали писмото от Inkasso е редно и какво да правиш.", href: "/guide", position: "upper-left", Icon: FileText },
+    { id: "inkasso", label: "Inkasso", description: "Провери дали писмото от Inkasso е редно и какво да правиш.", href: "/pruefung", position: "upper-left", Icon: FileText },
   ],
   de: [
     { id: "documents", label: "Dokumente", description: "Wichtige Dokumente hochladen, ordnen und verstehen.", href: "/documents", position: "bottom", Icon: FileCheck2 },
@@ -46,7 +46,7 @@ const items: Record<"bg" | "de", OrbitItem[]> = {
     { id: "jobcenter", label: "Jobcenter", description: "Unterlagen und nächste Schritte ordnen.", href: "/guide", position: "bottom-left", Icon: BriefcaseBusiness },
     { id: "energy", label: "Energie", description: "Daten zu deinen laufenden Kosten sammeln.", href: "/guide", position: "left", Icon: Zap },
     { id: "security", label: "Sicherheit", description: "Verstehen, wie deine Daten behandelt werden.", href: "/security", position: "top-left", Icon: ShieldCheck },
-    { id: "inkasso", label: "Inkasso", description: "Prüfe, ob das Inkassoschreiben berechtigt ist und was du tun kannst.", href: "/guide", position: "upper-left", Icon: FileText },
+    { id: "inkasso", label: "Inkasso", description: "Prüfe, ob das Inkassoschreiben berechtigt ist und was du tun kannst.", href: "/pruefung", position: "upper-left", Icon: FileText },
   ],
 }
 
@@ -60,7 +60,7 @@ const reviewedCopy: Record<"bg" | "de", Record<string, Pick<OrbitItem, "label" |
     jobcenter: { label: "Разбери ситуацията", description: "Избери дали да разбереш документ, да отговориш на институция или да подготвиш формуляр.", href: "/guide" },
     energy: { label: "Финансово обучение", description: "Научи повече за решенията, договорите и разходите си.", href: "/finanzbildung" },
     security: { label: "Как работи", description: "Виж как HORIZON подготвя документи, срокове и следващи стъпки.", href: "/how-it-works" },
-    inkasso: { label: "Inkasso писмо", description: "Отвори Guide и избери „Разбери документ“ за структурирана подготовка.", href: "/guide" },
+    inkasso: { label: "Inkasso писмо", description: "Постави писмото и провери разбивката, таксите и следващите стъпки.", href: "/pruefung" },
   },
   de: {
     documents: { label: "Dokumente", description: "Wichtige Unterlagen speichern und für eine manuelle Prüfung vorbereiten.", href: "/documents" },
@@ -71,7 +71,7 @@ const reviewedCopy: Record<"bg" | "de", Record<string, Pick<OrbitItem, "label" |
     jobcenter: { label: "Situation verstehen", description: "Dokument verstehen, Behörde antworten oder Formular vorbereiten.", href: "/guide" },
     energy: { label: "Finanzbildung", description: "Mehr über Entscheidungen, Verträge und laufende Kosten lernen.", href: "/finanzbildung" },
     security: { label: "So funktioniert es", description: "Sehen, wie HORIZON Dokumente, Fristen und nächste Schritte vorbereitet.", href: "/how-it-works" },
-    inkasso: { label: "Inkassoschreiben", description: "Guide öffnen und „Dokument verstehen“ für die strukturierte Vorbereitung wählen.", href: "/guide" },
+    inkasso: { label: "Inkassoschreiben", description: "Schreiben einfügen und Aufschlüsselung, Gebühren und nächste Schritte prüfen.", href: "/pruefung" },
   },
 }
 
