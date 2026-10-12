@@ -57,6 +57,25 @@ describe("Kfz landing copy", () => {
     expect(page).not.toMatch(/export const metadata/)
   })
 
+  it("tells where to get each document and links platform functions", () => {
+    for (const locale of ["bg", "de"] as const) {
+      const { items } = kfzLandingCopy[locale].documents
+      expect(items.length).toBeGreaterThanOrEqual(5)
+      const hrefs = items.map((item) => item.action?.href)
+      expect(hrefs).toEqual(expect.arrayContaining(["/documents", "/vertraege", "/zayavka?service=kfz", "/guide"]))
+    }
+  })
+
+  it("loads the partner calculator only after an explicit click", () => {
+    const widget = read("components/affiliate/kfz-partner-widget.tsx")
+    expect(widget).toMatch(/useState\(false\)/)
+    expect(widget).toMatch(/if \(!loaded \|\| !container\.current\) return/)
+    expect(widget).toMatch(/id="tcpp-iframe-kfz"/)
+    for (const locale of ["bg", "de"] as const) {
+      expect(kfzLandingCopy[locale].widget.privacy).toMatch(/partner-versicherung\.de/)
+    }
+  })
+
   it("carries the approved slogan and the Bulgarian-first framing", () => {
     expect(kfzLandingCopy.bg.hero.lead).toContain("Ясни условия. Честни цени. Бързо сключване.")
     expect(kfzLandingCopy.bg.hero.titleAccent).toBe("обяснена на български")
