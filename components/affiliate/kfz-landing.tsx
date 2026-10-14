@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, BadgeCheck, CheckCircle2, FileCheck2, FileText, KeyRound, ListChecks, Phone, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { KfzCalculator } from "@/components/affiliate/kfz-calculator"
 import { KfzPartnerWidget } from "@/components/affiliate/kfz-partner-widget"
 import { KfzHeroVisual } from "@/components/affiliate/kfz-hero-visual"
 import { insuranceHubCopy, kfzLandingCopy } from "@/components/affiliate/insurance-content"
@@ -226,6 +227,10 @@ export function KfzLanding({
             </li>
           ))}
         </ol>
+      </section>
+
+      <section id="kfz-vorbereitung" className="kfz-section mx-auto max-w-5xl scroll-mt-24 px-5 pt-14 lg:px-8 md:pt-20">
+        <KfzCalculator locale={locale} isOffered={isOffered} />
       </section>
 
       <section id="kfz-calculator" className="kfz-section mx-auto max-w-5xl scroll-mt-24 px-5 py-14 lg:px-8 md:py-20" aria-labelledby="kfz-widget">
