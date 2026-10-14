@@ -1924,6 +1924,41 @@
 .kfz-page .kfz-inner-card .border-border { border-color: rgb(89 151 220 / 0.2); }
 .kfz-page .bg-primary\/15 { background-color: rgb(21 128 238 / 0.2); }
 
+/* The guided preparation calculator (shared with Firmenversicherung) carries the
+   light "paper" sheet. On this dark page that sheet has no visible edge, and the
+   inputs inherit the light theme, so a white field sat on a near-white card.
+   Re-skin the sheet and the fields for the dark surface. */
+.kfz-page .paper {
+  color-scheme: dark;
+  border-color: rgb(83 147 218 / 0.28);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(15 99 202 / 0.16), transparent 52%),
+    linear-gradient(145deg, rgb(11 31 57 / 0.98), rgb(4 16 32 / 0.98));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 24px 60px -42px rgb(0 96 212 / 0.7);
+}
+
+.kfz-page .paper .paper,
+.kfz-page .paper.paper-inset {
+  background: rgb(3 17 35 / 0.72);
+  box-shadow: inset 0 0 0 1px rgb(89 151 220 / 0.16);
+}
+
+.kfz-page .paper label { color: #eef5ff; }
+
+.kfz-page .paper input,
+.kfz-page .paper select {
+  border-color: rgb(89 151 220 / 0.34);
+  background-color: rgb(2 12 26 / 0.9);
+  color: #eef5ff;
+}
+
+.kfz-page .paper input::placeholder { color: #7f92ab; }
+
+.kfz-page .paper input:focus-visible,
+.kfz-page .paper select:focus-visible {
+  border-color: var(--kfz-blue-soft);
+}
+
 .kfz-visual-stage { perspective: 900px; }
 .kfz-visual-orb { background: rgb(0 119 255 / 0.55); box-shadow: 0 0 55px 18px rgb(0 119 255 / 0.22); }
 .kfz-hero-car { filter: drop-shadow(0 26px 24px rgb(0 0 0 / 0.42)) drop-shadow(0 0 28px rgb(0 128 255 / 0.22)); }
