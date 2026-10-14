@@ -48,6 +48,16 @@ describe("Kfz landing copy", () => {
     expect(source).toMatch(/localizedPath\("\/documents", locale\)/)
   })
 
+  it("wires the guided preparation calculator before the partner widget", () => {
+    const source = read("components/affiliate/kfz-landing.tsx")
+    expect(source).toMatch(/import \{ KfzCalculator \} from "@\/components\/affiliate\/kfz-calculator"/)
+    expect(source).toMatch(/<KfzCalculator locale=\{locale\} isOffered=\{isOffered\} \/>/)
+    const preparation = source.indexOf("id=\"kfz-vorbereitung\"")
+    const widget = source.indexOf("id=\"kfz-calculator\"")
+    expect(preparation).toBeGreaterThan(-1)
+    expect(widget).toBeGreaterThan(preparation)
+  })
+
   it("gives each locale page metadata in its own language", () => {
     expect(kfzLandingCopy.de.meta.description).toMatch(/Kfz-Versicherung/)
     expect(kfzLandingCopy.de.meta.description).not.toMatch(/[а-яА-Я]/)
