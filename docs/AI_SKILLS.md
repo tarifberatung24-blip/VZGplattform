@@ -1,6 +1,6 @@
 # HORIZON AI skills
 
-Project-local reusable skills live under `.openhands/skills/`. There are 32 skills: 10 foundation skills and 22 orchestration, connector, safety, and operations skills. They are intentionally narrow: each skill routes an agent to the relevant repository rules and verification criteria; they do not authorize deployment, merge, schema changes, or access to customer data.
+Project-local reusable skills live under `.openhands/skills/`. There are 34 skills. They are intentionally narrow: each skill routes an agent to the relevant repository rules and verification criteria; they do not authorize deployment, merge, schema changes, or access to customer data.
 
 | Skill | Use for |
 |---|---|
@@ -14,6 +14,8 @@ Project-local reusable skills live under `.openhands/skills/`. There are 32 skil
 | `horizon-security-review` | auth, RLS assumptions, secrets, approvals |
 | `horizon-ui-qa` | browser, responsive, accessibility, visual smoke tests |
 | `horizon-release-gate` | quality gate and handoff report |
+| `horizon-render-ops` | Render deployment operations and infrastructure governance |
+| `horizon-retry-resilience` | retry behavior, resilience, and failure recovery |
 
 These skills accelerate implementation and review. They do not make an unverified product phase DONE.
 

@@ -208,7 +208,7 @@ export function outOfScopeSummary(index, phase) {
     "FROZEN modules: see FROZEN_SYSTEMS; do not modify them without explicit owner reopening.",
     "Capital code (lib/capital/**, docs/research/capital/**): PRESERVE / OUTSIDE CURRENT ACTIVE BUILD SEQUENCE.",
     "Application code, Supabase/schema/RLS, env, dependencies, lockfile, deployment: out of scope unless the owner authorizes it.",
-    "Branding drift and KintexBG/HAMMAL legacy references: report only, do not fix and do not delete.",
+    "Legacy identifiers (KintexBG/HAMMAL) are preserved and must not be deleted; drift in agent instructions and governance documents is corrected only with explicit owner authorization.",
   ]
   const extra = {
     P0: ["Application functionality, routes, UI redesign, Supabase changes, deployment."],

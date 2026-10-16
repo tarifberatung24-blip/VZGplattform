@@ -232,7 +232,8 @@ test("out-of-scope carries the Capital rule and the phase's own exclusion", () =
 
   const summary = outOfScopeSummary(index, "P12")
   assert.ok(summary.extra.some((line) => line.includes("P13")))
-  assert.ok(summary.summary.includes("report only"))
+  assert.ok(summary.summary.includes("Legacy identifiers (KintexBG/HAMMAL) are preserved"))
+  assert.ok(summary.summary.includes("explicit owner authorization"))
 })
 
 test("ledger index rows resolve for every phase", () => {

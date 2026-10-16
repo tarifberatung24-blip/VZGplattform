@@ -1,6 +1,6 @@
 # Multi-model and connector orchestration
 
-The repository now contains 32 project-local skills: 10 foundation skills and 22 orchestration, connector, safety, and operations skills. They describe reusable behavior; they do not create provider accounts, API keys, MCP sessions, or production permissions.
+The repository now contains 34 project-local skills. They describe reusable behavior; they do not create provider accounts, API keys, MCP sessions, or production permissions.
 
 Provider selection uses a local-first policy. Ollama is attempted before cloud providers. If the local call fails or times out, the router may use Gemini for visual inputs or OpenRouter for text only when `AI_ALLOW_CLOUD_FALLBACK=true` is present in the environment. The default is false so personal documents are not sent to a cloud provider accidentally.
 
