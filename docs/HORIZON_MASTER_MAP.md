@@ -252,14 +252,14 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | ROUTE | ACCESS | CURRENT PURPOSE | CURRENT BRANDING | LOCALE BEHAVIOR | MAIN COMPONENT | BACKEND / DATA DEPS | STATUS | TARGET DESTINATION | DISPOSITION |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `/` | PUBLIC | root, redirects to locale | VZGplattform (metadata) | redirect → cookie/default `bg` | — (proxy) | none | ACTIVE | Phase 1 | REPLACE LATER |
-| `/{locale}` | PUBLIC | marketing home | mixed HAMMAL / VZG CONSULT | `bg`/`de` via catch-all | `app/page.tsx` `Hero`, `OpportunityCheck`, `FinancialOsOverview` | none | ACTIVE | Phase 1 | REPLACE LATER |
+| `/{locale}` | PUBLIC | marketing home | mixed legacy / VZG CONSULT | `bg`/`de` via catch-all | `app/page.tsx` `Hero`, `OpportunityCheck`, `FinancialOsOverview` | none | ACTIVE | Phase 1 | REPLACE LATER |
 | `/{locale}/check` | REDIRECT | opportunity check entry | KintexBG-era | redirect → `/{locale}/dashboard` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
 | `/{locale}/uslugi` | REDIRECT | services (BG slug) | mixed | redirect → `/{locale}/functions` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
 | `/{locale}/anspruch` | PUBLIC | entitlement navigator | mixed, DE copy | `bg`/`de` | `app/anspruch/page.tsx` | `EntitlementNavigator` | PARTIAL | Phase 4 / 12–13 | REUSE |
 | `/{locale}/kindergeld` | PUBLIC | Kindergeld navigator | `KintexBG` in title | `bg`/`de` | `app/kindergeld/page.tsx` | `/api/kindergeld/draft`, `kindergeld_cases` | PARTIAL | Phase 4 (social module) | REUSE |
 | `/{locale}/produkte` | REDIRECT | product overview | mixed | redirect → `/{locale}/functions` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
 | `/{locale}/tarife` | REDIRECT | tariffs | KintexBG-era | redirect → `/{locale}/versicherungen` (N7) | — | none | LEGACY | Phase 17 (partner) | LEGACY |
-| `/{locale}/za-nas` | PUBLIC | about (BG slug) | HAMMAL in messages | `bg`/`de` | `app/za-nas/page.tsx` | static | ACTIVE | Phase 1 | LEGACY |
+| `/{locale}/za-nas` | PUBLIC | about (BG slug) | legacy branding in messages | `bg`/`de` | `app/za-nas/page.tsx` | static | ACTIVE | Phase 1 | LEGACY |
 | `/{locale}/zayavka` | PUBLIC | service request (BG) | mixed | `bg`/`de` | `app/zayavka/page.tsx` | `/api/service-requests` → automation webhook | PARTIAL | Phase 1 / 17 | LEGACY |
 | `/{locale}/anfrage` | PUBLIC | service request (DE) | mixed | `bg`/`de` | re-export of `zayavka` | `/api/service-requests` → automation webhook | PARTIAL | Phase 1 / 17 | LEGACY |
 | `/{locale}/angebote/{offer}` | PUBLIC | affiliate offer landing | mixed | `bg`/`de` | `affiliate-offer-landing` | `lib/affiliate-offers`, `/go/{offer}` | ACTIVE | Phase 17 | KEEP |
@@ -875,27 +875,21 @@ Contract management remains distinct from Kündigung (Phase 14) but shares the s
 
 ---
 
-## 8. Branding drift audit (report only)
+## 8. Branding drift audit
 
-Branding drift exists in application code and must **not** be fixed in Phase 0.
+Audited 2026-10-16 with `rg -o --glob '!node_modules/**' --glob '!.git/**' --glob '!docs/HORIZON_MASTER_MAP.md' TERM . | Measure-Object`; counts are repository-wide occurrence counts excluding this report to keep them reproducible.
 
 | Term | Approx. occurrences in `app components lib i18n messages public` | Where |
 | --- | ---: | --- |
-| `KintexBG` | 77 | auth pages, office prototype, kindergeld, footer/nav, tests, `globals.css` |
-| `HAMMAL` | 26 | `components/brand/logo.tsx`, `global-header.tsx`, `global-footer.tsx`, `messages/{bg,de}.json` |
-| `VZG CONSULT` | 19 | metadata, auth pages, headers |
-| `VZGplattform` | 15 | metadata, PWA, README |
-| `HORIZON` | 3 | `lib/capital/intake/categories*.ts` only — not user-facing |
-| `Tarifberater24` | 3 | `lib/legal-profile.ts`, `app/[locale]/contact/page.tsx` |
-| `finanzberaterbg.de` | 3 | `app/layout.tsx` `metadataBase`, other metadata |
+| `KintexBG` | 34 | repository-wide |
+| `HAMMAL` | 7 | repository-wide |
+| `VZG CONSULT` | 33 | repository-wide |
+| `VZGplattform` | 41 | repository-wide |
+| `HORIZON` | 721 | repository-wide |
+| `Tarifberater24` | 16 | repository-wide |
+| `finanzberaterbg.de` | 10 | repository-wide |
 
-Also present: `docs/TERRA_START.md` still names the product `HAMMAL by VZG`;
-`README.md` title is `KintexBG / VZGplattform`; `app/[locale]/[[...slug]]/page.tsx` emits
-`title: "KintexBG — BY VZG CONSULT"` for workspace paths; `lib/kintex-smart-dashboard.ts`
-declares `appName: "KintexBG"` and `deployment: "Vercel"` (Render is the actual authority);
-`app/layout.tsx` declares `generator: "v0.app"`.
-
-The product name `HORIZON by VZG` appears in **no** user-facing surface yet.
+The remaining legacy occurrences are preserved identifiers or documented historical/provider references; this task updates only the explicitly authorized agent and governance drift surfaces.
 
 ---
 

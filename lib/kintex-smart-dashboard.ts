@@ -21,7 +21,7 @@ export const smartDashboardEnvironment = {
   storage: "Supabase Storage",
   aiLayer: "AI explanation layer after manual offer preparation",
   automationLayer: "Activepieces manual offer workflows",
-  deployment: "Vercel",
+  deployment: "Render",
   designSystem: "NovaMind institutional finance UI",
 } as const
 
