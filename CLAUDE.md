@@ -60,6 +60,38 @@ pnpm build            # needs network for Google Fonts; CI is authoritative
   command (force push, `reset --hard`, `git add .`, reading `.env`, `supabase db push`, secrets in files). It is
   tested by `scripts/claude-guard.test.mjs`. If it blocks something legitimate, ask the owner; do not bypass it.
 
+## Browser verification: bdg (optional dev tool)
+
+`bdg` (browser-debugger-cli) drives a real Chromium from the shell and reads the DOM, network and console. It is a
+developer tool, not a project dependency: nothing is added to `package.json` or the lockfile. Install from the owner's
+fork (MIT, upstream `szymdzum/browser-debugger-cli`):
+
+```bash
+git clone --depth 1 https://github.com/hesreallyhim/browser-debugger-cli-fork ~/tools/bdg
+cd ~/tools/bdg && npm ci --ignore-scripts && npm run build && npm link
+```
+
+Rules:
+- Only local development hosts (`localhost`, `127.0.0.1`). Never point it at production.
+- Never sign in with real credentials through it. Use test data from the project's own seed files only.
+- Set `CHROME_PATH` when no Chrome is installed. In containers set `BDG_NO_SANDBOX=1`.
+- Use a named session and always stop it:
+
+```bash
+bdg http://localhost:3000 --headless --session horizon
+bdg dom query h1 --session horizon
+bdg peek --session horizon -q
+bdg stop --session horizon
+```
+
+Reviewed and deliberately not vendored (MIT, reviewed 2026-10-11):
+- `hesreallyhim/github-api-usage-monitor`: a GitHub Action that reports rate-limit usage. HORIZON makes no
+  meaningful GitHub API volume, and adding it would give a third-party action access to our workflows. Revisit only
+  if rate limits become a real problem.
+- `hesreallyhim/executor-fork`: an initiative workflow system of about 60 scripts. It overlaps `AGENTS.md`,
+  `PROJECT_RULES.md`, `AI_WORKFLOW.md` and `claude-guard`. Its `scripts/lint-prompt-injection.py` and
+  `skills/executor/scripts/exec-scan-secrets` are worth adopting only if third-party skill files are ever loaded here.
+
 ## Hard stops (also enforced in `.claude/settings.json`)
 
 - No merge, deploy, env/secret, schema/RLS or production change without explicit owner approval.
