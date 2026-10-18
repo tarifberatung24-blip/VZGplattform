@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ModuleInfoDialog } from "@/components/horizon/module-info-dialog"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { homeModuleIcon, homeModules } from "@/lib/horizon/modules/registry"
 import { startModuleCase } from "@/lib/horizon/modules/actions"
@@ -40,14 +41,14 @@ function ModuleButton({
       type="submit"
       variant="ghost"
       disabled={pending}
-      className="paper paper-link h-full min-h-[112px] w-full flex-col items-start justify-between gap-3 whitespace-normal p-4 text-left"
+      className="h-full min-h-[124px] w-full flex-col items-start justify-between gap-3 whitespace-normal rounded-none bg-transparent p-4 pb-11 text-left hover:bg-transparent"
     >
       <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
         <Icon className="size-[18px]" aria-hidden="true" />
       </span>
       <span className="block">
         <span className="block text-sm font-semibold leading-snug">{pending ? pendingLabel : label}</span>
-        <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">{status}</span>
+        <span className="mt-0.5 block max-w-[calc(100%-2rem)] text-[11px] font-normal text-muted-foreground">{status}</span>
       </span>
     </Button>
   )
@@ -100,7 +101,7 @@ export function HorizonHome({
           const Icon = icons[homeModuleIcon[definition.module]] ?? FileSearch
           const count = caseCounts[definition.module] ?? 0
           return (
-            <form key={definition.module} action={startModuleCase} className="min-w-0">
+            <form key={definition.module} action={startModuleCase} className="paper paper-link relative min-w-0 overflow-hidden">
               <input type="hidden" name="module" value={definition.module} />
               <input type="hidden" name="locale" value={locale} />
               <ModuleButton
@@ -109,6 +110,7 @@ export function HorizonHome({
                 pendingLabel={copy.starting}
                 status={count > 0 ? `${count} ${caseCountNoun(locale, count)}` : notStartedLabel(locale)}
               />
+              <ModuleInfoDialog module={definition.module} locale={locale} />
             </form>
           )
         })}

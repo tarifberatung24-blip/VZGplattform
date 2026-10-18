@@ -14,7 +14,6 @@ export const DAY_MS = 86_400_000
 
 export type NotificationKind =
   | "first_win"
-  | "report_day14"
   | "report_monthly"
   | "inactive_nudge"
   | "deadline_30"
@@ -167,10 +166,9 @@ export function computeDueNotifications(snapshot: ActivitySnapshot, now: Date): 
     drafts.push({ kind: "first_win", dedupeKey: "first_win", payload: { ...buildReport(snapshot, now), at: win } })
   }
 
-  // Day 14 report for new accounts; after that one report per calendar month.
-  if (age >= 14 && age < 44) {
-    drafts.push({ kind: "report_day14", dedupeKey: "report_day14", payload: buildReport(snapshot, now) })
-  } else if (age >= 44) {
+  // Keep the inbox quiet during the first weeks. Established accounts receive
+  // one compact report per calendar month.
+  if (age >= 44) {
     const month = day(now).slice(0, 7)
     drafts.push({ kind: "report_monthly", dedupeKey: `report_monthly:${month}`, payload: { ...buildReport(snapshot, now), month } })
   }

@@ -115,6 +115,7 @@ export async function emailPendingNotifications(
     .from("user_notifications")
     .select("id,kind,payload,created_at")
     .eq("user_id", user.id)
+    .neq("kind", "report_day14")
     .is("emailed_at", null)
     .gte("created_at", new Date(now.getTime() - EMAIL_MAX_AGE_MS).toISOString())
     .order("created_at", { ascending: true })

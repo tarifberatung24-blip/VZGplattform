@@ -10,7 +10,6 @@ import { formatMoney } from "@/lib/dashboard/contracts-data"
 import { buildAttentionItems, type AttentionKind, type AttentionTone } from "@/lib/dashboard/attention"
 import { HorizonHome } from "@/components/horizon/horizon-home"
 import { YourValueCard } from "./your-value-card"
-import { NotificationInbox, type InboxNotification } from "./notification-inbox"
 import type { YourValue } from "@/lib/value/your-value"
 import type { GrundversorgungMatch } from "@/lib/value/grundversorgung"
 
@@ -24,8 +23,6 @@ export type VzgDashboardProps = {
   caseCounts?: Record<string, number>
   moduleError?: string | null
   yourValue?: YourValue | null
-  notifications?: InboxNotification[]
-  notificationsEmailEnabled?: boolean
   grundversorgung?: GrundversorgungMatch[]
 }
 
@@ -65,9 +62,7 @@ function copyFor(de: boolean) {
         contracts: "Verträge",
         review: "Zur Prüfung",
         firstContract: "Ersten Vertrag hinzufügen",
-        firstContractDetail: "Wir behalten Fristen und Preis für dich im Blick",
         upload: "Brief oder Dokument hochladen",
-        uploadDetail: "Wir erklären, was drinsteht und bis wann du handeln musst",
       }
     : {
         hello: "Здравей",
@@ -76,26 +71,24 @@ function copyFor(de: boolean) {
         stepsTitle: "Следващи стъпки",
         more: (n: number) => `и още ${n}`,
         addDocument: "Добави документ",
-        reduceCosts: "Намали разходите си",
+        reduceCosts: "Намали разходи",
         startCase: "Започни случай",
         note: "Само потвърдени данни. Нищо не се изпраща без теб.",
         monthly: "Месечни разходи",
         contracts: "Договори",
         review: "За проверка",
         firstContract: "Добави първия си договор",
-        firstContractDetail: "Ще следим сроковете и цената вместо теб",
         upload: "Качи писмо или документ",
-        uploadDetail: "Ще ти обясним какво пише и докога трябва да действаш",
       }
 }
 
 /**
  * The customer home, in the look of the product preview on the home page: one "today" card with a
- * status tag, the greeting, three figures, the next steps and one strong action, then the inbox and
- * the modules. Built for a phone first. Charts, the contract table and the document analyzer live on
+ * status tag, the greeting, three figures, the next steps and one strong action, then the modules.
+ * Built for a phone first. The mailbox lives in the left navigation. Charts and detailed tools live on
  * the Contracts and Documents pages. The page tint comes from `.horizon-dashboard` in globals.css.
  */
-export function VzgDashboard({ firstName, profile, contracts, reviewCount, reminders, caseCounts, moduleError, yourValue, grundversorgung, notifications, notificationsEmailEnabled }: VzgDashboardProps) {
+export function VzgDashboard({ firstName, profile, contracts, reviewCount, reminders, caseCounts, moduleError, yourValue, grundversorgung }: VzgDashboardProps) {
   const { locale } = useLanguage()
   const de = locale === "de"
   const lang: "bg" | "de" = de ? "de" : "bg"
@@ -124,10 +117,10 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
 
   // With nothing to do, the steps suggest the two ways to get value out of Horizon.
   const steps = items.length
-    ? items.slice(0, VISIBLE_STEPS).map((item) => ({ id: item.id, title: item.title, detail: DATED.has(item.kind) ? null : item.detail, pill: DATED.has(item.kind) ? item.detail : null, tone: TONE_OF[item.tone], href: item.href }))
+    ? items.slice(0, VISIBLE_STEPS).map((item) => ({ id: item.id, title: item.title, pill: DATED.has(item.kind) ? item.detail : null, tone: TONE_OF[item.tone], href: item.href }))
     : [
-        ...(contracts.length === 0 ? [{ id: "first-contract", title: copy.firstContract, detail: copy.firstContractDetail, pill: null, tone: "neutral" as Tone, href: contractsHref }] : []),
-        { id: "upload", title: copy.upload, detail: copy.uploadDetail, pill: null, tone: "neutral" as Tone, href: documentsHref },
+        ...(contracts.length === 0 ? [{ id: "first-contract", title: copy.firstContract, pill: null, tone: "neutral" as Tone, href: contractsHref }] : []),
+        { id: "upload", title: copy.upload, pill: null, tone: "neutral" as Tone, href: documentsHref },
       ]
 
   return <div className="horizon-dashboard relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-24 pt-4 text-foreground sm:px-6 sm:pt-6 md:pb-8 lg:px-8">
@@ -157,7 +150,6 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
                 <CheckCircle2 className="mt-0.5 size-[18px] shrink-0 text-primary" aria-hidden="true" />
                 <span className="min-w-0 flex-1 text-[15px] leading-snug text-foreground">
                   {step.title}
-                  {step.detail ? <span className="mt-0.5 block text-xs text-muted-foreground">{step.detail}</span> : null}
                 </span>
                 {step.pill ? <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TAG[step.tone]}`}>{step.pill}</span> : <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
               </Link>
@@ -165,16 +157,14 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
           </ol>
           {items.length > VISIBLE_STEPS ? <p className="px-2 pt-1 text-xs text-muted-foreground">{copy.more(items.length - VISIBLE_STEPS)}</p> : null}
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Link href={costReductionHref} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-primary px-5 font-bold text-primary-foreground shadow-[0_10px_20px_-10px_var(--primary)] transition-colors hover:bg-[var(--primary-hover)] sm:flex-none"><Zap className="size-4" aria-hidden="true" />{copy.reduceCosts}</Link>
-            <Link href={documentsHref} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-border bg-card px-5 font-semibold text-foreground transition-colors hover:bg-muted sm:flex-none">{copy.addDocument}<ArrowRight className="size-4" aria-hidden="true" /></Link>
-            <Link href={`/${locale}/guide`} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-border bg-card px-5 font-semibold text-foreground transition-colors hover:bg-muted sm:flex-none"><Plus className="size-4" aria-hidden="true" />{copy.startCase}</Link>
-            <p className="w-full text-xs text-muted-foreground sm:w-auto sm:flex-1">{copy.note}</p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <Link href={costReductionHref} className="inline-flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-[12px] bg-primary px-3 text-center font-bold leading-snug text-primary-foreground shadow-[0_10px_20px_-10px_var(--primary)] transition-colors hover:bg-[var(--primary-hover)]"><Zap className="size-4 shrink-0" aria-hidden="true" /><span>{copy.reduceCosts}</span></Link>
+            <Link href={documentsHref} className="inline-flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-[12px] border border-border bg-card px-3 text-center font-semibold leading-snug text-foreground transition-colors hover:bg-muted"><span>{copy.addDocument}</span><ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link>
+            <Link href={`/${locale}/guide`} className="inline-flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-[12px] border border-border bg-card px-3 text-center font-semibold leading-snug text-foreground transition-colors hover:bg-muted"><Plus className="size-4 shrink-0" aria-hidden="true" /><span>{copy.startCase}</span></Link>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">{copy.note}</p>
         </div>
       </section>
-
-      <NotificationInbox initial={notifications ?? []} emailEnabled={notificationsEmailEnabled !== false} />
 
       <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} />
 

@@ -159,14 +159,10 @@ export function renderNotification(kind: NotificationKind, payload: Record<strin
         cta: de ? "Zum Dashboard" : "Към таблото",
       }
     }
-    case "report_day14":
     case "report_monthly": {
       const report = asReport(payload)
       return {
-        title:
-          kind === "report_day14"
-            ? de ? "Deine ersten 14 Tage mit HORIZON" : "Първите ти 14 дни с HORIZON"
-            : de ? "Dein Monatsbericht von HORIZON" : "Месечният ти отчет от HORIZON",
+        title: de ? "Dein Monatsbericht von HORIZON" : "Месечният ти отчет от HORIZON",
         body: reportBody(report, locale),
         href: dashboard,
         cta: de ? "Bericht ansehen" : "Виж отчета",

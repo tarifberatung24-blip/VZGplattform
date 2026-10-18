@@ -5,7 +5,6 @@ import type { NotificationKind } from "./rules"
 const report = { featuresUsed: ["documents", "contracts"], featureTotal: 8, contracts: 1, documents: 2, cases: 0, sentLetters: 0, securedSavingsCents: 29400, realizedSavingsCents: 0, upcomingDeadlines: 1 }
 const payloads: Record<NotificationKind, Record<string, unknown>> = {
   first_win: { ...report, at: "2026-10-09T10:00:00Z" },
-  report_day14: report,
   report_monthly: { ...report, month: "2026-10" },
   inactive_nudge: { ageDays: 25 },
   deadline_30: { contractId: "a", title: "Strom", date: "2026-11-05", daysLeft: 25 },
@@ -26,9 +25,9 @@ describe("notification copy", () => {
   }
 
   it("shows the evidenced saving, never an estimate", () => {
-    expect(renderNotification("report_day14", report, "bg").body).toMatch(/294,00\s€ годишно/)
-    expect(renderNotification("report_day14", { ...report, securedSavingsCents: 0 }, "bg").body).toMatch(/Още няма доказано спестяване/)
-    expect(renderNotification("report_day14", report, "de").body).toMatch(/Genutzt: 2 von 8/)
+    expect(renderNotification("report_monthly", report, "bg").body).toMatch(/294,00\s€ годишно/)
+    expect(renderNotification("report_monthly", { ...report, securedSavingsCents: 0 }, "bg").body).toMatch(/Още няма доказано спестяване/)
+    expect(renderNotification("report_monthly", report, "de").body).toMatch(/Genutzt: 2 von 8/)
   })
 
   it("handles the last day of a deadline", () => {

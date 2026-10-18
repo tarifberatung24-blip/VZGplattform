@@ -20,9 +20,9 @@ describe("notification rules", () => {
     expect(kinds(base())).toEqual([])
   })
 
-  it("sends the day 14 report from day 14 to day 43, then one report per month", () => {
-    expect(kinds(base({ accountCreatedAt: daysAgo(13) }))).toEqual([])
-    expect(kinds(base({ accountCreatedAt: daysAgo(14) }))).toEqual(["report_day14"])
+  it("keeps the first weeks quiet, then sends one report per month", () => {
+    expect(kinds(base({ accountCreatedAt: daysAgo(14) }))).toEqual([])
+    expect(kinds(base({ accountCreatedAt: daysAgo(43) }))).not.toContain("report_monthly")
     const later = computeDueNotifications(base({ accountCreatedAt: daysAgo(60), documentCount: 1 }), now)
     expect(later.map((draft) => draft.dedupeKey)).toEqual(["report_monthly:2026-10"])
   })

@@ -18,6 +18,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { navIcons } from "@/components/navigation/nav-icons"
+import { NotificationMailbox } from "@/components/layout/notification-mailbox"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { isDestinationActive, navGroups } from "@/lib/navigation/horizon-nav"
@@ -43,6 +44,13 @@ export function HorizonSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <NotificationMailbox />
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         {navGroups.map((group) => (
           <SidebarGroup key={group.id}>
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
