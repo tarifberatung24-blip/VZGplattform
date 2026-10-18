@@ -17,7 +17,6 @@ import { useLanguage } from "@/lib/i18n/language-context"
 import { guideIntentIcon, guideIntents } from "@/lib/horizon/guide/intents"
 import { caseStatusLabel, getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
 import { startGuideCase } from "@/lib/horizon/guide/actions"
-import { startModuleCase } from "@/lib/horizon/modules/actions"
 import { SituationRouter } from "@/components/guide/situation-router"
 import { BrandText } from "@/components/brand/horizon-wordmark"
 
@@ -136,24 +135,6 @@ export function GuideChooser({
 
           <SituationRouter locale={locale} />
 
-          <aside className="paper paper-note mt-6 flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between" aria-label={copy.benefitsLabel}>
-            <div>
-              <p className="text-sm font-semibold"><BrandText text={copy.benefitsLabel} /></p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground"><BrandText text={copy.benefitsText} /></p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <form action={startModuleCase}>
-                <input type="hidden" name="module" value="jobcenter" />
-                <input type="hidden" name="locale" value={locale} />
-                <Button type="submit" variant="outline" className="min-h-11 shrink-0"><BrandText text={copy.jobcenterCta} /></Button>
-              </form>
-              <form action={startModuleCase}>
-                <input type="hidden" name="module" value="agentur_fuer_arbeit" />
-                <input type="hidden" name="locale" value={locale} />
-                <Button type="submit" variant="outline" className="min-h-11 shrink-0"><BrandText text={copy.arbeitsagenturCta} /></Button>
-              </form>
-            </div>
-          </aside>
         </section>
 
         <section className="mt-10" aria-labelledby="guide-cases">
