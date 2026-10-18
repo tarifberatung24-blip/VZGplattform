@@ -26,7 +26,10 @@ const horizonMigrations = [engineMigration, ...reconciliationMigrations]
 const stripSqlComments = (sql: string) =>
   sql
     .split("\n")
-    .map((line) => line.replace(/--.*$/, ""))
+    // `readFileSync()` preserves CRLF on Windows. `.*$` does not consume the
+    // final `\r` in that form, so it left an entire `-- …` comment behind and
+    // made the security assertion inspect prose instead of SQL.
+    .map((line) => line.replace(/--[\s\S]*$/, ""))
     .join("\n")
 
 const executableRls = stripSqlComments(rlsReconcile)
