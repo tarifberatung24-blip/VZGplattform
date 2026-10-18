@@ -5,6 +5,7 @@ import {
   requiredFactKeysForJobcenterTask,
 } from "../jobcenter/registry"
 import { resolveTaxYear, steuerYearDefinition } from "../steuer/registry"
+import { isEnergyCostRequest } from "../service-requests/registry"
 
 /**
  * Required fact keys per module. A key is "required" only in the sense that the
@@ -173,6 +174,15 @@ export function deriveMissingInformation(
   facts: readonly MissingInfoFact[],
   module: string,
 ): MissingInformation {
+  // Energy tariff checks have a purpose-built, transparent readiness check:
+  // a bill can supply comparison inputs that are otherwise absent. Applying
+  // the generic contract checklist here would ask for `contract_provider` even
+  // when the user already attached the annual bill that contains it, and would
+  // mark user-entered contact data as needing a second confirmation.
+  if (isEnergyCostRequest(facts.map((fact) => ({ key: fact.key, value: fact.value ?? "" })))) {
+    return { missingFactKeys: [], unconfirmedCriticalFactKeys: [], complete: true }
+  }
+
   const presentKeys = new Set(facts.map((fact) => fact.key))
   const required = requiredKeysFor(module, facts)
 

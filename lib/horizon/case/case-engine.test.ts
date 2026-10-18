@@ -249,6 +249,18 @@ describe("missing-information derivation", () => {
     expect(deriveMissingInformation([], "unterlagen_erklaeren").complete).toBe(true)
   })
 
+  it("defers energy tariff completeness to its document-aware readiness check", () => {
+    expect(
+      deriveMissingInformation(
+        [
+          { key: "service_request_type", value: "energy_cost_check", critical: false, confirmedAt: null },
+          { key: "contact_email", value: "kunde@example.de", critical: true, confirmedAt: null },
+        ],
+        "contract_management",
+      ),
+    ).toEqual({ missingFactKeys: [], unconfirmedCriticalFactKeys: [], complete: true })
+  })
+
   it("makes the Agentur module ask for the task before task-specific facts", () => {
     const base = deriveMissingInformation([], "agentur_fuer_arbeit")
     expect(base.missingFactKeys).toEqual(["recipient_institution", "claim_type"])

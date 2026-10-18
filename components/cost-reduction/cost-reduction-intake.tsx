@@ -6,6 +6,7 @@ import { ArrowLeft, BookOpenCheck, CheckCircle2, ChevronDown, ExternalLink, File
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { caseStatusLabel } from "@/lib/horizon/guide/copy"
 import {
   initialCostReductionState,
   startCostReductionRequest,
@@ -13,7 +14,20 @@ import {
 
 const WHATSAPP_URL = "https://wa.me/message/JXXTA3JHKDX3L1"
 
-export function CostReductionIntake({ locale }: { locale: string }) {
+export type CostReductionRequestSummary = {
+  id: string
+  title: string
+  status: string
+  documentCount: number
+}
+
+export function CostReductionIntake({
+  locale,
+  requests = [],
+}: {
+  locale: string
+  requests?: readonly CostReductionRequestSummary[]
+}) {
   const de = locale === "de"
   const [state, formAction, pending] = useActionState(startCostReductionRequest, initialCostReductionState)
   const caseHref = state.caseId ? `/${locale}/guide/${state.caseId}` : null
@@ -24,6 +38,14 @@ export function CostReductionIntake({ locale }: { locale: string }) {
         eyebrow: "Energie-Check",
         title: "Senke deine Strom- und Gaskosten.",
         intro: "Lade deine Unterlagen hoch oder gib nur das ein, was du weißt. Wir bereiten deine Anfrage für eine persönliche Tarifprüfung vor.",
+        purposeTitle: "Wobei brauchst du Hilfe?",
+        purposeHint: "So bleibt Hilfe bei einer Rechnung klar getrennt von einer unverbindlichen Tarifprüfung.",
+        purposes: [
+          { value: "tariff_check", title: "Kosten und Tarif prüfen", text: "Ich möchte persönlich prüfen lassen, ob ein günstigerer Tarif möglich ist." },
+          { value: "bill_help", title: "Rechnung oder Vertrag verstehen", text: "Ich brauche Hilfe bei einer Rechnung, einem Vertrag oder meinen Rechten." },
+          { value: "urgent_support", title: "Dringend: Sperrandrohung oder Mahnung", text: "Ich habe ein Schreiben mit einer kurzen Frist oder einer drohenden Unterbrechung." },
+        ],
+        urgentNotice: "Ich habe eine Sperrandrohung, Mahnung oder einen sehr kurzen Termin erhalten.",
         uploadTitle: "Schnell mit Dokumenten starten",
         uploadText: "Jahresabrechnung, Unterlagen zum aktuellen Strom-, Gas- oder Wärmetarif. PDF, JPG oder PNG, maximal 3 Dateien à 10 MB.",
         documentType: "Welche Unterlagen lädst du hoch?",
@@ -56,6 +78,13 @@ export function CostReductionIntake({ locale }: { locale: string }) {
         nextTitle: "Was danach passiert",
         next: ["Deine Angaben und Dateien werden sicher in deinem Vorgang gespeichert.", "Wir prüfen die vorhandenen Daten und melden uns, falls etwas fehlt.", "Eine echte Ersparnis oder ein Angebot nennen wir erst nach einer persönlichen Prüfung."],
         success: (count: number) => `Deine Anfrage ist gespeichert${count ? `, ${count} Datei${count === 1 ? "" : "en"} angehängt` : ""}.`,
+        urgentSuccess: "Dein Vorgang ist als dringend markiert und zur persönlichen Prüfung vorbereitet.",
+        missingSuccess: "Damit wir ohne Unterlagen vergleichen können, brauchen wir noch:",
+        readySuccess: "Die erste Prüfung ist vollständig genug für die persönliche Bearbeitung vorbereitet.",
+        requestsTitle: "Meine Energie-Anfragen und Dokumente",
+        requestsHint: "Öffne einen Vorgang, um seinen Status, Dokumente und die nächsten Angaben zu sehen.",
+        requestDocuments: (count: number) => `${count} Dokument${count === 1 ? "" : "e"}`,
+        requestOpen: "Vorgang öffnen",
         openCase: "Anfrage öffnen",
         invalid: "Bitte fülle Vorname, Nachname, E-Mail, Mobilnummer und Thema aus.",
         consentError: "Bitte bestätige die Verarbeitung für diese persönliche Anfrage.",
@@ -66,6 +95,14 @@ export function CostReductionIntake({ locale }: { locale: string }) {
         eyebrow: "Енергиен преглед",
         title: "Намали разходите си за ток и газ.",
         intro: "Качи документи или въведи само това, което знаеш. Ще подготвим заявката ти за лична проверка на тарифата.",
+        purposeTitle: "За какво ти е нужна помощ?",
+        purposeHint: "Така помощта за сметка остава ясно отделена от неангажираща проверка на тарифа.",
+        purposes: [
+          { value: "tariff_check", title: "Проверка на разходи и тарифа", text: "Искам лична проверка дали е възможна по-изгодна тарифа." },
+          { value: "bill_help", title: "Разбиране на сметка или договор", text: "Имам нужда от помощ за сметка, договор или моите права." },
+          { value: "urgent_support", title: "Спешно: предупреждение за прекъсване или Mahnung", text: "Имам писмо с кратък срок или риск от прекъсване." },
+        ],
+        urgentNotice: "Имам предупреждение за прекъсване, Mahnung или много кратък срок.",
         uploadTitle: "Бърз старт с документи",
         uploadText: "Jahresabrechnung, документи за актуалната тарифа за ток, газ или отопление. PDF, JPG или PNG, до 3 файла по 10 MB.",
         documentType: "Какви документи качваш?",
@@ -98,6 +135,13 @@ export function CostReductionIntake({ locale }: { locale: string }) {
         nextTitle: "Какво следва след това",
         next: ["Данните и файловете ти се запазват сигурно към твоята заявка.", "Проверяваме наличната информация и ще се свържем с теб, ако нещо липсва.", "Реално спестяване или оферта се посочва само след лична проверка."],
         success: (count: number) => `Заявката ти е запазена${count ? ` и са прикачени ${count} файл${count === 1 ? "" : "а"}` : ""}.`,
+        urgentSuccess: "Случаят е отбелязан като спешен и е подготвен за личен преглед.",
+        missingSuccess: "За да сравним без документи, са нужни още:",
+        readySuccess: "Първоначалната информация е достатъчна, за да започне личен преглед.",
+        requestsTitle: "Моите енергийни заявки и документи",
+        requestsHint: "Отвори заявка, за да видиш нейния статус, документи и следващи нужни данни.",
+        requestDocuments: (count: number) => `${count} документ${count === 1 ? "" : "а"}`,
+        requestOpen: "Отвори заявката",
         openCase: "Отвори заявката",
         invalid: "Моля, попълни име, фамилия, имейл, мобилен телефон и тема.",
         consentError: "Моля, потвърди обработката за тази лична заявка.",
@@ -105,6 +149,19 @@ export function CostReductionIntake({ locale }: { locale: string }) {
       }
 
   const error = state.error === "invalid" ? copy.invalid : state.error === "consent" ? copy.consentError : state.error ? copy.failed : null
+  const missingLabels: Record<string, string> = de
+    ? {
+        postcode: "Postleitzahl",
+        current_provider: "aktueller Anbieter",
+        annual_consumption_kwh: "Jahresverbrauch in kWh",
+        monthly_payment_eur: "monatlicher Abschlag",
+      }
+    : {
+        postcode: "пощенски код",
+        current_provider: "настоящ доставчик",
+        annual_consumption_kwh: "годишно потребление в kWh",
+        monthly_payment_eur: "месечна вноска",
+      }
   const rights = de
     ? {
         eyebrow: "Deine Rechte bei Strom und Gas",
@@ -158,6 +215,17 @@ export function CostReductionIntake({ locale }: { locale: string }) {
           </div>
         </section>
 
+        {requests.length > 0 ? <section className="paper mt-5 p-5 sm:p-7" aria-labelledby="energy-request-list">
+          <h2 id="energy-request-list" className="text-xl font-bold tracking-tight">{copy.requestsTitle}</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.requestsHint}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {requests.map((request) => <Link key={request.id} href={`/${locale}/guide/${request.id}`} className="paper paper-inset paper-link flex min-h-28 flex-col justify-between gap-3 p-4">
+              <span><span className="block text-sm font-semibold">{request.title}</span><span className="mt-1 block text-xs text-muted-foreground">{caseStatusLabel(de ? "de" : "bg", request.status)} · {copy.requestDocuments(request.documentCount)}</span></span>
+              <span className="text-xs font-semibold text-primary">{copy.requestOpen}</span>
+            </Link>)}
+          </div>
+        </section> : null}
+
         <section className="paper mt-5 p-5 sm:p-7" aria-labelledby="energy-rights-title">
           <div className="flex gap-3">
             <BookOpenCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
@@ -188,6 +256,20 @@ export function CostReductionIntake({ locale }: { locale: string }) {
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
           <form action={formAction} className="paper space-y-7 p-5 sm:p-7">
             <input type="hidden" name="locale" value={locale} />
+            <section>
+              <h2 className="text-lg font-bold">{copy.purposeTitle}</h2>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">{copy.purposeHint}</p>
+              <div className="mt-4 grid gap-3">
+                {copy.purposes.map((purpose, index) => <label key={purpose.value} className="flex min-h-20 cursor-pointer items-start gap-3 rounded-xl border border-border p-4 transition-colors hover:bg-muted/40 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                  <input type="radio" name="requestPurpose" value={purpose.value} defaultChecked={index === 0} className="mt-1 size-4 accent-primary" />
+                  <span><span className="block text-sm font-semibold">{purpose.title}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{purpose.text}</span></span>
+                </label>)}
+              </div>
+              <label className="mt-4 flex items-start gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm leading-6">
+                <input name="urgentNotice" value="yes" type="checkbox" className="mt-1 size-4" />
+                <span>{copy.urgentNotice}</span>
+              </label>
+            </section>
             <section>
               <div className="flex gap-3"><FileUp className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" /><div><h2 className="text-lg font-bold">{copy.uploadTitle}</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">{copy.uploadText}</p></div></div>
               <label className="mt-4 block text-sm font-medium" htmlFor="cost-reduction-document-type">{copy.documentType}</label>
@@ -222,7 +304,7 @@ export function CostReductionIntake({ locale }: { locale: string }) {
               <label className="flex items-start gap-3 text-sm leading-6"><input name="consent" value="yes" type="checkbox" required className="mt-1 size-4" /><span>{copy.consent} <Link href={`/${locale}/datenschutz`} className="font-medium text-primary underline">{copy.privacy}</Link>.</span></label>
             </section>
 
-            {state.ok ? <div className="paper paper-note paper-note-success flex flex-wrap items-center gap-3 p-4" role="status"><CheckCircle2 className="size-5 text-success" aria-hidden="true" /><span className="text-sm font-medium">{copy.success(state.uploadedCount)}</span>{caseHref ? <Button asChild size="sm"><Link href={caseHref}>{copy.openCase}</Link></Button> : null}</div> : null}
+            {state.ok ? <div className="paper paper-note paper-note-success space-y-3 p-4" role="status"><div className="flex flex-wrap items-center gap-3"><CheckCircle2 className="size-5 text-success" aria-hidden="true" /><span className="text-sm font-medium">{copy.success(state.uploadedCount)}</span>{caseHref ? <Button asChild size="sm"><Link href={caseHref}>{copy.openCase}</Link></Button> : null}</div>{state.urgent ? <p className="text-sm font-medium text-foreground">{copy.urgentSuccess}</p> : null}{state.missingFactKeys.length > 0 ? <p className="text-sm text-muted-foreground">{copy.missingSuccess} {state.missingFactKeys.map((key) => missingLabels[key] ?? key).join(", ")}.</p> : <p className="text-sm text-muted-foreground">{copy.readySuccess}</p>}</div> : null}
             {error ? <div className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive" role="alert"><span>{error}</span>{caseHref ? <Button asChild size="sm" variant="outline"><Link href={caseHref}>{copy.openCase}</Link></Button> : null}</div> : null}
             <Button type="submit" className="min-h-12 w-full sm:w-auto" disabled={pending || Boolean(state.caseId)}>{pending ? copy.saving : copy.submit}<Sparkles className="size-4" aria-hidden="true" /></Button>
           </form>

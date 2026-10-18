@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { CostReductionIntake } from "@/components/cost-reduction/cost-reduction-intake"
+import { loadCostReductionRequests } from "@/lib/horizon/cost-reduction/requests"
 import { createClient } from "@/lib/supabase/server"
 
 export const metadata = {
@@ -13,5 +14,6 @@ export default async function CostReductionPage({ params }: { params: Promise<{ 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect(`/auth/login?next=/${locale}/kosten-senken`)
 
-  return <CostReductionIntake locale={locale} />
+  const requests = await loadCostReductionRequests()
+  return <CostReductionIntake locale={locale} requests={requests} />
 }
