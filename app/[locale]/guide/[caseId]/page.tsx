@@ -110,6 +110,7 @@ export default async function GuideCasePage({
           caseId={caseId}
           locale={locale}
           module={loaded.data.module}
+          status={loaded.data.status}
           intent={loaded.data.intent}
           applicationReadiness={readiness}
           documents={documents.data ?? []}

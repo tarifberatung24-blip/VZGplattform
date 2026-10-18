@@ -12,6 +12,7 @@ const localizedStaticPaths = new Set([
   "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/how-it-works",
   "/affiliate-hinweis", "/widerruf", "/app", "/functions", "/anfrage", "/zayavka",
   "/email-generator", "/pruefung", "/security", "/versicherungen", "/admin/editor", "/admin/users",
+  "/kosten-senken",
 ])
 
 function isKnownLocalizedPath(pathname: string) {

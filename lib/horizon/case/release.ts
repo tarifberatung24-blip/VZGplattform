@@ -20,6 +20,11 @@
 
 import { isApprovalValid } from "./approval"
 import type { CaseApproval, CaseDraft, MissingInformation } from "./contract"
+import {
+  evaluateHorizonAgentOperation,
+  type AgentSafetyDecision,
+  type HumanReviewEvidence,
+} from "../agent/safety"
 
 export const DRAFT_RELEASE_BLOCKERS = [
   "NO_DRAFT",
@@ -37,6 +42,21 @@ export type DraftReleaseAssessment = {
   blockers: DraftReleaseBlocker[]
   /** True when the draft was approved, but its content changed afterwards. */
   approvalInvalidated: boolean
+}
+
+/**
+ * Gate for a future partner/institution handoff prepared with AI assistance.
+ *
+ * It intentionally does not send anything. A releasable draft alone is not
+ * enough: a named human reviewer must pass the package and the customer
+ * approval must still match the exact current content. The separate agent
+ * policy then makes it impossible for an agent to turn that preparation into
+ * an autonomous external transmission.
+ */
+export type ExternalHandoffPreparationAssessment = {
+  preparable: boolean
+  draftRelease: DraftReleaseAssessment
+  safety: AgentSafetyDecision
 }
 
 /**
@@ -83,6 +103,37 @@ export function assessDraftRelease(input: {
   }
 
   return { releasable: blockers.length === 0, blockers, approvalInvalidated }
+}
+
+export function assessExternalHandoffPreparation(input: {
+  draft: CaseDraft | null
+  missing: MissingInformation | null
+  approvals: readonly CaseApproval[]
+  humanReview: HumanReviewEvidence | null
+  unconfirmedCriticalFactKeys?: readonly string[]
+}): ExternalHandoffPreparationAssessment {
+  const draftRelease = assessDraftRelease(input)
+  const currentApproval = input.draft
+    ? input.approvals.find(
+        (approval) =>
+          approval.draftId === input.draft?.id &&
+          isApprovalValid(approval.approvedHash, input.draft.contentHash),
+      )
+    : null
+
+  const safety = evaluateHorizonAgentOperation({
+    operation: "prepare_external_handoff",
+    humanReview: input.humanReview,
+    customerApproval: currentApproval && input.draft
+      ? {
+          approvedHash: currentApproval.approvedHash,
+          currentContentHash: input.draft.contentHash,
+          approvedAt: currentApproval.approvedAt,
+        }
+      : null,
+  })
+
+  return { preparable: draftRelease.releasable && safety.allowed, draftRelease, safety }
 }
 
 /**

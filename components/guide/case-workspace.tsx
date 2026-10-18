@@ -14,6 +14,7 @@ import { JobcenterTaskPanel } from "@/components/jobcenter/jobcenter-task-panel"
 import { KuendigungPanel } from "@/components/kuendigung/kuendigung-panel"
 import { SteuerPanel } from "@/components/steuer/steuer-panel"
 import { UnterlagenPanel, type EvidenceSources } from "@/components/unterlagen/unterlagen-panel"
+import { EnergyRequestProgress } from "@/components/cost-reduction/energy-request-progress"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import {
   documentStatusLabel,
@@ -24,6 +25,8 @@ import {
 } from "@/lib/horizon/guide/copy"
 import type { Locale } from "@/lib/i18n/dictionaries"
 import { assessDraftRelease } from "@/lib/horizon/case/release"
+import { isEnergyCostRequest } from "@/lib/horizon/service-requests/registry"
+import { deriveServiceRequestReadiness } from "@/lib/horizon/service-requests/readiness"
 import { pickSendableDraft } from "@/lib/horizon/send/marker"
 import {
   selectedAgenturTask,
@@ -37,6 +40,7 @@ import type {
   CaseSourceDocument,
   CaseTask,
   ExtractedFact,
+  HorizonCaseStatus,
   MissingInformation,
 } from "@/lib/horizon/case/contract"
 
@@ -44,6 +48,7 @@ export type CaseWorkspaceProps = {
   caseId: string
   locale: string
   module: string
+  status: HorizonCaseStatus
   intent?: string
   applicationReadiness?: { available: boolean; hasProfileBasics: boolean; documentCount: number }
   documents: readonly CaseSourceDocument[]
@@ -101,6 +106,7 @@ export function CaseWorkspace({
   caseId,
   locale,
   module,
+  status,
   intent,
   applicationReadiness,
   documents,
@@ -114,6 +120,10 @@ export function CaseWorkspace({
   evidenceSources,
 }: CaseWorkspaceProps) {
   const de = locale === "de"
+  const energyRequest = isEnergyCostRequest(facts)
+  const energyReadiness = energyRequest
+    ? deriveServiceRequestReadiness({ serviceType: "energy_cost_check", facts, documentCount: documents.length })
+    : null
 
   const copy = de
     ? {
@@ -231,12 +241,37 @@ export function CaseWorkspace({
     }
   })()
 
+  const shownNextStep = energyRequest
+    ? energyReadiness?.missingFactKeys.length
+      ? {
+          text: de
+            ? "Ergänze die wenigen Angaben, die für eine Prüfung ohne Unterlagen fehlen."
+            : "Допълни малкото данни, които липсват за проверка без документи.",
+          anchor: "energy-request-progress",
+        }
+      : {
+          text: energyReadiness?.urgent
+            ? (de ? "Dringender Vorgang: Prüfe dein Schreiben und den Termin sofort." : "Спешен случай: провери писмото и срока веднага.")
+            : (de ? "Die Anfrage ist für die persönliche Prüfung vorbereitet." : "Заявката е подготвена за личен преглед."),
+          anchor: "energy-request-progress",
+        }
+    : nextStep
+
   const steps = [
     { label: de ? "Dokumente" : "Документи", value: `${documents.length}`, done: documents.length > 0 },
     { label: de ? "Bestätigte Fakten" : "Потвърдени факти", value: `${confirmedFacts}/${facts.length}`, done: facts.length > 0 && confirmedFacts === facts.length },
     { label: de ? "Fehlende Angaben" : "Липсващи данни", value: `${missingCount}`, done: missingCount === 0, alert: missingCount > 0 },
     { label: de ? "Entwurf" : "Чернова", value: latestDraft ? `${de ? "v" : "в"}${latestDraft.version}` : "—", done: Boolean(latestDraft) && release.releasable },
   ]
+
+  const shownSteps = energyRequest
+    ? [
+        { label: de ? "Anfrage" : "Заявка", value: de ? "Erhalten" : "Получена", done: true },
+        { label: de ? "Dokumente" : "Документи", value: `${documents.length}`, done: documents.length > 0 },
+        { label: de ? "Angaben" : "Данни", value: `${energyReadiness?.missingFactKeys.length ?? 0}`, done: (energyReadiness?.missingFactKeys.length ?? 0) === 0, alert: (energyReadiness?.missingFactKeys.length ?? 0) > 0 },
+        { label: de ? "Prüfung" : "Преглед", value: status === "waiting_for_user" ? (de ? "Warten" : "Изчаква") : (de ? "Vorgemerkt" : "Отбелязан"), done: status !== "waiting_for_user" },
+      ]
+    : steps
 
   return (
     <div className="mt-6 space-y-4">
@@ -246,17 +281,17 @@ export function CaseWorkspace({
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {de ? "Nächster Schritt" : "Следваща стъпка"}
             </p>
-            <p className="mt-1 text-sm font-medium text-foreground">{nextStep.text}</p>
+            <p className="mt-1 text-sm font-medium text-foreground">{shownNextStep.text}</p>
           </div>
           <a
-            href={`#${nextStep.anchor}`}
+            href={`#${shownNextStep.anchor}`}
             className="text-xs font-medium text-primary hover:underline"
           >
             {de ? "Zum Schritt" : "Към стъпката"}
           </a>
         </div>
         <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {steps.map((step) => (
+          {shownSteps.map((step) => (
             <div key={step.label} className="paper paper-inset p-3">
               <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 {step.label}
@@ -272,6 +307,8 @@ export function CaseWorkspace({
       {intent === "application" ? (
         <ApplicationPlan locale={locale} readiness={applicationReadiness} />
       ) : null}
+
+      {energyRequest ? <EnergyRequestProgress caseId={caseId} locale={locale} status={status} facts={facts} documents={documents} /> : null}
 
       <AgenturTaskPanel
         caseId={caseId}

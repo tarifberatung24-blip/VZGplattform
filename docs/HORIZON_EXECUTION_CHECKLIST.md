@@ -59,6 +59,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   `lib/navigation/legacy-redirects.ts` applied by `proxy.ts`; superseded pages and dead components
   deleted (see `FINAL_SITE_MAP.md` §7–§8)
 - ✅ Navigation verification: tests, typecheck, lint, i18n parity and production build all pass
+- ✅ Horizon Agent Safety & Knowledge Blueprint base: deny-by-default agent policy, documented human/customer approval gates, audit vocabulary and source-register standard; no autonomous external agent is active
 
 ---
 

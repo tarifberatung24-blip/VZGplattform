@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { assessDraftRelease, canApproveDraft, DRAFT_RELEASE_BLOCKERS } from "./release"
+import {
+  assessDraftRelease,
+  assessExternalHandoffPreparation,
+  canApproveDraft,
+  DRAFT_RELEASE_BLOCKERS,
+} from "./release"
 import type { CaseApproval, CaseDraft, MissingInformation } from "./contract"
 
 const draft = (overrides: Partial<CaseDraft> = {}): CaseDraft => ({
@@ -155,5 +160,49 @@ describe("canApproveDraft", () => {
       allowed: false,
       reason: "NO_DRAFT",
     })
+  })
+})
+
+describe("assessExternalHandoffPreparation", () => {
+  const humanReview = {
+    reviewerId: "reviewer-1",
+    reviewedAt: "2026-10-18T10:00:00.000Z",
+    verdict: "pass" as const,
+  }
+
+  it("requires a named human review in addition to exact customer approval", () => {
+    const result = assessExternalHandoffPreparation({
+      draft: draft(),
+      missing: complete,
+      approvals: [approval()],
+      humanReview: null,
+    })
+
+    expect(result.preparable).toBe(false)
+    expect(result.safety.reason).toBe("HUMAN_REVIEW_REQUIRED")
+  })
+
+  it("permits preparation only after a valid review and exact approval", () => {
+    const result = assessExternalHandoffPreparation({
+      draft: draft(),
+      missing: complete,
+      approvals: [approval()],
+      humanReview,
+    })
+
+    expect(result.preparable).toBe(true)
+    expect(result.draftRelease.releasable).toBe(true)
+  })
+
+  it("does not prepare an edited document even if a human previously reviewed it", () => {
+    const result = assessExternalHandoffPreparation({
+      draft: draft({ contentHash: "b".repeat(64) }),
+      missing: complete,
+      approvals: [approval()],
+      humanReview,
+    })
+
+    expect(result.preparable).toBe(false)
+    expect(result.draftRelease.approvalInvalidated).toBe(true)
   })
 })
