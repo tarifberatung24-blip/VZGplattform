@@ -136,6 +136,10 @@ Current implementation work remains governed by the approved Phase 0–17 sequen
 defines the direction the product is moving toward; it does not authorize jumping ahead of the
 active phase or bypassing safety, legal, RLS, approval, or evidence requirements.
 
+The owner's detailed long-term destination and partnership standard are recorded in
+[`HORIZON_OWNER_NORTH_STAR.md`](./HORIZON_OWNER_NORTH_STAR.md). It is a strategic target, not a
+claim that a provider, public institution, regulated service, or integration is currently available.
+
 ---
 
 ## 0. First principle — state model
