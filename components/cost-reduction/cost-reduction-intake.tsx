@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useActionState } from "react"
-import { ArrowLeft, CheckCircle2, FileUp, MessageCircle, ShieldCheck, Sparkles } from "lucide-react"
+import { ArrowLeft, BookOpenCheck, CheckCircle2, ChevronDown, ExternalLink, FileUp, MessageCircle, ShieldCheck, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -105,6 +105,41 @@ export function CostReductionIntake({ locale }: { locale: string }) {
       }
 
   const error = state.error === "invalid" ? copy.invalid : state.error === "consent" ? copy.consentError : state.error ? copy.failed : null
+  const rights = de
+    ? {
+        eyebrow: "Deine Rechte bei Strom und Gas",
+        title: "Kurz erklärt. Mit offiziellen Quellen.",
+        intro: "Diese Hinweise gelten für private Strom- und Gasverträge in Deutschland. Sie ersetzen keine Rechtsberatung. Für Wärme/Fernwärme gelten teilweise andere Regeln.",
+        source: "Offizielle Quelle",
+        entries: [
+          { title: "Kann ich meinen Anbieter wechseln?", text: "Ja. Du kannst deinen Strom- oder Gasanbieter wählen. Der neue Anbieter übernimmt häufig die Kündigung, wenn du ihn dazu bevollmächtigst. Vertragslaufzeit und Kündigungsfrist bleiben dabei wichtig.", source: "Bundesnetzagentur: Lieferantenwechsel", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+          { title: "Was zeigt meine Jahresabrechnung?", text: "Sie sollte den Abrechnungszeitraum, Zählerstände, Verbrauch, Preise und die Berechnung verständlich zeigen. Wenn etwas unklar ist, kannst du eine kostenlose Erklärung verlangen.", source: "Bundesnetzagentur: Rechnungen", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/RechnungenSperrungen/Rechnungen-table.html" },
+          { title: "Was bedeutet „Schätzung“?", text: "Bei einer Schätzung wurde dein Verbrauch nicht vollständig aus einem tatsächlichen Zählerstand abgerechnet. Die Rechnung muss dies deutlich kennzeichnen und Grund sowie Berechnungsfaktoren nennen.", source: "EnWG § 40a", href: "https://www.gesetze-im-internet.de/enwg_2005/__40a.html" },
+          { title: "Wer ist Lieferant, Netzbetreiber und Messstellenbetreiber?", text: "Der Lieferant verkauft dir Energie und rechnet ab. Der Netzbetreiber betreibt das Netz. Der Messstellenbetreiber ist für Zähler und Messtechnik zuständig. Das können verschiedene Unternehmen sein.", source: "Bundesnetzagentur: Messstellenbetreiber", href: "https://www.bundesnetzagentur.de/SharedDocs/A_Z_Glossar/M/Messstellenbetreiber_grundzustaendig.html" },
+          { title: "Wer darf an meinen Zähler?", text: "Gib Unbekannten keinen freien Zugang zu Zähler, Rechnung oder Vertragsunterlagen. Bei einem angekündigten Besuch: Ausweis prüfen und über die offizielle Nummer auf deiner Rechnung nachfragen. Bei Unsicherheit nicht vor Ort unterschreiben.", source: "Bundesnetzagentur: Schutz vor ungewolltem Wechsel", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+          { title: "Wann kann Strom oder Gas gesperrt werden?", text: "Nicht sofort. Für Haushalte gelten gesetzliche Voraussetzungen, eine vorherige Androhung und Fristen. Bei einer Sperrandrohung solltest du das Schreiben sofort prüfen lassen. In der Grundversorgung kannst du eine Vereinbarung zur Abwendung der Sperre verlangen.", source: "EnWG §§ 41f–41g", href: "https://www.gesetze-im-internet.de/enwg_2005/__41f.html" },
+          { title: "Kann ich Unterstützung vom Staat bekommen?", text: "Das zuständige Jobcenter prüft Hilfe individuell. Angemessene Wohn- und Heizkosten können berücksichtigt werden; Haushaltsstrom ist grundsätzlich Teil des Regelbedarfs. Horizon hilft beim Ordnen der Unterlagen, entscheidet aber nicht über den Anspruch.", source: "Bundesagentur für Arbeit: Wohnen und Heizen", href: "https://www.arbeitsagentur.de/grundsicherung/wohnen" },
+          { title: "Was mache ich bei einer möglichen Täuschung an der Haustür?", text: "Gib keine Kunden-, Zähler- oder MaLo-ID an Unbekannte weiter und unterschreibe nichts unter Zeitdruck. Bei untergeschobenen Haustür- oder Fernabsatzverträgen kann ein Widerrufsrecht bestehen; prüfe Unterlagen und Frist sofort.", source: "Bundesnetzagentur: ungewollter Anbieterwechsel", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+          { title: "Was prüfe ich vor einer neuen Tarifzusage?", text: "Vergleiche nicht nur den Preis: Prüfe Laufzeit, Kündigungsfrist, Preisgarantie, Preisanpassung, Bonusbedingungen, Zahlungsart und Starttermin. Eine Tarifprüfung von Horizon wird erst nach deiner persönlichen Zustimmung weitergegeben.", source: "Bundesnetzagentur: Vertragsinhalte prüfen", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+        ],
+      }
+    : {
+        eyebrow: "Твоите права при ток и газ",
+        title: "Кратко обяснени. С официални източници.",
+        intro: "Тази информация важи за частни договори за ток и газ в Германия и не заменя правна консултация. За Wärme/Fernwärme може да важат други правила.",
+        source: "Официален източник",
+        entries: [
+          { title: "Мога ли да сменя доставчика си?", text: "Да. Можеш да избереш доставчик на ток или газ. Новият доставчик често организира прекратяването, ако му дадеш пълномощие. Срокът на договора и срокът за прекратяване остават важни.", source: "Bundesnetzagentur: смяна на доставчик", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+          { title: "Какво показва годишната ми сметка?", text: "Тя трябва разбираемо да показва периода, стойностите на електромера, потреблението, цените и изчислението. Ако нещо не е ясно, можеш да поискаш безплатно обяснение.", source: "Bundesnetzagentur: сметки", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/RechnungenSperrungen/Rechnungen-table.html" },
+          { title: "Какво означава „Schätzung“?", text: "При Schätzung потреблението не е изчислено изцяло по реално отчетена стойност. Сметката трябва ясно да отбележи това, причината и факторите, използвани за оценката.", source: "EnWG § 40a", href: "https://www.gesetze-im-internet.de/enwg_2005/__40a.html" },
+          { title: "Кой е Lieferant, Netzbetreiber и Messstellenbetreiber?", text: "Lieferant продава енергията и издава сметката. Netzbetreiber управлява мрежата. Messstellenbetreiber отговаря за електромера и измерването. Това може да са различни организации.", source: "Bundesnetzagentur: Messstellenbetreiber", href: "https://www.bundesnetzagentur.de/SharedDocs/A_Z_Glossar/M/Messstellenbetreiber_grundzustaendig.html" },
+          { title: "Кой има право на достъп до електромера ми?", text: "Не давай свободен достъп до електромера, сметката или договора си на непознати. При обявено посещение провери служебната карта и се обади на официалния номер от сметката. При съмнение не подписвай на място.", source: "Bundesnetzagentur: защита от нежелана смяна", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+          { title: "Кога могат да спрат ток или газ?", text: "Не веднага. За домакинствата има законови условия, предварително предупреждение и срокове. При писмо за прекъсване го провери веднага. При Grundversorgung можеш да поискаш споразумение за избягване на прекъсването.", source: "EnWG §§ 41f–41g", href: "https://www.gesetze-im-internet.de/enwg_2005/__41f.html" },
+          { title: "Мога ли да получа помощ от държавата?", text: "Компетентният Jobcenter проверява всеки случай индивидуално. Разумните разходи за жилище и отопление може да бъдат признати; домашният ток по правило е част от Regelsatz. Horizon помага с документите, но не решава дали има право на помощ.", source: "Bundesagentur für Arbeit: жилище и отопление", href: "https://www.arbeitsagentur.de/grundsicherung/wohnen" },
+          { title: "Какво да направя при възможна измама на вратата?", text: "Не давай клиентски номер, номер на електромер или MaLo-ID на непознат и не подписвай под напрежение. При договор на вратата или от разстояние може да има право на отказ — провери документа и срока веднага.", source: "Bundesnetzagentur: нежелана смяна на доставчик", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+          { title: "Какво да проверя преди да приема нова тарифа?", text: "Не гледай само цената: провери срок, предизвестие, ценова гаранция, промяна на цената, условия за бонус, начин на плащане и начална дата. Horizon предава заявка за проверка само след твоето лично съгласие.", source: "Bundesnetzagentur: проверка на договорните условия", href: "https://www.bundesnetzagentur.de/DE/Vportal/Energie/KuendigungLieferantenwechsel/Lieferantenwechsel/start.html" },
+        ],
+      }
 
   return (
     <main className="horizon-dashboard min-h-[calc(100svh-3.5rem)] bg-background px-4 py-5 pb-24 text-foreground sm:px-6 sm:py-8 lg:px-8">
@@ -120,6 +155,33 @@ export function CostReductionIntake({ locale }: { locale: string }) {
           <div className="paper paper-note mt-6 flex gap-3 p-4 text-sm leading-6 text-muted-foreground">
             <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
             <p>{de ? "Nichts wird ohne deine Prüfung und Zustimmung an einen Anbieter oder Partner weitergegeben." : "Нищо не се предава към доставчик или партньор без твой преглед и изрично съгласие."}</p>
+          </div>
+        </section>
+
+        <section className="paper mt-5 p-5 sm:p-7" aria-labelledby="energy-rights-title">
+          <div className="flex gap-3">
+            <BookOpenCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{rights.eyebrow}</p>
+              <h2 id="energy-rights-title" className="mt-1 text-xl font-bold tracking-tight sm:text-2xl">{rights.title}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{rights.intro}</p>
+            </div>
+          </div>
+          <div className="mt-5 divide-y divide-border overflow-hidden rounded-xl border border-border">
+            {rights.entries.map((entry) => (
+              <details key={entry.title} className="group bg-background">
+                <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-left text-sm font-semibold marker:hidden hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset">
+                  <span>{entry.title}</span>
+                  <ChevronDown className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+                </summary>
+                <div className="border-t border-border px-4 py-4">
+                  <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{entry.text}</p>
+                  <a href={entry.href} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                    {rights.source}: {entry.source}<ExternalLink className="size-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </details>
+            ))}
           </div>
         </section>
 
