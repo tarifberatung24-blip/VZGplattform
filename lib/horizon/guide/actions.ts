@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { createCaseEngine } from "@/lib/horizon/case"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
+import { TEXT_INTAKE_MAX_LENGTH } from "@/lib/horizon/intake/text"
 import {
   guideIntentDefinition,
   guideCasePath,
@@ -32,6 +33,8 @@ export async function startGuideCase(formData: FormData) {
   }
 
   const definition = guideIntentDefinition(rawIntent)
+  const rawDescription = formData.get("description")
+  const description = typeof rawDescription === "string" ? rawDescription : ""
 
   // The intent is captured verbatim in the audit metadata, so the original
   // selection stays reconstructable even after the case is reclassified.
@@ -45,6 +48,17 @@ export async function startGuideCase(formData: FormData) {
 
   if (created.error || !created.data) {
     redirect(`/${locale}/guide?error=create-failed`)
+  }
+
+  if (description.trim().length > 0 && description.length <= TEXT_INTAKE_MAX_LENGTH) {
+    const stored = await engine.repository.addTextIntake(created.data.id, {
+      text: description,
+      kind: "pasted_text",
+      locale,
+    })
+    if (stored.error) {
+      redirect(`${guideCasePath(locale, created.data.id)}?notice=intake-not-saved`)
+    }
   }
 
   redirect(guideCasePath(locale, created.data.id))

@@ -7,6 +7,19 @@ export type GuideCopy = {
   title: string
   intro: string
   chooseLabel: string
+  chooseHint: string
+  benefitsLabel: string
+  benefitsText: string
+  jobcenterCta: string
+  arbeitsagenturCta: string
+  readinessTitle: string
+  readinessHint: string
+  profileReady: string
+  profileNeedsData: string
+  documentsReady: string
+  documentsEmpty: string
+  profileCta: string
+  documentsCta: string
   openCasesTitle: string
   openCasesEmpty: string
   openCasesHint: string
@@ -45,9 +58,22 @@ const copies: Record<Locale, GuideCopy> = {
   bg: {
     brand: "HORIZON by VZG",
     brandNote: "VZG CONSULT",
-    title: "Откъде да започна?",
-    intro: "Избери какво искаш да направиш. Ще отворим случай и ще те водим стъпка по стъпка.",
+    title: "Здравейте, с какво да помогна?",
+    intro: "Избери ситуацията, която е най-близо до твоята. HORIZON ще отвори правилния път и ще те води стъпка по стъпка.",
     chooseLabel: "Какво искаш да направиш?",
+    chooseHint: "Не е нужно да познаваш функциите на HORIZON.",
+    benefitsLabel: "Имаш въпрос към Jobcenter или Arbeitsagentur?",
+    benefitsText: "Избери институцията. HORIZON ще те насочи към подходяща задача, официален път и нужните документи.",
+    jobcenterCta: "Отвори Jobcenter",
+    arbeitsagenturCta: "Отвори Arbeitsagentur",
+    readinessTitle: "Какво HORIZON вече може да използва",
+    readinessHint: "Това е ориентир за подготовка, не потвърждение за право на помощ.",
+    profileReady: "Има основни данни за домакинството и дохода.",
+    profileNeedsData: "Липсват основни данни за домакинството или дохода.",
+    documentsReady: "Има качени документи, които можеш да прегледаш.",
+    documentsEmpty: "Все още няма качени документи.",
+    profileCta: "Отвори профила",
+    documentsCta: "Отвори документи",
     openCasesTitle: "Твоите случаи",
     openCasesEmpty: "Още няма започнати случаи.",
     openCasesHint: "Всеки избор създава случай, който можеш да продължиш по-късно.",
@@ -60,33 +86,46 @@ const copies: Record<Locale, GuideCopy> = {
     statusLabel: "Състояние",
     intents: {
       understand_document: {
-        title: "Разбери документ",
-        text: "Качи писмо, снимка или текст и виж какво означава на твоя език.",
+        title: "Получих писмо или документ",
+        text: "Качи го или постави текста. Ще видиш какво означава, има ли срок и каква е следващата стъпка.",
       },
       reply_to_authority: {
-        title: "Отговори на институция",
-        text: "Подготви отговор и го прегледай, преди да го изпратиш.",
+        title: "Имам срок или трябва да отговоря",
+        text: "Подготви отговор и го прегледай, преди да решиш дали да го изпратиш.",
       },
       fill_official_form: {
-        title: "Попълни официален формуляр",
-        text: "Попълни германски формуляр стъпка по стъпка.",
+        title: "Искам да кандидатствам за помощ",
+        text: "Ще уточним каква е ситуацията ти, какви документи може да са нужни и откъде да започнеш.",
       },
       cancel_contract: {
-        title: "Прекрати договор",
-        text: "Подготви предизвестие само по данните от договора.",
+        title: "Искам да прекратя договор",
+        text: "Провери данните от договора и подготви предизвестие за свой преглед.",
       },
       unsure: {
         title: "Не знам какво да правя",
-        text: "Опиши ситуацията си и ще започнем оттам.",
+        text: "Започни с няколко думи за ситуацията. Не избирай институция или формуляр на сляпо.",
       },
     },
   },
   de: {
     brand: "HORIZON by VZG",
     brandNote: "VZG CONSULT",
-    title: "Wo soll ich anfangen?",
-    intro: "Wähle, was du tun möchtest. Wir öffnen einen Vorgang und führen dich Schritt für Schritt.",
+    title: "Hallo, wie kann ich helfen?",
+    intro: "Wähle die Situation, die deiner am nächsten kommt. HORIZON öffnet den passenden Weg und führt dich Schritt für Schritt.",
     chooseLabel: "Was möchtest du tun?",
+    chooseHint: "Du musst die Funktionen von HORIZON nicht kennen.",
+    benefitsLabel: "Hast du ein Anliegen beim Jobcenter oder bei der Arbeitsagentur?",
+    benefitsText: "Wähle die Institution. HORIZON führt dich zur passenden Aufgabe, zum offiziellen Weg und zu möglichen Unterlagen.",
+    jobcenterCta: "Jobcenter öffnen",
+    arbeitsagenturCta: "Arbeitsagentur öffnen",
+    readinessTitle: "Was HORIZON bereits verwenden kann",
+    readinessHint: "Dies ist eine Orientierung für die Vorbereitung, keine Bestätigung eines Leistungsanspruchs.",
+    profileReady: "Grunddaten zu Haushalt und Einkommen sind vorhanden.",
+    profileNeedsData: "Grunddaten zu Haushalt oder Einkommen fehlen noch.",
+    documentsReady: "Es gibt hochgeladene Dokumente, die du prüfen kannst.",
+    documentsEmpty: "Es wurden noch keine Dokumente hochgeladen.",
+    profileCta: "Profil öffnen",
+    documentsCta: "Dokumente öffnen",
     openCasesTitle: "Deine Vorgänge",
     openCasesEmpty: "Noch keine Vorgänge begonnen.",
     openCasesHint: "Jede Auswahl legt einen Vorgang an, den du später fortsetzen kannst.",
@@ -99,24 +138,24 @@ const copies: Record<Locale, GuideCopy> = {
     statusLabel: "Status",
     intents: {
       understand_document: {
-        title: "Dokument verstehen",
-        text: "Lade einen Brief, ein Foto oder Text hoch und lies, was er bedeutet.",
+        title: "Ich habe einen Brief oder ein Dokument bekommen",
+        text: "Lade es hoch oder füge den Text ein. Du siehst, was es bedeutet, ob es eine Frist gibt und was als Nächstes ansteht.",
       },
       reply_to_authority: {
-        title: "Behörde antworten",
-        text: "Bereite eine Antwort vor und prüfe sie vor dem Versand.",
+        title: "Ich habe eine Frist oder muss antworten",
+        text: "Bereite eine Antwort vor und prüfe sie, bevor du entscheidest, ob du sie versendest.",
       },
       fill_official_form: {
-        title: "Amtliches Formular ausfüllen",
-        text: "Fülle ein deutsches Formular Schritt für Schritt aus.",
+        title: "Ich möchte eine Hilfe beantragen",
+        text: "Wir klären deine Situation, welche Unterlagen nötig sein können und wo du anfangen kannst.",
       },
       cancel_contract: {
-        title: "Vertrag kündigen",
-        text: "Bereite die Kündigung nur aus den Vertragsdaten vor.",
+        title: "Ich möchte einen Vertrag kündigen",
+        text: "Prüfe die Vertragsdaten und bereite eine Kündigung für deine Prüfung vor.",
       },
       unsure: {
         title: "Ich weiß nicht weiter",
-        text: "Beschreibe deine Situation, und wir starten dort.",
+        text: "Beginne mit ein paar Worten zu deiner Situation. Wähle keine Behörde oder kein Formular auf Verdacht.",
       },
     },
   },

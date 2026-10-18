@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { TextIntakeForm } from "@/components/guide/text-intake-form"
 import { DocumentIntakeForm } from "@/components/guide/document-intake-form"
 import { DocumentExtractButton } from "@/components/guide/document-extract-button"
@@ -43,6 +44,8 @@ export type CaseWorkspaceProps = {
   caseId: string
   locale: string
   module: string
+  intent?: string
+  applicationReadiness?: { available: boolean; hasProfileBasics: boolean; documentCount: number }
   documents: readonly CaseSourceDocument[]
   facts: readonly ExtractedFact[]
   drafts: readonly CaseDraft[]
@@ -98,6 +101,8 @@ export function CaseWorkspace({
   caseId,
   locale,
   module,
+  intent,
+  applicationReadiness,
   documents,
   facts,
   drafts,
@@ -263,6 +268,10 @@ export function CaseWorkspace({
           ))}
         </dl>
       </section>
+
+      {intent === "application" ? (
+        <ApplicationPlan locale={locale} readiness={applicationReadiness} />
+      ) : null}
 
       <AgenturTaskPanel
         caseId={caseId}
@@ -432,5 +441,68 @@ export function CaseWorkspace({
       </Panel>
       </div>
     </div>
+  )
+}
+
+function ApplicationPlan({
+  locale,
+  readiness,
+}: {
+  locale: string
+  readiness?: { available: boolean; hasProfileBasics: boolean; documentCount: number }
+}) {
+  const de = locale === "de"
+  const profileReady = readiness?.available && readiness.hasProfileBasics
+  const documentsReady = readiness?.available && readiness.documentCount > 0
+  const steps = [
+    {
+      label: de ? "Grunddaten prüfen" : "Провери основните данни",
+      detail: profileReady
+        ? (de ? "Die Angaben zu Haushalt und Einkommen sind vorhanden." : "Има данни за домакинството и дохода.")
+        : (de ? "Ergänze Haushalt und Einkommen, wenn sie für deinen Antrag relevant sind." : "Добави данни за домакинство и доход, ако са важни за заявлението."),
+      href: `/${locale}/profil`,
+      action: de ? "Profil öffnen" : "Отвори профила",
+    },
+    {
+      label: de ? "Unterlagen prüfen" : "Провери документите",
+      detail: documentsReady
+        ? (de ? `${readiness?.documentCount} Dokumente sind gespeichert. Prüfe selbst, ob eines passt.` : `Има ${readiness?.documentCount} качени документа. Провери сам дали някой е подходящ.`)
+        : (de ? "Lade nur Unterlagen hoch, die du für diesen Vorgang verwenden möchtest." : "Качи само документите, които искаш да използваш за този случай."),
+      href: `/${locale}/documents`,
+      action: de ? "Dokumente öffnen" : "Отвори документите",
+    },
+  ]
+
+  return (
+    <section className="paper paper-note p-4 sm:p-5" aria-labelledby="application-plan-title">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+        {de ? "Dein Vorbereitungsplan" : "Твоят план за подготовка"}
+      </p>
+      <h2 id="application-plan-title" className="mt-2 text-lg font-semibold">
+        {de ? "Bevor du mit dem Antrag weitermachst" : "Преди да продължиш със заявлението"}
+      </h2>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        {de
+          ? "HORIZON zeigt dir nur, welche Angaben und Unterlagen vorhanden sind. Ob sie ausreichen, entscheidest du nach deiner Prüfung."
+          : "HORIZON показва само кои данни и документи са налични. Ти решаваш след преглед дали са достатъчни."}
+      </p>
+      <ol className="mt-4 grid gap-3 sm:grid-cols-2">
+        {steps.map((step, index) => (
+          <li key={step.label} className="paper paper-inset p-4">
+            <p className="text-xs font-semibold text-primary">{index + 1}</p>
+            <p className="mt-2 text-sm font-semibold">{step.label}</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">{step.detail}</p>
+            <Link href={step.href} className="mt-3 inline-flex min-h-10 items-center text-xs font-medium text-primary hover:underline">
+              {step.action}
+            </Link>
+          </li>
+        ))}
+      </ol>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <a href="#case-intake" className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-semibold hover:bg-muted">
+          {de ? "Situation beschreiben" : "Опиши ситуацията"}
+        </a>
+      </div>
+    </section>
   )
 }
