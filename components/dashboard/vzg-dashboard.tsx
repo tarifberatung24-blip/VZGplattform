@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, ChevronRight, Plus, UserRound } from "lucide-react"
+import { ArrowRight, CheckCircle2, ChevronRight, Plus, UserRound, Zap } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 import type { DashboardDocument } from "@/components/dashboard/document-analyzer"
@@ -58,6 +58,7 @@ function copyFor(de: boolean) {
         stepsTitle: "Nächste Schritte",
         more: (n: number) => `und ${n} weitere`,
         addDocument: "Dokument hinzufügen",
+        reduceCosts: "Kosten senken",
         startCase: "Vorgang starten",
         note: "Nur bestätigte Daten. Nichts wird ohne dich verschickt.",
         monthly: "Monatliche Kosten",
@@ -75,6 +76,7 @@ function copyFor(de: boolean) {
         stepsTitle: "Следващи стъпки",
         more: (n: number) => `и още ${n}`,
         addDocument: "Добави документ",
+        reduceCosts: "Намали разходите си",
         startCase: "Започни случай",
         note: "Само потвърдени данни. Нищо не се изпраща без теб.",
         monthly: "Месечни разходи",
@@ -101,6 +103,7 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
 
   const documentsHref = localizedPath("/documents", locale)
   const contractsHref = localizedPath("/vertraege", locale)
+  const costReductionHref = localizedPath("/kosten-senken", locale)
   const profileHref = localizedPath("/profil", locale)
   const completeness = profile?.completeness ?? 0
   const items = useMemo(
@@ -163,7 +166,8 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
           {items.length > VISIBLE_STEPS ? <p className="px-2 pt-1 text-xs text-muted-foreground">{copy.more(items.length - VISIBLE_STEPS)}</p> : null}
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Link href={documentsHref} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-primary px-5 font-bold text-primary-foreground shadow-[0_10px_20px_-10px_var(--primary)] transition-colors hover:bg-[var(--primary-hover)] sm:flex-none">{copy.addDocument}<ArrowRight className="size-4" aria-hidden="true" /></Link>
+            <Link href={costReductionHref} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-primary px-5 font-bold text-primary-foreground shadow-[0_10px_20px_-10px_var(--primary)] transition-colors hover:bg-[var(--primary-hover)] sm:flex-none"><Zap className="size-4" aria-hidden="true" />{copy.reduceCosts}</Link>
+            <Link href={documentsHref} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-border bg-card px-5 font-semibold text-foreground transition-colors hover:bg-muted sm:flex-none">{copy.addDocument}<ArrowRight className="size-4" aria-hidden="true" /></Link>
             <Link href={`/${locale}/guide`} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-border bg-card px-5 font-semibold text-foreground transition-colors hover:bg-muted sm:flex-none"><Plus className="size-4" aria-hidden="true" />{copy.startCase}</Link>
             <p className="w-full text-xs text-muted-foreground sm:w-auto sm:flex-1">{copy.note}</p>
           </div>

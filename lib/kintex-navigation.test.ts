@@ -44,7 +44,7 @@ describe("KintexBG workspace navigation", () => {
   })
 
   it("keeps representative authenticated routes inside the workspace", () => {
-    for (const path of ["/bg/dashboard", "/bg/vertraege", "/bg/documents", "/bg/steuer", "/bg/guide", "/bg/konto/sicherheit"]) {
+    for (const path of ["/bg/dashboard", "/bg/vertraege", "/bg/documents", "/bg/steuer", "/bg/guide", "/bg/konto/sicherheit", "/bg/kosten-senken"]) {
       expect(isKintexWorkspacePath(path)).toBe(true)
       expect(isProtectedAppPath(path)).toBe(true)
     }
