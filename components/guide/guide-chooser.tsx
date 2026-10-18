@@ -8,6 +8,7 @@ import {
   FileX2,
   HelpCircle,
   Mail,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import { useLanguage } from "@/lib/i18n/language-context"
 import { guideIntentIcon, guideIntents } from "@/lib/horizon/guide/intents"
 import { caseStatusLabel, getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
 import { startGuideCase } from "@/lib/horizon/guide/actions"
+import { SituationRouter } from "@/components/guide/situation-router"
 import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const icons: Record<string, LucideIcon> = {
@@ -34,6 +36,12 @@ export type GuideOpenCase = {
   createdAt: string
 }
 
+export type GuideReadiness = {
+  available: boolean
+  hasProfileBasics: boolean
+  documentCount: number
+}
+
 /**
  * The guide's five entry points plus any cases the user has already opened.
  *
@@ -43,21 +51,27 @@ export type GuideOpenCase = {
 export function GuideChooser({
   openCases,
   errorCode,
+  readiness,
 }: {
   openCases: readonly GuideOpenCase[]
   errorCode: string | null
+  readiness: GuideReadiness
 }) {
   const { locale } = useLanguage()
+  const de = locale === "de"
   const copy = getGuideCopy(locale)
 
   return (
     <WorkspacePage>
       <div className="mx-auto max-w-3xl">
         <header className="border-b border-border pb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"><BrandText text={copy.brand} /></p>
+          <span className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <Sparkles className="size-5" aria-hidden="true" />
+          </span>
+          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"><BrandText text={copy.brand} /></p>
           <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><BrandText text={copy.brandNote} /></p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight"><BrandText text={copy.title} /></h1>
-          <p className="mt-2 text-sm text-muted-foreground"><BrandText text={copy.intro} /></p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground"><BrandText text={copy.intro} /></p>
         </header>
 
         {errorCode ? (
@@ -69,6 +83,29 @@ export function GuideChooser({
           </p>
         ) : null}
 
+        {readiness.available ? (
+          <section className="paper paper-note mt-6 p-4 sm:p-5" aria-labelledby="guide-readiness">
+            <h2 id="guide-readiness" className="text-sm font-semibold"><BrandText text={copy.readinessTitle} /></h2>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground"><BrandText text={copy.readinessHint} /></p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <ReadinessItem
+                label={de ? "Profil" : "Профил"}
+                detail={readiness.hasProfileBasics ? copy.profileReady : copy.profileNeedsData}
+                action={copy.profileCta}
+                href={`/${locale}/profil`}
+                complete={readiness.hasProfileBasics}
+              />
+              <ReadinessItem
+                label={de ? "Dokumente" : "Документи"}
+                detail={readiness.documentCount > 0 ? `${readiness.documentCount} · ${copy.documentsReady}` : copy.documentsEmpty}
+                action={copy.documentsCta}
+                href={`/${locale}/documents`}
+                complete={readiness.documentCount > 0}
+              />
+            </div>
+          </section>
+        ) : null}
+
         <section className="mt-8" aria-labelledby="guide-choose">
           <h2
             id="guide-choose"
@@ -76,8 +113,9 @@ export function GuideChooser({
           >
             <BrandText text={copy.chooseLabel} />
           </h2>
+          <p className="mt-1 text-sm text-muted-foreground"><BrandText text={copy.chooseHint} /></p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {guideIntents.map((entry) => {
+            {guideIntents.filter((entry) => entry.intent !== "unsure").map((entry) => {
               const Icon = icons[guideIntentIcon[entry.intent]] ?? HelpCircle
               const text = copy.intents[entry.intent]
               return (
@@ -94,6 +132,9 @@ export function GuideChooser({
               )
             })}
           </div>
+
+          <SituationRouter locale={locale} />
+
         </section>
 
         <section className="mt-10" aria-labelledby="guide-cases">
@@ -131,6 +172,30 @@ export function GuideChooser({
         </section>
       </div>
     </WorkspacePage>
+  )
+}
+
+function ReadinessItem({
+  label,
+  detail,
+  action,
+  href,
+  complete,
+}: {
+  label: string
+  detail: string
+  action: string
+  href: string
+  complete: boolean
+}) {
+  return (
+    <div className="paper paper-inset flex min-h-28 flex-col justify-between gap-3 p-4">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+        <p className={`mt-2 text-sm leading-5 ${complete ? "text-foreground" : "text-muted-foreground"}`}>{detail}</p>
+      </div>
+      <Link href={href} className="text-xs font-medium text-primary hover:underline">{action}</Link>
+    </div>
   )
 }
 

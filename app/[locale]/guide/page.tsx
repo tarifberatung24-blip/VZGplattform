@@ -1,6 +1,7 @@
 import { requireGuideContext } from "@/lib/horizon/guide/guard"
 import { GuideChooser } from "@/components/guide/guide-chooser"
 import { resolveCaseModule } from "@/lib/horizon/case/module"
+import { loadGuideReadiness } from "@/lib/horizon/guide/readiness"
 
 export const dynamic = "force-dynamic"
 
@@ -23,5 +24,7 @@ export default async function GuidePage({
     createdAt: item.createdAt,
   }))
 
-  return <GuideChooser openCases={openCases} errorCode={error ?? null} />
+  const readiness = await loadGuideReadiness(engine.userId)
+
+  return <GuideChooser openCases={openCases} errorCode={error ?? null} readiness={readiness} />
 }

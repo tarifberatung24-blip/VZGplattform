@@ -8,15 +8,18 @@ import { isLocale } from "@/lib/i18n/dictionaries"
 import { WorkspacePage } from "@/components/layout/workspace-page-header"
 import { CaseWorkspace } from "@/components/guide/case-workspace"
 import { BrandText } from "@/components/brand/horizon-wordmark"
+import { loadGuideReadiness } from "@/lib/horizon/guide/readiness"
 
 export const dynamic = "force-dynamic"
 
 export default async function GuideCasePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; caseId: string }>
+  searchParams: Promise<{ notice?: string }>
 }) {
-  const { locale: rawLocale, caseId } = await params
+  const [{ locale: rawLocale, caseId }, { notice }] = await Promise.all([params, searchParams])
   const locale = isLocale(rawLocale) ? rawLocale : "bg"
   const { engine } = await requireGuideContext(locale, `/${locale}/guide/${caseId}`)
 
@@ -25,7 +28,7 @@ export default async function GuideCasePage({
   // which keeps case existence from leaking across accounts.
   if (loaded.error || !loaded.data) notFound()
 
-  const [documents, facts, drafts, tasks, missing, approvals, audit, pages, messages] =
+  const [documents, facts, drafts, tasks, missing, approvals, audit, pages, messages, readiness] =
     await Promise.all([
       engine.repository!.listDocuments(caseId),
       engine.repository!.listFacts(caseId),
@@ -36,6 +39,7 @@ export default async function GuideCasePage({
       engine.repository!.listAudit(caseId),
       engine.repository!.listDocumentPages(caseId),
       engine.repository!.listMessages(caseId),
+      loadGuideReadiness(engine.userId),
     ])
 
   // P16 analyses everything the user supplied: extracted page text plus pasted
@@ -94,10 +98,20 @@ export default async function GuideCasePage({
           </p>
         </header>
 
+        {notice === "intake-not-saved" ? (
+          <p role="alert" className="paper paper-note paper-note-danger mt-6 px-4 py-3 text-sm text-destructive">
+            {locale === "de"
+              ? "Deine Situationsbeschreibung konnte nicht gespeichert werden. Du kannst sie unten erneut einfügen."
+              : "Описанието на ситуацията не можа да се запази. Можеш да го поставиш отново по-долу."}
+          </p>
+        ) : null}
+
         <CaseWorkspace
           caseId={caseId}
           locale={locale}
           module={loaded.data.module}
+          intent={loaded.data.intent}
+          applicationReadiness={readiness}
           documents={documents.data ?? []}
           facts={facts.data ?? []}
           drafts={drafts.data ?? []}
