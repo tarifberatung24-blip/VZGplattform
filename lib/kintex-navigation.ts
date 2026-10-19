@@ -17,11 +17,10 @@ export const kintexModules = [
 //
 // Every prefix here must be an authenticated route, because the HORIZON shell hides the public
 // header and footer and shows account controls. Verifying the list against the protection source
-// is required; see lib/kintex-navigation.test.ts. `/anspruch` and `/email-generator` resolve for
-// anonymous visitors, so they are deliberately excluded.
+// is required; see lib/kintex-navigation.test.ts. `/anspruch` remains public and is excluded.
 export function isKintexWorkspacePath(pathname: string) {
   const path = stripLocale(pathname)
-  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/forum", "/profil", "/konto", "/assistant", "/steuer", "/finanzamt", "/guide", "/pruefung", "/kosten-senken", "/admin"]
+  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/email-generator", "/forum", "/profil", "/konto", "/assistant", "/steuer", "/finanzamt", "/guide", "/pruefung", "/kosten-senken", "/admin"]
     .some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 

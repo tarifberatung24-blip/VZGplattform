@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, FileText, Loader2, Send } from "lucide-react"
+import { Copy, FileText, Loader2, RotateCcw, Send } from "lucide-react"
 import { requestLetter, type LetterResult, type Recipient } from "./generate-letter-client"
 
 type OutputState =
@@ -35,6 +35,10 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
   const isLetterResult = output && "german" in output && !("loading" in output)
   const letter = isLetterResult ? output : null
 
+  const errorMessage = output && !("loading" in output) && "error" in output
+    ? getErrorMessage(isBg, output.code)
+    : null
+
   return (
     <section className="paper flex flex-col gap-10 p-8 md:p-10">
       <form
@@ -46,7 +50,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
       >
         <label className="flex flex-col gap-3">
           <span className="text-sm font-medium">
-            {isBg ? "Вашето запитване (на български)" : "Ihre Anfrage (bulgarisch)"}
+            {isBg ? "Какво трябва да пише в писмото?" : "Was soll im Brief stehen?"}
           </span>
           <textarea
             value={description}
@@ -56,8 +60,8 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
             className="h-40 resize-y rounded-sm border border-border bg-background px-4 py-3 text-sm leading-7 placeholder:text-muted-foreground focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
             placeholder={
               isBg
-                ? "Опишете пократко ситуацията и какво искате да поискате или да попитате от администрацията..."
-                : "Beschreiben Sie kurz die Situation und was Sie von der Behörde wissen oder beantragen möchten..."
+                ? "Опиши накратко ситуацията и какво искаш да попиташ или поискаш..."
+                : "Beschreibe kurz die Situation und was du fragen oder beantragen möchtest..."
             }
           />
         </label>
@@ -88,12 +92,7 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
           )}
 
           {output && !("loading" in output) && "error" in output && (
-            <p className="text-sm text-foreground">
-              {isBg
-                ? "Неуспешно генериране. Можете да опитате отново."
-                : "Erstellung fehlgeschlagen. Sie können es erneut versuchen."}
-              {("message" in output) && output.message ? ` (${output.message})` : ""}
-            </p>
+            <p className="text-sm text-destructive" role="alert">{errorMessage}</p>
           )}
 
           <button
@@ -113,6 +112,20 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
               </>
             )}
           </button>
+
+          {letter && (
+            <button
+              type="button"
+              onClick={() => {
+                setDescription("")
+                setOutput(null)
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-background px-5 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            >
+              <RotateCcw className="size-4" />
+              {isBg ? "Подготви друго писмо" : "Weiteren Brief vorbereiten"}
+            </button>
+          )}
         </div>
       </form>
 
@@ -121,9 +134,10 @@ export function EmailGeneratorForm({ locale }: { locale: string }) {
         <div className="flex flex-col gap-6">
           <div className="grid gap-px border border-border bg-border md:grid-cols-2">
             <LetterCard
-              label={isBg ? "Немски版本" : "Deutsche Version"}
+              label={isBg ? "Немска версия" : "Deutsche Version"}
               content={output.german}
               onCopy={copyGerman}
+              copyLabel={isBg ? "Копирай" : "Kopieren"}
             />
             <LetterCard
               label={isBg ? "Български превод" : "Bulgarische Übersetzung"}
@@ -165,11 +179,13 @@ function LetterCard({
   label,
   content,
   onCopy,
+  copyLabel,
   placeholder,
 }: {
   label: string
   content: string
   onCopy: (() => void) | null
+  copyLabel?: string
   placeholder?: string
 }) {
   const isEmpty = content.trim().length === 0
@@ -186,7 +202,7 @@ function LetterCard({
             className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-background px-3 py-1 text-xs font-bold text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <Copy className="size-3.5" />
-            Kopieren
+            {copyLabel}
           </button>
         )}
       </div>
@@ -195,4 +211,20 @@ function LetterCard({
       </div>
     </div>
   )
+}
+
+function getErrorMessage(isBg: boolean, code?: string) {
+  if (code === "AUTHENTICATION_REQUIRED") {
+    return isBg
+      ? "Сесията ти е изтекла. Влез отново и опитай пак."
+      : "Deine Sitzung ist abgelaufen. Melde dich erneut an und versuche es noch einmal."
+  }
+  if (code === "RATE_LIMITED") {
+    return isBg
+      ? "Направени са твърде много опити. Изчакай малко и опитай отново."
+      : "Zu viele Versuche. Warte kurz und versuche es erneut."
+  }
+  return isBg
+    ? "Писмото не беше създадено. Опитай отново след малко."
+    : "Der Brief konnte nicht erstellt werden. Versuche es gleich noch einmal."
 }

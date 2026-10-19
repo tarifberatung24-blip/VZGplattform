@@ -14,7 +14,7 @@
  */
 
 import { readFile } from "node:fs/promises"
-import { resolve } from "node:path"
+import { join } from "node:path"
 import { PDFDocument, StandardFonts } from "pdf-lib"
 import type { PdfFieldAssignment } from "./fill"
 import type { OverlayPlan } from "./overlay-fill"
@@ -52,8 +52,13 @@ export type TemplateBytes = { ok: true; bytes: Uint8Array } | { ok: false; detai
 
 /** Reads a registered template from the repository. */
 export async function readTemplateBytes(path: string): Promise<TemplateBytes> {
+  const prefix = "public/forms/"
+  const filename = path.startsWith(prefix) ? path.slice(prefix.length) : ""
+  if (!filename || filename.includes("/") || filename.includes("\\") || filename === "." || filename === "..") {
+    return { ok: false, detail: "invalid_template_path" }
+  }
   try {
-    const loaded = await readFile(resolve(process.cwd(), path))
+    const loaded = await readFile(join(process.cwd(), "public", "forms", filename))
     return { ok: true, bytes: new Uint8Array(loaded) }
   } catch (error) {
     return { ok: false, detail: error instanceof Error ? error.message : "read_failed" }

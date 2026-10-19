@@ -66,6 +66,11 @@ describe("writer boundary", () => {
     expect(result.ok).toBe(false)
   })
 
+  it("refuses paths outside the registered template directory", async () => {
+    await expect(readTemplateBytes("package.json")).resolves.toEqual({ ok: false, detail: "invalid_template_path" })
+    await expect(readTemplateBytes("public/forms/../package.json")).resolves.toEqual({ ok: false, detail: "invalid_template_path" })
+  })
+
   /**
    * The real templates are static, so the reader must report no fields. If this
    * ever changes — e.g. fillable templates replace the printable ones — the

@@ -7,7 +7,10 @@ const find = (facts: ConfirmedFact[], key: string) => facts.find(f => f.key === 
 export const requiredFactKeys = ['recipient', 'subject', 'request']
 
 export class DeterministicTranslator implements Translator {
-  async translate(input: { subject: string; body: string; locale: Locale }) { if (input.locale === 'de') return { subject: input.subject, body: input.body }; return { subject: input.subject, body: `Übersetzung für ${input.locale}:\n\n${input.body}` } }
+  async translate(input: { subject: string; body: string; locale: Locale }) {
+    if (input.locale === 'de') return { subject: input.subject, body: input.body }
+    throw new Error('AI_TRANSLATION_PROVIDER_REQUIRED')
+  }
 }
 export class DeterministicDraftGenerator implements DraftGenerator {
   private readonly translator: Translator

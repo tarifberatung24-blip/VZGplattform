@@ -7,7 +7,7 @@
  * against `isProtectedAppPath` (the `protectedPrefixes` source of truth).
  *
  * `/security` is the public Layer 0 trust page and must not be listed; the authenticated Account
- * Security surface is `/konto/sicherheit`. `/anspruch` and `/email-generator` are public too.
+ * Security surface is `/konto/sicherheit`. `/anspruch` remains public.
  *
  * Desktop sidebar, mobile bottom bar and the mobile "More" sheet all derive from this file, so the
  * three surfaces cannot drift. See docs/HORIZON_NAVIGATION_DESIGN.md.

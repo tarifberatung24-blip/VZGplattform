@@ -8,7 +8,7 @@ export type Recipient =
   | "Other"
 
 export type LetterResult =
-  | { error: true; message?: string }
+  | { error: true; code?: string; message?: string }
   | {
       german: string
       bulgarian: string
@@ -42,8 +42,9 @@ export async function requestLetter({
   if (!response.ok) {
     let message = "Letter generation failed."
     try {
-      const json = (await response.json()) as { error?: string }
+      const json = (await response.json()) as { code?: string; error?: string }
       if (json.error) message = json.error
+      return { error: true, code: json.code, message }
     } catch {
       // ignore
     }

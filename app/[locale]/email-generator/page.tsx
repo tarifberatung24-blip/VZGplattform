@@ -12,20 +12,20 @@ export default function EmailGeneratorPage() {
     <main className="min-h-screen bg-background px-5 py-24 text-foreground sm:px-8">
       <div className="mx-auto flex max-w-5xl flex-col gap-12">
         <Link
-          href={`/${locale}`}
+          href={`/${locale}/dashboard`}
           className="text-sm font-bold uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground"
         >
-          {isBg ? "Към началото" : "Zur Startseite"}
+          {isBg ? "Към таблото" : "Zum Dashboard"}
         </Link>
 
         <div className="flex flex-col gap-6 border-b border-border pb-12">
           <h1 className="text-balance text-5xl font-black tracking-[-0.05em] md:text-7xl">
-            {isBg ? "Официално писмо — генератор" : "Offizieller Brief-Generator"}
+            {isBg ? "Подготви официално писмо" : "Offiziellen Brief vorbereiten"}
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-muted-foreground">
             {isBg
-              ? "Опишете на български какво искате да кажете и изберете получател. Инструментът генерира официално немецко писмо с превод."
-              : "Beschreiben Sie auf Bulgarisch, was Sie sagen möchten, und wählen Sie den Empfänger. Das Tool generiert einen formellen deutschen Brief mit Übersetzung."}
+              ? "Опиши какво искаш да кажеш. Ще получиш немска чернова и превод за преглед."
+              : "Beschreibe dein Anliegen. Du erhältst einen deutschen Entwurf und eine Übersetzung zur Prüfung."}
           </p>
         </div>
 
