@@ -109,7 +109,7 @@ export function GuideChooser({
           </h2>
           <p className="mt-1 text-sm text-muted-foreground"><BrandText text={copy.chooseHint} /></p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {guideIntents.filter((entry) => entry.intent !== "unsure").map((entry) => {
+            {guideIntents.map((entry) => {
               const Icon = icons[guideIntentIcon[entry.intent]] ?? HelpCircle
               const text = copy.intents[entry.intent]
               return (
