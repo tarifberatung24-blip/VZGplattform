@@ -15,6 +15,7 @@ const protectedPrefixes = [
   "/forum",
   "/admin",
   "/guide",
+  "/pruefung",
   "/kosten-senken",
   "/auth/update-password",
   "/onboarding",

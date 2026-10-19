@@ -1,18 +1,30 @@
 "use client"
 
+import { useState } from "react"
 import { useFormStatus } from "react-dom"
 import Link from "next/link"
 import {
+  ArrowRight,
   Briefcase,
   Building2,
   FileSearch,
+  FileWarning,
   FileX2,
+  Info,
   Receipt,
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModuleInfoDialog } from "@/components/horizon/module-info-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { localizedPath } from "@/lib/i18n/routing"
 import { homeModuleIcon, homeModules } from "@/lib/horizon/modules/registry"
 import { startModuleCase } from "@/lib/horizon/modules/actions"
 import {
@@ -54,6 +66,67 @@ function ModuleButton({
   )
 }
 
+function InkassoCard({ locale }: { locale: "bg" | "de" }) {
+  const [open, setOpen] = useState(false)
+  const de = locale === "de"
+  const copy = de
+    ? {
+        title: "Inkasso-Check",
+        status: "Inkasso- oder Mahnschreiben prüfen",
+        info: "Lade das Schreiben hoch oder füge seinen Text ein. Danach prüfst du die erkannten Angaben und wählst selbst den nächsten Schritt. Ohne deine Freigabe wird nichts versendet.",
+        more: "Mehr lesen…",
+        aria: "Mehr über Inkasso-Check",
+      }
+    : {
+        title: "Inkasso Check",
+        status: "Провери писмо за Inkasso или Mahnbescheid",
+        info: "Качи писмото или постави текста му. После прегледай извлечените данни и избери следващата стъпка. Нищо не се изпраща без твоето одобрение.",
+        more: "Прочети още…",
+        aria: "Повече информация за Inkasso Check",
+      }
+
+  return (
+    <article className="paper paper-link relative min-w-0 overflow-hidden">
+      <Link
+        href={localizedPath("/pruefung", locale)}
+        className="flex min-h-[124px] w-full flex-col items-start justify-between gap-3 p-4 pb-11"
+      >
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+          <FileWarning className="size-[18px]" aria-hidden="true" />
+        </span>
+        <span className="block">
+          <span className="block text-sm font-semibold leading-snug">{copy.title}</span>
+          <span className="mt-0.5 block max-w-[calc(100%-2rem)] text-[11px] text-muted-foreground">{copy.status}</span>
+        </span>
+      </Link>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="absolute bottom-3 right-3 grid size-8 place-items-center rounded-full border border-primary/30 bg-background text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        aria-label={copy.aria}
+      >
+        <Info className="size-4" aria-hidden="true" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="pr-8">
+            <DialogTitle className="text-lg leading-snug">{copy.title}</DialogTitle>
+            <DialogDescription className="pt-2 text-sm leading-6">{copy.info}</DialogDescription>
+          </DialogHeader>
+          <Link
+            href={`/${locale}/how-it-works`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            {copy.more}<ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </DialogContent>
+      </Dialog>
+    </article>
+  )
+}
+
 /**
  * HORIZON home: the five entry modules and the secondary destinations.
  *
@@ -74,14 +147,11 @@ export function HorizonHome({
   const copy = getGuideCopy(locale)
 
   return (
-    <section className="mt-8" aria-labelledby="horizon-modules">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
+    <section className="mt-2" aria-labelledby="horizon-modules">
+      <div className="flex flex-wrap items-baseline gap-2">
         <h2 id="horizon-modules" className="text-lg font-semibold tracking-tight">
-          {de ? "Womit kann ich helfen?" : "С какво да помогна?"}
+          {de ? "Dienst wählen" : "Избери услуга"}
         </h2>
-        <Link href={`/${locale}/guide`} className="inline-flex min-h-10 items-center text-xs font-medium text-primary hover:underline">
-          {de ? "Alle Wege ansehen" : "Виж всички пътища"}
-        </Link>
       </div>
 
       {errorCode ? (
@@ -96,7 +166,7 @@ export function HorizonHome({
       ) : null}
 
       {/* Two columns on a phone, so the five modules fit on about one screen instead of a long list. */}
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {homeModules.map((definition) => {
           const Icon = icons[homeModuleIcon[definition.module]] ?? FileSearch
           const count = caseCounts[definition.module] ?? 0
@@ -114,6 +184,7 @@ export function HorizonHome({
             </form>
           )
         })}
+        <InkassoCard locale={locale} />
       </div>
     </section>
   )

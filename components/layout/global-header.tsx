@@ -7,6 +7,7 @@ import { Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { ServiceSearch } from "@/components/navigation/service-search"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { cn } from "@/lib/utils"
@@ -127,6 +128,7 @@ export function GlobalHeader() {
         </nav>
 
         <div className="flex min-w-0 items-center gap-2">
+          <ServiceSearch className="hidden lg:inline-flex" />
           {/* Both switchers drop into the mobile menu below `sm`: at 390px the
               brand, a switcher, the register CTA and the menu button already
               exceed the viewport and clip the menu button. */}
@@ -187,6 +189,7 @@ export function GlobalHeader() {
       {mobileOpen && (
         <div className="glass-chrome border-t backdrop-blur-xl backdrop-saturate-150 md:hidden">
           <nav className="flex flex-col gap-1 px-4 py-4">
+            <ServiceSearch className="mb-2 w-full justify-center" />
             <Link
               href={homeHref}
               onClick={closeMobile}

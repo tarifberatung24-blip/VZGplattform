@@ -1,19 +1,62 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { ArrowRight, Info } from "lucide-react"
 import type { UnterlagenState } from "@/lib/horizon/unterlagen/actions"
 import { getUnterlagenCopy } from "@/lib/horizon/unterlagen/copy"
 import { analyseDocumentText, DOCUMENT_KIND_FACT_KEY } from "@/lib/horizon/unterlagen/analysis"
 import { DOCUMENT_KINDS, type DocumentKind } from "@/lib/horizon/unterlagen/classify"
 import { locateEvidence, type EvidencePage } from "@/lib/horizon/unterlagen/evidence"
 import { BrandText } from "@/components/brand/horizon-wordmark"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 const initialState: UnterlagenState = { error: null, ok: false }
 
 export type EvidenceSources = { pages: readonly EvidencePage[]; pastedTexts: readonly string[] }
 
 type Fact = { key: string; value?: string | null; confirmedAt?: string | null }
+
+function DocumentAnalysisInfoDialog({ locale, heading, description }: { locale: "bg" | "de"; heading: string; description: string }) {
+  const [open, setOpen] = useState(false)
+  const de = locale === "de"
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="grid size-8 shrink-0 place-items-center rounded-full border border-primary/30 bg-background text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        aria-label={de ? "Wie diese Prüfung funktioniert" : "Как работи тази проверка"}
+      >
+        <Info className="size-4" aria-hidden="true" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="pr-8">
+            <DialogTitle>{heading}</DialogTitle>
+            <DialogDescription className="pt-2 leading-6">{description}</DialogDescription>
+          </DialogHeader>
+          <Link
+            href={`/${locale}/how-it-works`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            {de ? "Mehr lesen…" : "Прочети още…"}<ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
 
 /**
  * P16 — the "Unterlagen erklären" panel inside a case.
@@ -50,6 +93,7 @@ export function UnterlagenPanel({
   const [state, setState] = useState<UnterlagenState>(initialState)
   const [pending, setPending] = useState(false)
   const copy = getUnterlagenCopy(locale === "de" ? "de" : "bg")
+  const de = locale === "de"
 
   if (module !== "unterlagen_erklaeren") return null
 
@@ -114,12 +158,14 @@ export function UnterlagenPanel({
 
   return (
     <section className="paper p-4 sm:p-5">
-      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        <BrandText text={copy.heading} />
-      </h2>
-      <p className="mt-3 text-xs text-muted-foreground"><BrandText text={copy.intro} /></p>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <BrandText text={copy.heading} />
+        </h2>
+        <DocumentAnalysisInfoDialog locale={de ? "de" : "bg"} heading={copy.heading} description={copy.intro} />
+      </div>
 
-      <div className="mt-4 space-y-4">
+      <div className="mt-3 space-y-4">
         <div className="space-y-1">
           <p className="text-xs font-semibold"><BrandText text={copy.classificationHeading} /></p>
           <p className="text-sm font-medium"><BrandText text={copy.kinds[analysis.kind]} /></p>
@@ -128,9 +174,7 @@ export function UnterlagenPanel({
               {copy.classificationEvidence}: <span className="italic"><BrandText text={analysis.kindEvidence} /></span>
               {whereFound(analysis.kindEvidence)}
             </p>
-          ) : (
-            <p className="text-xs text-muted-foreground"><BrandText text={copy.classificationUnclear} /></p>
-          )}
+          ) : <p className="text-xs text-muted-foreground">{de ? "Wähle die passende Art." : "Избери подходящия вид."}</p>}
 
           <form onSubmit={confirmKind} className="mt-2 space-y-2">
             <label htmlFor="document-kind" className="block text-xs font-medium">
@@ -168,11 +212,6 @@ export function UnterlagenPanel({
             <p className="text-xs text-muted-foreground">
               {copy.deadlineQuote}: <span className="italic"><BrandText text={analysis.deadline.quote} /></span>
               {whereFound(analysis.deadline.quote)}
-            </p>
-          ) : null}
-          {analysis.deadline.rule ? (
-            <p className="text-xs text-muted-foreground">
-              {copy.deadlineRule}: {analysis.deadline.rule}
             </p>
           ) : null}
           {analysis.deadline.requiresUserVerification && analysis.deadline.kind !== "unknown" ? (

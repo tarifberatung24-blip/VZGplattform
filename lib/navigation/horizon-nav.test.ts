@@ -57,8 +57,9 @@ describe("HORIZON navigation model", () => {
     for (const id of mobilePrimaryIds) {
       expect(navDestinations.some((item) => item.id === id)).toBe(true)
     }
-    // Owner decisions: slot 4 is contracts; Steuern and Finanzbildung are under More.
-    expect(mobilePrimaryIds).toContain("contracts")
+    // Inkasso is reachable directly; Steuern and Finanzbildung stay under More.
+    expect(mobilePrimaryIds).toContain("inkasso")
+    expect(mobilePrimaryIds).not.toContain("contracts")
     expect(mobilePrimaryIds).not.toContain("taxes")
     expect(mobilePrimaryIds).not.toContain("education")
   })

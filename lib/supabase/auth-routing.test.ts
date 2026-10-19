@@ -38,6 +38,7 @@ describe("auth routing", () => {
     expect(isProtectedAppPath("/bg/protected/security")).toBe(true)
     expect(isProtectedAppPath("/de/profil")).toBe(true)
     expect(isProtectedAppPath("/bg/kosten-senken")).toBe(true)
+    expect(isProtectedAppPath("/bg/pruefung")).toBe(true)
     expect(isProtectedAppPath("/bg/auth/login")).toBe(false)
   })
 

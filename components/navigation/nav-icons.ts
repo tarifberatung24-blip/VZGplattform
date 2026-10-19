@@ -1,5 +1,6 @@
 import {
   Compass,
+  FileWarning,
   FileText,
   GraduationCap,
   MessagesSquare,
@@ -18,6 +19,7 @@ export const navIcons: Record<NavDestinationId, LucideIcon> = {
   dashboard: LayoutDashboard,
   guide: Compass,
   documents: FileText,
+  inkasso: FileWarning,
   contracts: WalletCards,
   taxes: Receipt,
   education: GraduationCap,

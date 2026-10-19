@@ -109,7 +109,7 @@ export function MobileBottomNav({ panel, onPanelChange }: MobileBottomNavProps) 
   const copy = menuCopy(de)
 
   const primary = mobilePrimaryIds.map(findDestination)
-  const quickIds = ["guide", "documents", "forum", "contracts"] as const
+  const quickIds = ["guide", "documents", "inkasso", "forum"] as const
   const quick = quickIds.map(findDestination)
   const menuItems = navDestinations.filter((item) => item.id !== "dashboard" && item.id !== "security")
   const settingsItems = [

@@ -17,6 +17,7 @@ import { guideIntentIcon, guideIntents } from "@/lib/horizon/guide/intents"
 import { caseStatusLabel, getGuideCopy, guideModuleLabel } from "@/lib/horizon/guide/copy"
 import { startGuideCase } from "@/lib/horizon/guide/actions"
 import { SituationRouter } from "@/components/guide/situation-router"
+import { GuideIntentInfoDialog } from "@/components/guide/guide-intent-info-dialog"
 import { BrandText } from "@/components/brand/horizon-wordmark"
 
 const icons: Record<string, LucideIcon> = {
@@ -50,22 +51,19 @@ export type GuideReadiness = {
 export function GuideChooser({
   openCases,
   errorCode,
-  readiness,
 }: {
   openCases: readonly GuideOpenCase[]
   errorCode: string | null
   readiness: GuideReadiness
 }) {
   const { locale } = useLanguage()
-  const de = locale === "de"
   const copy = getGuideCopy(locale)
 
   return (
     <WorkspacePage>
       <div className="mx-auto max-w-3xl">
-        <header className="border-b border-border pb-6">
-          <h1 className="text-3xl font-semibold tracking-tight"><BrandText text={copy.title} /></h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground"><BrandText text={copy.intro} /></p>
+        <header className="border-b border-border pb-5">
+          <h1 className="text-3xl font-semibold tracking-tight"><BrandText text={copy.chooseLabel} /></h1>
         </header>
 
         {errorCode ? (
@@ -77,51 +75,21 @@ export function GuideChooser({
           </p>
         ) : null}
 
-        {readiness.available ? (
-          <section className="paper paper-note mt-6 p-4 sm:p-5" aria-labelledby="guide-readiness">
-            <h2 id="guide-readiness" className="text-sm font-semibold"><BrandText text={copy.readinessTitle} /></h2>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground"><BrandText text={copy.readinessHint} /></p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <ReadinessItem
-                label={de ? "Profil" : "Профил"}
-                detail={readiness.hasProfileBasics ? copy.profileReady : copy.profileNeedsData}
-                action={copy.profileCta}
-                href={`/${locale}/profil`}
-                complete={readiness.hasProfileBasics}
-              />
-              <ReadinessItem
-                label={de ? "Dokumente" : "Документи"}
-                detail={readiness.documentCount > 0 ? `${readiness.documentCount} · ${copy.documentsReady}` : copy.documentsEmpty}
-                action={copy.documentsCta}
-                href={`/${locale}/documents`}
-                complete={readiness.documentCount > 0}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        <section className="mt-8" aria-labelledby="guide-choose">
-          <h2
-            id="guide-choose"
-            className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-          >
-            <BrandText text={copy.chooseLabel} />
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground"><BrandText text={copy.chooseHint} /></p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <section className="mt-6" aria-label={copy.chooseLabel}>
+          <div className="grid gap-3 sm:grid-cols-2">
             {guideIntents.map((entry) => {
               const Icon = icons[guideIntentIcon[entry.intent]] ?? HelpCircle
               const text = copy.intents[entry.intent]
               return (
-                <form key={entry.intent} action={startGuideCase}>
+                <form key={entry.intent} action={startGuideCase} className="paper paper-link relative min-w-0 overflow-hidden">
                   <input type="hidden" name="intent" value={entry.intent} />
                   <input type="hidden" name="locale" value={locale} />
                   <IntentButton
                     Icon={Icon}
                     title={text.title}
-                    text={text.text}
                     pendingLabel={copy.starting}
                   />
+                  <GuideIntentInfoDialog locale={locale} title={text.title} description={text.text} />
                 </form>
               )
             })}
@@ -169,56 +137,27 @@ export function GuideChooser({
   )
 }
 
-function ReadinessItem({
-  label,
-  detail,
-  action,
-  href,
-  complete,
-}: {
-  label: string
-  detail: string
-  action: string
-  href: string
-  complete: boolean
-}) {
-  return (
-    <div className="paper paper-inset flex min-h-28 flex-col justify-between gap-3 p-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-        <p className={`mt-2 text-sm leading-5 ${complete ? "text-foreground" : "text-muted-foreground"}`}>{detail}</p>
-      </div>
-      <Link href={href} className="text-xs font-medium text-primary hover:underline">{action}</Link>
-    </div>
-  )
-}
-
 function IntentButton({
   Icon,
   title,
-  text,
   pendingLabel,
 }: {
   Icon: LucideIcon
   title: string
-  text: string
   pendingLabel: string
 }) {
   const { pending } = useFormStatus()
   return (
     <Button
       type="submit"
-      variant="outline"
+      variant="ghost"
       disabled={pending}
-      className="h-auto min-h-24 w-full justify-start gap-4 whitespace-normal px-4 py-4 text-left"
+      className="h-auto min-h-[7.75rem] w-full justify-start gap-4 whitespace-normal bg-transparent px-4 py-4 pb-11 text-left hover:bg-transparent"
     >
       <span className="grid size-10 shrink-0 place-items-center rounded-md bg-primary/5 text-primary">
         <Icon className="size-5" />
       </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-medium">{pending ? pendingLabel : title}</span>
-        <span className="mt-0.5 block text-xs font-normal text-muted-foreground">{text}</span>
-      </span>
+      <span className="block text-sm font-medium">{pending ? pendingLabel : title}</span>
     </Button>
   )
 }

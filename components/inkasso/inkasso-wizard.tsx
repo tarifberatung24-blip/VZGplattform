@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Check, Loader2, Plus } from "lucide-react"
+import { ArrowLeft, Check, FileUp, Loader2, Plus } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { localizedPath } from "@/lib/i18n/routing"
 
@@ -107,6 +107,8 @@ export function InkassoWizard() {
   const [record, setRecord] = useState<CaseRecord | null>(null)
   const [step, setStep] = useState<Step>(0)
   const [text, setText] = useState("")
+  const [documentId, setDocumentId] = useState<string | null>(null)
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null)
   const [facts, setFacts] = useState(emptyCase(locale))
   const [needsReview, setNeedsReview] = useState<string[]>([])
   const [drafts, setDrafts] = useState<Draft[]>([])
@@ -116,11 +118,11 @@ export function InkassoWizard() {
 
   const steps = [c.stepUpload, c.stepConfirm, c.stepResult, c.stepDrafts, c.stepReview]
 
-  const createCase = useCallback(async () => {
+  const createCase = useCallback(async (sourceDocumentId?: string | null) => {
     const res = await fetch("/api/inkasso/cases", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ locale, caseType: "inkasso" }),
+      body: JSON.stringify({ locale, caseType: "inkasso", documentId: sourceDocumentId ?? null }),
     })
     if (!res.ok) throw new Error((await res.json()).code)
     const data = await res.json()
@@ -132,15 +134,51 @@ export function InkassoWizard() {
   // The case is created when the user actually submits something, not on mount:
   // an empty visit should not hit the database, and a misconfigured backend
   // should not greet the user with an error before they have done anything.
+  async function uploadDocument(file: File | undefined) {
+    if (!file) return
+    setBusy(true)
+    setError(null)
+    setUploadMessage(null)
+    try {
+      const form = new FormData()
+      form.append("file", file)
+      const upload = await fetch("/api/documents/upload", { method: "POST", body: form })
+      const uploadPayload = await upload.json().catch(() => null) as { document?: { id?: string }; code?: string } | null
+      if (!upload.ok || !uploadPayload?.document?.id) throw new Error(uploadPayload?.code ?? "UPLOAD_FAILED")
+
+      const extract = await fetch("/api/documents/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId: uploadPayload.document.id }),
+      })
+      const extractPayload = await extract.json().catch(() => null) as { status?: string; code?: string } | null
+      if (!extract.ok || extractPayload?.status !== "extracted") {
+        setError(extractPayload?.status === "ocr_required" || extractPayload?.code === "OCR_NOT_CONFIGURED" ? c.ocrRequired : c.uploadFailed)
+        return
+      }
+
+      setDocumentId(uploadPayload.document.id)
+      setUploadMessage(c.uploaded)
+    } catch {
+      setError(c.uploadFailed)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function runExtract() {
+    if (!text.trim() && !documentId) {
+      setError(readableError("NO_TEXT_TO_EXTRACT", locale))
+      return
+    }
     setBusy(true)
     setError(null)
     try {
-      const id = caseId ?? (await createCase())
+      const id = caseId ?? (await createCase(documentId))
       const res = await fetch(`/api/inkasso/cases/${id}/extract`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, documentId }),
       })
       if (!res.ok) throw new Error((await res.json()).code)
       const data = await res.json()
@@ -240,7 +278,7 @@ export function InkassoWizard() {
   const evaluation = record?.evaluation ?? null
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 pb-24 pt-28 sm:px-10">
+    <div className="mx-auto w-full max-w-4xl px-4 pb-10 pt-6 sm:px-6 sm:pt-8">
       <Link
         href={localizedPath("/dashboard", locale)}
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -279,6 +317,24 @@ export function InkassoWizard() {
 
       {step === 0 && (
         <section className="mt-8 flex flex-col gap-4">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <label htmlFor="inkasso-file" className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-semibold">
+              <span className="grid size-9 place-items-center rounded-full bg-primary/10 text-primary"><FileUp className="size-4" aria-hidden="true" /></span>
+              {busy ? c.uploading : c.uploadLabel}
+            </label>
+            <input
+              id="inkasso-file"
+              type="file"
+              accept="application/pdf,image/jpeg,image/png"
+              disabled={busy}
+              onChange={(event) => void uploadDocument(event.currentTarget.files?.[0])}
+              className="sr-only"
+            />
+            <p className="mt-2 text-xs text-muted-foreground">{c.uploadHint}</p>
+            {uploadMessage ? <p role="status" className="mt-2 text-xs font-medium text-primary">{uploadMessage}</p> : null}
+          </div>
+
+          <p className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">{locale === "de" ? "oder" : "или"}</p>
           <label htmlFor="inkasso-text" className="text-sm font-semibold">
             {c.pasteLabel}
           </label>

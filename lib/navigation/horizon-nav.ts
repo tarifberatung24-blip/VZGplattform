@@ -16,6 +16,7 @@ export type NavDestinationId =
   | "dashboard"
   | "guide"
   | "documents"
+  | "inkasso"
   | "contracts"
   | "taxes"
   | "education"
@@ -48,6 +49,7 @@ export const navGroups: readonly NavGroup[] = [
       { id: "dashboard", href: "/dashboard", labelKey: "dashboard" },
       { id: "guide", href: "/guide", labelKey: "guide" },
       { id: "documents", href: "/documents", labelKey: "documents" },
+      { id: "inkasso", href: "/pruefung", labelKey: "inkasso" },
     ],
   },
   {
@@ -79,13 +81,14 @@ export const navGroups: readonly NavGroup[] = [
 /**
  * Mobile bottom bar destinations, in order. Slot 5 is the "More" trigger, which is not a
  * destination and is rendered separately. Steuern, Finanzbildung, Profil, Sicherheit and the app
- * actions live under "More". Owner decision: slot 4 is Verträge.
+ * actions live under "More". Inkasso is primary so a letter with a deadline
+ * is reachable immediately, without opening another menu.
  */
 export const mobilePrimaryIds: readonly NavDestinationId[] = [
   "dashboard",
   "guide",
   "documents",
-  "contracts",
+  "inkasso",
 ]
 
 export const navDestinations: readonly NavDestination[] = navGroups.flatMap((group) => group.items)
