@@ -166,6 +166,30 @@ export function getGuideCopy(locale: Locale): GuideCopy {
 }
 
 /**
+ * Cases keep their durable German title for the underlying administrative
+ * record. The workspace, however, is a user-facing surface and must not mix a
+ * German stored label into a Bulgarian session. For Guide-created cases we can
+ * derive the localized task label from the stable legacy intent; other cases
+ * keep their own title unchanged.
+ */
+const guideIntentByLegacyIntent: Partial<Record<string, GuideIntent>> = {
+  explanation: "understand_document",
+  reply: "reply_to_authority",
+  application: "fill_official_form",
+  cancellation: "cancel_contract",
+  free_email: "unsure",
+}
+
+export function guideCaseDisplayTitle(
+  locale: Locale,
+  intent: string | null | undefined,
+  fallback: string,
+): string {
+  const guideIntent = intent ? guideIntentByLegacyIntent[intent] : undefined
+  return guideIntent ? getGuideCopy(locale).intents[guideIntent].title : fallback
+}
+
+/**
  * "not started" marker and the counted case label.
  *
  * The count is rendered as a numeric badge beside an inflected noun, never as

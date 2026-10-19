@@ -8,7 +8,6 @@ import {
   FileX2,
   HelpCircle,
   Mail,
-  Sparkles,
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -65,12 +64,7 @@ export function GuideChooser({
     <WorkspacePage>
       <div className="mx-auto max-w-3xl">
         <header className="border-b border-border pb-6">
-          <span className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Sparkles className="size-5" aria-hidden="true" />
-          </span>
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"><BrandText text={copy.brand} /></p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><BrandText text={copy.brandNote} /></p>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight"><BrandText text={copy.title} /></h1>
+          <h1 className="text-3xl font-semibold tracking-tight"><BrandText text={copy.title} /></h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground"><BrandText text={copy.intro} /></p>
         </header>
 

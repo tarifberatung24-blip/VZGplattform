@@ -1,7 +1,8 @@
 "use client"
 
-import { useActionState } from "react"
-import { confirmDocumentKind, type UnterlagenState } from "@/lib/horizon/unterlagen/actions"
+import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
+import type { UnterlagenState } from "@/lib/horizon/unterlagen/actions"
 import { getUnterlagenCopy } from "@/lib/horizon/unterlagen/copy"
 import { analyseDocumentText, DOCUMENT_KIND_FACT_KEY } from "@/lib/horizon/unterlagen/analysis"
 import { DOCUMENT_KINDS, type DocumentKind } from "@/lib/horizon/unterlagen/classify"
@@ -45,7 +46,9 @@ export function UnterlagenPanel({
   /** The stored pages and pasted texts, so each quote can name its page. */
   evidenceSources?: EvidenceSources
 }) {
-  const [state, action, pending] = useActionState(confirmDocumentKind, initialState)
+  const router = useRouter()
+  const [state, setState] = useState<UnterlagenState>(initialState)
+  const [pending, setPending] = useState(false)
   const copy = getUnterlagenCopy(locale === "de" ? "de" : "bg")
 
   if (module !== "unterlagen_erklaeren") return null
@@ -84,6 +87,31 @@ export function UnterlagenPanel({
             ? copy.translateUnavailable
             : null
 
+  async function confirmKind(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = event.currentTarget
+    const values = new FormData(form)
+    setPending(true)
+    setState(initialState)
+    try {
+      const response = await fetch(`/api/horizon/cases/${caseId}/document-kind`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: values.get("kind") }),
+      })
+      const payload = await response.json().catch(() => null) as UnterlagenState | null
+      const nextState = payload && typeof payload.ok === "boolean"
+        ? payload
+        : { error: "failed" as const, ok: false }
+      setState(nextState)
+      if (nextState.ok) router.refresh()
+    } catch {
+      setState({ error: "failed", ok: false })
+    } finally {
+      setPending(false)
+    }
+  }
+
   return (
     <section className="paper p-4 sm:p-5">
       <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -104,9 +132,7 @@ export function UnterlagenPanel({
             <p className="text-xs text-muted-foreground"><BrandText text={copy.classificationUnclear} /></p>
           )}
 
-          <form action={action} className="mt-2 space-y-2">
-            <input type="hidden" name="caseId" value={caseId} />
-            <input type="hidden" name="locale" value={locale} />
+          <form onSubmit={confirmKind} className="mt-2 space-y-2">
             <label htmlFor="document-kind" className="block text-xs font-medium">
               <BrandText text={copy.classificationCorrect} />
             </label>

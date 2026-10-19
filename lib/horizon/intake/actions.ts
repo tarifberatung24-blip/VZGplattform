@@ -1,11 +1,9 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createCaseEngine } from "@/lib/horizon/case"
-import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
-import { isTextIntakeKind } from "./text"
+import { saveTextIntake, type TextIntakeState } from "./text-service"
 
-export type TextIntakeState = { error: string | null; ok: boolean }
+export type { TextIntakeState } from "./text-service"
 
 /**
  * Server action for P6 text intake.
@@ -20,25 +18,15 @@ export async function submitTextIntake(
   formData: FormData,
 ): Promise<TextIntakeState> {
   const caseId = formData.get("caseId")
-  const rawLocale = formData.get("locale")
-  const rawKind = formData.get("kind")
-  const rawText = formData.get("text")
-
-  const locale: Locale = typeof rawLocale === "string" && isLocale(rawLocale) ? rawLocale : defaultLocale
-  if (typeof caseId !== "string" || caseId.length === 0) return { error: "missing_case", ok: false }
-  if (!isTextIntakeKind(rawKind)) return { error: "unknown_kind", ok: false }
-  if (typeof rawText !== "string") return { error: "empty", ok: false }
-
-  const engine = await createCaseEngine()
-  if (!engine.repository) return { error: "unauthorized", ok: false }
-
-  const result = await engine.repository.addTextIntake(caseId, {
-    text: rawText,
-    kind: rawKind,
+  const locale = formData.get("locale")
+  const result = await saveTextIntake({
+    caseId,
     locale,
+    kind: formData.get("kind"),
+    text: formData.get("text"),
   })
-  if (result.error) return { error: result.error, ok: false }
-
-  revalidatePath(`/${locale}/guide/${caseId}`)
-  return { error: null, ok: true }
+  if (result.ok && typeof caseId === "string" && typeof locale === "string") {
+    revalidatePath(`/${locale}/guide/${caseId}`)
+  }
+  return result
 }

@@ -127,7 +127,7 @@ export function DocumentsWorkspace({ initialDocuments, loadError }: { initialDoc
           </div>
         ))}
       </div>
-      <Button asChild variant="outline" className="mt-5 h-auto max-w-full whitespace-normal py-2.5 text-center"><Link href={localizedPath("/zayavka", locale)}>{de ? "Dokumentenprüfung anfragen" : "Заяви проверка по документ"}</Link></Button>
+      <Button asChild className="mt-5 h-auto max-w-full whitespace-normal py-2.5 text-center"><Link href={localizedPath("/guide", locale)}>{de ? "Dokument im HORIZON Guide verstehen" : "Разбери документ в HORIZON Guide"}</Link></Button>
     </section>
   )
 }

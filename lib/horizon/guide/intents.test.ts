@@ -12,7 +12,14 @@ import {
   isGuideIntent,
   isKnownLegacyIntent,
 } from "./intents"
-import { caseCountLabel, caseCountNoun, getGuideCopy, guideModules, notStartedLabel } from "./copy"
+import {
+  caseCountLabel,
+  caseCountNoun,
+  getGuideCopy,
+  guideCaseDisplayTitle,
+  guideModules,
+  notStartedLabel,
+} from "./copy"
 
 const locales = ["bg", "de"] as const
 
@@ -125,6 +132,15 @@ describe("guide copy", () => {
 
   it("falls back to Bulgarian for an unknown locale instead of throwing", () => {
     expect(getGuideCopy("fr" as "bg").brand).toBe("HORIZON by VZG")
+  })
+
+  it("uses the session language for Guide-created case titles", () => {
+    expect(guideCaseDisplayTitle("bg", "reply", "Antwort an eine Behörde vorbereiten"))
+      .toBe("Имам срок или трябва да отговоря")
+    expect(guideCaseDisplayTitle("de", "reply", "Antwort an eine Behörde vorbereiten"))
+      .toBe("Ich habe eine Frist oder muss antworten")
+    expect(guideCaseDisplayTitle("bg", "document_request", "Custom case"))
+      .toBe("Custom case")
   })
 })
 

@@ -1,7 +1,8 @@
 "use client"
 
-import { useActionState } from "react"
-import { submitTextIntake, type TextIntakeState } from "@/lib/horizon/intake/actions"
+import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
+import type { TextIntakeState } from "@/lib/horizon/intake/actions"
 import { TEXT_INTAKE_KINDS, TEXT_INTAKE_MAX_LENGTH } from "@/lib/horizon/intake/text"
 
 const initialState: TextIntakeState = { error: null, ok: false }
@@ -15,7 +16,9 @@ const initialState: TextIntakeState = { error: null, ok: false }
  * has been interpreted or acted on.
  */
 export function TextIntakeForm({ caseId, locale }: { caseId: string; locale: string }) {
-  const [state, formAction, pending] = useActionState(submitTextIntake, initialState)
+  const router = useRouter()
+  const [state, setState] = useState<TextIntakeState>(initialState)
+  const [pending, setPending] = useState(false)
   const de = locale === "de"
 
   const copy = de
@@ -32,6 +35,7 @@ export function TextIntakeForm({ caseId, locale }: { caseId: string; locale: str
         empty: "Bitte Text eingeben.",
         tooLong: `Der Text ist zu lang (max. ${TEXT_INTAKE_MAX_LENGTH} Zeichen).`,
         unknownKind: "Unbekannte Eingabeart.",
+        saveFailed: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
       }
     : {
         title: "Постави текст или имейл",
@@ -46,6 +50,7 @@ export function TextIntakeForm({ caseId, locale }: { caseId: string; locale: str
         empty: "Моля, въведи текст.",
         tooLong: `Текстът е твърде дълъг (макс. ${TEXT_INTAKE_MAX_LENGTH} знака).`,
         unknownKind: "Непознат вид въвеждане.",
+        saveFailed: "Запазването не успя. Опитай отново.",
       }
 
   const errorText =
@@ -56,11 +61,44 @@ export function TextIntakeForm({ caseId, locale }: { caseId: string; locale: str
         : state.error === "unknown_kind"
           ? copy.unknownKind
           : state.error
+            ? copy.saveFailed
+            : null
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = event.currentTarget
+    const values = new FormData(form)
+    setPending(true)
+    setState(initialState)
+
+    try {
+      const response = await fetch(`/api/horizon/cases/${caseId}/intake/text`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          locale,
+          kind: values.get("kind"),
+          text: values.get("text"),
+        }),
+      })
+      const payload = await response.json().catch(() => null) as TextIntakeState | null
+      const nextState = payload && typeof payload.ok === "boolean"
+        ? payload
+        : { error: "save_failed" as const, ok: false }
+      setState(nextState)
+      if (nextState.ok) {
+        form.reset()
+        router.refresh()
+      }
+    } catch {
+      setState({ error: "save_failed", ok: false })
+    } finally {
+      setPending(false)
+    }
+  }
 
   return (
-    <form action={formAction} className="space-y-3">
-      <input type="hidden" name="caseId" value={caseId} />
-      <input type="hidden" name="locale" value={locale} />
+    <form onSubmit={save} className="space-y-3">
 
       <p className="text-xs text-muted-foreground">{copy.hint}</p>
 

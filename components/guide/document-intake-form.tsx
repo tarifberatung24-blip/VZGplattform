@@ -1,7 +1,8 @@
 "use client"
 
-import { useActionState } from "react"
-import { submitDocumentIntake, type DocumentIntakeState } from "@/lib/horizon/intake/document-actions"
+import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
+import type { DocumentIntakeState } from "@/lib/horizon/intake/document-actions"
 import { CASE_DOCUMENT_MAX_BYTES } from "@/lib/horizon/intake/document"
 
 const initialState: DocumentIntakeState = { error: null, ok: false }
@@ -16,7 +17,9 @@ const initialState: DocumentIntakeState = { error: null, ok: false }
  * database error is never shown.
  */
 export function DocumentIntakeForm({ caseId, locale }: { caseId: string; locale: string }) {
-  const [state, formAction, pending] = useActionState(submitDocumentIntake, initialState)
+  const router = useRouter()
+  const [state, setState] = useState<DocumentIntakeState>(initialState)
+  const [pending, setPending] = useState(false)
   const de = locale === "de"
   const maxMb = Math.round(CASE_DOCUMENT_MAX_BYTES / (1024 * 1024))
 
@@ -97,10 +100,34 @@ export function DocumentIntakeForm({ caseId, locale }: { caseId: string; locale:
     }
   })()
 
+  async function upload(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = event.currentTarget
+    setPending(true)
+    setState(initialState)
+    try {
+      const response = await fetch(`/api/horizon/cases/${caseId}/documents`, {
+        method: "POST",
+        body: new FormData(form),
+      })
+      const payload = await response.json().catch(() => null) as DocumentIntakeState | null
+      const nextState = payload && typeof payload.ok === "boolean"
+        ? payload
+        : { error: "UPLOAD_FAILED" as const, ok: false }
+      setState(nextState)
+      if (nextState.ok) {
+        form.reset()
+        router.refresh()
+      }
+    } catch {
+      setState({ error: "UPLOAD_FAILED", ok: false })
+    } finally {
+      setPending(false)
+    }
+  }
+
   return (
-    <form action={formAction} className="space-y-3">
-      <input type="hidden" name="caseId" value={caseId} />
-      <input type="hidden" name="locale" value={locale} />
+    <form onSubmit={upload} className="space-y-3">
 
       <p className="text-xs text-muted-foreground">{copy.hint}</p>
 

@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { requireGuideContext } from "@/lib/horizon/guide/guard"
-import { getGuideCopy, guideModuleLabel, caseStatusLabel } from "@/lib/horizon/guide/copy"
+import { getGuideCopy, guideCaseDisplayTitle, guideModuleLabel, caseStatusLabel } from "@/lib/horizon/guide/copy"
 import { combineAnalysisText } from "@/lib/horizon/unterlagen/analysis"
 import { documentDisplayName } from "@/lib/horizon/intake/document"
 import { isLocale } from "@/lib/i18n/dictionaries"
@@ -88,10 +88,9 @@ export default async function GuideCasePage({
         </Link>
 
         <header className="mt-4 border-b border-border pb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            <BrandText text={copy.brand} />
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight"><BrandText text={loaded.data.title} /></h1>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            <BrandText text={guideCaseDisplayTitle(locale, loaded.data.intent, loaded.data.title)} />
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {copy.moduleLabel}: {guideModuleLabel(locale, loaded.data.module)} ·{" "}
             {copy.statusLabel}: {caseStatusLabel(locale, loaded.data.status)}
