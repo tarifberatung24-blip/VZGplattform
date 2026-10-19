@@ -6,9 +6,9 @@ import { MessageCircle, Pin, ThumbsUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   createForumComment,
-  initialForumActionState,
   reportForumContent,
   toggleForumReaction,
+  type ForumActionState,
 } from "@/lib/forum/actions"
 import { getForumCopy } from "@/lib/forum/copy"
 import type { ForumComment, ForumPost } from "@/lib/forum/contract"
@@ -128,3 +128,5 @@ function ReportForm({
 function formatDate(value: string, locale: Locale) {
   return new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "bg-BG", { dateStyle: "medium" }).format(new Date(value))
 }
+
+const initialForumActionState: ForumActionState = { message: null, ok: false }

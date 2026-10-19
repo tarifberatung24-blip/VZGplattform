@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 import { Button } from "@/components/ui/button"
-import { createForumAnnouncement, initialForumActionState } from "@/lib/forum/actions"
+import { createForumAnnouncement, type ForumActionState } from "@/lib/forum/actions"
 import { forumOfficialTopics } from "@/lib/forum/contract"
 import { getForumCopy } from "@/lib/forum/copy"
 import type { Locale } from "@/lib/i18n/dictionaries"
@@ -36,3 +36,5 @@ export function ForumAnnouncementComposer({ locale }: { locale: Locale }) {
     </form>
   )
 }
+
+const initialForumActionState: ForumActionState = { message: null, ok: false }

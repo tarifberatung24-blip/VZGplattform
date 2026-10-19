@@ -15,7 +15,6 @@ import {
 } from "./contract"
 
 export type ForumActionState = { message: string | null; ok: boolean }
-export const initialForumActionState: ForumActionState = { message: null, ok: false }
 
 const uuidSchema = z.string().uuid()
 
