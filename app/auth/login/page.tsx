@@ -11,6 +11,7 @@ import { sanitizeNextPath } from "@/lib/supabase/auth-routing"
 import { isSupportedMobile, normalizeGermanMobile, phoneAuthMessage } from "@/lib/supabase/phone-auth"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
+import { classifyAuthError } from "@/lib/supabase/auth-errors"
 
 export default function LoginPage() {
   const { locale } = useLanguage()
@@ -24,7 +25,7 @@ export default function LoginPage() {
         login: "Mit E-Mail anmelden",
         loading: "Anmeldung...",
         error: "E-Mail oder Passwort ist nicht korrekt.",
-        confirm: "Bitte bestaetige zuerst deine E-Mail-Adresse.",
+        confirm: "Bitte bestätige zuerst deine E-Mail-Adresse.",
         forgot: "Passwort vergessen?",
         noAccount: "Noch kein Konto?",
         signup: "Konto erstellen",
@@ -41,7 +42,7 @@ export default function LoginPage() {
         codeSent: "Wir haben dir einen SMS-Code geschickt.",
         invalidPhone: "Bitte gib eine gültige Mobilnummer mit Ländervorwahl ein.",
         genericAuthError: "Diese Anmeldemethode ist noch nicht aktiviert. Bitte versuche es später erneut.",
-        terms: "Mit der Anmeldung akzeptierst du unsere Datenschutzerklaerung und Nutzungsbedingungen.",
+        terms: "Mit der Anmeldung akzeptierst du unsere Datenschutzerklärung und Nutzungsbedingungen.",
       }
     : {
         title: "Вход",
@@ -91,7 +92,7 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     const { error } = await createClient().auth.signInWithPassword({ email, password })
-    if (error) setError(error.message.toLowerCase().includes("confirm") ? copy.confirm : copy.error)
+    if (error) setError(classifyAuthError(error) === "email_unconfirmed" ? copy.confirm : copy.error)
     else {
       router.replace(destination())
       router.refresh()
