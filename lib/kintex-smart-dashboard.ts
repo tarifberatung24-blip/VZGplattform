@@ -22,7 +22,7 @@ export const smartDashboardEnvironment = {
   aiLayer: "AI explanation layer after manual offer preparation",
   automationLayer: "Activepieces manual offer workflows",
   deployment: "Render",
-  designSystem: "NovaMind institutional finance UI",
+  designSystem: "HORIZON institutional finance UI",
 } as const
 
 export const smartDashboardRules = {
