@@ -43,6 +43,7 @@ export class HorizonContextError extends Error {
 }
 
 const text = (value) => String(value ?? "").trim()
+const normalizeLineEndings = (value) => String(value ?? "").replace(/\r\n?/g, "\n")
 
 export function loadIndex(indexPath = INDEX_PATH) {
   if (!existsSync(indexPath)) {
@@ -67,7 +68,7 @@ export function readSourceSources(index) {
     if (!existsSync(absolute)) {
       throw new HorizonContextError(`Declared source file is missing: ${relativePath}`)
     }
-    sources[key] = readFileSync(absolute, "utf8")
+    sources[key] = normalizeLineEndings(readFileSync(absolute, "utf8"))
   }
   return sources
 }
@@ -81,7 +82,7 @@ function escapeRegExp(value) {
  * next heading of the same or higher level. Returns the heading line plus its body.
  */
 export function extractSection(markdown, headingPrefix) {
-  const lines = markdown.split("\n")
+  const lines = normalizeLineEndings(markdown).split("\n")
   const start = lines.findIndex((line) => {
     const match = /^(#{1,6})\s+(.*)$/.exec(line)
     return match && match[2].startsWith(headingPrefix)
@@ -101,7 +102,7 @@ export function extractSection(markdown, headingPrefix) {
 }
 
 export function extractByHeadingName(markdown, headingName) {
-  const lines = markdown.split("\n")
+  const lines = normalizeLineEndings(markdown).split("\n")
   const start = lines.findIndex((line) => {
     const match = /^(#{1,6})\s+(.*)$/.exec(line)
     return match && text(match[2]) === text(headingName)
@@ -173,9 +174,10 @@ export function ledgerPhaseHeading(index, phase) {
 export function ledgerPhaseSection(ledger, index, phase) {
   const headingPrefix = ledgerPhaseHeading(index, phase)
   if (!headingPrefix) return null
-  const heading = new RegExp(`^## ${escapeRegExp(headingPrefix)}.*$`, "m").exec(ledger)
+  const normalizedLedger = normalizeLineEndings(ledger)
+  const heading = new RegExp(`^## ${escapeRegExp(headingPrefix)}.*$`, "m").exec(normalizedLedger)
   if (!heading) return null
-  return extractByHeadingName(ledger, heading[0].replace(/^##\s+/, ""))
+  return extractByHeadingName(normalizedLedger, heading[0].replace(/^##\s+/, ""))
 }
 
 export function ledgerFrozenSummary(ledger, index) {

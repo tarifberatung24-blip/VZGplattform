@@ -11,7 +11,7 @@ import assert from "node:assert/strict"
 import { execFileSync, spawnSync } from "node:child_process"
 import { readFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import test from "node:test"
 
 import {
@@ -110,6 +110,17 @@ test("a missing ledger heading fails non-zero", () => {
     () => buildContext("P5", { index, sources: brokenSources }),
     (error) => error instanceof HorizonContextError && /Ledger heading/.test(error.message),
   )
+})
+
+test("P3 and P4 ledger records load from a CRLF checkout", () => {
+  const windowsSources = {
+    ...sources,
+    buildLedger: sources.buildLedger.replace(/\n/g, "\r\n"),
+  }
+  for (const phase of ["P3", "P4"]) {
+    const context = buildContext(phase, { index, sources: windowsSources })
+    assert.ok(context.BUILD_LEDGER_CONTEXT.includes(label(phase)))
+  }
 })
 
 test("the Capital section does not leak into normal phase context", () => {
@@ -280,7 +291,7 @@ test("the loader loads only the two canonical documents plus governance sources"
 test("the loader is importable without executing the CLI", () => {
   const output = execFileSync(
     process.execPath,
-    ["-e", `import(${JSON.stringify(LOADER)}).then((m) => process.stdout.write(typeof m.buildContext))`],
+    ["-e", `import(${JSON.stringify(pathToFileURL(LOADER).href)}).then((m) => process.stdout.write(typeof m.buildContext))`],
     { cwd: REPO_ROOT, encoding: "utf8" },
   )
   assert.equal(output, "function")
