@@ -32,7 +32,7 @@ Legend for the columns used in every phase record:
 - **FROZEN** — freeze state
 - **OWNER APPROVAL REQUIRED** — whether the owner must approve to proceed/publish
 
-**P1 Public Layer 0 is DONE and FROZEN.** All other modules remain unfrozen. Freeze is granted only by explicit owner acceptance
+**P1 Public Layer 0 is reopened and unfrozen by owner instruction on 2026-10-19.** All other modules remain unfrozen. Freeze is granted only by explicit owner acceptance
 after a module meets the full DONE definition.
 
 ---
@@ -42,7 +42,7 @@ after a module meets the full DONE definition.
 | ID | SYSTEM | CURRENT STATUS | FROZEN | OWNER APPROVAL REQUIRED |
 | --- | --- | --- | --- | --- |
 | P0 | MASTER MAP + GOVERNANCE | DONE — CRITERIA MET 2026-09-25 (master map + ledger + checklist exist; DONE→FROZEN and ACTIVE_PHASE/ALLOWED_FILES/FROZEN_FILES/OUT_OF_SCOPE rules carried in `PROJECT_RULES.md`/`AGENTS.md`/`AI_WORKFLOW.md`; sequence fixed; Capital out of scope; `git diff --check` clean); FROZEN pending owner acceptance | NO | YES |
-| P1 | PUBLIC LAYER 0 | FROZEN — OWNER ACCEPTED 2026-09-25 | YES | SATISFIED |
+| P1 | PUBLIC LAYER 0 | IN_PROGRESS — OWNER REOPENED 2026-10-19 | NO | YES — refreeze only |
 | P2 | AUTH + FIRST LOGIN + ONBOARDING | DONE — END-TO-END RUNTIME VERIFIED 2026-09-25 (blocker migration applied + live `profiles.upsert` 200; fresh-user login/onboarding/second-login E2E pass; FROZEN pending owner acceptance) | NO | YES |
 | P3 | HORIZON GUIDE | VERIFIED — AUTHENTICATED RUNTIME E2E PASS (`/de/guide`, case workspace 200; content renders) | NO | YES |
 | P4 | HORIZON HOME + FIVE ENTRY MODULES | VERIFIED — AUTHENTICATED RUNTIME E2E PASS 2026-09-25 (`/de/dashboard` renders the five entries with live per-module counts; each of the five entries was clicked and created a real case; account routes `/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents` respond; at verification time the interim security surface was `/de/protected/security` — since N5 the canonical surface is `/de/konto/sicherheit`, and `/de/security` is the public trust page, not an account route) | NO | YES |
@@ -101,14 +101,14 @@ after a module meets the full DONE definition.
 
 - **ID:** P1
 - **SYSTEM:** Public Layer 0
-- **TARGET ROUTES:** `/{locale}` → `/`, `/how-it-works`, `/functions`, `/security`, `/contact`,
+- **TARGET ROUTES:** `/{locale}` → `/`, `/how-it-works`, `/forum`, `/security`, `/contact`,
   `/auth/login`, `/auth/sign-up`, legal pages.
-- **CURRENT STATUS:** FROZEN — OWNER ACCEPTED 2026-09-25
+- **CURRENT STATUS:** IN_PROGRESS — OWNER REOPENED 2026-10-19
 - **CURRENT IMPLEMENTATION:** public marketing and legal surfaces are available in BG/DE with
   HORIZON by VZG customer-facing branding. Public `/security` is a trust page; account/MFA
   security is protected at `/{locale}/konto/sicherheit` (canonical since N5; the legacy
   `/{locale}/protected/security` route redirects there).
-  Existing: `/{locale}` home, `/{locale}/how-it-works`, `/{locale}/contact`,
+  Existing: `/{locale}` home, `/{locale}/how-it-works`, authenticated `/{locale}/forum`, `/{locale}/contact`,
   `/{locale}/auth/login`, `/{locale}/auth/sign-up`, `/{locale}/impressum`,
   `/{locale}/datenschutz`, `/{locale}/agb`, `/{locale}/widerruf`, `/{locale}/affiliate-hinweis`.
   Additional legacy marketing routes: `/check`, `/uslugi`, `/produkte`, `/za-nas`, `/tarife`,
@@ -122,15 +122,15 @@ after a module meets the full DONE definition.
   `components/marketing/product-opportunity-board.tsx` are now orphaned too; both are dead code and
   were left in place, so no further P1 asset is reusable. This record no longer lists them as
   reusable P1 assets.
-- **MISSING:** none for the accepted P1 scope. Legacy marketing routes that remain are treated as preserved public compatibility surfaces; changing or removing them requires an explicit P1 reopen.
+- **MISSING:** owner-directed Layer 0 content and design work is in progress. Legacy marketing routes remain preserved compatibility surfaces unless the owner directs a change.
 - **DEPENDENCIES:** P0.
 - **BLOCKERS:** none. Final live legal re-audit passed on production commit `46a5fa3e90827c6d085fd24206f502e93bd9be83`.
 - **DONE CRITERIA:** every Layer 0 target route exists and is usable in each supported UI locale;
   branding is consistent with HORIZON by VZG; legal pages complete and reviewed; loading, error,
   and empty states present; real HTTP checks pass against production; no legacy route broken silently.
-- **FROZEN:** YES
-- **OWNER APPROVAL REQUIRED:** SATISFIED — recorded 2026-09-25.
-- **FREEZE BASELINE:** production commit `46a5fa3e90827c6d085fd24206f502e93bd9be83`; reopen P1 explicitly before changing its public/legal surfaces.
+- **FROZEN:** NO — owner reopened P1 on 2026-10-19.
+- **OWNER APPROVAL REQUIRED:** YES — a new explicit owner acceptance is required before refreezing.
+- **FREEZE BASELINE:** former production baseline `46a5fa3e90827c6d085fd24206f502e93bd9be83`; it is superseded while P1 is open.
 
 ---
 

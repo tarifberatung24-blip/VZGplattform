@@ -960,7 +960,6 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
-.env-label-mark { height: 0.8em; }
 
 .env-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .env-chips[hidden] { display: none; }
@@ -1489,7 +1488,6 @@
 }
 .env-cta:hover:not(:disabled) { transform: translateY(-2px); }
 .env-cta:disabled { opacity: 0.6; }
-.env-cta-mark { height: 0.8em; }
 .env-stage[data-stage="closed"] .env-closed-cta { animation: env-cta-pulse 2.4s ease-in-out infinite; }
 
 @keyframes env-cta-pulse {

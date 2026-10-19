@@ -33,8 +33,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   (`/de/profil`, `/de/vertraege`, `/de/steuer`, `/de/documents`); at verification time the interim
   security surface was `/de/protected/security` (`/de/security` is the public Layer 0 trust page,
   not an account route). Since N5 the canonical account-security surface is `/de/konto/sicherheit`.
-- ✅ P1 owner/legal acceptance — recorded in the Build Ledger as DONE/FROZEN by owner acceptance 2026-09-25
-- ✅ P1 FROZEN after explicit owner acceptance
+- 🔄 P1 reopened by explicit owner instruction on 2026-10-19
 - ✅ P2 migration applied to the project (owner-side authorized channel) — `20260925020000` applied; live `profiles.upsert()` returns `200`
 - P2 explicit owner acceptance
 - ✅ P5 canonical model decision (`public.cases`; `platform_*` retained for compatibility)
@@ -91,7 +90,7 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ GitHub Actions CI green
 - ✅ Owner/legal review — recorded in the Build Ledger as accepted with the P1 freeze
 - ✅ Explicit owner acceptance
-- ✅ FROZEN (owner accepted 2026-09-25)
+- 🔄 REOPENED — owner instruction 2026-10-19; refreeze requires new explicit acceptance
 
 ## P2 — Auth + First Login + Onboarding
 

@@ -57,9 +57,16 @@ describe("hero envelope cases", () => {
 
   it("keeps the dashboard copy free of em and en dashes and exclamation marks", () => {
     for (const locale of ["bg", "de"] as const) {
-      const { cases, caseNames, eyebrow, open, before, after, toAfter, next, hint } = envelopeCopy[locale]
-      expect(JSON.stringify({ cases, caseNames, eyebrow, open, before, after, toAfter, next, hint })).not.toMatch(/[—–!]/)
+      const { cases, caseNames, eyebrow, open, before, after, toAfter, upload, next, hint } = envelopeCopy[locale]
+      expect(JSON.stringify({ cases, caseNames, eyebrow, open, before, after, toAfter, upload, next, hint })).not.toMatch(/[—–!]/)
     }
+  })
+
+  it("uses the owner-approved Bulgarian explanation in the active demo", () => {
+    expect(envelopeCopy.bg.eyebrow).toBe("Кликни върху писмото и разбери как работи системата ни")
+    expect(envelopeCopy.bg.before).toBe("Ти получаваш в този вид писмено известие")
+    expect(envelopeCopy.bg.after).toBe("Ето какво ще покаже клиентското ти табло HORIZON")
+    expect(envelopeCopy.bg.upload).toBe("Качи писмото в HORIZON")
   })
 
   it("marks the partner offer as a partner offer and keeps the tax benefit general", () => {
@@ -94,6 +101,11 @@ describe("hero envelope steps", () => {
   it("never closes the envelope again without a page reload", () => {
     const source = readFileSync(join(process.cwd(), "components/marketing/letter-envelope.tsx"), "utf8")
     expect(source).not.toMatch(/setStage\("closed"\)/)
+  })
+
+  it("takes an interested visitor to the protected Guide upload path", () => {
+    const source = readFileSync(join(process.cwd(), "components/marketing/letter-envelope.tsx"), "utf8")
+    expect(source).toContain('localizedPath("/guide", locale)')
   })
 })
 

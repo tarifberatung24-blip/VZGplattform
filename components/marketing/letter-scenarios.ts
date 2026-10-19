@@ -159,10 +159,10 @@ export type EnvelopeCopy = {
   /** Shown above the closed envelope. */
   eyebrow: string
   open: string
-  /** "Before" and "after" are followed by the wordmark. */
   before: string
   after: string
   toAfter: string
+  upload: string
   next: string
   hint: string
   dashboard: string
@@ -178,12 +178,13 @@ export const envelopeCopy: Record<Locale, EnvelopeCopy> = {
   bg: {
     regionLabel: "Пример: как Horizon превръща немско писмо в ясен план",
     sample: "Пример",
-    eyebrow: "Как работи?",
+    eyebrow: "Кликни върху писмото и разбери как работи системата ни",
     open: "Отвори писмото",
-    before: "Преди",
-    after: "След",
-    toAfter: "Виж след",
-    next: "Следващ казус",
+    before: "Ти получаваш в този вид писмено известие",
+    after: "Ето какво ще покаже клиентското ти табло HORIZON",
+    toAfter: "Виж как HORIZON го подрежда",
+    upload: "Качи писмото в HORIZON",
+    next: "Виж друг пример",
     hint: "Кликни или скролни върху писмото",
     dashboard: "Моето табло",
     notice: "Известие",
@@ -276,12 +277,13 @@ export const envelopeCopy: Record<Locale, EnvelopeCopy> = {
   de: {
     regionLabel: "Beispiel: So macht Horizon aus einem deutschen Brief einen klaren Plan",
     sample: "Beispiel",
-    eyebrow: "So funktioniert's",
+    eyebrow: "Klicke auf den Brief und sieh, wie unser System funktioniert",
     open: "Brief öffnen",
-    before: "Vor",
-    after: "Mit",
-    toAfter: "Ansehen mit",
-    next: "Nächster Fall",
+    before: "So erhältst du eine schriftliche Mitteilung",
+    after: "Das zeigt dir dein HORIZON Dashboard",
+    toAfter: "Sieh, wie HORIZON es ordnet",
+    upload: "Brief in HORIZON hochladen",
+    next: "Weiteres Beispiel ansehen",
     hint: "Klick oder scrolle auf den Brief",
     dashboard: "Mein Dashboard",
     notice: "Hinweis",

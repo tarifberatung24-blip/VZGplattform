@@ -1,8 +1,10 @@
 "use client"
 
+import Link from "next/link"
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react"
 import { ArrowRight, Bell, CheckCircle2, Mail } from "lucide-react"
 import type { Locale } from "@/lib/i18n/dictionaries"
+import { localizedPath } from "@/lib/i18n/routing"
 import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 import {
   envelopeCopy,
@@ -419,8 +421,7 @@ export function LetterEnvelope({ locale }: { locale: Locale }) {
   const showingBack = isOpen && step.side === "back"
   const firstLetter = sampleLetters[letterCaseOrder[0]]
 
-  const ctaText = step.side === "front" ? copy.toAfter : copy.next
-  const ctaLabel = step.side === "front" ? `${copy.toAfter} Horizon` : ctaText
+  const sheetLabel = step.side === "front" ? copy.toAfter : copy.next
 
   const onSheetKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -442,11 +443,7 @@ export function LetterEnvelope({ locale }: { locale: Locale }) {
     >
       <div className="env-bar">
         <p className="env-label" aria-live="polite" data-side={isOpen ? step.side : "closed"}>
-          {isOpen ? (
-            <>
-              <span>{step.side === "front" ? copy.before : copy.after}</span> <HorizonWordmark className="env-label-mark" />
-            </>
-          ) : null}
+          {isOpen ? <span>{step.side === "front" ? copy.before : copy.after}</span> : null}
         </p>
         <div className="env-chips" role="group" aria-label={copy.casesLabel} hidden={!isOpen}>
           {letterCaseOrder.map((id, index) => (
@@ -487,7 +484,7 @@ export function LetterEnvelope({ locale }: { locale: Locale }) {
             role="button"
             tabIndex={isOpen ? 0 : -1}
             aria-hidden={!isOpen}
-            aria-label={ctaLabel}
+            aria-label={sheetLabel}
             onClick={isOpen ? next : undefined}
             onKeyDown={isOpen ? onSheetKey : undefined}
           >
@@ -520,11 +517,17 @@ export function LetterEnvelope({ locale }: { locale: Locale }) {
       </div>
 
       <div className="env-controls" aria-hidden={!isOpen}>
-        <button type="button" className="env-cta" onClick={next} disabled={!isOpen} tabIndex={isOpen ? 0 : -1} aria-label={ctaLabel}>
-          <span>{ctaText}</span>
-          {step.side === "front" ? <HorizonWordmark className="env-cta-mark" /> : null}
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </button>
+        {step.side === "front" ? (
+          <Link href={localizedPath("/guide", locale)} className="env-cta" tabIndex={isOpen ? 0 : -1}>
+            <span>{copy.upload}</span>
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        ) : (
+          <button type="button" className="env-cta" onClick={next} disabled={!isOpen} tabIndex={isOpen ? 0 : -1} aria-label={copy.next}>
+            <span>{copy.next}</span>
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </button>
+        )}
         <p className="env-hint">{copy.hint}</p>
       </div>
     </div>
