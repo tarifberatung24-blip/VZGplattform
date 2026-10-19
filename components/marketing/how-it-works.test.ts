@@ -4,20 +4,39 @@ import { buildPathGeometry } from "./feature-path"
 
 
 describe("how-it-works copy", () => {
-  it("has the same four stages in both locales", () => {
+  it("documents the same fifteen services in both locales", () => {
+    const expected = [
+      "guide",
+      "document_explanation",
+      "inkasso",
+      "documents",
+      "agentur",
+      "jobcenter",
+      "termination",
+      "tax",
+      "entitlements",
+      "kindergeld",
+      "contracts",
+      "cost_reduction",
+      "insurance",
+      "education",
+      "forum",
+    ]
     for (const locale of ["bg", "de"] as const) {
-      expect(howItWorksCopy[locale].stages.map((stage) => stage.id)).toEqual(["understand", "manage", "analyze", "plan"])
+      expect(howItWorksCopy[locale].groups.flatMap((group) => group.services.map((service) => service.id))).toEqual(expected)
     }
   })
 
-  it("keeps the owner's wording on the plan stage and marks it as not yet available", () => {
-    expect(howItWorksCopy.bg.stages[3].body).toBe(
-      "Провери, след индивидуален анализ на текущата ти ситуация, как да постигнеш финансовите си цели, с ясен план, който да следваш.",
-    )
+  it("gives every service a problem, exactly three steps, a result and a route", () => {
     for (const locale of ["bg", "de"] as const) {
-      const plan = howItWorksCopy[locale].stages[3]
-      expect(plan.soon?.trim().length).toBeGreaterThan(0)
-      for (const stage of howItWorksCopy[locale].stages.slice(0, 3)) expect(stage.soon).toBeUndefined()
+      for (const service of howItWorksCopy[locale].groups.flatMap((group) => group.services)) {
+        expect(service.problem.trim().length).toBeGreaterThan(0)
+        expect(service.steps).toHaveLength(3)
+        expect(service.steps.every((step) => step.trim().length > 0)).toBe(true)
+        expect(service.result.trim().length).toBeGreaterThan(0)
+        expect(service.cta.trim().length).toBeGreaterThan(0)
+        expect(service.href).toMatch(/^\/[a-z0-9-]+$/)
+      }
     }
   })
 
@@ -37,6 +56,14 @@ describe("how-it-works copy", () => {
   it("keeps the no-replacement-for-advice notice", () => {
     expect(howItWorksCopy.bg.notice).toMatch(/Не заменя данъчна, правна или социална консултация/)
     expect(howItWorksCopy.de.notice).toMatch(/ersetzt keine Steuer-, Rechts- oder Sozialberatung/)
+  })
+
+  it("keeps regulated product limits explicit", () => {
+    expect(howItWorksCopy.bg.notice).toMatch(/не е застраховател/)
+    expect(howItWorksCopy.bg.notice).toMatch(/не обещава цена, спестяване или одобрение/)
+    expect(howItWorksCopy.bg.notice).toMatch(/Партньорските връзки са означени/)
+    expect(howItWorksCopy.de.notice).toMatch(/kein Versicherer/)
+    expect(howItWorksCopy.de.notice).toMatch(/Partnerlinks sind gekennzeichnet/)
   })
 })
 
