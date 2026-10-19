@@ -19,6 +19,7 @@ export type NavDestinationId =
   | "contracts"
   | "taxes"
   | "education"
+  | "forum"
   | "profile"
   | "security"
 
@@ -70,6 +71,7 @@ export const navGroups: readonly NavGroup[] = [
     labelKey: "services",
     items: [
       { id: "education", href: "/finanzbildung", labelKey: "education" },
+      { id: "forum", href: "/forum", labelKey: "forum" },
     ],
   },
 ]

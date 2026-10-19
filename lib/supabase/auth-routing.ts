@@ -12,6 +12,8 @@ const protectedPrefixes = [
   "/vertraege",
   "/documents",
   "/finanzbildung",
+  "/forum",
+  "/admin",
   "/guide",
   "/kosten-senken",
   "/auth/update-password",

@@ -2,6 +2,7 @@ import {
   Compass,
   FileText,
   GraduationCap,
+  MessagesSquare,
   LayoutDashboard,
   Receipt,
   ShieldCheck,
@@ -20,6 +21,7 @@ export const navIcons: Record<NavDestinationId, LucideIcon> = {
   contracts: WalletCards,
   taxes: Receipt,
   education: GraduationCap,
+  forum: MessagesSquare,
   profile: UserRound,
   security: ShieldCheck,
 }

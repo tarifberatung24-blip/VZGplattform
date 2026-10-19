@@ -14,4 +14,8 @@ export type Database = { public: { Tables: {
   tasks: Row<{ id: string; owner_id: string; case_id: string; type: 'reminder' | 'human_review'; due_at: string | null; status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'; idempotency_key: string; created_at: string }>
   audit_events: Row<{ id: string; actor_id: string; case_id: string | null; action: string; metadata: Record<string, unknown>; created_at: string }>
   usage_counters: Row<{ user_id: string; period: string; ai_cases: number; tokens: number }>
+  forum_posts: Row<{ id: string; author_id: string; author_type: 'member' | 'official'; category: 'community' | 'feedback' | 'announcement'; official_topic: 'platform' | 'law' | 'promotion' | 'innovation' | null; title: string; body: string; status: 'published' | 'hidden'; is_pinned: boolean; is_locked: boolean; created_at: string }>
+  forum_comments: Row<{ id: string; post_id: string; author_id: string; body: string; status: 'published' | 'hidden'; created_at: string }>
+  forum_post_reactions: Row<{ post_id: string; user_id: string; reaction: 'helpful'; created_at: string }>
+  forum_reports: Row<{ id: string; reporter_id: string; post_id: string | null; comment_id: string | null; reason: string; status: 'open' | 'reviewed' | 'resolved'; created_at: string }>
 }; Views: Record<string, never>; Functions: { consume_ai_quota: { Args: { p_user_id: string; p_daily_limit?: number; p_monthly_limit?: number }; Returns: { allowed: boolean; daily_used: number; monthly_used: number; daily_limit: number; monthly_limit: number; retry_after: string | null }[] } }; Enums: Record<string, never>; CompositeTypes: Record<string, never> } }

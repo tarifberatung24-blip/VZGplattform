@@ -21,7 +21,7 @@ export const kintexModules = [
 // anonymous visitors, so they are deliberately excluded.
 export function isKintexWorkspacePath(pathname: string) {
   const path = stripLocale(pathname)
-  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/profil", "/konto", "/assistant", "/steuer", "/finanzamt", "/guide", "/kosten-senken"]
+  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/forum", "/profil", "/konto", "/assistant", "/steuer", "/finanzamt", "/guide", "/kosten-senken", "/admin"]
     .some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 
