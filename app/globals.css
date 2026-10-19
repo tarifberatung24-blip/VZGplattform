@@ -1974,3 +1974,185 @@
   .kfz-feature-card { transition: none; }
   .kfz-feature-card:hover { transform: none; }
 }
+
+/* Mobile HORIZON workspace: an app-like dark surface with a thumb-reachable dock.
+   It is deliberately scoped to authenticated mobile routes; public Layer 0 keeps its own theme. */
+@media (max-width: 767px) {
+  .kintex-workspace {
+    color-scheme: dark;
+    --background: #202124;
+    --foreground: #f6f7f9;
+    --card: #2b2d31;
+    --card-foreground: #f6f7f9;
+    --popover: #202124;
+    --popover-foreground: #f6f7f9;
+    --primary: #43a6f5;
+    --primary-foreground: #07131d;
+    --primary-hover: #77c2ff;
+    --secondary: #323439;
+    --secondary-foreground: #f6f7f9;
+    --muted: #323439;
+    --muted-foreground: #b7bbc3;
+    --accent: #323439;
+    --accent-foreground: #f6f7f9;
+    --border: rgb(255 255 255 / 0.1);
+    --input: rgb(255 255 255 / 0.16);
+    --ring: #77c2ff;
+    --focus-ring: #77c2ff;
+    --sidebar: #202124;
+    --sidebar-foreground: #f6f7f9;
+    --sidebar-primary: #43a6f5;
+    --sidebar-primary-foreground: #07131d;
+    --sidebar-accent: #323439;
+    --sidebar-accent-foreground: #f6f7f9;
+    --sidebar-border: rgb(255 255 255 / 0.1);
+    --sidebar-ring: #77c2ff;
+    --paper-cut: #202124;
+  }
+
+  .kintex-workspace .paper,
+  .mobile-workspace-sheet {
+    color-scheme: dark;
+    --background: #202124;
+    --foreground: #f6f7f9;
+    --card: #2b2d31;
+    --card-foreground: #f6f7f9;
+    --popover: #202124;
+    --popover-foreground: #f6f7f9;
+    --secondary: #323439;
+    --secondary-foreground: #f6f7f9;
+    --muted: #323439;
+    --muted-foreground: #b7bbc3;
+    --border: rgb(255 255 255 / 0.1);
+    --input: rgb(255 255 255 / 0.16);
+    --paper-hi: #323438;
+    --paper-mid: #2b2d31;
+    --paper-lo: #24262a;
+    --paper-tint: #323439;
+    --paper-fold: #46494f;
+    --paper-crease-1: rgb(0 0 0 / 0.28);
+    --paper-crease-2: rgb(255 255 255 / 0.05);
+    --paper-ring: rgb(255 255 255 / 0.09);
+    --paper-ring-inset: rgb(255 255 255 / 0.1);
+    --paper-edge: rgb(0 0 0 / 0.3);
+    --paper-lift: rgb(0 0 0 / 0.42);
+    --paper-lift-far: rgb(0 0 0 / 0.5);
+    --paper-soft: rgb(0 0 0 / 0.26);
+    --paper-soft-lift: rgb(0 0 0 / 0.38);
+    --paper-dash: #5a5e66;
+    --paper-empty-hi: #2d2f33;
+    --paper-empty-lo: #25272b;
+  }
+
+  .kintex-workspace .horizon-dashboard {
+    --background: #202124;
+    --card: #2b2d31;
+    --border: rgb(255 255 255 / 0.1);
+    --muted: #323439;
+    --tone-urgent-bg: rgb(255 116 116 / 0.18);
+    --tone-urgent-fg: #ffaaa6;
+    --tone-warn-bg: rgb(255 194 102 / 0.18);
+    --tone-warn-fg: #ffd58a;
+    --tone-good-bg: rgb(104 211 145 / 0.16);
+    --tone-good-fg: #7ee2a4;
+    --tone-neutral-bg: #393c42;
+    --tone-neutral-fg: #e1e4e9;
+  }
+
+  .kintex-workspace .mobile-client-dashboard .paper {
+    border-radius: 1.35rem;
+  }
+
+  .kintex-workspace .mobile-client-dashboard .paper.paper-inset,
+  .kintex-workspace .mobile-client-dashboard .paper .paper {
+    border-radius: 1rem;
+  }
+
+  .mobile-workspace-sheet {
+    background: #202124;
+    color: #f6f7f9;
+  }
+
+  .mobile-menu-profile,
+  .mobile-menu-settings {
+    display: flex;
+    min-height: 5.4rem;
+    align-items: center;
+    gap: 0.85rem;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    border-radius: 1.25rem;
+    padding: 1rem;
+    background: rgb(255 255 255 / 0.07);
+    color: #f6f7f9;
+    transition: background 160ms ease, transform 160ms ease;
+  }
+
+  .mobile-menu-profile:hover,
+  .mobile-menu-settings:hover { background: rgb(255 255 255 / 0.12); }
+  .mobile-menu-profile:active,
+  .mobile-menu-settings:active { transform: scale(0.985); }
+
+  .mobile-menu-quick {
+    display: flex;
+    min-height: 5.1rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border: 1px solid rgb(255 255 255 / 0.09);
+    border-radius: 1rem;
+    padding: 0.6rem 0.25rem;
+    background: rgb(255 255 255 / 0.07);
+    color: #f6f7f9;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .mobile-menu-row,
+  .mobile-settings-row {
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.75rem 0.9rem;
+    color: #f6f7f9;
+  }
+
+  .mobile-menu-row + .mobile-menu-row,
+  .mobile-settings-row + .mobile-settings-row { border-top: 1px solid rgb(255 255 255 / 0.09); }
+
+  .mobile-menu-signout {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    padding-inline: 0.75rem;
+    color: #d8dce2;
+    font-size: 0.9rem;
+    font-weight: 650;
+  }
+
+  .mobile-settings-search {
+    display: flex;
+    min-height: 3.1rem;
+    align-items: center;
+    gap: 0.65rem;
+    border-radius: 1rem;
+    padding-inline: 1rem;
+    background: #34363a;
+    color: #b7bbc3;
+  }
+
+  .mobile-settings-search input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #f6f7f9;
+  }
+
+  .mobile-settings-search input::placeholder { color: #b7bbc3; }
+  .mobile-settings-heading { color: #f6f7f9; font-size: 1.05rem; font-weight: 800; }
+}

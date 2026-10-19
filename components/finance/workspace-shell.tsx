@@ -1,13 +1,13 @@
 "use client"
 
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 import { usePathname } from "next/navigation"
 
-import { Cookie } from "lucide-react"
+import { Cookie, Settings } from "lucide-react"
 import { cookieNoticeCopy } from "@/components/horizon/cookie-notice-copy"
 import { HorizonSidebar } from "@/components/layout/horizon-sidebar"
 import { LanguageSwitcher } from "@/components/language-switcher"
-import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav"
+import { MobileBottomNav, type MobileWorkspacePanel } from "@/components/navigation/mobile-bottom-nav"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { openCookieSettings } from "@/lib/cookies/consent"
@@ -27,6 +27,7 @@ import { isKintexWorkspacePath } from "@/lib/kintex-navigation"
  */
 export function WorkspaceShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/"
+  const [mobilePanel, setMobilePanel] = useState<MobileWorkspacePanel>("closed")
 
   if (!isKintexWorkspacePath(pathname)) {
     return <>{children}</>
@@ -54,29 +55,37 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           tabIndex={-1}
           className="min-h-svh min-w-0 focus-visible:outline-none"
         >
-          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-3 sm:px-4">
-            <SidebarTrigger aria-label={toggleText} />
+          <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-3 sm:px-4 max-md:h-[4.5rem] max-md:border-white/5 max-md:bg-[#202124] max-md:px-5">
+            <SidebarTrigger aria-label={toggleText} className="hidden md:inline-flex" />
             {/* Brand lives in the sidebar. Shown here only while the sidebar is a
                 drawer (below md), so exactly one instance is visible per viewport. */}
             <span role="img" aria-label="Horizon by VZG" className="logo-mask h-5 w-auto text-foreground md:hidden" />
             <div className="ml-auto flex shrink-0 items-center gap-1">
               <button
                 type="button"
+                onClick={() => setMobilePanel("settings")}
+                aria-label={de ? "Einstellungen und Privatsphäre" : "Настройки и поверителност"}
+                className="inline-flex size-11 items-center justify-center rounded-full text-white/85 transition-colors hover:bg-white/10 hover:text-white md:hidden"
+              >
+                <Settings className="size-6" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
                 onClick={openCookieSettings}
                 aria-label={cookieLabel}
                 title={cookieLabel}
-                className="inline-flex size-9 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                className="hidden size-9 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:inline-flex"
               >
                 <Cookie className="size-4" aria-hidden="true" />
               </button>
-              <LanguageSwitcher className="shrink-0" />
+              <LanguageSwitcher className="hidden shrink-0 md:block" />
             </div>
           </header>
           <div className="min-w-0 flex-1">{children}</div>
           {/* Space for the fixed bottom bar on mobile so content is not covered. */}
-          <div className="h-16 md:hidden" aria-hidden="true" />
+          <div className="h-24 md:hidden" aria-hidden="true" />
         </SidebarInset>
-        <MobileBottomNav />
+        <MobileBottomNav panel={mobilePanel} onPanelChange={setMobilePanel} />
       </SidebarProvider>
     </TooltipProvider>
   )

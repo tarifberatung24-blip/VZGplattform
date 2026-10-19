@@ -123,9 +123,9 @@ export function VzgDashboard({ firstName, profile, contracts, reviewCount, remin
         { id: "upload", title: copy.upload, pill: null, tone: "neutral" as Tone, href: documentsHref },
       ]
 
-  return <div className="horizon-dashboard relative min-h-[calc(100svh-3.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-24 pt-4 text-foreground sm:px-6 sm:pt-6 md:pb-8 lg:px-8">
+  return <div className="mobile-client-dashboard horizon-dashboard relative min-h-[calc(100svh-4.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-28 pt-5 text-foreground sm:px-6 sm:pt-6 md:min-h-[calc(100svh-3.5rem)] md:pb-8 lg:px-8">
     <div className="relative z-10 mx-auto min-w-0 max-w-[1100px]">
-      <section aria-labelledby="today-title" className="paper p-5 sm:p-7">
+      <section aria-labelledby="today-title" className="paper mobile-client-dashboard__overview p-5 sm:p-7">
         <div className="relative">
           <div className="flex items-center gap-3">
             <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] ${TAG[status]}`}>{copy.status[status]}</span>
