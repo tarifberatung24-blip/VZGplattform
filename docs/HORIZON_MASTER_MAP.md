@@ -244,8 +244,9 @@ Facts only. Nothing here is deleted, redirected, or renamed. Branding drift is r
   - preserves `/api`, `/_next`, and `/favicon.ico` untouched.
 - Two i18n systems coexist: `i18n/routing.ts` (`next-intl`, locales `bg`+`de`, default `bg`)
   and `lib/i18n/routing.ts` + `lib/i18n/dictionaries.ts` (custom `bg`+`de`, cookie `finanzbg_locale`).
-- The catch-all key `emailGenerator` (camelCase) was removed by N7; `/{locale}/email-generator` is
-  served by `app/[locale]/email-generator/page.tsx`.
+- The catch-all key `emailGenerator` (camelCase) was removed by N7; the authenticated
+  `/{locale}/email-generator` route is served by `app/[locale]/email-generator/page.tsx` and its
+  API independently verifies the signed-in user.
 
 ### 2.2 Page routes
 
@@ -269,7 +270,7 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | `/{locale}/angebote/{offer}` | PUBLIC | affiliate offer landing | mixed | `bg`/`de` | `affiliate-offer-landing` | `lib/affiliate-offers`, `/go/{offer}` | ACTIVE | Phase 17 | KEEP |
 | `/{locale}/contact` | PUBLIC | contact form | `Tarifberater24` | `bg`/`de` | `app/[locale]/contact/page.tsx` | `/api/leads`, `leads` table | ACTIVE | Phase 1 | REUSE |
 | `/{locale}/how-it-works` | PUBLIC | explainer | `KintexBG · BY VZG CONSULT` | `bg`/`de` | `app/[locale]/how-it-works/page.tsx` | static | ACTIVE | Phase 1 | REPLACE LATER |
-| `/{locale}/email-generator` | PUBLIC | AI letter generator | KintexBG-era | `bg`/`de` | `app/[locale]/email-generator/page.tsx` | `/api/generate-letter` (Cerebras) | PARTIAL | Phase 8 (superseded by Draft/Review) | LEGACY |
+| `/{locale}/email-generator` | AUTH | AI letter generator | HORIZON by VZG | `bg`/`de` | `app/[locale]/email-generator/page.tsx` | `/api/generate-letter` (Cerebras; auth + per-user rate limit + strict bilingual output) | PARTIAL | Phase 8 (superseded by Draft/Review) | LEGACY |
 | `/{locale}/datenschutz` | PUBLIC | privacy | mixed | `bg`/`de` | `legal-page` | static | ACTIVE | Phase 1 (legal) | REUSE |
 | `/{locale}/agb` | PUBLIC | terms | mixed | `bg`/`de` | `legal-page` | static | ACTIVE | Phase 1 (legal) | REUSE |
 | `/{locale}/impressum` | PUBLIC | imprint | mixed | `bg`/`de` | `legal-page` | static | ACTIVE | Phase 1 (legal) | REUSE |

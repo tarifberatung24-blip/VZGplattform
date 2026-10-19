@@ -112,7 +112,8 @@ after a module meets the full DONE definition.
   `/{locale}/auth/login`, `/{locale}/auth/sign-up`, `/{locale}/impressum`,
   `/{locale}/datenschutz`, `/{locale}/agb`, `/{locale}/widerruf`, `/{locale}/affiliate-hinweis`.
   Additional legacy marketing routes: `/check`, `/uslugi`, `/produkte`, `/za-nas`, `/tarife`,
-  `/zayavka`, `/anfrage`, `/angebote/{offer}`, `/email-generator`.
+  `/zayavka`, `/anfrage`, `/angebote/{offer}`. The retained `/email-generator` is now an
+  authenticated workspace route; its API also requires a signed-in user.
 - **REUSE:** `GlobalHeader`, `GlobalFooter`, `legal-page`, `animated-hero`, `LanguageSwitcher`,
   `legal-profile.ts`, `/api/leads`, `lead-submit.ts`, PWA install pages.
   Note: `components/marketing/hero.tsx` is dead code (no importer); the home page renders
