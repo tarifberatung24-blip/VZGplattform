@@ -258,10 +258,10 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | `/` | PUBLIC | root, redirects to locale | VZGplattform (metadata) | redirect → cookie/default `bg` | — (proxy) | none | ACTIVE | Phase 1 | REPLACE LATER |
 | `/{locale}` | PUBLIC | marketing home | mixed legacy / VZG CONSULT | `bg`/`de` via catch-all | `app/page.tsx` `Hero`, `OpportunityCheck`, `FinancialOsOverview` | none | ACTIVE | Phase 1 | REPLACE LATER |
 | `/{locale}/check` | REDIRECT | opportunity check entry | KintexBG-era | redirect → `/{locale}/dashboard` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
-| `/{locale}/uslugi` | REDIRECT | services (BG slug) | mixed | redirect → `/{locale}/functions` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
+| `/{locale}/uslugi` | REDIRECT | services (BG slug) | mixed | redirect → `/{locale}/forum` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
 | `/{locale}/anspruch` | PUBLIC | entitlement navigator | mixed, DE copy | `bg`/`de` | `app/anspruch/page.tsx` | `EntitlementNavigator` | PARTIAL | Phase 4 / 12–13 | REUSE |
 | `/{locale}/kindergeld` | PUBLIC | Kindergeld navigator | `KintexBG` in title | `bg`/`de` | `app/kindergeld/page.tsx` | `/api/kindergeld/draft`, `kindergeld_cases` | PARTIAL | Phase 4 (social module) | REUSE |
-| `/{locale}/produkte` | REDIRECT | product overview | mixed | redirect → `/{locale}/functions` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
+| `/{locale}/produkte` | REDIRECT | product overview | mixed | redirect → `/{locale}/forum` (N7) | — | none | LEGACY | Phase 1 | LEGACY |
 | `/{locale}/tarife` | REDIRECT | tariffs | KintexBG-era | redirect → `/{locale}/versicherungen` (N7) | — | none | LEGACY | Phase 17 (partner) | LEGACY |
 | `/{locale}/za-nas` | PUBLIC | about (BG slug) | legacy branding in messages | `bg`/`de` | `app/za-nas/page.tsx` | static | ACTIVE | Phase 1 | LEGACY |
 | `/{locale}/zayavka` | PUBLIC | service request (BG) | mixed | `bg`/`de` | `app/zayavka/page.tsx` | `/api/service-requests` → automation webhook | PARTIAL | Phase 1 / 17 | LEGACY |
@@ -356,8 +356,8 @@ destinations; the rest stay reachable. See `FINAL_SITE_MAP.md` §7–§8 for the
 | Pattern | N7 disposition |
 |---|---|
 | `/{locale}/check` | REDIRECT → `/{locale}/dashboard` |
-| `/{locale}/uslugi` | REDIRECT → `/{locale}/functions` |
-| `/{locale}/produkte` | REDIRECT → `/{locale}/functions` |
+| `/{locale}/uslugi` | REDIRECT → `/{locale}/forum` |
+| `/{locale}/produkte` | REDIRECT → `/{locale}/forum` |
 | `/{locale}/tarife` | REDIRECT → `/{locale}/versicherungen` |
 | `/{locale}/office` | REDIRECT → `/{locale}/guide` |
 | `/{locale}/office/cases/{id}` | REDIRECT → `/{locale}/guide/{caseId}` |
@@ -390,7 +390,7 @@ These are TARGET routes. They are not required to exist yet. Nothing is redirect
 /{locale}
 ├── /
 ├── /how-it-works
-├── /functions
+├── /forum (authenticated)
 ├── /security
 ├── /contact
 ├── /auth/login
@@ -399,7 +399,7 @@ These are TARGET routes. They are not required to exist yet. Nothing is redirect
 ```
 
 - Public Layer 0 must be usable in every supported UI locale.
-- `/functions` replaces the current sprawl of separate product/marketing routes.
+- `/forum` is the Layer 0 navigation entry for the authenticated HORIZON Forum.
 - `/security` is a public trust page and is distinct from the authenticated account-security
   surface `/{locale}/konto/sicherheit`. `/{locale}/security` itself is public.
 

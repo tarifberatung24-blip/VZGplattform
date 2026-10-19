@@ -31,7 +31,7 @@ body has no session check and relies on the middleware gate.
 |---|---|---|---|---|
 | `/{locale}` | PUBLIC | Layer 0 home | IMPLEMENTED | KEEP |
 | `/{locale}/how-it-works` | PUBLIC | Layer 0 explanation | IMPLEMENTED | KEEP |
-| `/{locale}/functions` | PUBLIC | Layer 0 functions | IMPLEMENTED | KEEP |
+| `/{locale}/forum` | AUTHENTICATED | HORIZON Forum | IMPLEMENTED | KEEP |
 | `/{locale}/security` | PUBLIC | Layer 0 trust | IMPLEMENTED | KEEP |
 | `/{locale}/contact` | PUBLIC | Layer 0 contact | IMPLEMENTED | KEEP |
 | `/{locale}/versicherungen` | PUBLIC | Insurance hub, partner insurance (HORIZON OPTIMIZE) | IMPLEMENTED | KEEP |
@@ -43,7 +43,7 @@ body has no session check and relies on the middleware gate.
 | `/check`, `/uslugi`, `/produkte`, `/tarife` | REDIRECT | Pre-HORIZON marketing surfaces | LEGACY | LEGACY |
 | `/kindergeld`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces | LEGACY | LEGACY |
 
-`/check` → `/{locale}/dashboard`, `/uslugi` and `/produkte` → `/{locale}/functions`, `/tarife` →
+`/check` → `/{locale}/dashboard`, `/uslugi` and `/produkte` → `/{locale}/forum`, `/tarife` →
 `/{locale}/versicherungen`; the redirects live in `lib/navigation/legacy-redirects.ts` and are
 applied by `proxy.ts`. `/kindergeld`, `/za-nas` and `/app` stay reachable. None of them is linked
 from the HORIZON workspace navigation and none is part of the current product.

@@ -96,7 +96,7 @@ Rules:
 ```
 LEVEL 0 — PUBLIC (GlobalHeader + GlobalFooter; no workspace shell)
   /                                  home
-  /how-it-works  /functions  /security  /contact
+  /how-it-works  /forum (authenticated)  /security  /contact
   /impressum /datenschutz /agb /widerruf /affiliate-hinweis
   /versicherungen  /angebote/business-insurance  /angebote/kfz  /angebote/[offer]
   /go/[offer]                        affiliate redirect
@@ -244,7 +244,7 @@ candidates the owner approved in `FINAL_SITE_MAP.md` §8.
 - **N7 — Legacy cleanup.** Executed against the candidates in `FINAL_SITE_MAP.md` §8, after owner
   approval. `/{locale}/office` and `/{locale}/office/cases/[id]` redirect to `/{locale}/guide`
   (case id carried); `/check` → `/{locale}/dashboard`; `/uslugi` and `/produkte` →
-  `/{locale}/functions`; `/tarife` → `/{locale}/versicherungen`;
+  `/{locale}/forum`; `/tarife` → `/{locale}/versicherungen`;
   `/{locale}/protected/home-office` → `/{locale}/assistant`; `/{locale}/protected/security` →
   `/{locale}/konto/sicherheit`; `/{locale}/onboarding/language` → `/{locale}/onboarding/profile`.
   Redirects live in the unit-tested `lib/navigation/legacy-redirects.ts` and run in `proxy.ts`

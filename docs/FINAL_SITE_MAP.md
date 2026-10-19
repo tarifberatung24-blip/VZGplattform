@@ -36,7 +36,7 @@ checklist. A route appears in exactly one class.
 
 | Class | Section | Routes |
 |---|---|---|
-| Public — Layer 0 | §1 | `/{locale}`, `/{locale}/how-it-works`, `/{locale}/functions`, `/{locale}/security`, `/{locale}/contact`, `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis` |
+| Public — Layer 0 | §1 | `/{locale}`, `/{locale}/how-it-works`, `/{locale}/security`, `/{locale}/contact`, `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis`; the Layer 0 header links to authenticated `/{locale}/forum` |
 | Public — affiliate / partner | §2 | `/{locale}/versicherungen`, `/{locale}/angebote/business-insurance`, `/{locale}/angebote/kfz`, `/{locale}/angebote/[offer]`, `/go/[offer]`, `/{locale}/go/[offer]` |
 | Auth + onboarding | §3 | `/auth/login`, `/auth/sign-up`, `/auth/sign-up-success`, `/auth/forgot-password`, `/auth/update-password`, `/auth/mfa-verify`, `/auth/error`, `/auth/callback`, `/auth/logout`, `/{locale}/onboarding/{profile,tour,finish}`, `/{locale}/onboarding` (REDIRECT), `/{locale}/onboarding/language` (REDIRECT) |
 | Authenticated workspace | §4 | `/{locale}/dashboard`, `/{locale}/guide`, `/{locale}/guide/[caseId]`, `/{locale}/vertraege`, `/{locale}/documents`, `/{locale}/steuer`, `/{locale}/steuer/providers`, `/{locale}/steuer/review`, `/{locale}/profil`, `/{locale}/konto/sicherheit`, `/{locale}/assistant`, `/{locale}/finanzamt`, `/{locale}/finanzbildung` |
@@ -55,7 +55,7 @@ Capital in §10.
 |---|---|---|---|
 | `/{locale}` | PUBLIC | Layer 0 home (redirects a signed-in user to `/{locale}/dashboard`) | IMPLEMENTED |
 | `/{locale}/how-it-works` | PUBLIC | Explainer | IMPLEMENTED |
-| `/{locale}/functions` | PUBLIC | Functions overview | IMPLEMENTED |
+| `/{locale}/forum` | AUTHENTICATED | HORIZON Forum | IMPLEMENTED |
 | `/{locale}/security` | PUBLIC | Trust page | IMPLEMENTED |
 | `/{locale}/contact` | PUBLIC | Contact form → `/api/leads` | IMPLEMENTED |
 | `/impressum`, `/datenschutz`, `/agb`, `/widerruf`, `/affiliate-hinweis` | PUBLIC | Legal | IMPLEMENTED |
@@ -192,8 +192,8 @@ catch-all renders.
 | `/{locale}/office` | REDIRECT | → `/{locale}/guide` (KintexBG communication prototype, superseded by the guide case workspace) | LEGACY |
 | `/{locale}/office/cases/[id]` | REDIRECT | → `/{locale}/guide/{caseId}` (case id carried; handled by its own page) | LEGACY |
 | `/check` | REDIRECT | → `/{locale}/dashboard` | LEGACY |
-| `/uslugi` | REDIRECT | → `/{locale}/functions` | LEGACY |
-| `/produkte` | REDIRECT | → `/{locale}/functions` | LEGACY |
+| `/uslugi` | REDIRECT | → `/{locale}/forum` | LEGACY |
+| `/produkte` | REDIRECT | → `/{locale}/forum` | LEGACY |
 | `/tarife` | REDIRECT | → `/{locale}/versicherungen` | LEGACY |
 | `/{locale}/onboarding/language` | REDIRECT | → `/{locale}/onboarding/profile` | LEGACY |
 | `/kindergeld`, `/za-nas`, `/app` | PUBLIC | Pre-HORIZON marketing surfaces, kept reachable | LEGACY |
@@ -222,8 +222,8 @@ surfaces.
 | `/{locale}/protected/home-office` | Alias of `/{locale}/assistant` | **REDIRECTED** → `/{locale}/assistant` | KintexBG-era copy |
 | `/{locale}/protected/security` | Authenticated MFA | **REDIRECTED** → `/{locale}/konto/sicherheit` | Replaced by the N5 workspace settings surface |
 | `/{locale}/check` | Opportunity-check entry | **REDIRECTED** → `/{locale}/dashboard` | None identified |
-| `/{locale}/uslugi` | BG-slug services page | **REDIRECTED** → `/{locale}/functions` | BG SEO only |
-| `/{locale}/produkte` | Product overview | **REDIRECTED** → `/{locale}/functions` | None identified |
+| `/{locale}/uslugi` | BG-slug services page | **REDIRECTED** → `/{locale}/forum` | BG SEO only |
+| `/{locale}/produkte` | Product overview | **REDIRECTED** → `/{locale}/forum` | None identified |
 | `/{locale}/tarife` | Tariffs | **REDIRECTED** → `/{locale}/versicherungen` | `affiliate-offers` disclosure preserved on the target |
 | `/{locale}/onboarding/language` | Legacy onboarding step | **REDIRECTED** → `/{locale}/onboarding/profile` | Was already a pure redirect; low risk |
 | `/{locale}/emailGenerator` | Duplicate camelCase catch-all key for the same `EmailGeneratorPage` | **REMOVED** | No navigation linked the camelCase form |

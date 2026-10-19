@@ -7,7 +7,6 @@ const publicPaths = [
   "/contact",
   "/anfrage",
   "/zayavka",
-  "/functions",
   "/security",
   "/versicherungen",
   "/finanzbildung",

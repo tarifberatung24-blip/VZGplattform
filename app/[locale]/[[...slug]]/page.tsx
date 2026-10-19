@@ -30,8 +30,6 @@ import WithdrawalPage from "@/app/widerruf/page"
 import AppInstallPage from "@/app/app/page"
 import FinanzbildungPage from "@/app/finanzbildung/page"
 import HowItWorksPage from "@/app/[locale]/how-it-works/page"
-import { FunctionsPage } from "@/components/marketing/public-layer-page"
-import type { Locale } from "@/lib/i18n/dictionaries"
 import { hasSupabaseConfig } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
 
@@ -60,7 +58,7 @@ export const dynamicParams = false
 
 export function generateStaticParams() {
   const locales = ["bg", "de"]
-  const knownSlugs = [...Object.keys(pages), "functions"].map((path) => path.split("/"))
+  const knownSlugs = Object.keys(pages).map((path) => path.split("/"))
   return locales.flatMap((locale) => [
     { locale, slug: [] },
     ...knownSlugs.map((slug) => ({ locale, slug })),
@@ -81,7 +79,6 @@ export default async function LocalizedPage({params}: {params: Promise<{locale: 
     const { data: { user } } = await supabase.auth.getUser()
     if (user) redirect(`/${locale}/dashboard`)
   }
-  if (slug.join("/") === "functions") return <FunctionsPage locale={locale as Locale} />
   if (slug.join("/") === "protected") redirect("/dashboard")
   if (slug[0] === "onboarding") return <OnboardingOutlet locale={locale} step={slug[1]} />
   const Page = pages[slug.join("/")]

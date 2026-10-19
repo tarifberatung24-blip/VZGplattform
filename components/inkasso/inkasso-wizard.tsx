@@ -242,7 +242,7 @@ export function InkassoWizard() {
   return (
     <div className="mx-auto w-full max-w-4xl px-6 pb-24 pt-28 sm:px-10">
       <Link
-        href={localizedPath("/functions", locale)}
+        href={localizedPath("/dashboard", locale)}
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />

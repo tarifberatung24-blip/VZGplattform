@@ -22,8 +22,8 @@ describe("N7 legacy redirects", () => {
   it("forwards each documented legacy surface to its canonical destination", () => {
     expect(legacyRedirectTarget("/bg/office")).toBe("/guide")
     expect(legacyRedirectTarget("/de/check")).toBe("/dashboard")
-    expect(legacyRedirectTarget("/bg/uslugi")).toBe("/functions")
-    expect(legacyRedirectTarget("/de/produkte")).toBe("/functions")
+    expect(legacyRedirectTarget("/bg/uslugi")).toBe("/forum")
+    expect(legacyRedirectTarget("/de/produkte")).toBe("/forum")
     expect(legacyRedirectTarget("/bg/tarife")).toBe("/versicherungen")
     expect(legacyRedirectTarget("/de/protected/home-office")).toBe("/assistant")
     expect(legacyRedirectTarget("/bg/protected/security")).toBe("/konto/sicherheit")
@@ -64,8 +64,8 @@ describe("N7 legacy redirects", () => {
 
   it("points every authenticated target at a real, protected route", () => {
     // A redirect into a missing route would 404; into an unprotected route it would expose the
-    // workspace shell to an anonymous visitor. `/functions` is the one public target.
-    const publicTargets = new Set(["/functions", "/versicherungen"])
+    // workspace shell to an anonymous visitor. `/versicherungen` is the one public target.
+    const publicTargets = new Set(["/versicherungen"])
     for (const target of Object.values(legacyRedirects)) {
       expect(rendersPage(target), `${target} must render a page`).toBe(true)
       if (!publicTargets.has(target)) {

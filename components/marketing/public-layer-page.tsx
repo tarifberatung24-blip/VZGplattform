@@ -1,41 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react"
+import { ArrowRight, CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { localizedPath } from "@/lib/i18n/routing"
 import type { Locale } from "@/lib/i18n/dictionaries"
 import { BrandText } from "@/components/brand/horizon-wordmark"
 
-type PublicLayerPageProps = { kind: "functions" | "security"; locale: Locale }
+type PublicLayerPageProps = { locale: Locale }
 
-export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
+export function PublicLayerPage({ locale }: PublicLayerPageProps) {
   const isBg = locale === "bg"
-  const content = kind === "functions"
-    ? isBg
-      ? {
-          title: "Ясна помощ за административния живот в Германия.",
-          intro: "HORIZON събира документи, срокове и следващи стъпки на едно спокойно място — с контрол във всеки момент.",
-          items: [
-            ["Документи на едно място", "Качи документ или опиши въпроса си, за да започнеш подредено."],
-            ["Разбираеми следващи стъпки", "Получаваш структурирана ориентация, а не непроверени обещания."],
-            ["Подготовка с твой контрол", "Преглеждаш всяка чернова и решаваш сам какво да изпратиш."],
-          ],
-          cta: "Създай профил",
-          secondary: "Как работи",
-        }
-      : {
-          title: "Klare Hilfe für deinen Verwaltungsalltag in Deutschland.",
-          intro: "HORIZON bündelt Dokumente, Fristen und nächste Schritte an einem ruhigen Ort — mit Kontrolle bei jedem Schritt.",
-          items: [
-            ["Dokumente an einem Ort", "Lade ein Dokument hoch oder beschreibe deine Frage, um strukturiert zu starten."],
-            ["Verständliche nächste Schritte", "Du erhältst Orientierung statt ungeprüfter Versprechen."],
-            ["Vorbereitung mit deiner Kontrolle", "Du prüfst jeden Entwurf und entscheidest selbst, was versendet wird."],
-          ],
-          cta: "Profil erstellen",
-          secondary: "So funktioniert's",
-        }
-    : isBg
+  const content = isBg
       ? {
           title: "Сигурността е част от всеки следващ ход.",
           intro: "HORIZON е създаден да помага с чувствителни документи и административни въпроси, без да отнема контрола от теб.",
@@ -59,7 +35,7 @@ export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
           secondary: "Kontakt aufnehmen",
         }
 
-  const icons = kind === "functions" ? [Sparkles, CheckCircle2, ArrowRight] : [LockKeyhole, ShieldCheck, CheckCircle2]
+  const icons = [LockKeyhole, ShieldCheck, CheckCircle2]
   return (
     <main className="relative min-h-screen text-foreground">
       <div className="mx-auto max-w-[1440px] px-5 pt-28 pb-16 lg:px-8 md:pt-32 md:pb-24">
@@ -87,12 +63,11 @@ export function PublicLayerPage({ kind, locale }: PublicLayerPageProps) {
         </section>
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild size="lg"><Link href={localizedPath("/auth/sign-up", locale)}>{content.cta}<ArrowRight className="ml-1 size-4" /></Link></Button>
-          <Button asChild size="lg" variant="outline"><Link href={localizedPath(kind === "functions" ? "/how-it-works" : "/contact", locale)}>{content.secondary}</Link></Button>
+          <Button asChild size="lg" variant="outline"><Link href={localizedPath("/contact", locale)}>{content.secondary}</Link></Button>
         </div>
       </div>
     </main>
   )
 }
 
-export function FunctionsPage({ locale }: { locale: Locale }) { return <PublicLayerPage kind="functions" locale={locale} /> }
-export function PublicSecurityPage({ locale }: { locale: Locale }) { return <PublicLayerPage kind="security" locale={locale} /> }
+export function PublicSecurityPage({ locale }: { locale: Locale }) { return <PublicLayerPage locale={locale} /> }

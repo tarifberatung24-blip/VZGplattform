@@ -304,8 +304,8 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
       <section className="border-b border-border bg-card">
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-16">
           <div>
-            <Link href={localizedPath("/functions", locale)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="size-4" />{de ? "Alle Angebote" : "Всички предложения"}
+            <Link href={localizedPath("/versicherungen", locale)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="size-4" />{de ? "Alle Versicherungen" : "Всички застраховки"}
             </Link>
             <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-primary"><BrandText text={copy.eyebrow} /></p>
             <h1 className="mt-4 max-w-3xl text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl"><BrandText text={copy.title} /></h1>

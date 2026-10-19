@@ -15,8 +15,8 @@ import { stripLocale } from "@/lib/i18n/routing"
 export const legacyRedirects: Readonly<Record<string, string>> = {
   "/office": "/guide",
   "/check": "/dashboard",
-  "/uslugi": "/functions",
-  "/produkte": "/functions",
+  "/uslugi": "/forum",
+  "/produkte": "/forum",
   "/tarife": "/versicherungen",
   "/protected/home-office": "/assistant",
   "/protected/security": "/konto/sicherheit",
