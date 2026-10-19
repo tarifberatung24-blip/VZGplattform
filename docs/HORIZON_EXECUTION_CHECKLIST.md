@@ -58,6 +58,18 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   `lib/navigation/legacy-redirects.ts` applied by `proxy.ts`; superseded pages and dead components
   deleted (see `FINAL_SITE_MAP.md` §7–§8)
 - ✅ Navigation verification: tests, typecheck, lint, i18n parity and production build all pass
+- ✅ Production hardening `a073f10` live on 2026-10-20: protected letter generator, strict
+  bilingual AI response, per-user rate limit, honest translation fallback, expanded service
+  search, scoped PDF template loading, clean lint/build, 1423 passing tests
+- ⬜ Scheduled notifications and affiliate reconciliation: production endpoints return `503`
+  because Render does not have the matching `NOTIFICATIONS_CRON_SECRET`; changing the Render and
+  GitHub secret together requires the owner's explicit production-environment approval
+- ⬜ Forum database performance: five missing foreign-key indexes were confirmed for
+  `forum_comments.author_id`, `forum_post_reactions.user_id`, `forum_posts.author_id`,
+  `forum_reports.comment_id`, and `forum_reports.post_id`; applying the migration requires the
+  owner's explicit schema approval
+- ⬜ Supabase Auth leaked-password protection is disabled; enabling it requires the owner's
+  explicit production-security approval
 - ✅ Horizon Agent Safety & Knowledge Blueprint base: deny-by-default agent policy, documented human/customer approval gates, audit vocabulary and source-register standard; no autonomous external agent is active
 
 ---
