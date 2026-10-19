@@ -1,10 +1,8 @@
 "use client"
 
-import Link from "next/link"
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react"
 import { ArrowRight, Bell, CheckCircle2, Mail } from "lucide-react"
 import type { Locale } from "@/lib/i18n/dictionaries"
-import { localizedPath } from "@/lib/i18n/routing"
 import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 import {
   envelopeCopy,
@@ -511,17 +509,17 @@ export function LetterEnvelope({ locale }: { locale: Locale }) {
           aria-hidden={stage !== "closed"}
           tabIndex={stage === "closed" ? 0 : -1}
         >
-          <span>{copy.open}</span>
+          <span>{copy.upload}</span>
           <ArrowRight className="size-4" aria-hidden="true" />
         </button>
       </div>
 
       <div className="env-controls" aria-hidden={!isOpen}>
         {step.side === "front" ? (
-          <Link href={localizedPath("/guide", locale)} className="env-cta" tabIndex={isOpen ? 0 : -1}>
-            <span>{copy.upload}</span>
+          <button type="button" className="env-cta" onClick={next} disabled={!isOpen} tabIndex={isOpen ? 0 : -1} aria-label={copy.toAfter}>
+            <span>{copy.toAfter}</span>
             <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
+          </button>
         ) : (
           <button type="button" className="env-cta" onClick={next} disabled={!isOpen} tabIndex={isOpen ? 0 : -1} aria-label={copy.next}>
             <span>{copy.next}</span>

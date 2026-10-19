@@ -103,9 +103,21 @@ describe("hero envelope steps", () => {
     expect(source).not.toMatch(/setStage\("closed"\)/)
   })
 
-  it("takes an interested visitor to the protected Guide upload path", () => {
+  it("uses the upload label to open the illustrative letter, without navigating away", () => {
     const source = readFileSync(join(process.cwd(), "components/marketing/letter-envelope.tsx"), "utf8")
-    expect(source).toContain('localizedPath("/guide", locale)')
+    expect(source).toContain('<span>{copy.upload}</span>')
+    expect(source).toContain('className="env-cta env-closed-cta"')
+    expect(source).toContain('onClick={open}')
+    expect(source).toContain('<span>{copy.toAfter}</span>')
+    expect(source).not.toContain('localizedPath("/guide", locale)')
+    expect(source).not.toContain('href=')
+  })
+
+  it("keeps explanatory headings neutral and reserves blue for controls", () => {
+    const css = readFileSync(join(process.cwd(), "app/globals.css"), "utf8")
+    expect(css).toMatch(/\.env-label \{[^}]*color: var\(--foreground\);/)
+    expect(css).toMatch(/\.env-closed-eyebrow \{[^}]*color: var\(--foreground\);/)
+    expect(css).not.toMatch(/\.env-label\[data-side="back"\] \{ color: var\(--thread-core\); \}/)
   })
 })
 

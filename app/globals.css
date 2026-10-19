@@ -950,12 +950,10 @@
   font-size: clamp(1.05rem, 1.5vw, 1.35rem);
   font-weight: 800;
   letter-spacing: -0.01em;
-  color: var(--muted-foreground);
+  color: var(--foreground);
   transition: color 0.4s ease;
 }
-.env-label[data-side="back"] { color: var(--thread-core); }
 .env-label[data-side="closed"] {
-  color: var(--thread-core);
   font-size: 0.85rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1036,7 +1034,7 @@
 }
 .env-closed-eyebrow {
   bottom: calc(55% + 25.4cqi + 1.4rem);
-  color: var(--thread-core);
+  color: var(--foreground);
   font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.18em;
