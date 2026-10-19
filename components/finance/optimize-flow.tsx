@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { CheckCircle2, ChevronDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
@@ -20,12 +20,9 @@ export function OptimizeFlow({ contract, autoStart = false }: { contract: Contra
   const [message, setMessage] = useState("")
   const [confirmed, setConfirmed] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
+  const autoStarted = useRef(false)
 
-  useEffect(() => {
-    if (autoStart && !session && !loading) void start()
-  }, [autoStart])
-
-  async function start() {
+  const start = useCallback(async () => {
     setLoading(true); setMessage(""); setSession(null); setMissing([]); setConfirmed(false)
     try {
       const category = contract.category === "insurance" ? "kfz" : "energy"
@@ -34,7 +31,13 @@ export function OptimizeFlow({ contract, autoStart = false }: { contract: Contra
       if (!response.ok || !payload.session) { setMessage(copy.startFailed); return }
       setSession(payload.session); setMissing(payload.missing_critical ?? []); setPartnerConfigured(Boolean(payload.partner_configured))
     } catch { setMessage(copy.startFailed) } finally { setLoading(false) }
-  }
+  }, [contract.category, contract.id, copy.startFailed])
+
+  useEffect(() => {
+    if (!autoStart || autoStarted.current) return
+    autoStarted.current = true
+    void start()
+  }, [autoStart, start])
 
   async function confirm() {
     if (!session || missing.length > 0) return

@@ -35,11 +35,16 @@ describe("KintexBG workspace navigation", () => {
   })
 
   it("does not treat public routes as workspace routes", () => {
-    // These resolve for an anonymous visitor (see the protection assertions below), so the
-    // authenticated shell must not wrap them.
-    for (const path of ["/bg/anspruch", "/de/anspruch", "/bg/email-generator", "/de/email-generator"]) {
+    for (const path of ["/bg/anspruch", "/de/anspruch"]) {
       expect(isKintexWorkspacePath(path)).toBe(false)
       expect(isProtectedAppPath(path)).toBe(false)
+    }
+  })
+
+  it("keeps the AI letter generator inside the authenticated workspace", () => {
+    for (const path of ["/bg/email-generator", "/de/email-generator"]) {
+      expect(isKintexWorkspacePath(path)).toBe(true)
+      expect(isProtectedAppPath(path)).toBe(true)
     }
   })
 

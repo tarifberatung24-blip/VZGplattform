@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process"
+import { execFileSync, spawnSync } from "node:child_process"
 import { mkdtempSync, readFileSync, rmSync } from "node:fs"
 import net from "node:net"
 import { tmpdir } from "node:os"
@@ -173,40 +173,42 @@ const provider = () =>
   })
 
 const mailCommands = () => transcript.commands.filter((command) => /^(MAIL|RCPT|DATA)/i.test(command))
+const opensslAvailable = spawnSync("openssl", ["version"], { stdio: "ignore" }).status === 0
+const describeWithOpenSsl = opensslAvailable ? describe : describe.skip
 
-beforeAll(async () => {
-  certDir = mkdtempSync(join(tmpdir(), "horizon-smtp-"))
-  execFileSync(
-    "openssl",
-    [
-      "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
-      "-keyout", join(certDir, "key.pem"),
-      "-out", join(certDir, "cert.pem"),
-      "-subj", "/CN=127.0.0.1",
-      "-addext", "subjectAltName=IP:127.0.0.1",
-    ],
-    { stdio: "ignore" },
-  )
-  key = readFileSync(join(certDir, "key.pem"), "utf8")
-  cert = readFileSync(join(certDir, "cert.pem"), "utf8")
-  shared.ca = cert
-  port = await startServer()
-}, 30_000)
+describeWithOpenSsl("SMTP transport over a real connection", () => {
+  beforeAll(async () => {
+    certDir = mkdtempSync(join(tmpdir(), "horizon-smtp-"))
+    execFileSync(
+      "openssl",
+      [
+        "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
+        "-keyout", join(certDir, "key.pem"),
+        "-out", join(certDir, "cert.pem"),
+        "-subj", "/CN=127.0.0.1",
+        "-addext", "subjectAltName=IP:127.0.0.1",
+      ],
+      { stdio: "ignore" },
+    )
+    key = readFileSync(join(certDir, "key.pem"), "utf8")
+    cert = readFileSync(join(certDir, "cert.pem"), "utf8")
+    shared.ca = cert
+    port = await startServer()
+  }, 30_000)
 
-afterAll(async () => {
-  await new Promise((resolve) => server.close(resolve))
-  rmSync(certDir, { recursive: true, force: true })
-})
+  afterAll(async () => {
+    await new Promise((resolve) => server.close(resolve))
+    rmSync(certDir, { recursive: true, force: true })
+  })
 
-beforeEach(() => {
-  transcript = freshTranscript()
-  mode.offerStartTls = true
-  mode.rejectRecipient = false
-  shared.trustTestCa = true
-  shared.capturedOptions = []
-})
+  beforeEach(() => {
+    transcript = freshTranscript()
+    mode.offerStartTls = true
+    mode.rejectRecipient = false
+    shared.trustTestCa = true
+    shared.capturedOptions = []
+  })
 
-describe("SMTP transport over a real connection", () => {
   it("sends over STARTTLS with authentication, one recipient and the attachment", async () => {
     const result = await provider().send(message)
 

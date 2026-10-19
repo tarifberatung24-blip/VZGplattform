@@ -120,6 +120,9 @@ export function ContractsTable({ contracts }: { contracts: ContractLike[] }) {
   // One local TanStack model: filtering, sorting and pagination all run through the table itself.
   // The previous version enabled manualFiltering/manualPagination and then sliced a separate
   // filteredData array for rendering, so the controls and the rows disagreed.
+  // TanStack Table returns mutable helper functions by design; React Compiler therefore skips
+  // this component. The table owns its state and none of those helpers cross a memo boundary.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: contracts,
     columns,

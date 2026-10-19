@@ -9,7 +9,7 @@ test("run journal persists safe progress and does not require prompt content", a
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "vzg-ai-run-"))
   let state = createRunState({ taskId: "task-1", workspace: root, gitBranch: "test", pipeline: ["coder", "vision-scanner", "coder"] })
   state = await transitionRun(state, { status: "running", currentStep: "coder" }, root)
-  state = await transitionRun(state, { completedStep: "coder", currentStep: "vision-scanner" }, root)
+  await transitionRun(state, { completedStep: "coder", currentStep: "vision-scanner" }, root)
   const persisted = await readRunState("task-1", root)
   assert.equal(persisted.status, "running")
   assert.equal(persisted.currentStep, "vision-scanner")
