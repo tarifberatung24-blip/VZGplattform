@@ -1,4 +1,5 @@
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
+import { PDFJS_STANDARD_FONT_DATA_URL } from '../../pdfjs-node'
 
 const MAX_BYTES = 10 * 1024 * 1024
 
@@ -13,7 +14,7 @@ export async function extractPdfPages(input: Uint8Array | ArrayBuffer): Promise<
   const bytes = new Uint8Array(input instanceof Uint8Array ? input : new Uint8Array(input))
   if (bytes.byteLength < 1 || bytes.byteLength > MAX_BYTES) throw new Error('PDF must be between 1 byte and 10 MB')
 
-  const document = await getDocument({ data: bytes }).promise
+  const document = await getDocument({ data: bytes, standardFontDataUrl: PDFJS_STANDARD_FONT_DATA_URL }).promise
   const pages: ExtractedPdfPage[] = []
   try {
     for (let pageNo = 1; pageNo <= document.numPages; pageNo += 1) {

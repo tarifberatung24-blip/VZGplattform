@@ -18,6 +18,7 @@ import { detectCapability, verifyTemplateSource } from "../pdf/source"
 import { planPdfFill, type PdfFact } from "../pdf/fill"
 import { readAcroFormFieldNames, generateAcroFormPdf, readTemplateBytes } from "../pdf/writer"
 import { computeSha256 } from "../pdf/source"
+import { PDFJS_STANDARD_FONT_DATA_URL } from "@/lib/pdfjs-node"
 import { requiredKeysFor, AGENTUR_TASK_FACT_KEY, selectedAgenturTask } from "../case/missing-info"
 import { getAgenturCopy } from "./copy"
 
@@ -306,6 +307,7 @@ describe("generation actually writes the values into the official form", () => {
     const doc = await pdfjs.getDocument({
       data: new Uint8Array(written.bytes),
       useSystemFonts: false,
+      standardFontDataUrl: PDFJS_STANDARD_FONT_DATA_URL,
     }).promise
     let text = ""
     for (let page = 1; page <= doc.numPages; page += 1) {
