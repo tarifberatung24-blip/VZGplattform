@@ -89,8 +89,8 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   site pages, journey logging, terms acceptance, and the forum were replaced with the canonical
   repository versions; revenue attribution, user notifications, and Awin transactions were marked
   applied only after their tables, constraints, and policies were verified in production
-- ✅ Production readiness re-audited on 2026-10-21 at commit `98a2550`: GitHub CI passed, Render
-  deploy `dep-dbbv9ejm8hqs73ev0csg` is live on the exact commit, `/api/health` reports that revision,
+- ✅ Production readiness re-audited on 2026-10-21 through documentation commit `8dc3aa5`: GitHub
+  CI passed, Render deploy `dep-dbbvfdh5efls73c3q1vg` is live on the exact commit, `/api/health` reports that revision,
   and Render recorded no application errors or HTTP 5xx responses after the deploy. The evidence
   matrix and remaining owner decisions are in `docs/PRODUCTION_READINESS_AUDIT_2026-10-21.md`.
 - ✅ Supabase's eight `RLS enabled, no policy` information notices were reviewed on 2026-10-20:

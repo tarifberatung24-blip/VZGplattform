@@ -16,12 +16,12 @@ No customer-row content, secrets or credentials were inspected or printed during
 | Draft translation contract | `draft-writer-v2` requires a complete target-language translation, preserves the authoritative German draft and refuses a false deterministic non-German translation | PASS in code and tests |
 | Translation persistence | Generated drafts persist `translation` and `translation_locale` in `correspondence_drafts` | PASS in code and database contract |
 | SMTP transport | STARTTLS, certificate verification, refusal paths, message identity and attachment bytes are covered by the committed network test | PASS in CI |
-| Auth routing | Localized login, signup, recovery, MFA and protected-route redirects are covered by the production hardening test suite | PASS in CI |
+| Auth routing | BG login, signup, recovery and MFA pages return `200`; anonymous BG and DE dashboard requests return localized `307` redirects to their login pages | PASS in production |
 | Migration history | Supabase lists the repository migration sequence through `20261020194930_forum_fk_covering_indexes` | PASS |
 | Forum database performance | The performance advisor reports no unindexed foreign keys; the five forum covering indexes are present | PASS |
 | Service-only RLS tables | Eight information notices remain, but the reviewed tables have RLS enabled and no `anon` or `authenticated` table grants | PASS; no policy change required |
-| Repository checks | GitHub CI run `39513154895` completed successfully for commit `98a2550` | PASS |
-| Render deployment | Deploy `dep-dbbv9ejm8hqs73ev0csg` is live on commit `98a2550`; health reports the same revision | PASS |
+| Repository checks | GitHub CI run `39514584737` completed successfully for documentation commit `8dc3aa5`; application commit `98a2550` passed in run `39513154895` | PASS |
+| Render deployment | Deploy `dep-dbbvfdh5efls73c3q1vg` is live on commit `8dc3aa5`; health reports the same revision | PASS |
 | Runtime errors | No application-error or HTTP 5xx log entries after the current deploy | PASS |
 
 ## Owner decisions still required
@@ -43,5 +43,5 @@ These are not safe code fixes and were not changed by this audit.
 ## Current conclusion
 
 The safe code, database-history repair, forum indexes, cron authentication and deployment checks
-are complete. Production is healthy at `98a2550`. The four items above remain explicit owner or
+are complete. Production is healthy at `8dc3aa5`. The four items above remain explicit owner or
 test-fixture decisions and are not hidden behind a passing code check.
