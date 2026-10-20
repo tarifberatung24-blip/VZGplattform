@@ -12,6 +12,7 @@ const fieldClass = "h-11"
 
 export default function ContactForm({ locale }: { locale: string }) {
   const [state, setState] = useState<LeadSubmitResult>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   return (
     <section className="paper flex flex-col gap-6 px-6 py-8">
@@ -21,9 +22,14 @@ export default function ContactForm({ locale }: { locale: string }) {
 
       <form
         className="flex flex-col gap-4"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault()
-          void submitLead(event.currentTarget, locale, setState)
+          setSubmitting(true)
+          try {
+            await submitLead(event.currentTarget, locale, setState)
+          } finally {
+            setSubmitting(false)
+          }
         }}
       >
         <div className="grid gap-4 sm:grid-cols-2">
@@ -33,6 +39,7 @@ export default function ContactForm({ locale }: { locale: string }) {
               name="name"
               type="text"
               required
+              maxLength={120}
               className={fieldClass}
               placeholder={locale === "bg" ? "Вашето име" : "Ihr Name"}
             />
@@ -43,6 +50,7 @@ export default function ContactForm({ locale }: { locale: string }) {
               name="email"
               type="email"
               required
+              maxLength={180}
               className={fieldClass}
               placeholder={locale === "bg" ? "Вашият имейл" : "Ihre E-Mail-Adresse"}
             />
@@ -56,6 +64,7 @@ export default function ContactForm({ locale }: { locale: string }) {
           <Textarea
             name="message"
             required
+            maxLength={5000}
             rows={5}
             className="min-h-28 resize-none py-3"
             placeholder={locale === "bg" ? "Напишете съобщение..." : "Schreiben Sie Ihre Nachricht..."}
@@ -80,12 +89,12 @@ export default function ContactForm({ locale }: { locale: string }) {
             <p className="text-sm text-foreground">
               {locale === "bg"
                 ? "Изпратването не е успешно. Опитайте отново или използвайте email."
-                : "Sendefehler. Bitte versuchen Sie es erneut oder nutzen Sie das E-Mail."}
+                : "Die Nachricht wurde nicht gesendet. Versuche es erneut oder schreibe uns eine E-Mail."}
             </p>
           )}
-          <Button type="submit" size="lg" className="w-full sm:w-auto sm:self-start">
+          <Button type="submit" size="lg" className="w-full sm:w-auto sm:self-start" disabled={submitting}>
             <Send className="size-4" />
-            {locale === "bg" ? "Изпрати" : "Absenden"}
+            {submitting ? (locale === "bg" ? "Изпращане…" : "Wird gesendet…") : (locale === "bg" ? "Изпрати" : "Absenden")}
           </Button>
         </div>
       </form>
