@@ -2,17 +2,26 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { locales } from "@/lib/office/locales"
+import { checkRateLimit, getRequestKey } from "@/lib/rate-limit"
 
 const leadSchema = z.object({
-  name: z.string().trim().min(1),
-  email: z.string().trim().min(1).email(),
-  message: z.string().trim().min(1),
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().min(1).email().max(180),
+  message: z.string().trim().min(1).max(5000),
   locale: z.string().optional(),
-  origin: z.string().optional(),
-})
+  origin: z.string().trim().max(500).optional(),
+}).strict()
 
 export async function POST(request: Request) {
   try {
+    const rate = checkRateLimit(getRequestKey(request, "lead"), { limit: 5, windowMs: 10 * 60_000 })
+    if (!rate.allowed) {
+      return NextResponse.json({ code: "LEAD_RATE_LIMITED", retryAfter: rate.retryAfter }, {
+        status: 429,
+        headers: { "Cache-Control": "no-store", "Retry-After": String(rate.retryAfter) },
+      })
+    }
+
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
     const parsed = leadSchema.safeParse(body)
 
@@ -39,7 +48,7 @@ export async function POST(request: Request) {
       email,
       message,
       locale: resolvedLocale,
-      origin: origin ?? request.headers.get("origin") ?? null,
+      origin: origin ?? request.headers.get("origin")?.slice(0, 500) ?? null,
     })
 
     if (error) {
