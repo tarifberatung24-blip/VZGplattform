@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { createCaseEngine } from "@/lib/horizon/case"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { TEXT_INTAKE_MAX_LENGTH } from "@/lib/horizon/intake/text"
+import { localizedLoginPath } from "@/lib/supabase/auth-routing"
 import {
   guideIntentDefinition,
   guideCasePath,
@@ -29,7 +30,7 @@ export async function startGuideCase(formData: FormData) {
 
   const engine = await createCaseEngine()
   if (!engine.repository) {
-    redirect(`/auth/login?next=${encodeURIComponent(`${locale}/guide`)}`)
+    redirect(localizedLoginPath(locale, `/${locale}/guide`))
   }
 
   const definition = guideIntentDefinition(rawIntent)

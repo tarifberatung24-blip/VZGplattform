@@ -6,6 +6,7 @@ import { ensureHousehold } from "@/lib/supabase/household"
 import { createCaseEngine } from "../case"
 import { guideCasePath } from "../guide/intents"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
+import { localizedLoginPath } from "@/lib/supabase/auth-routing"
 import {
   contractFactSeeds,
   isContractVerified,
@@ -41,7 +42,7 @@ export async function startKuendigungFromContract(formData: FormData): Promise<v
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect(`/auth/login?next=${encodeURIComponent(`/${locale}/vertraege`)}`)
+  if (!user) redirect(localizedLoginPath(locale, `/${locale}/vertraege`))
 
   if (typeof rawContractId !== "string" || rawContractId.length === 0) {
     redirect(`/${locale}/vertraege?error=contract-not-found`)
@@ -75,7 +76,7 @@ export async function startKuendigungFromContract(formData: FormData): Promise<v
 
   const engine = await createCaseEngine()
   if (!engine.repository) {
-    redirect(`/auth/login?next=${encodeURIComponent(`/${locale}/vertraege`)}`)
+    redirect(localizedLoginPath(locale, `/${locale}/vertraege`))
   }
 
   const definition = kuendigungCaseForContract(contract)

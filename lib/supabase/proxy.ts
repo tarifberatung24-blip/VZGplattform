@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseConfig, hasSupabaseConfig, missingConfigurationMessage } from './config'
 import { isProtectedAppPath, isOnboardingComplete, isKnownOnboardingStep, normalizeOnboardingStep, isOnboardingPath, isAuthFlowPath, pathLocale, requiresMfa } from './auth-routing'
-import { stripLocale } from '../i18n/routing'
+import { localizedPath } from '../i18n/routing'
 
 /**
  * A redirect built after `getUser()` must carry the cookies a token refresh may just have set on
@@ -71,9 +71,9 @@ export async function updateSession(request: NextRequest) {
 
   if (isProtectedAppPath(request.nextUrl.pathname) && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
+    url.pathname = localizedPath('/auth/login', pathLocale(request.nextUrl.pathname))
     url.search = ''
-    url.searchParams.set('next', `${stripLocale(request.nextUrl.pathname)}${request.nextUrl.search}`)
+    url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`)
     return redirectWithSession(url, supabaseResponse)
   }
 
@@ -81,9 +81,9 @@ export async function updateSession(request: NextRequest) {
     const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
     if (requiresMfa(assurance?.currentLevel, assurance?.nextLevel)) {
       const url = request.nextUrl.clone()
-      url.pathname = '/auth/mfa-verify'
+      url.pathname = localizedPath('/auth/mfa-verify', pathLocale(request.nextUrl.pathname))
       url.search = ''
-      url.searchParams.set('next', `${stripLocale(request.nextUrl.pathname)}${request.nextUrl.search}`)
+      url.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`)
       return redirectWithSession(url, supabaseResponse)
     }
   }

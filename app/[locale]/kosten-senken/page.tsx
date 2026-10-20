@@ -2,6 +2,8 @@ import { redirect } from "next/navigation"
 import { CostReductionIntake } from "@/components/cost-reduction/cost-reduction-intake"
 import { loadCostReductionRequests } from "@/lib/horizon/cost-reduction/requests"
 import { createClient } from "@/lib/supabase/server"
+import { isLocale, defaultLocale } from "@/lib/i18n/dictionaries"
+import { localizedLoginPath } from "@/lib/supabase/auth-routing"
 
 export const metadata = {
   title: "Намали разходите си",
@@ -9,10 +11,11 @@ export const metadata = {
 }
 
 export default async function CostReductionPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params
+  const { locale: rawLocale } = await params
+  const locale = isLocale(rawLocale) ? rawLocale : defaultLocale
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect(`/auth/login?next=/${locale}/kosten-senken`)
+  if (!user) redirect(localizedLoginPath(locale, `/${locale}/kosten-senken`))
 
   const requests = await loadCostReductionRequests()
   return <CostReductionIntake locale={locale} requests={requests} />

@@ -5,6 +5,7 @@ import { createCaseEngine } from "@/lib/horizon/case"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { guideCasePath } from "@/lib/horizon/guide/intents"
 import { homeModules, isHorizonHomeModule } from "./registry"
+import { localizedLoginPath } from "@/lib/supabase/auth-routing"
 
 /**
  * Opens a case for a home module selection and sends the user to it.
@@ -23,7 +24,7 @@ export async function startModuleCase(formData: FormData) {
 
   const engine = await createCaseEngine()
   if (!engine.repository) {
-    redirect(`/auth/login?next=${encodeURIComponent(`${locale}/dashboard`)}`)
+    redirect(localizedLoginPath(locale, `/${locale}/dashboard`))
   }
 
   const definition = homeModules.find((entry) => entry.module === rawModule)

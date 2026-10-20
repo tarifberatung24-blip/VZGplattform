@@ -25,6 +25,16 @@ describe("auth recovery surface", () => {
     expect(update).toContain('href={`/${locale}/auth/forgot-password`}')
   })
 
+  it("keeps the MFA challenge localized", () => {
+    const page = read("app/auth/mfa-verify/page.tsx")
+    const challenge = read("components/auth/mfa-challenge.tsx")
+    expect(page).toContain("requestLocale")
+    expect(page).toContain('redirect(`/${locale}/auth/login`)')
+    expect(page).toContain("Anmeldung bestätigen")
+    expect(challenge).toContain("Code aus Google Authenticator")
+    expect(challenge).toContain("Потвърди и продължи")
+  })
+
   it("renders recovery copy independently in Bulgarian and German", () => {
     const source = read("app/auth/update-password/page.tsx")
     expect(source).toContain('title: "Нова парола"')

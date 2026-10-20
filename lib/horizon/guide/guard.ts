@@ -2,6 +2,7 @@ import "server-only"
 import { redirect } from "next/navigation"
 import { createCaseEngine, type CaseEngineContext } from "@/lib/horizon/case"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
+import { localizedLoginPath } from "@/lib/supabase/auth-routing"
 
 /**
  * Resolves the authenticated case engine for a guide route, or redirects to
@@ -18,7 +19,7 @@ export async function requireGuideContext(rawLocale: string, nextPath: string): 
   const engine = await createCaseEngine()
 
   if (!engine.repository) {
-    redirect(`/auth/login?next=${encodeURIComponent(nextPath)}`)
+    redirect(localizedLoginPath(locale, nextPath))
   }
 
   return { engine, locale }

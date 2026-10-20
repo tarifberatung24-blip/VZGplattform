@@ -8,6 +8,7 @@ import {
   type OnboardingStep,
 } from "./state"
 import { readOnboardingStep } from "./profile"
+import { localizedLoginPath } from "@/lib/supabase/auth-routing"
 
 /**
  * Server-side guard shared by every onboarding step route.
@@ -19,7 +20,7 @@ import { readOnboardingStep } from "./profile"
 export async function guardOnboardingStep(rawLocale: string, step: OnboardingStep) {
   const locale: Locale = isLocale(rawLocale) ? rawLocale : "bg"
   const { user, step: current } = await readOnboardingStep()
-  if (!user) redirect(`/auth/login?next=${encodeURIComponent(`${locale}/onboarding/${step}`)}`)
+  if (!user) redirect(localizedLoginPath(locale, `/${locale}/onboarding/${step}`))
 
   const destination = onboardingRedirect(current, step, locale)
   if (destination) redirect(destination)
@@ -35,6 +36,6 @@ export async function guardOnboardingStep(rawLocale: string, step: OnboardingSte
 export async function onboardingStepDestination(rawLocale: string): Promise<string> {
   const locale: Locale = isLocale(rawLocale) ? rawLocale : "bg"
   const { user, step } = await readOnboardingStep()
-  if (!user) return `/auth/login?next=${encodeURIComponent(`${locale}/onboarding`)}`
+  if (!user) return localizedLoginPath(locale, `/${locale}/onboarding`)
   return onboardingPath(step, locale) ?? `/${locale}/dashboard`
 }
