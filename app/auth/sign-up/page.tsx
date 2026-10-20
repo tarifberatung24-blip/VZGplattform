@@ -12,6 +12,7 @@ import { useLanguage } from "@/lib/i18n/language-context"
 import { BrandText, HorizonWordmark } from "@/components/brand/horizon-wordmark"
 import { TERMS_SIGNUP_COOKIE, TERMS_VERSION } from "@/lib/journey/keys"
 import { TermsLabel } from "@/components/journey/terms-label"
+import { classifyAuthError } from "@/lib/supabase/auth-errors"
 
 export default function SignUpPage() {
   const { locale } = useLanguage()
@@ -25,7 +26,7 @@ export default function SignUpPage() {
         password: "Passwort",
         create: "Konto mit E-Mail erstellen",
         creating: "Wird erstellt...",
-        passwordError: "Das Passwort muss mindestens 6 Zeichen haben.",
+        passwordError: "Das Passwort muss mindestens 8 Zeichen haben.",
         rateLimited: "Zu viele Registrierungsversuche. Bitte warte einige Minuten oder nutze die Registrierung per Google bzw. SMS.",
         invalidEmail: "Bitte prüfe deine E-Mail-Adresse und versuche es erneut.",
         genericError: "Registrierung konnte nicht abgeschlossen werden.",
@@ -54,7 +55,7 @@ export default function SignUpPage() {
         password: "Парола",
         create: "Създай акаунт с имейл",
         creating: "Създаване...",
-        passwordError: "Паролата трябва да е поне 6 символа.",
+        passwordError: "Паролата трябва да е поне 8 знака.",
         rateLimited: "Има твърде много опити за регистрация. Изчакай няколко минути или използвай Google/SMS регистрация.",
         invalidEmail: "Провери имейл адреса и опитай отново.",
         genericError: "Регистрацията не можа да бъде завършена.",
@@ -94,21 +95,24 @@ export default function SignUpPage() {
     setLoading(true)
     setEmailError(null)
     const redirectTo = `${window.location.origin}/auth/callback`
+    const developmentRedirect = process.env.NODE_ENV === "development"
+      ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL
+      : undefined
     const { data, error } = await createClient().auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ?? redirectTo,
+        emailRedirectTo: developmentRedirect ?? redirectTo,
         data: { first_name: name, terms_accepted_version: TERMS_VERSION },
       },
     })
     if (error) {
-      const message = error.message.toLowerCase()
-      setEmailError(error.status === 429 || message.includes("rate_limit") || message.includes("too many")
+      const code = classifyAuthError(error)
+      setEmailError(code === "rate_limited"
         ? copy.rateLimited
-        : message.includes("email_address_invalid") || message.includes("invalid email")
+        : code === "invalid_email"
           ? copy.invalidEmail
-          : message.includes("password") ? copy.passwordError : copy.genericError)
+          : code === "weak_password" ? copy.passwordError : copy.genericError)
     }
     else router.push(data.session ? `/${locale}/dashboard` : `/${locale}/auth/sign-up-success`)
     setLoading(false)
@@ -204,7 +208,7 @@ export default function SignUpPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">{copy.password}</Label>
-            <Input id="password" type="password" autoComplete="new-password" minLength={6} required value={password} onChange={(event) => setPassword(event.target.value)} />
+            <Input id="password" type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} />
           </div>
           {termsField}
           {emailError && <p role="alert" className="text-sm text-destructive">{emailError}</p>}
