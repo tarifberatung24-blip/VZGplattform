@@ -8,8 +8,19 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const require = createRequire(resolve(root, 'package.json'))
 let blocked = false
 function report(status, label) { console.log(`${status}: ${label}`) }
+function runExecutable(executable, args) {
+  if (process.platform === 'win32') {
+    return spawnSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', executable, ...args], {
+      cwd: root,
+      encoding: 'utf8',
+      timeout: 10000,
+    })
+  }
+
+  return spawnSync(executable, args, { cwd: root, encoding: 'utf8', timeout: 10000 })
+}
 for (const executable of ['node', 'pnpm', 'git', 'rg']) {
-  const result = spawnSync(executable, ['--version'], { cwd: root, encoding: 'utf8', timeout: 10000 })
+  const result = runExecutable(executable, ['--version'])
   if (result.status !== 0) { blocked = true; report('BLOCKED', `${executable} unavailable`) }
   else report('PASS', `${executable} ${result.stdout.trim().split('\n')[0]}`)
 }
@@ -31,7 +42,7 @@ else report('INFO', 'No known literal mismatch detected; regression tests still 
 for (const name of ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'GROQ_API_KEY', 'AUTOMATION_WEBHOOK_URL', 'AUTOMATION_WEBHOOK_SECRET']) {
   report('INFO', `${name}: ${process.env[name] ? 'present in process (validity unchecked)' : 'absent from process (env files not loaded)'}`)
 }
-const git = spawnSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8', timeout: 10000 })
+const git = runExecutable('git', ['status', '--porcelain'])
 if (git.status === 0) report('INFO', `Worktree entries: ${git.stdout.trim() ? git.stdout.trim().split('\n').length : 0}; preserve existing changes`)
 else { blocked = true; report('BLOCKED', 'Cannot inspect worktree') }
 report('INFO', 'No network calls, secret values, package installs, or production mutations performed')
