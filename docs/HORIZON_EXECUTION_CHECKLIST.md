@@ -72,6 +72,10 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   does not embed them; Render reports the exact revision live with no new error logs; 1444 tests
   passed, 6 SMTP network tests skipped, 42 script tests passed, 474/474 i18n keys and a 171-page
   production build
+- ✅ Windows preflight compatibility `5dcd994` live on 2026-10-20: Node 24 now invokes Windows
+  command shims through `ComSpec`, so installed tools such as `pnpm` are detected correctly;
+  GitHub CI is green, `/api/health` reports the exact revision, `/bg` returns `200`, and no new
+  production error logs were recorded after deployment
 - ⬜ Scheduled notifications and affiliate reconciliation: production endpoints return `503`
   because Render does not have the matching `NOTIFICATIONS_CRON_SECRET`; changing the Render and
   GitHub secret together requires the owner's explicit production-environment approval
@@ -79,6 +83,14 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   `forum_comments.author_id`, `forum_post_reactions.user_id`, `forum_posts.author_id`,
   `forum_reports.comment_id`, and `forum_reports.post_id`; applying the migration requires the
   owner's explicit schema approval
+- ⬜ Supabase migration history differs from the repository: the live project records alternate
+  versions for `site_pages`, `journey_log`, and `terms_acceptance`, and does not record the
+  repository versions for revenue attribution, user notifications, or Awin transactions, although
+  all related tables exist. Reconciling migration history requires the owner's explicit production
+  schema approval; no history entry was changed during the 2026-10-20 read-only audit
+- ✅ Supabase's eight `RLS enabled, no policy` information notices were reviewed on 2026-10-20:
+  every listed service-only table has RLS enabled and no `anon` or `authenticated` table grant, so
+  the Data API has no member-facing access path and no policy change is required
 - ⬜ Supabase Auth leaked-password protection is disabled; enabling it requires the owner's
   explicit production-security approval
 - ✅ Horizon Agent Safety & Knowledge Blueprint base: deny-by-default agent policy, documented human/customer approval gates, audit vocabulary and source-register standard; no autonomous external agent is active
