@@ -67,6 +67,11 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   production smoke checks returned localized redirects, contact `200`, invalid input `400` and
   unauthenticated Office workflow `401`; 1443 tests passed, 6 SMTP network tests skipped without
   OpenSSL, 474/474 i18n keys and a 171-page production build
+- ✅ PDF runtime hardening `4b44047` live on 2026-10-20: server-side extraction, OCR and official
+  form inspection load the bundled pdf.js standard fonts instead of silently degrading when a PDF
+  does not embed them; Render reports the exact revision live with no new error logs; 1444 tests
+  passed, 6 SMTP network tests skipped, 42 script tests passed, 474/474 i18n keys and a 171-page
+  production build
 - ⬜ Scheduled notifications and affiliate reconciliation: production endpoints return `503`
   because Render does not have the matching `NOTIFICATIONS_CRON_SECRET`; changing the Render and
   GitHub secret together requires the owner's explicit production-environment approval
