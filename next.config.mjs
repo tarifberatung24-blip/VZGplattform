@@ -9,6 +9,9 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url))
 const nextConfig = {
   turbopack: { root: projectRoot },
   serverExternalPackages: ["@napi-rs/canvas", "pdfjs-dist", "tesseract.js"],
+  outputFileTracingIncludes: {
+    "/*": ["node_modules/pdfjs-dist/standard_fonts/**/*"],
+  },
   experimental: {
     /**
      * P6 file intake allows documents up to `CASE_DOCUMENT_MAX_BYTES` (10 MB), because

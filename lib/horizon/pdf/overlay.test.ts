@@ -16,6 +16,7 @@ import { findTemplateById, OFFICIAL_PDF_TEMPLATES } from "./registry"
 import { detectCapability, computeSha256, verifyTemplateSource } from "./source"
 import { buildManifest, renderManifestBody } from "./manifest"
 import type { PdfFact } from "./fill"
+import { PDFJS_STANDARD_FONT_DATA_URL } from "@/lib/pdfjs-node"
 
 const est1a = findTemplateById("fms-2025-est-1-a")!
 const estBytes = () => new Uint8Array(readFileSync(resolve(process.cwd(), est1a.path)))
@@ -95,7 +96,7 @@ describe("overlay mapping is bound to the verified template", () => {
       const mapping = STATIC_TEMPLATE_MAPPINGS[id]
       const template = findTemplateById(id)!
       const bytes = new Uint8Array(readFileSync(resolve(process.cwd(), template.path)))
-      const doc = await getDocument({ data: bytes }).promise
+      const doc = await getDocument({ data: bytes, standardFontDataUrl: PDFJS_STANDARD_FONT_DATA_URL }).promise
       const page = await doc.getPage(1)
       const viewport = page.getViewport({ scale: 1 })
       const content = await page.getTextContent()

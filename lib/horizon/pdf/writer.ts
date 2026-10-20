@@ -18,6 +18,7 @@ import { join } from "node:path"
 import { PDFDocument, StandardFonts } from "pdf-lib"
 import type { PdfFieldAssignment } from "./fill"
 import type { OverlayPlan } from "./overlay-fill"
+import { PDFJS_STANDARD_FONT_DATA_URL } from "@/lib/pdfjs-node"
 import type { StaticTemplateMapping } from "./overlay-map"
 import { writeOverlay, type OverlayWriteResult } from "./overlay-writer"
 import { isWinAnsiRepresentable } from "./encoding"
@@ -89,6 +90,7 @@ export async function readAcroFormFieldNames(bytes: Uint8Array): Promise<readonl
     const document = await pdfjs.getDocument({
       data: new Uint8Array(bytes),
       useSystemFonts: false,
+      standardFontDataUrl: PDFJS_STANDARD_FONT_DATA_URL,
     }).promise
     try {
       const fields = await document.getFieldObjects()

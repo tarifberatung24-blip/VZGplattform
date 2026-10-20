@@ -18,6 +18,7 @@ import { buildKuendigungLetter, formatGermanDate, kuendigungExplanation } from "
 import { renderLetterBody, renderLetterSubject, readLetterOutputSha } from "./manifest"
 import { getKuendigungCopy } from "./copy"
 import { signaturePlacementForTemplate, verifiedSignatureTemplateIds } from "../pdf/signature-map"
+import { PDFJS_STANDARD_FONT_DATA_URL } from "@/lib/pdfjs-node"
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { generateLetterPdf } from "../pdf/letter-writer"
@@ -256,7 +257,10 @@ describe("the letter PDF is a real, distinct, deterministic artifact", () => {
     if (!result.ok) return
 
     const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs")
-    const doc = await pdfjs.getDocument({ data: new Uint8Array(result.bytes) }).promise
+    const doc = await pdfjs.getDocument({
+      data: new Uint8Array(result.bytes),
+      standardFontDataUrl: PDFJS_STANDARD_FONT_DATA_URL,
+    }).promise
     let text = ""
     for (let page = 1; page <= doc.numPages; page += 1) {
       const content = await (await doc.getPage(page)).getTextContent()
