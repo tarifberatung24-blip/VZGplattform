@@ -5,6 +5,7 @@ const state = vi.hoisted(() => ({
   draft: { id: "d1", owner_id: "u1", content_hash: "a".repeat(64) } as Record<string, unknown> | null,
   insertResult: { data: null as unknown, error: null as { message: string; code?: string } | null },
   insertCalls: [] as Array<Record<string, unknown>>,
+  sourceDocumentIds: ["document-1"],
 }))
 
 vi.mock("server-only", () => ({}))
@@ -20,6 +21,9 @@ vi.mock("../supabase/admin", () => ({
       const chain = () => query
       query.select = chain
       query.eq = chain
+      query.in = async (_column: string, ids: string[]) => table === "source_documents"
+        ? { data: state.sourceDocumentIds.filter((id) => ids.includes(id)).map((id) => ({ id })), error: null }
+        : { data: [], error: null }
       query.maybeSingle = async () =>
         table === "approvals"
           ? { data: { id: "a1", draft_id: "d1", approved_hash: "a".repeat(64) }, error: null }
@@ -35,13 +39,21 @@ vi.mock("../supabase/admin", () => ({
   }),
 }))
 
-import { approveDraft } from "./records"
+import { approveDraft, generateDraft } from "./records"
 
 beforeEach(() => {
   state.signedIn = true
   state.draft = { id: "d1", owner_id: "u1", content_hash: "a".repeat(64) }
   state.insertResult = { data: { id: "a1" }, error: null }
   state.insertCalls = []
+  state.sourceDocumentIds = ["document-1"]
+})
+
+describe("generateDraft attachments", () => {
+  it("refuses a document outside the owned case", async () => {
+    const result = await generateDraft("case-1", "de", ["document-from-another-case"])
+    expect(result).toEqual({ error: "Invalid document selection" })
+  })
 })
 
 describe("approveDraft", () => {
