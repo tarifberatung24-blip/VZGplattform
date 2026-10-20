@@ -621,10 +621,11 @@ after a module meets the full DONE definition.
   `"Approval could not be recorded"` rather than a database string. Re-verified live: re-approving
   the same draft returns `201` with the existing approval and the table still holds exactly one row
   for it; the hash-mismatch rail still refuses with `"Draft content changed; approval rejected"`.
-  Locked by `lib/office/workflow/records.test.ts` (5 tests: unauthenticated, hash mismatch, happy
-  path, idempotent conflict, and no raw message leak).
-- **CURRENT IMPLEMENTATION:** deterministic draft generator and safety reviewer
-  (`lib/office/workflow/deterministic.ts`) with required fact keys `recipient`, `subject`,
+  Locked by `lib/office/workflow/records.test.ts` (6 tests: attachment ownership,
+  unauthenticated access, hash mismatch, happy path, idempotent conflict, and no raw message leak).
+- **CURRENT IMPLEMENTATION:** deterministic fallback plus the structured Groq draft/translation
+  generator and safety reviewer (`lib/office/workflow/deterministic.ts`,
+  `lib/office/ai/groq-draft-generator.ts`) with required fact keys `recipient`, `subject`,
   `request`; SHA-256 `content_hash` and `input_facts_hash`;
   hash-bound approval (`lib/office/workflow/approval.ts` `approvalMatches`,
   `/api/office/drafts/{id}/approve` rejects anything other than a valid 64-hex hash);
@@ -646,9 +647,9 @@ after a module meets the full DONE definition.
   acknowledgement is verified in the action, not only in the form. The draft body is shown
   verbatim and is not editable on this surface.
 - **REUSE:** all of the above.
-- **MISSING:** no enforced blocking of unapproved *send* at the UI level (the send engine is P11);
-  the deterministic translator does not produce a real translation for non-`de` locales; two
-  overlapping draft/approval families exist with no canonical choice.
+- **MISSING:** authenticated production E2E of a non-German Groq translation; two overlapping
+  draft/approval families exist with no canonical choice. The deterministic fallback deliberately
+  refuses non-German output instead of labelling untranslated German copy as a translation.
 - **DEPENDENCIES:** P5, P7.
 - **BLOCKERS:** canonical draft/approval model depends on the P5 case-model decision.
   **Live E2E observed 2026-09-25:** approval was exercised against the real generated tax-form

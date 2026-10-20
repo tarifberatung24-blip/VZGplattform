@@ -279,11 +279,11 @@ Destination: target HORIZON phase. Disposition: `KEEP`, `REUSE`, `REPLACE LATER`
 | `/{locale}/app` | PUBLIC | PWA install help | VZGplattform | `bg`/`de` | `pwa-install-help` | none | ACTIVE | Phase 1 (PWA) | KEEP |
 | `/{locale}/auth/login` | PUBLIC | login | `KintexBG` | `bg`/`de` | `app/auth/login/page.tsx` | Supabase Auth | ACTIVE | Phase 2 | REPLACE LATER |
 | `/{locale}/auth/sign-up` | PUBLIC | sign-up | `KintexBG` | `bg`/`de` | `app/auth/sign-up/page.tsx` | Supabase Auth | ACTIVE | Phase 2 | REPLACE LATER |
-| `/{locale}/auth/sign-up-success` | PUBLIC | confirm e-mail notice | `KintexBG` | DE-only text | `app/auth/sign-up-success/page.tsx` | none | ACTIVE | Phase 2 | REPLACE LATER |
-| `/{locale}/auth/error` | PUBLIC | expired/invalid link | `KintexBG` | DE-only text | `app/auth/error/page.tsx` | none | ACTIVE | Phase 2 | REPLACE LATER |
+| `/{locale}/auth/sign-up-success` | PUBLIC | confirm e-mail notice | `KintexBG` | `bg`/`de` | `app/auth/sign-up-success/page.tsx` | none | ACTIVE | Phase 2 | REPLACE LATER |
+| `/{locale}/auth/error` | PUBLIC | expired/invalid link | `KintexBG` | `bg`/`de` | `app/auth/error/page.tsx` | none | ACTIVE | Phase 2 | REPLACE LATER |
 | `/{locale}/auth/forgot-password` | PUBLIC | password reset request | `KintexBG` | `bg`/`de` | `app/auth/forgot-password/page.tsx` | Supabase Auth | ACTIVE | Phase 2 | REUSE |
-| `/{locale}/auth/update-password` | PUBLIC | set new password | `KintexBG` | `bg`/`de` | `app/auth/update-password/page.tsx` | Supabase Auth | ACTIVE | Phase 2 | REUSE |
-| `/{locale}/auth/mfa-verify` | PUBLIC | MFA challenge | `KintexBG` | DE-only text | `app/auth/mfa-verify/page.tsx` | Supabase MFA | ACTIVE | Phase 2 (security) | KEEP |
+| `/{locale}/auth/update-password` | AUTH | set new password | `KintexBG` | `bg`/`de` | `app/auth/update-password/page.tsx` | Supabase Auth recovery session | ACTIVE | Phase 2 | REUSE |
+| `/{locale}/auth/mfa-verify` | AUTH | MFA challenge | `KintexBG` | `bg`/`de` | `app/auth/mfa-verify/page.tsx` | Supabase MFA | ACTIVE | Phase 2 (security) | KEEP |
 | `/{locale}/dashboard` | PROTECTED | main dashboard | VZGplattform / mixed | `bg`/`de` | `VzgDashboard` | `profiles`, `contracts`, `documents`, `deadlines`, `ensureHousehold` | PARTIAL | Phase 4 (HORIZON HOME) | REPLACE LATER |
 | `/{locale}/protected` | PROTECTED | alias | — | redirect | proxy → `/dashboard` | none | LEGACY | Phase 4 | LEGACY |
 | `/{locale}/assistant` | AUTH | AI home-office chat | KintexBG | `bg`/`de` | `home-office-workspace` | `/api/chat` (Groq) | PARTIAL | Phase 7 (Context AI Assistant) | REUSE |
@@ -346,7 +346,7 @@ source of truth for which patterns are reachable after N7.
 | `/auth/logout` | PUBLIC | sign out | Supabase Auth | ACTIVE | Phase 2 |
 | `/go/{offer}` | PUBLIC | affiliate redirect | `lib/affiliate-offers` | ACTIVE | Phase 17 |
 
-Route handler files: **37** — 33 under `/api/*`, 2 auth handlers (`/auth/callback`, `/auth/logout`),
+Route handler files: **59** — 55 under `/api/*`, 2 auth handlers (`/auth/callback`, `/auth/logout`),
 and 2 public affiliate redirects (`/go/{offer}` and its `/{locale}/go/{offer}` mirror).
 
 ### 2.4 Legacy inventory (disposition recorded; N7 executed the approved subset)
@@ -534,14 +534,19 @@ MISSING PARTS · DEPENDENT MODULES · TARGET STATUS · COMPLETION CRITERIA.
 
 - **PURPOSE:** explain German content in the user's conversation language and produce German output.
 - **EXISTING REUSABLE CODE:** `lib/office/workflow/deterministic.ts` (`DeterministicTranslator`),
-  `lib/office/workflow/interfaces.ts` (`Translator`), `lib/office/locales.ts`,
-  `lib/i18n/*`, `messages/{bg,de}.json`.
+  `lib/office/ai/groq-draft-generator.ts` (`GroqDraftGenerator`, strict structured translation),
+  `lib/office/workflow/interfaces.ts` (`Translator`), `lib/office/locales.ts`, `lib/i18n/*`,
+  `messages/{bg,de}.json`.
 - **EXISTING DATABASE SUPPORT:** `profiles.locale`, `profiles.conversation_locale`,
   `profiles.output_locale`, `cases.ui_locale`, `cases.conversation_locale`
   (migration `…005500_add_profile_locale_preferences`, vocabulary `bg,de,ru,pl,sr,ro`).
-- **MISSING PARTS:** real translation provider (the deterministic translator only prefixes a
-  translation label for non-`de`); the three language concepts are not persisted as distinct
-  first-class concepts; no per-document translation storage.
+- **CURRENT BOUNDARY:** with `GROQ_API_KEY`, the draft path requires a complete, faithful translation
+  in the requested language and preserves names, dates, amounts, references and paragraph structure.
+  German output is forced to the authoritative German body. Without a provider, the deterministic
+  fallback refuses non-German output with `AI_TRANSLATION_PROVIDER_REQUIRED`; it never presents a
+  copied German body as a translation.
+- **MISSING PARTS:** authenticated production E2E of a non-German draft translation and
+  per-document translation storage.
 - **DEPENDENT MODULES:** Phases 6, 7, 8, 12–17.
 - **TARGET STATUS:** PARTIAL.
 - **COMPLETION CRITERIA:** UI / conversation / output language are independently stored and honored;

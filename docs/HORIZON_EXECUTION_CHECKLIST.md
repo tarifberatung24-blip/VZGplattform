@@ -61,6 +61,12 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Production hardening `a073f10` live on 2026-10-20: protected letter generator, strict
   bilingual AI response, per-user rate limit, honest translation fallback, expanded service
   search, scoped PDF template loading, clean lint/build, 1423 passing tests
+- ✅ Production hardening through `70c632c` live on 2026-10-20: localized auth/MFA redirects,
+  bounded and rate-limited public lead intake, strict Groq translation contract, preserved draft
+  attachments, bounded Office workflow payloads and same-owner/same-case attachment verification;
+  production smoke checks returned localized redirects, contact `200`, invalid input `400` and
+  unauthenticated Office workflow `401`; 1443 tests passed, 6 SMTP network tests skipped without
+  OpenSSL, 474/474 i18n keys and a 171-page production build
 - ⬜ Scheduled notifications and affiliate reconciliation: production endpoints return `503`
   because Render does not have the matching `NOTIFICATIONS_CRON_SECRET`; changing the Render and
   GitHub secret together requires the owner's explicit production-environment approval
@@ -196,7 +202,8 @@ The current HORIZON intake and legacy document flows coexist, but they now share
 Scope note (owner-confirmed 2026-09-28): the DONE status covers Document Intake / OCR /
 Explanation only. It does NOT close the shared engines this phase depends on:
   P6 Document Intake/OCR: DONE
-  E3 Translation Layer: NOT IMPLEMENTED / OPEN
+  E3 Translation Layer: PARTIAL / OPEN (provider-backed draft translation implemented; production
+  non-German E2E and per-document translation storage remain)
 `docs/HORIZON_CONTEXT_INDEX.json` maps P6 to engines E2, E3, E10, and
 `docs/HORIZON_MASTER_MAP.md` lists E3 as a dependency of Phases 6, 7, 8 and 12–17. E3 must not
 be read as delivered because P6 is marked DONE.
@@ -617,10 +624,12 @@ rather than as phases.
   (two real authenticated users, 2026-09-25); `platform_*` preserved as legacy
 - ✅ E2 Document Intake/OCR — five input types, real Tesseract OCR, one shared READY rule
   (`lib/documents/extraction-contract.ts`); two-stack reconciliation closed 2026-09-25 (P6)
-- ⬜ E3 Translation Layer — NOT IMPLEMENTED / OPEN. The deterministic translator only prefixes
-  a translation label for non-`de` locales; it does not translate. Verified: translation is always
-  marked as a translation (`correspondence_drafts.translation_locale`) and UI/conversation/output
-  locale are persisted as distinct fields. Required by Phases 6, 7, 8 and 12–17.
+- ◐ E3 Translation Layer — the existing Groq path now requires a complete structured translation
+  in the selected output language, preserves facts and paragraph structure, and keeps German output
+  identical to the authoritative German body. The deterministic fallback refuses non-`de` output
+  rather than faking a translation. Remaining: authenticated production E2E for a non-German draft
+  and per-document translation storage. `translation_locale` and the UI/conversation/output locale
+  fields remain distinct.
 - ⬜ E4 Risk/Urgency Engine — risk indication exists in P16; a shared risk/urgency engine is not
   yet extracted
 - ✅ E5 Context AI Assistant orchestration — rails/context verified live; end-to-end answer
