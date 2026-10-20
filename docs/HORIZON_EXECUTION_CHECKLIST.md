@@ -79,7 +79,9 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
 - ✅ Scheduled notifications and affiliate reconciliation: `NOTIFICATIONS_CRON_SECRET` was rotated
   to one matching 256-bit value in GitHub Actions and Render on 2026-10-20; after the configuration
   deploy, both production endpoints reject requests without the secret with `401` instead of the
-  previous configuration error `503`
+  previous configuration error `503`. The complete GitHub Actions paths were then verified on
+  2026-10-21: notifications run `39514013295` and affiliate reconciliation run `39514019041`
+  both completed successfully against production. The reconciliation check used a one-day window.
 - ✅ Forum database performance: migration `20261020194930_forum_fk_covering_indexes.sql` adds the
   five missing foreign-key indexes for comments, reactions, posts, and reports; the production
   performance advisor no longer reports unindexed foreign keys
@@ -87,6 +89,10 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   site pages, journey logging, terms acceptance, and the forum were replaced with the canonical
   repository versions; revenue attribution, user notifications, and Awin transactions were marked
   applied only after their tables, constraints, and policies were verified in production
+- ✅ Production readiness re-audited on 2026-10-21 at commit `98a2550`: GitHub CI passed, Render
+  deploy `dep-dbbv9ejm8hqs73ev0csg` is live on the exact commit, `/api/health` reports that revision,
+  and Render recorded no application errors or HTTP 5xx responses after the deploy. The evidence
+  matrix and remaining owner decisions are in `docs/PRODUCTION_READINESS_AUDIT_2026-10-21.md`.
 - ✅ Supabase's eight `RLS enabled, no policy` information notices were reviewed on 2026-10-20:
   every listed service-only table has RLS enabled and no `anon` or `authenticated` table grant, so
   the Data API has no member-facing access path and no policy change is required
@@ -644,8 +650,10 @@ rather than as phases.
 - ◐ E3 Translation Layer — the existing Groq path now requires a complete structured translation
   in the selected output language, preserves facts and paragraph structure, and keeps German output
   identical to the authoritative German body. The deterministic fallback refuses non-`de` output
-  rather than faking a translation. Remaining: authenticated production E2E for a non-German draft
-  and per-document translation storage. `translation_locale` and the UI/conversation/output locale
+  rather than faking a translation. The contract is covered by `groq-draft-generator.test.ts` and
+  persists both `translation` and `translation_locale` on each generated draft. Remaining:
+  authenticated production E2E for a non-German draft and a separately approved design for
+  per-document translation storage. `translation_locale` and the UI/conversation/output locale
   fields remain distinct.
 - ⬜ E4 Risk/Urgency Engine — risk indication exists in P16; a shared risk/urgency engine is not
   yet extracted
