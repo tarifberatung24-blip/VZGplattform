@@ -76,23 +76,23 @@ This checklist does not supersede the Master Map, the Build Ledger, or the gover
   command shims through `ComSpec`, so installed tools such as `pnpm` are detected correctly;
   GitHub CI is green, `/api/health` reports the exact revision, `/bg` returns `200`, and no new
   production error logs were recorded after deployment
-- ⬜ Scheduled notifications and affiliate reconciliation: production endpoints return `503`
-  because Render does not have the matching `NOTIFICATIONS_CRON_SECRET`; changing the Render and
-  GitHub secret together requires the owner's explicit production-environment approval
-- ⬜ Forum database performance: five missing foreign-key indexes were confirmed for
-  `forum_comments.author_id`, `forum_post_reactions.user_id`, `forum_posts.author_id`,
-  `forum_reports.comment_id`, and `forum_reports.post_id`; applying the migration requires the
-  owner's explicit schema approval
-- ⬜ Supabase migration history differs from the repository: the live project records alternate
-  versions for `site_pages`, `journey_log`, and `terms_acceptance`, and does not record the
-  repository versions for revenue attribution, user notifications, or Awin transactions, although
-  all related tables exist. Reconciling migration history requires the owner's explicit production
-  schema approval; no history entry was changed during the 2026-10-20 read-only audit
+- ✅ Scheduled notifications and affiliate reconciliation: `NOTIFICATIONS_CRON_SECRET` was rotated
+  to one matching 256-bit value in GitHub Actions and Render on 2026-10-20; after the configuration
+  deploy, both production endpoints reject requests without the secret with `401` instead of the
+  previous configuration error `503`
+- ✅ Forum database performance: migration `20261020194930_forum_fk_covering_indexes.sql` adds the
+  five missing foreign-key indexes for comments, reactions, posts, and reports; the production
+  performance advisor no longer reports unindexed foreign keys
+- ✅ Supabase migration history reconciled on 2026-10-20: the temporary production versions for
+  site pages, journey logging, terms acceptance, and the forum were replaced with the canonical
+  repository versions; revenue attribution, user notifications, and Awin transactions were marked
+  applied only after their tables, constraints, and policies were verified in production
 - ✅ Supabase's eight `RLS enabled, no policy` information notices were reviewed on 2026-10-20:
   every listed service-only table has RLS enabled and no `anon` or `authenticated` table grant, so
   the Data API has no member-facing access path and no policy change is required
-- ⬜ Supabase Auth leaked-password protection is disabled; enabling it requires the owner's
-  explicit production-security approval
+- ⬜ Supabase Auth leaked-password protection remains disabled because the canonical project is on
+  the Free plan and Supabase exposes this control only on Pro and above; enabling it now requires
+  an explicit billing-plan upgrade decision
 - ✅ Horizon Agent Safety & Knowledge Blueprint base: deny-by-default agent policy, documented human/customer approval gates, audit vocabulary and source-register standard; no autonomous external agent is active
 
 ---

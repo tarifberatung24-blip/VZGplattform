@@ -9,6 +9,10 @@ import {
 } from "./contract"
 
 const sql = readFileSync("supabase/migrations/20261019100000_forum.sql", "utf8").toLowerCase()
+const indexSql = readFileSync(
+  "supabase/migrations/20261020194930_forum_fk_covering_indexes.sql",
+  "utf8",
+).toLowerCase()
 
 describe("forum input contract", () => {
   it("accepts only member discussion and feedback posts", () => {
@@ -54,5 +58,17 @@ describe("forum database contract", () => {
     expect(sql).toContain("and category in ('community', 'feedback')")
     expect(sql).toContain("forum_posts_author_category_check")
     expect(sql).toContain("forum_reports_one_target_check")
+  })
+
+  it("covers every forum foreign-key column used from the referenced side", () => {
+    for (const index of [
+      "forum_comments_author_id_idx",
+      "forum_post_reactions_user_id_idx",
+      "forum_posts_author_id_idx",
+      "forum_reports_comment_id_idx",
+      "forum_reports_post_id_idx",
+    ]) {
+      expect(indexSql).toContain(`create index if not exists ${index}`)
+    }
   })
 })

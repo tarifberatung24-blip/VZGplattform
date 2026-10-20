@@ -1,7 +1,14 @@
 # Supabase migration history repair (canonical project `mteguzgbiuexmdcrqajj`)
 
 Source: read-only production audit, 2026-10-10 (catalog queries and `supabase_migrations.schema_migrations` only; no customer rows read).
-Status: **PLAN — not executed.** Every step below changes production metadata or schema and requires explicit owner approval.
+Status: **EXECUTED 2026-10-20.** The owner approved the production metadata and schema work.
+
+The canonical repository and production history now match through
+`20261020194930_forum_fk_covering_indexes.sql`. The repair also replaced the temporary production
+versions for `site_pages`, `journey_log`, `terms_acceptance`, and `forum`, and recorded the already
+verified revenue-attribution, notification, and Awin migrations under their canonical versions.
+The final additive migration created the five missing forum foreign-key indexes; Supabase's
+performance advisor no longer reports `unindexed_foreign_keys`.
 
 ## Why
 
