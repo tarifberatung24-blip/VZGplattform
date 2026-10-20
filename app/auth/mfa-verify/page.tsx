@@ -3,19 +3,22 @@ import { redirect } from "next/navigation"
 import { MfaChallenge } from "@/components/auth/mfa-challenge"
 import { createClient } from "@/lib/supabase/server"
 import { HorizonWordmark } from "@/components/brand/horizon-wordmark"
+import { requestLocale } from "@/lib/i18n/server-locale"
 
 export default async function MfaVerifyPage() {
+  const locale = await requestLocale()
+  const de = locale === "de"
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/auth/login")
+  if (!user) redirect(`/${locale}/auth/login`)
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="paper w-full max-w-md p-8">
-        <Link href="/" className="text-sm font-semibold uppercase tracking-[0.16em] text-primary"><HorizonWordmark className="h-[1.1em]" /><span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span></Link>
-        <p className="mt-8 text-sm font-semibold uppercase tracking-[0.16em] text-primary">Допълнителна защита</p>
-        <h1 className="mt-2 text-3xl font-bold text-foreground">Потвърди входа</h1>
-        <p className="mt-2 leading-6 text-muted-foreground">Отвори Google Authenticator и въведи текущия 6-цифрен код.</p>
+        <Link href={`/${locale}`} className="text-sm font-semibold uppercase tracking-[0.16em] text-primary"><HorizonWordmark className="h-[1.1em]" /><span className="mt-1 block text-[10px] text-muted-foreground">BY VZG CONSULT</span></Link>
+        <p className="mt-8 text-sm font-semibold uppercase tracking-[0.16em] text-primary">{de ? "Zusätzlicher Schutz" : "Допълнителна защита"}</p>
+        <h1 className="mt-2 text-3xl font-bold text-foreground">{de ? "Anmeldung bestätigen" : "Потвърди входа"}</h1>
+        <p className="mt-2 leading-6 text-muted-foreground">{de ? "Öffne Google Authenticator und gib den aktuellen sechsstelligen Code ein." : "Отвори Google Authenticator и въведи текущия 6-цифрен код."}</p>
         <MfaChallenge />
       </div>
     </main>

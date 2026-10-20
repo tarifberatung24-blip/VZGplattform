@@ -7,6 +7,7 @@ import {
   isOnboardingPath,
   normalizeOnboardingStep,
   isProtectedAppPath,
+  localizedLoginPath,
   pathLocale,
   requiresMfa,
   sanitizeNextPath,
@@ -16,6 +17,11 @@ describe("auth routing", () => {
   it("keeps authenticated home navigation localized to the dashboard", () => {
     expect(authenticatedHomePath("bg")).toBe("/bg/dashboard")
     expect(authenticatedHomePath("de")).toBe("/de/dashboard")
+  })
+
+  it("builds a localized login path with a safe return destination", () => {
+    expect(localizedLoginPath("de", "/de/forum?topic=changes")).toBe("/de/auth/login?next=%2Fde%2Fforum%3Ftopic%3Dchanges")
+    expect(localizedLoginPath("bg", "//evil.example")).toBe("/bg/auth/login?next=%2Fbg%2Fdashboard")
   })
 
   it("accepts local destinations and rejects external redirects", () => {

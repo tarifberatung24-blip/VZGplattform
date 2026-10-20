@@ -82,3 +82,8 @@ export function pathLocale(pathname: string) {
 export function authenticatedHomePath(locale: Locale) {
   return localizedPath("/dashboard", locale)
 }
+
+export function localizedLoginPath(locale: Locale, nextPath: string) {
+  const destination = sanitizeNextPath(nextPath, authenticatedHomePath(locale))
+  return `${localizedPath("/auth/login", locale)}?next=${encodeURIComponent(destination)}`
+}
