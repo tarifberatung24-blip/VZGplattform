@@ -40,6 +40,11 @@ describe("how-it-works copy", () => {
     }
   })
 
+  it("provides a short label for progressive disclosure in both locales", () => {
+    expect(howItWorksCopy.bg.detailsLabel).toBe("Как работи")
+    expect(howItWorksCopy.de.detailsLabel).toBe("So funktioniert es")
+  })
+
   it("keeps prose free of em and en dashes and exclamation marks (Humanizer)", () => {
     for (const locale of ["bg", "de"] as const) {
       expect(JSON.stringify(howItWorksCopy[locale])).not.toMatch(/[—–!]/)

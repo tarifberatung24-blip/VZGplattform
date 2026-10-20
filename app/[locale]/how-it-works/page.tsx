@@ -10,6 +10,7 @@ import {
   BriefcaseBusiness,
   Building2,
   Check,
+  ChevronDown,
   FileCheck2,
   FileQuestion,
   FileText,
@@ -53,10 +54,12 @@ const serviceIcons: Record<HowItWorksServiceId, ComponentType<{ className?: stri
 function ServiceCard({
   service,
   locale,
+  detailsLabel,
   stepLabel,
 }: {
   service: HowItWorksService
   locale: "bg" | "de"
+  detailsLabel: string
   stepLabel: string
 }) {
   const Icon = serviceIcons[service.id]
@@ -73,23 +76,27 @@ function ServiceCard({
         </div>
       </div>
 
-      <ol className="mt-5 space-y-3">
-        {service.steps.map((step, index) => (
-          <li key={step} className="flex gap-3 text-sm leading-6">
-            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-foreground" aria-label={`${stepLabel} ${index + 1}`}>
-              {index + 1}
-            </span>
-            <span><BrandText text={step} /></span>
-          </li>
-        ))}
-      </ol>
+      <details className="group mt-4 border-t border-border pt-3">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+          {detailsLabel}
+          <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden={true} />
+        </summary>
+        <ol className="mt-2 space-y-3">
+          {service.steps.map((step, index) => (
+            <li key={step} className="flex gap-3 text-sm leading-6">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-foreground" aria-label={`${stepLabel} ${index + 1}`}>
+                {index + 1}
+              </span>
+              <span><BrandText text={step} /></span>
+            </li>
+          ))}
+        </ol>
 
-      <div className="mt-5 border-t border-border pt-4">
-        <p className="flex items-start gap-2 text-sm leading-6">
+        <p className="mt-4 flex items-start gap-2 border-t border-border pt-4 text-sm leading-6">
           <Check className="mt-1 size-4 shrink-0 text-success" aria-hidden={true} />
           <span><strong>{service.resultLabel}:</strong> <BrandText text={service.result} /></span>
         </p>
-      </div>
+      </details>
 
       <Link
         href={localizedPath(service.href, locale)}
@@ -150,7 +157,13 @@ export default function HowItWorksPage() {
               </header>
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 {group.services.map((service) => (
-                  <ServiceCard key={service.id} service={service} locale={locale} stepLabel={copy.stepLabel} />
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    locale={locale}
+                    detailsLabel={copy.detailsLabel}
+                    stepLabel={copy.stepLabel}
+                  />
                 ))}
               </div>
             </section>

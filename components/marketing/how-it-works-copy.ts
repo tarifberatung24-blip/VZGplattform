@@ -53,6 +53,7 @@ export type HowItWorksCopy = {
   intro: string
   quickTitle: string
   quickHint: string
+  detailsLabel: string
   stepLabel: string
   groups: HowItWorksGroup[]
   noticeTitle: string
@@ -69,6 +70,7 @@ export const howItWorksCopy: Record<Locale, HowItWorksCopy> = {
     intro: "Намери своя проблем. Виж трите стъпки. Отвори точната услуга.",
     quickTitle: "Избери тема",
     quickHint: "Не е нужно да знаеш името на функцията.",
+    detailsLabel: "Как работи",
     stepLabel: "Стъпка",
     groups: [
       {
@@ -255,6 +257,7 @@ export const howItWorksCopy: Record<Locale, HowItWorksCopy> = {
     intro: "Finde dein Problem. Sieh die drei Schritte. Öffne den passenden Dienst.",
     quickTitle: "Thema wählen",
     quickHint: "Du musst den Namen der Funktion nicht kennen.",
+    detailsLabel: "So funktioniert es",
     stepLabel: "Schritt",
     groups: [
       {
