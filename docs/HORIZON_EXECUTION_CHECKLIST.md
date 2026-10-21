@@ -651,10 +651,12 @@ rather than as phases.
   in the selected output language, preserves facts and paragraph structure, and keeps German output
   identical to the authoritative German body. The deterministic fallback refuses non-`de` output
   rather than faking a translation. The contract is covered by `groq-draft-generator.test.ts` and
-  persists both `translation` and `translation_locale` on each generated draft. Remaining:
-  authenticated production E2E for a non-German draft and a separately approved design for
-  per-document translation storage. `translation_locale` and the UI/conversation/output locale
-  fields remain distinct.
+  persists both `translation` and `translation_locale` on each generated draft. Separate
+  per-document storage is now live through immutable, owner-scoped `document_translations`
+  versions tied to the exact source hash; authenticated clients have read-only access. Remaining:
+  authenticated production E2E for a non-German draft and the provider-backed action that creates
+  document translation versions. `translation_locale` and the UI/conversation/output locale fields
+  remain distinct.
 - ⬜ E4 Risk/Urgency Engine — risk indication exists in P16; a shared risk/urgency engine is not
   yet extracted
 - ✅ E5 Context AI Assistant orchestration — rails/context verified live; end-to-end answer

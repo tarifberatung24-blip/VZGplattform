@@ -76,6 +76,23 @@ export type DocumentPageText = {
   confidence: number | null
 }
 
+/** A versioned translation of one exact uploaded document. The original remains authoritative. */
+export type DocumentTranslation = {
+  id: string
+  caseId: string
+  documentId: string
+  version: number
+  sourceLocale: string
+  targetLocale: string
+  sourceSha256: string
+  content: string
+  contentHash: string
+  model: string
+  promptVersion: string
+  reviewStatus: DraftReviewStatus
+  createdAt: string
+}
+
 export type ExtractedFact = {
   id: string
   caseId: string

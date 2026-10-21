@@ -538,15 +538,18 @@ MISSING PARTS · DEPENDENT MODULES · TARGET STATUS · COMPLETION CRITERIA.
   `lib/office/workflow/interfaces.ts` (`Translator`), `lib/office/locales.ts`, `lib/i18n/*`,
   `messages/{bg,de}.json`.
 - **EXISTING DATABASE SUPPORT:** `profiles.locale`, `profiles.conversation_locale`,
-  `profiles.output_locale`, `cases.ui_locale`, `cases.conversation_locale`
-  (migration `…005500_add_profile_locale_preferences`, vocabulary `bg,de,ru,pl,sr,ro`).
+  `profiles.output_locale`, `cases.ui_locale`, `cases.conversation_locale`, and immutable,
+  owner-scoped `document_translations` versions tied to an exact source document hash
+  (migrations `…005500_add_profile_locale_preferences`, `…003741_document_translation_storage`,
+  `…003859_document_translation_fk_index`; vocabulary `bg,de,ru,pl,sr,ro`).
 - **CURRENT BOUNDARY:** with `GROQ_API_KEY`, the draft path requires a complete, faithful translation
   in the requested language and preserves names, dates, amounts, references and paragraph structure.
   German output is forced to the authoritative German body. Without a provider, the deterministic
   fallback refuses non-German output with `AI_TRANSLATION_PROVIDER_REQUIRED`; it never presents a
   copied German body as a translation.
-- **MISSING PARTS:** authenticated production E2E of a non-German draft translation and
-  per-document translation storage.
+- **MISSING PARTS:** authenticated production E2E of a non-German draft translation and the
+  provider-backed action that creates document translation versions. The storage and owner read
+  path are complete; the original document remains authoritative.
 - **DEPENDENT MODULES:** Phases 6, 7, 8, 12–17.
 - **TARGET STATUS:** PARTIAL.
 - **COMPLETION CRITERIA:** UI / conversation / output language are independently stored and honored;

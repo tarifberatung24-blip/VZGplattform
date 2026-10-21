@@ -10,6 +10,7 @@ import {
   type CaseSourceDocument,
   type CaseTask,
   type DocumentPageText,
+  type DocumentTranslation,
   type DraftReviewStatus,
   type ExtractedFact,
   type HorizonCaseAction,
@@ -34,6 +35,7 @@ import { buildCaseContext, type CaseContext } from "../ai/context"
 type Db = Database["public"]
 type CaseRow = Db["Tables"]["cases"]["Row"]
 type DocumentRow = Db["Tables"]["source_documents"]["Row"]
+type DocumentTranslationRow = Db["Tables"]["document_translations"]["Row"]
 type FactRow = Db["Tables"]["extracted_facts"]["Row"]
 type MessageRow = Db["Tables"]["case_messages"]["Row"]
 type DraftRow = Db["Tables"]["correspondence_drafts"]["Row"]
@@ -71,6 +73,24 @@ function mapDocument(row: DocumentRow): CaseSourceDocument {
     sizeBytes: row.size_bytes,
     sha256: row.sha256,
     status: row.status,
+    createdAt: row.created_at,
+  }
+}
+
+function mapDocumentTranslation(row: DocumentTranslationRow): DocumentTranslation {
+  return {
+    id: row.id,
+    caseId: row.case_id,
+    documentId: row.document_id,
+    version: row.version,
+    sourceLocale: row.source_locale,
+    targetLocale: row.target_locale,
+    sourceSha256: row.source_sha256,
+    content: row.content,
+    contentHash: row.content_hash,
+    model: row.model,
+    promptVersion: row.prompt_version,
+    reviewStatus: row.review_status,
     createdAt: row.created_at,
   }
 }
@@ -312,6 +332,21 @@ export class CaseEngineRepository {
       .order("created_at", { ascending: false })
     if (error) return fail(error.message)
     return ok((data ?? []).map(mapDocument))
+  }
+
+  async listDocumentTranslations(
+    caseId: string,
+    documentId: string,
+  ): Promise<RepoResult<DocumentTranslation[]>> {
+    const { data, error } = await this.client
+      .from("document_translations")
+      .select("*")
+      .eq("case_id", caseId)
+      .eq("document_id", documentId)
+      .eq("owner_id", this.userId)
+      .order("version", { ascending: false })
+    if (error) return fail(error.message)
+    return ok((data ?? []).map(mapDocumentTranslation))
   }
 
   /**
