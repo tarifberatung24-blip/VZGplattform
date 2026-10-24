@@ -252,6 +252,15 @@ async function recordOutcome(input: {
       failureDetail: input.failureDetail,
       resend: input.resend ?? false,
     })
+
+    // A delivered message is the end of the drafting lifecycle, so the case moves
+    // to `action_ready`. Only a real `SENT` advances it: a blocked, unavailable or
+    // failed attempt is recorded but must not report progress the customer cannot
+    // see. The advance is forward-only, so a resend of an already-sent draft is a
+    // no-op and a second send cannot move the case anywhere new.
+    if (input.state === "SENT") {
+      await engine.repository.advanceTo(input.caseId, "action_ready")
+    }
   } catch {
     // Intentionally swallowed: see doc comment above. The caller still receives
     // the true provider outcome.
