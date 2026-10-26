@@ -159,3 +159,84 @@ export function allowedCaseActions(status: HorizonCaseStatus): HorizonCaseAction
 export function isTerminalCaseStatus(status: HorizonCaseStatus): boolean {
   return status === "completed" || status === "cancelled"
 }
+
+/**
+ * Progress order used for automatic advancement.
+ *
+ * Only one direction is meaningful for an automatic advance: a case moves on
+ * when new evidence appears, and never slides back because bookkeeping ran.
+ * `cancelled` sorts last so a cancelled case is never auto-advanced out of its
+ * terminal state, and `completed` cannot be reached by an event path.
+ */
+const STATUS_RANK: Record<HorizonCaseStatus, number> = {
+  draft: 0,
+  collecting_data: 1,
+  waiting_for_user: 1,
+  processing: 2,
+  draft_ready: 3,
+  review: 4,
+  approved: 5,
+  action_ready: 6,
+  completed: 7,
+  cancelled: 8,
+}
+
+export function statusRank(status: HorizonCaseStatus): number {
+  return STATUS_RANK[status]
+}
+
+/**
+ * The status each engine event should leave the case in.
+ *
+ * These are the only statuses the application advances to automatically. Kept
+ * here, next to the transition table, so a wiring mistake is a compile error and
+ * so a test can prove every target is reachable from a freshly created case.
+ */
+export const CASE_ADVANCE_TARGETS = {
+  intake: "collecting_data",
+  draftSaved: "draft_ready",
+  approved: "approved",
+  sent: "action_ready",
+} as const satisfies Record<string, HorizonCaseStatus>
+
+/**
+ * The action sequence that moves a case from `from` to `to`, or null when no
+ * forward path exists.
+ *
+ * Walks the declared transition table breadth-first instead of hard-coding a
+ * path, so the table stays the single source of truth: adding or removing an
+ * edge changes the answer here with no second edit. A move that does not go
+ * forward (`statusRank(to) <= statusRank(from)`) is refused, which is what keeps
+ * an automatic advance from regressing a case that has already moved on — for
+ * example re-saving a draft after a successful send must not undo `action_ready`.
+ * `cancelled` is never used as an intermediate step.
+ */
+export function caseAdvancePath(
+  from: HorizonCaseStatus,
+  to: HorizonCaseStatus,
+): HorizonCaseAction[] | null {
+  if (from === to) return []
+  if (statusRank(to) <= statusRank(from)) return null
+
+  const queue: Array<{ status: HorizonCaseStatus; path: HorizonCaseAction[] }> = [
+    { status: from, path: [] },
+  ]
+  const seen = new Set<HorizonCaseStatus>([from])
+
+  while (queue.length > 0) {
+    const current = queue.shift() as { status: HorizonCaseStatus; path: HorizonCaseAction[] }
+    for (const action of HORIZON_CASE_ACTIONS) {
+      const next = nextCaseStatus(current.status, action)
+      if (!next || seen.has(next)) continue
+      if (next === "cancelled" && to !== "cancelled") continue
+
+      const path = [...current.path, action]
+      if (next === to) return path
+
+      seen.add(next)
+      queue.push({ status: next, path })
+    }
+  }
+
+  return null
+}

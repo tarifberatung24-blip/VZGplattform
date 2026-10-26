@@ -8,6 +8,7 @@ import { CaseAssistantPanel } from "@/components/guide/case-assistant-panel"
 import { DraftReviewPanel } from "@/components/guide/draft-review-panel"
 import { OfficialFormPanel } from "@/components/guide/official-form-panel"
 import { SendPanel } from "@/components/guide/send-panel"
+import { CaseClosurePanel } from "@/components/guide/case-closure-panel"
 import { SignaturePanel } from "@/components/guide/signature-panel"
 import { AgenturTaskPanel } from "@/components/agentur/agentur-task-panel"
 import { JobcenterTaskPanel } from "@/components/jobcenter/jobcenter-task-panel"
@@ -137,6 +138,7 @@ export function CaseWorkspace({
         signature: "Sichtbare Signatur",
         send: "Versand",
         tasks: "Aufgaben",
+        closure: "Vorgang abschließen",
         missing: "Fehlende Angaben",
         audit: "Verlauf",
         none: "Noch keine Einträge.",
@@ -161,6 +163,7 @@ export function CaseWorkspace({
         signature: "Видима сигнатура",
         send: "Изпращане",
         tasks: "Задачи",
+        closure: "Приключване",
         missing: "Липсващи данни",
         audit: "История",
         none: "Още няма записи.",
@@ -475,6 +478,10 @@ export function CaseWorkspace({
             <p className="mt-0.5 text-xs text-muted-foreground">{event.createdAt}</p>
           </div>
         ))}
+      </Panel>
+
+      <Panel id="case-closure" title={copy.closure} empty={copy.none}>
+        <CaseClosurePanel caseId={caseId} locale={locale} status={status} />
       </Panel>
       </div>
     </div>

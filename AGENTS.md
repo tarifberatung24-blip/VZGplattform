@@ -61,6 +61,31 @@ and German are written independently, not translated word for word.
 End a task with a few lines in Bulgarian: what changed, what was checked with exact numbers, what was not
 run or is blocked, and the next step. This replaces the long report block mentioned in `CLAUDE.md`.
 
+## Local environment notes
+
+- `pnpm` is not on `PATH` in this sandbox even though the repo uses it. Run the checks through the local
+  binaries instead: `./node_modules/.bin/tsc --noEmit`, `./node_modules/.bin/eslint .`,
+  `./node_modules/.bin/vitest run --exclude 'scripts/**'`, `./node_modules/.bin/next build`. The
+  `i18n:*` scripts are plain `node scripts/i18n-*.mjs`.
+- `gh` is installed but not logged in, and a plain `git push` prompts for a username. Push with
+  `git push "https://x-access-token:${GITHUB_TOKEN}@github.com/tarifberatung24-blip/VZGplattform.git" <branch>`.
+- A new PR is created as a draft. `PATCH /pulls/{n}` with `{"draft": false}` is ignored; use the GraphQL
+  `markPullRequestReadyForReview` mutation with the PR's `node_id`.
+- Runtime smoke test without touching production: `./node_modules/.bin/next build` then
+  `./node_modules/.bin/next start -p 3999`. Locally `/bg/guide` returns `503` (Supabase not configured),
+  which is correct here — production returns `307` to login.
+
+## Case lifecycle (important when touching cases)
+
+`cases.horizon_status` is the canonical status and is advanced **only** through
+`CaseEngineRepository.advanceTo` (which walks the transition table via `caseAdvancePath`). Callers pass
+the status an *artefact* implies (`collecting_data`, `draft_ready`, `approved`, `action_ready`) and never
+write `horizon_status` directly. Advancement is forward-only, so re-saving a draft or resending cannot
+regress a case. `complete` and `reopen` are the only user-driven moves and live in
+`lib/horizon/case/closure-actions.ts`. If you add an engine event that should move a case, add its target
+to `CASE_ADVANCE_TARGETS` in `lib/horizon/case/lifecycle.ts` — a test in `advance.test.ts` proves every
+target is reachable from a fresh case.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

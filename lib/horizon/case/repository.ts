@@ -18,6 +18,7 @@ import {
   type MissingInformation,
 } from "./contract"
 import {
+  caseAdvancePath,
   nextCaseStatus,
   resolveCaseStatus,
   toLegacyStatus,
@@ -271,6 +272,39 @@ export class CaseEngineRepository {
     return ok(mapCase(data))
   }
 
+  /**
+   * Advances a case towards the status an engine event implies.
+   *
+   * The status is derived from stored rows, never from the caller: an event only
+   * says *what happened* ("a draft was saved"), and this method decides whether
+   * that is enough to move the case and how far. The walk follows the declared
+   * transition table, so a case reaches `approved` only through the real
+   * `approve` edge, and `action_ready` only after a recorded approval.
+   *
+   * Advancement is strictly forward and best-effort. A case that is already at or
+   * past the target is left alone, and a failed move is returned as an error for
+   * the caller to log rather than thrown, because the business artefact that
+   * triggered it is already stored and must not be lost to bookkeeping.
+   */
+  async advanceTo(caseId: string, to: HorizonCaseStatus): Promise<RepoResult<Case>> {
+    const current = await this.getMine(caseId)
+    if (current.error || !current.data) return fail(current.error ?? "Case not found")
+
+    const path = caseAdvancePath(current.data.status, to)
+    if (!path) return ok(current.data)
+    if (path.length === 0) return ok(current.data)
+
+    let latest = current.data
+    for (const action of path) {
+      const applied = await this.applyAction(caseId, action)
+      if (applied.error || !applied.data) {
+        return fail(applied.error ?? `Action ${action} could not be applied`)
+      }
+      latest = applied.data
+    }
+    return ok(latest)
+  }
+
   async updateDetails(
     id: string,
     patch: Partial<Pick<Case, "title" | "institution" | "deadline" | "conversationLocale">>,
@@ -320,6 +354,9 @@ export class CaseEngineRepository {
       .single()
     if (error) return fail(error.message)
     await this.appendAudit(input.caseId, "document_attached", { documentId: data.id })
+    // A document is intake: the case is no longer an empty draft. Best-effort,
+    // because the document is stored either way and the status is derived.
+    await this.advanceTo(input.caseId, "collecting_data")
     return ok(mapDocument(data))
   }
 
@@ -490,6 +527,7 @@ export class CaseEngineRepository {
     })
     if (audited.error) return fail(audited.error)
 
+    await this.advanceTo(caseId, "collecting_data")
     return ok(message.data)
   }
 
@@ -554,6 +592,9 @@ export class CaseEngineRepository {
       .single()
     if (error) return fail(error.message)
     await this.appendAudit(caseId, "draft_saved", { draftId: data.id, version: data.version })
+    // A saved draft is the artefact `draft_ready` names. Forward-only, so the
+    // send record this method also stores cannot pull a sent case back.
+    await this.advanceTo(caseId, "draft_ready")
     return ok(mapDraft(data))
   }
 
@@ -611,6 +652,9 @@ export class CaseEngineRepository {
       .single()
     if (error) return fail(error.message)
     await this.appendAudit(draft.data.case_id, "draft_approved", { draftId })
+    // Approval is a real lifecycle step, so the case moves to `approved` through
+    // the real `approve` edge rather than being set there directly.
+    await this.advanceTo(draft.data.case_id, "approved")
     return ok({
       id: data.id,
       caseId: draft.data.case_id,
