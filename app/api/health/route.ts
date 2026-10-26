@@ -24,13 +24,21 @@ function isAutomationWebhookConfigured(env: NodeJS.ProcessEnv = process.env): bo
   }
 }
 
+/**
+ * Whether the app's Google OAuth client is configured, which is the gate for a
+ * user connecting their own mailbox and sending from it.
+ *
+ * `createGoogleProvider` returns `null` when no connection row exists, so an
+ * unconfigured OAuth client and a signed-in user who simply has not connected a
+ * mailbox are indistinguishable from the outside. This probe reports the *app*
+ * capability only; whether any individual user has connected is per-user data and
+ * does not belong in a public response.
+ */
+function isGoogleSenderConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.GOOGLE_CLIENT_ID?.trim() && env.GOOGLE_CLIENT_SECRET?.trim())
+}
+
 export async function GET() {
-  // Liveness and capability are reported separately on purpose. `status` answers
-  // "is this process serving?", which is what a restart probe needs, and must not
-  // depend on an integration being configured. `capabilities` answers "what can
-  // this deployment actually do?", so a missing SMTP credential is visible as
-  // `send: false` instead of hiding behind an unqualified "ok". Booleans only —
-  // no host, no username, no key is ever read into the response.
   const smtp = readSmtpConfig()
 
   return NextResponse.json({
@@ -38,7 +46,14 @@ export async function GET() {
     revision: process.env.RENDER_GIT_COMMIT ?? "unknown",
     integrations: { awin: isAwinConfigured() },
     capabilities: {
-      send: smtp.ok,
+      // Two transports exist: a server-side relay and a signed-in user's own
+      // connected mailbox. `smtp` names only the first, so an operator must not
+      // read `smtp: false` as "this deployment cannot send at all".
+      smtp: smtp.ok,
+      // Variable names only, never values: exactly what an operator has to set.
+      smtpMissingEnv: smtp.ok ? [] : smtp.missing,
+      smtpInvalidEnv: smtp.ok ? [] : smtp.invalid,
+      googleSender: isGoogleSenderConfigured(),
       automationHandoff: isAutomationWebhookConfigured(),
     },
   }, {
