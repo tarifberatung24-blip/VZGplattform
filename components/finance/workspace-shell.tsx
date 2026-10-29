@@ -8,7 +8,7 @@ import { cookieNoticeCopy } from "@/components/horizon/cookie-notice-copy"
 import { HorizonSidebar } from "@/components/layout/horizon-sidebar"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { MobileBottomNav, type MobileWorkspacePanel } from "@/components/navigation/mobile-bottom-nav"
-import { ServiceSearch } from "@/components/navigation/service-search"
+import { AiSearch } from "@/components/search/ai-search"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { openCookieSettings } from "@/lib/cookies/consent"
@@ -62,8 +62,8 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                 drawer (below md), so exactly one instance is visible per viewport. */}
             <span role="img" aria-label="Horizon by VZG" className="logo-mask h-5 w-auto text-foreground md:hidden" />
             <div className="ml-auto flex shrink-0 items-center gap-1">
-              <ServiceSearch compact className="md:hidden" />
-              <ServiceSearch className="hidden md:inline-flex" />
+              <AiSearch compact className="md:hidden" />
+              <AiSearch className="hidden md:inline-flex" />
               <button
                 type="button"
                 onClick={() => setMobilePanel("settings")}
