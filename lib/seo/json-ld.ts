@@ -64,8 +64,23 @@ export function webSiteJsonLd(locale: string): JsonLd {
 }
 
 /** One page, as a document with a canonical identity. */
-export function webPageJsonLd(input: { path: string; locale: string; title: string; description: string }): JsonLd {
+export function webPageJsonLd(input: {
+  path: string
+  locale: string
+  title: string
+  description: string
+  /**
+   * Paths this page is a companion to, emitted as `relatedLink`.
+   *
+   * A letter page and the guide that explains it answer the same search from two
+   * angles. Naming the other page here tells a crawler the two belong together
+   * rather than competing, which is the difference between the pair ranking once
+   * and ranking not at all.
+   */
+  relatedPaths?: readonly string[]
+}): JsonLd {
   const url = canonicalUrl(input.path, input.locale)
+  const related = (input.relatedPaths ?? []).map((path) => canonicalUrl(path, input.locale))
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -76,6 +91,7 @@ export function webPageJsonLd(input: { path: string; locale: string; title: stri
     inLanguage: input.locale === "de" ? "de-DE" : "bg-BG",
     isPartOf: { "@id": `${SITE_URL}/#website` },
     publisher: { "@id": `${SITE_URL}/#organization` },
+    ...(related.length ? { relatedLink: related } : {}),
   }
 }
 

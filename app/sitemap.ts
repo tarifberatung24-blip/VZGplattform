@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { guidePath, guideTopics } from "@/lib/ratgeber"
+import { VORLAGE_INDEX_PATH, vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
 import { absoluteUrl } from "@/lib/seo/site"
 
 /**
@@ -27,11 +28,13 @@ const publicPaths = [
   "/widerruf",
   "/affiliate-hinweis",
   "/ratgeber",
+  VORLAGE_INDEX_PATH,
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const topicPaths = guideTopics.map((topic) => guidePath(topic.slug))
-  const allPaths = [...publicPaths, ...topicPaths]
+  const templatePaths = vorlagen.map((template) => vorlagePath(template.slug))
+  const allPaths = [...publicPaths, ...topicPaths, ...templatePaths]
 
   return ["bg", "de"].flatMap((locale) =>
     allPaths.map((path) => {
@@ -39,11 +42,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // A guide page is the most likely to have been edited, and its priority
       // reflects that it answers a specific question rather than being a hub.
       const isGuide = path.startsWith("/ratgeber/")
+      const isTemplate = path.startsWith("/vorlagen/")
       return {
         url: absoluteUrl(`/${locale}${path}`),
         lastModified: new Date(),
         changeFrequency: isRoot ? ("weekly" as const) : ("monthly" as const),
-        priority: isRoot ? 1 : isGuide ? 0.8 : 0.6,
+        priority: isRoot ? 1 : isGuide || isTemplate ? 0.8 : 0.6,
         alternates: {
           languages: {
             bg: absoluteUrl(`/bg${path}`),

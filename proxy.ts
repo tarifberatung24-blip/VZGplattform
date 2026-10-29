@@ -5,6 +5,7 @@ import { legacyRedirectTarget } from "./lib/navigation/legacy-redirects"
 import { isAffiliateOfferId } from "./lib/affiliate-offers"
 import { pathAliasTarget } from "./lib/navigation/path-aliases"
 import { isGuideSlug } from "./lib/ratgeber/slugs"
+import { isVorlageSlug } from "./lib/horizon/vorlagen/slugs"
 
 const localizedStaticPaths = new Set([
   "/", "/anspruch", "/kindergeld", "/za-nas", "/vertraege", "/documents", "/auth/login",
@@ -14,7 +15,7 @@ const localizedStaticPaths = new Set([
   "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/how-it-works",
   "/affiliate-hinweis", "/widerruf", "/app", "/functions", "/anfrage", "/zayavka",
   "/email-generator", "/pruefung", "/security", "/versicherungen", "/admin/editor", "/admin/users",
-  "/admin/forum", "/kosten-senken", "/forum", "/ratgeber",
+  "/admin/forum", "/kosten-senken", "/forum", "/ratgeber", "/vorlagen",
 ])
 
 function isKnownLocalizedPath(pathname: string) {
@@ -33,6 +34,10 @@ function isKnownLocalizedPath(pathname: string) {
   // status is committed to 200 — the unknown slug would answer as a soft 404.
   if (segments[0] === "ratgeber" && segments.length === 1) return true
   if (segments[0] === "ratgeber" && segments.length === 2 && isGuideSlug(segments[1])) return true
+  // Same reason as the guide slugs: the template page cannot set the status once the
+  // layout has begun streaming, so an unknown letter is rejected here and answered 404.
+  if (segments[0] === "vorlagen" && segments.length === 1) return true
+  if (segments[0] === "vorlagen" && segments.length === 2 && isVorlageSlug(segments[1])) return true
   if (segments[0] === "onboarding" && ["profile", "tour", "finish"].includes(segments[1] ?? "")) return true
   return false
 }

@@ -7,6 +7,7 @@ import { legalProfile } from "@/lib/legal-profile"
 import { breadcrumbJsonLd, itemListJsonLd, organizationJsonLd, webPageJsonLd } from "@/lib/seo/json-ld"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { GUIDE_INDEX_PATH, guideCategories, guidePath, guideTopics, guideTopicsByCategory } from "@/lib/ratgeber"
+import { VORLAGE_INDEX_PATH } from "@/lib/horizon/vorlagen"
 
 type Props = { params: Promise<{ locale: string }> }
 
@@ -122,6 +123,29 @@ export default async function GuideIndexPage({ params }: Props) {
             </section>
           )
         })}
+
+        <section className="paper mt-16 p-6 md:p-8" aria-labelledby="letters-heading">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            {isBg ? "Готови писма" : "Fertige Briefe"}
+          </p>
+          <h2 id="letters-heading" className="mt-3 text-xl font-bold">
+            {isBg ? "Има ли готово писмо за моя случай" : "Gibt es einen fertigen Brief für meinen Fall"}
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
+            {isBg
+              ? "За част от темите има готово немско писмо. Попълваш няколко полета и го виждаш готово, с твоите данни — преглеждаш го и решаваш дали да го изпратиш."
+              : "Zu einigen Themen gibt es einen fertigen deutschen Brief. Wenige Felder ausfüllen und ihn fertig sehen – mit deinen Daten. Prüfen und selbst entscheiden."}
+          </p>
+          <div className="mt-5">
+            <Link
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+              href={`/${locale}${VORLAGE_INDEX_PATH}`}
+            >
+              {isBg ? "Виж готовите писма" : "Fertige Briefe ansehen"}
+              <ArrowRight className="size-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
 
         <p className="mt-16 border-t border-border pt-6 text-xs leading-6 text-muted-foreground">
           {isBg

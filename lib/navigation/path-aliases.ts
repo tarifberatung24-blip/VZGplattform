@@ -27,6 +27,18 @@ export const pathAliases: Readonly<Record<string, string>> = {
   "/behoerden": "/ratgeber",
   "/aemter": "/ratgeber",
   "/hilfe": "/ratgeber",
+  // The letters, under the names a German speaker types. Someone who needs a
+  // Mängelanzeige searches for "Mängelanzeige", not "vorlagen", so the letter's own
+  // German name has to be a reachable URL rather than a 404.
+  "/briefe": "/vorlagen",
+  "/briefvorlagen": "/vorlagen",
+  "/musterschreiben": "/vorlagen",
+  "/vorlage": "/vorlagen",
+  "/mangelanzeige": "/vorlagen/mangelanzeige",
+  "/maengelanzeige": "/vorlagen/mangelanzeige",
+  "/widerspruch": "/vorlagen/widerspruch",
+  "/urlaubsantrag": "/vorlagen/urlaubsantrag",
+  "/arbeitszeugnis": "/vorlagen/arbeitszeugnis-anfordern",
   // Insurance and the financial topics.
   "/versicherung": "/versicherungen",
   "/finanzen": "/finanzbildung",

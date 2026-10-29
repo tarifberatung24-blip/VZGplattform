@@ -16,6 +16,7 @@ export type HowItWorksServiceId =
   | "document_explanation"
   | "inkasso"
   | "documents"
+  | "vorlagen"
   | "agentur"
   | "jobcenter"
   | "termination"
@@ -117,6 +118,16 @@ export const howItWorksCopy: Record<Locale, HowItWorksCopy> = {
             result: "Едно подредено място за важните документи.",
             cta: "Отвори документите",
             href: "/documents",
+          },
+          {
+            id: "vorlagen",
+            title: "Готови писма",
+            problem: "Трябва да изпратиш немско писмо и не знаеш как се пише.",
+            steps: ["Избираш писмото.", "Попълваш няколко полета.", "Виждаш готовия немски текст и го изтегляш."],
+            resultLabel: "Получаваш",
+            result: "Готово немско писмо с твоите данни, което преглеждаш преди да изпратиш.",
+            cta: "Отвори готовите писма",
+            href: "/vorlagen",
           },
         ],
       },
@@ -304,6 +315,16 @@ export const howItWorksCopy: Record<Locale, HowItWorksCopy> = {
             result: "Ein geordneter Ort für wichtige Dokumente.",
             cta: "Dokumente öffnen",
             href: "/documents",
+          },
+          {
+            id: "vorlagen",
+            title: "Fertige Briefe",
+            problem: "Du musst einen deutschen Brief senden und weißt nicht, wie er formuliert wird.",
+            steps: ["Du wählst den Brief.", "Du füllst wenige Felder aus.", "Du siehst den fertigen deutschen Text und lädst ihn herunter."],
+            resultLabel: "Ergebnis",
+            result: "Ein fertiger deutscher Brief mit deinen Daten, den du vor dem Versand prüfst.",
+            cta: "Fertige Briefe öffnen",
+            href: "/vorlagen",
           },
         ],
       },
