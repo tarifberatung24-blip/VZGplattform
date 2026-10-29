@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { pathAliases } from "@/lib/navigation/path-aliases"
 import { guideCategories, guidePath, guideTopics, findGuideTopic } from "@/lib/ratgeber"
 import { GUIDE_SLUGS } from "@/lib/ratgeber/slugs"
+import { findVorlage } from "@/lib/horizon/vorlagen"
 import { locales } from "@/lib/i18n/routing"
 
 /**
@@ -69,8 +70,8 @@ describe("guide corpus", () => {
   })
 
   it("points every alias at a path that exists", () => {
-    // The alias targets are either a known static route or a real guide topic. A
-    // target that is neither would redirect the reader to a 404.
+    // The alias targets are either a known static route or a real guide topic or a
+    // real letter. A target that is none of these would redirect the reader to a 404.
     const staticTargets = new Set([
       "/contact",
       "/documents",
@@ -79,10 +80,12 @@ describe("guide corpus", () => {
       "/ratgeber",
       "/steuer",
       "/versicherungen",
+      "/vorlagen",
     ])
     for (const [from, to] of Object.entries(pathAliases)) {
       const isGuide = to.startsWith("/ratgeber/") && findGuideTopic(to.slice("/ratgeber/".length)) !== undefined
-      expect(staticTargets.has(to) || isGuide, `${from} -> ${to} does not exist`).toBe(true)
+      const isVorlage = to.startsWith("/vorlagen/") && findVorlage(to.slice("/vorlagen/".length)) !== undefined
+      expect(staticTargets.has(to) || isGuide || isVorlage, `${from} -> ${to} does not exist`).toBe(true)
     }
   })
 })

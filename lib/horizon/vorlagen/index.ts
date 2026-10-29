@@ -90,3 +90,29 @@ export function vorlageForGuide(guideSlug: string): VorlageTemplate | undefined 
 
 /** The guide-to-template map, exposed so a test can prove both ends exist. */
 export const guideVorlageMap: Readonly<Record<string, string>> = guideToVorlage
+
+/**
+ * The guide that explains a template, where one does.
+ *
+ * The guide pages already offer the matching letter, so a reader arrives here from
+ * a guide. Without the reverse link the traffic is one-way: the letter page is a
+ * dead end for a search engine and for a reader who wants the rule behind the
+ * letter before sending it. This closes the loop.
+ *
+ * It is a separate explicit map rather than a derivation of `guideToVorlage`,
+ * because a guide can point at a letter while the letter's *best* reading is a
+ * different guide. Only the two letters with a fitting guide appear; the other two
+ * link to the guide index instead of a topic that would not answer them.
+ */
+const vorlageToGuide: Readonly<Record<string, string>> = {
+  mangelanzeige: "mietvertrag",
+  widerspruch: "jobcenter",
+}
+
+/** The guide slug that explains a template, or undefined when none fits. */
+export function guideForVorlage(vorlageSlug: string): string | undefined {
+  return vorlageToGuide[vorlageSlug]
+}
+
+/** The template-to-guide map, exposed so a test can prove the two maps agree. */
+export const vorlageGuideMap: Readonly<Record<string, string>> = vorlageToGuide

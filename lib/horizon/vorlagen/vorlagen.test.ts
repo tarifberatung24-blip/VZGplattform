@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { formatGermanDate } from "@/lib/horizon/letters/format"
 import { findGuideTopic, guideTopics } from "@/lib/ratgeber"
-import { guideVorlageMap, vorlagen, vorlageCategories, vorlageForGuide, vorlagePath, findVorlage } from "@/lib/horizon/vorlagen"
+import { guideVorlageMap, vorlageGuideMap, vorlagen, vorlageCategories, vorlageForGuide, vorlagePath, findVorlage } from "@/lib/horizon/vorlagen"
 import { VORLAGE_SLUGS } from "@/lib/horizon/vorlagen/slugs"
 import { locales } from "@/lib/i18n/routing"
 
@@ -93,6 +93,24 @@ describe("vorlagen corpus", () => {
       } else {
         expect(template, `${topic.slug} unexpectedly resolves`).toBeUndefined()
       }
+    }
+  })
+
+  it("points every reverse guide link at a topic that exists", () => {
+    // The reverse map is what makes the letter page a route into the explanation
+    // rather than a dead end, so a stale slug here would be a broken link on a
+    // published page rather than a silent miss.
+    for (const [vorlageSlug, guideSlug] of Object.entries(vorlageGuideMap)) {
+      expect(findVorlage(vorlageSlug), `template ${vorlageSlug} does not exist`).toBeDefined()
+      expect(findGuideTopic(guideSlug), `guide ${guideSlug} does not exist`).toBeDefined()
+    }
+  })
+
+  it("only reverses a link the guide also declares, so the pair stays mutual", () => {
+    // A one-sided reverse link would send a reader from the letter to a guide that
+    // does not offer the letter back, which is the dead end this map exists to close.
+    for (const [vorlageSlug, guideSlug] of Object.entries(vorlageGuideMap)) {
+      expect(guideVorlageMap[guideSlug], `${vorlageSlug} -> ${guideSlug} is not mutual`).toBe(vorlageSlug)
     }
   })
 

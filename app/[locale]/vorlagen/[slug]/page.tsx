@@ -8,7 +8,8 @@ import { legalProfile } from "@/lib/legal-profile"
 import { breadcrumbJsonLd, faqJsonLd, organizationJsonLd, serviceJsonLd, webPageJsonLd } from "@/lib/seo/json-ld"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { canonicalUrl } from "@/lib/seo/site"
-import { VORLAGE_INDEX_PATH, findVorlage, vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
+import { findGuideTopic, guidePath } from "@/lib/ratgeber"
+import { VORLAGE_INDEX_PATH, findVorlage, guideForVorlage, vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
 import { VorlageForm } from "./vorlage-form"
 
 type Props = { params: Promise<{ locale: string; slug: string }> }
@@ -50,11 +51,25 @@ export default async function VorlagePage({ params }: Props) {
   const indexLabel = isBg ? "Готови писма" : "Fertige Briefe"
   const otherTemplates = vorlagen.filter((item) => item.slug !== slug).slice(0, 3)
 
+  // The guide that explains the rule behind the letter. The guide pages already
+  // offer this letter, so without the reverse link a reader arriving from a search
+  // engine lands on a page with no route to the explanation of why it exists.
+  const guideSlug = guideForVorlage(slug)
+  const guide = guideSlug ? findGuideTopic(guideSlug) : undefined
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <JsonLdScript
         data={[
-          webPageJsonLd({ path: vorlagePath(slug), locale, title: content.title, description: content.summary }),
+          webPageJsonLd({
+            path: vorlagePath(slug),
+            locale,
+            title: content.title,
+            description: content.summary,
+            // The guide that explains this letter, so the pair is not read as two
+            // competing documents for the same search.
+            relatedPaths: guide ? [guidePath(guide.slug)] : undefined,
+          }),
           serviceJsonLd({ path: vorlagePath(slug), locale, name: content.title, description: content.summary }),
           organizationJsonLd(legalProfile),
           faqJsonLd(content.faq),
@@ -176,6 +191,31 @@ export default async function VorlagePage({ params }: Props) {
             ))}
           </ul>
         </section>
+
+        {guide && (
+          <section className="paper mt-14 border-primary/30 p-6 md:p-8" aria-labelledby="guide-heading">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+              {isBg ? "Наръчник" : "Ratgeber"}
+            </p>
+            <h2 id="guide-heading" className="mt-3 text-xl font-bold">
+              {isBg ? "Прочети правилото зад писмото" : "Die Regel hinter dem Brief nachlesen"}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              {isBg
+                ? `Преди да изпратиш, виж как работи процедурата и какво се обърква най-често: ${guide.content[locale].title}.`
+                : `Vor dem Versand nachlesen, wie das Verfahren läuft und was typischerweise schiefgeht: ${guide.content[locale].title}.`}
+            </p>
+            <div className="mt-5">
+              <Link
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                href={`/${locale}${guidePath(guide.slug)}`}
+              >
+                {isBg ? "Отвори темата" : "Thema öffnen"}
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+          </section>
+        )}
 
         {otherTemplates.length > 0 && (
           <section className="mt-16" aria-labelledby="more-heading">

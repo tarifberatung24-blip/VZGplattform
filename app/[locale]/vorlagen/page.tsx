@@ -6,8 +6,10 @@ import { isLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { legalProfile } from "@/lib/legal-profile"
 import { breadcrumbJsonLd, itemListJsonLd, organizationJsonLd, webPageJsonLd } from "@/lib/seo/json-ld"
 import { pageMetadata } from "@/lib/seo/metadata"
+import { findGuideTopic, guidePath } from "@/lib/ratgeber"
 import {
   VORLAGE_INDEX_PATH,
+  guideForVorlage,
   vorlageCategories,
   vorlagePath,
   vorlagen,
@@ -32,6 +34,9 @@ const indexCopy = {
     why: "Защо не празен формуляр",
     whyBody:
       "Празният формуляр оставя най-трудното на теб: да измислиш немските формулировки. Тук писмото е вече написано. Нищо не се изпраща — преглеждаш го и решаваш.",
+    explain: "Разбери процедурата",
+    explainBody:
+      "Всяко писмо има смисъл само в контекста на една процедура. Наръчникът обяснява стъпките, документите и най-честите грешки.",
   },
   de: {
     title: "Fertige Briefe für Deutschland – mit deinen Daten",
@@ -44,8 +49,24 @@ const indexCopy = {
     why: "Warum kein leeres Formular",
     whyBody:
       "Ein leeres Formular überlässt dir das Schwerste: die deutschen Formulierungen. Hier ist der Brief schon geschrieben. Nichts wird versendet – du prüfst und entscheidest.",
+    explain: "Das Verfahren verstehen",
+    explainBody:
+      "Ein Brief wirkt nur im Zusammenhang eines Verfahrens. Der Ratgeber erklärt die Schritte, die Unterlagen und die häufigsten Fehler.",
   },
 } as const
+
+/**
+ * The guide links shown above the letter list.
+ *
+ * They come from the same map that puts a letter on a guide page, so the two
+ * directions cannot drift: a guide that offers a letter also appears here, with its
+ * own title in each locale.
+ */
+const explainLinks = vorlagen.flatMap((template) => {
+  const guideSlug = guideForVorlage(template.slug)
+  const guide = guideSlug ? findGuideTopic(guideSlug) : undefined
+  return guide ? [{ path: guidePath(guide.slug), title: guide.content }] : []
+})
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: raw } = await params
@@ -107,6 +128,26 @@ export default async function VorlageIndexPage({ params }: Props) {
             {copy.why}
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">{copy.whyBody}</p>
+        </section>
+
+        <section className="mt-10" aria-labelledby="explain-heading">
+          <h2 id="explain-heading" className="text-lg font-bold">
+            {copy.explain}
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">{copy.explainBody}</p>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {explainLinks.map((item) => (
+              <li key={item.path}>
+                <Link
+                  href={`/${locale}${item.path}`}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:border-primary/40"
+                >
+                  {item.title[locale].title}
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {vorlageCategories.map((category) => {

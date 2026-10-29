@@ -4,12 +4,13 @@ import { buildPathGeometry } from "./feature-path"
 
 
 describe("how-it-works copy", () => {
-  it("documents the same fifteen services in both locales", () => {
+  it("documents the same sixteen services in both locales", () => {
     const expected = [
       "guide",
       "document_explanation",
       "inkasso",
       "documents",
+      "vorlagen",
       "agentur",
       "jobcenter",
       "termination",

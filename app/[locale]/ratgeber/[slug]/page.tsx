@@ -56,7 +56,15 @@ export default async function GuideTopicPage({ params }: Props) {
     <main className="min-h-screen bg-background text-foreground">
       <JsonLdScript
         data={[
-          webPageJsonLd({ path: guidePath(slug), locale, title: content.title, description: content.summary }),
+          webPageJsonLd({
+            path: guidePath(slug),
+            locale,
+            title: content.title,
+            description: content.summary,
+            // The letter this guide offers, named as a companion so a crawler reads
+            // the two as one topic with a reading step and a doing step.
+            relatedPaths: letter ? [vorlagePath(letter.slug)] : undefined,
+          }),
           organizationJsonLd(legalProfile),
           faqJsonLd(content.faq),
           breadcrumbJsonLd(
