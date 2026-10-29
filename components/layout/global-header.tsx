@@ -54,6 +54,7 @@ export function GlobalHeader() {
       ? {
           home: "Startseite",
           howItWorks: "So funktioniert's",
+          ratgeber: "Ratgeber",
           forum: "HORIZON Forum",
           security: "Sicherheit",
           contact: "Kontakt",
@@ -66,6 +67,7 @@ export function GlobalHeader() {
       : {
           home: "Начало",
           howItWorks: "Как работи",
+          ratgeber: "Наръчник",
           forum: "HORIZON Forum",
           security: "Сигурност",
           contact: "Контакт",
@@ -89,6 +91,7 @@ export function GlobalHeader() {
 
   const navLinks: { href: string; labelKey: keyof typeof labels }[] = [
     { href: "/how-it-works", labelKey: "howItWorks" },
+    { href: "/ratgeber", labelKey: "ratgeber" },
     { href: "/forum", labelKey: "forum" },
     { href: "/security", labelKey: "security" },
     { href: "/contact", labelKey: "contact" },

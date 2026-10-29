@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { defaultLocale, isLocale, LOCALE_COOKIE_KEY, stripLocale } from "./lib/i18n/routing"
 import { legacyRedirectTarget } from "./lib/navigation/legacy-redirects"
 import { isAffiliateOfferId } from "./lib/affiliate-offers"
+import { pathAliasTarget } from "./lib/navigation/path-aliases"
+import { isGuideSlug } from "./lib/ratgeber/slugs"
 
 const localizedStaticPaths = new Set([
   "/", "/anspruch", "/kindergeld", "/za-nas", "/vertraege", "/documents", "/auth/login",
@@ -12,7 +14,7 @@ const localizedStaticPaths = new Set([
   "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/how-it-works",
   "/affiliate-hinweis", "/widerruf", "/app", "/functions", "/anfrage", "/zayavka",
   "/email-generator", "/pruefung", "/security", "/versicherungen", "/admin/editor", "/admin/users",
-  "/admin/forum", "/kosten-senken", "/forum",
+  "/admin/forum", "/kosten-senken", "/forum", "/ratgeber",
 ])
 
 function isKnownLocalizedPath(pathname: string) {
@@ -25,6 +27,12 @@ function isKnownLocalizedPath(pathname: string) {
   if (segments[0] === "p" && segments.length === 2) return true
   if (segments[0] === "admin" && segments[1] === "users" && segments.length === 3) return true
   if (segments[0] === "guide" && (segments.length === 1 || segments.length === 2)) return true
+  // A guide topic is checked against the slug list rather than the corpus, so an
+  // unknown slug is rejected here. The page's own `notFound()` cannot do it: the root
+  // layout reads cookies, so every response is already streaming by then and the
+  // status is committed to 200 — the unknown slug would answer as a soft 404.
+  if (segments[0] === "ratgeber" && segments.length === 1) return true
+  if (segments[0] === "ratgeber" && segments.length === 2 && isGuideSlug(segments[1])) return true
   if (segments[0] === "onboarding" && ["profile", "tour", "finish"].includes(segments[1] ?? "")) return true
   return false
 }
@@ -68,6 +76,16 @@ export async function proxy(request: NextRequest) {
   if (legacyTarget) {
     const url = request.nextUrl.clone()
     url.pathname = isLocale(segment) ? `/${segment}${legacyTarget}` : legacyTarget
+    url.search = ""
+    return NextResponse.redirect(url, 308)
+  }
+
+  // German synonyms for routes that exist under an English or Bulgarian name. A German-speaking
+  // reader types `Bürgeramt`, not `contact`; before this map the most likely guess was a 404.
+  const aliasTarget = pathAliasTarget(stripLocale(pathname))
+  if (aliasTarget) {
+    const url = request.nextUrl.clone()
+    url.pathname = isLocale(segment) ? `/${segment}${aliasTarget}` : aliasTarget
     url.search = ""
     return NextResponse.redirect(url, 308)
   }

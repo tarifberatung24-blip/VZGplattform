@@ -32,6 +32,9 @@ import FinanzbildungPage from "@/app/finanzbildung/page"
 import HowItWorksPage from "@/app/[locale]/how-it-works/page"
 import { hasSupabaseConfig } from "@/lib/supabase/config"
 import { createClient } from "@/lib/supabase/server"
+import { isLocale, defaultLocale } from "@/lib/i18n/dictionaries"
+import { publicPageMetaFor } from "@/lib/seo/public-pages"
+import { pageMetadata } from "@/lib/seo/metadata"
 
 /**
  * Onboarding outlet for the localized catch-all. The four real step pages live
@@ -66,10 +69,26 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
-  const {slug = []} = await params
-  return isKintexWorkspacePath(`/${slug.join("/")}`)
-    ? { title: { absolute: "HORIZON by VZG — VZG CONSULT" }, description: "HORIZON by VZG — administrative support for life in Germany" }
-    : {}
+  const {locale: rawLocale, slug = []} = await params
+  const path = slug.join("/")
+
+  if (isKintexWorkspacePath(`/${path}`)) {
+    return { title: { absolute: "HORIZON by VZG — VZG CONSULT" }, description: "HORIZON by VZG — administrative support for life in Germany" }
+  }
+
+  // Every page in `pages` below renders as a child of this route, so its own
+  // `metadata` export never runs and this is the only metadata a crawler sees.
+  // Returning `{}` here shipped one title for all sixteen public pages.
+  const locale = isLocale(rawLocale) ? rawLocale : defaultLocale
+  const meta = publicPageMetaFor(path)
+  if (!meta) return {}
+  return pageMetadata({
+    path: `/${path}`,
+    locale,
+    title: meta.title[locale],
+    description: meta.description[locale],
+    keywords: meta.keywords?.[locale],
+  })
 }
 
 export default async function LocalizedPage({params}: {params: Promise<{locale: string; slug?: string[]}>}) {
