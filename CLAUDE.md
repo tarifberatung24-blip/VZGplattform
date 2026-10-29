@@ -19,14 +19,6 @@ A `SessionStart` hook in `.claude/settings.json` runs `node scripts/terra-prefli
 secret values). Then declare `ACTIVE_PHASE`, `ALLOWED_FILES`, `FROZEN_FILES / SYSTEMS`, `OUT_OF_SCOPE` and load
 phase context with `node scripts/horizon-context.mjs <PHASE>`.
 
-## Code navigation: codebase-memory-mcp
-
-`.mcp.json` registers `codebase-memory-mcp` (install: `npm install -g codebase-memory-mcp`). Prefer it over
-blind grep for "who calls X", impact analysis and architecture questions: `search_graph`, `trace_path`,
-`get_code_snippet`, `get_architecture`. Index once per machine with `index_repository` on the repo root. It is a
-navigation aid, not a source of truth: confirm anything load-bearing in the file itself. Use `rg` for literals
-and for `supabase/` SQL (the SQL parser is partial).
-
 ## Supabase
 
 `.mcp.json` registers the Supabase MCP for project `mteguzgbiuexmdcrqajj` in **read-only** mode. Schema, RLS,
