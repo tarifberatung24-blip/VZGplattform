@@ -1039,6 +1039,17 @@
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+  /* The shared rule anchors at left:50%, which leaves only the right half of the
+     stage as available width. Uppercase with this tracking then overflows a phone
+     and gets clipped, so the line takes the full stage width and wraps instead. */
+  left: 0;
+  right: 0;
+  translate: 0;
+  max-width: 92cqi;
+  margin-inline: auto;
+  white-space: normal;
+  text-align: center;
+  text-wrap: balance;
 }
 .env-closed-cta { top: calc(45% + 25.4cqi + 1.75rem); }
 .env-stage:not([data-stage="closed"]) :is(.env-closed-eyebrow, .env-closed-cta) { opacity: 0; pointer-events: none; }

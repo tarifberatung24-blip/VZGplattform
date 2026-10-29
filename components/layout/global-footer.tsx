@@ -31,7 +31,7 @@ export function GlobalFooter() {
 
   return (
     <footer className="glass-chrome relative border-t backdrop-blur-xl backdrop-saturate-150">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-5 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-8">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-2 px-5 pt-4 pb-24 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between md:pb-4 lg:px-8">
         <span>
           {"© 2026 "}
           <HorizonWordmark />
@@ -42,7 +42,7 @@ export function GlobalFooter() {
             <Link
               key={link.href}
               href={localizedPath(link.href, locale)}
-              className="inline-flex min-h-8 items-center transition-colors hover:text-foreground"
+              className="inline-flex min-h-11 items-center transition-colors hover:text-foreground md:min-h-8"
             >
               {link.label}
             </Link>
@@ -50,7 +50,7 @@ export function GlobalFooter() {
           <button
             type="button"
             onClick={openCookieSettings}
-            className="inline-flex min-h-8 items-center transition-colors hover:text-foreground"
+            className="inline-flex min-h-11 items-center transition-colors hover:text-foreground md:min-h-8"
           >
             {cookieNoticeCopy[locale].settingsLink}
           </button>

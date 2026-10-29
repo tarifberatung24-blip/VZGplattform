@@ -178,7 +178,7 @@ export const envelopeCopy: Record<Locale, EnvelopeCopy> = {
   bg: {
     regionLabel: "Пример: как Horizon превръща немско писмо в ясен план",
     sample: "Пример",
-    eyebrow: "Кликни върху писмото и разбери как работи системата ни",
+    eyebrow: "Кликни върху писмото - разбери как ти помага Horizon",
     open: "Отвори писмото",
     before: "Ти получаваш в този вид писмено известие",
     after: "Ето какво ще покаже клиентското ти табло HORIZON",
@@ -277,7 +277,7 @@ export const envelopeCopy: Record<Locale, EnvelopeCopy> = {
   de: {
     regionLabel: "Beispiel: So macht Horizon aus einem deutschen Brief einen klaren Plan",
     sample: "Beispiel",
-    eyebrow: "Klicke auf den Brief und sieh, wie unser System funktioniert",
+    eyebrow: "Klicke auf den Brief - sieh, wie Horizon dir hilft",
     open: "Brief öffnen",
     before: "So erhältst du eine schriftliche Mitteilung",
     after: "Das zeigt dir dein HORIZON Dashboard",
