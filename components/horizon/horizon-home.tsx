@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModuleInfoDialog } from "@/components/horizon/module-info-dialog"
+import { QuickServices } from "@/components/dashboard/quick-services"
 import {
   Dialog,
   DialogContent,
@@ -186,6 +187,8 @@ export function HorizonHome({
         })}
         <InkassoCard locale={locale} />
       </div>
+
+      <QuickServices />
     </section>
   )
 }

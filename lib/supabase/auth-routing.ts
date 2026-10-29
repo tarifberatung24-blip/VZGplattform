@@ -18,6 +18,7 @@ const protectedPrefixes = [
   "/guide",
   "/pruefung",
   "/kosten-senken",
+  "/schufa",
   "/auth/update-password",
   "/onboarding",
 ]

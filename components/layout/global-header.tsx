@@ -3,17 +3,34 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, ArrowRight } from "lucide-react"
+import { ArrowRight, ChevronDown, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { ServiceSearch } from "@/components/navigation/service-search"
+import { AiSearch } from "@/components/search/ai-search"
 import { localizedPath, stripLocale } from "@/lib/i18n/routing"
 import { isKintexWorkspacePath, isSelfChromedPath } from "@/lib/kintex-navigation"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { authenticatedHomePath } from "@/lib/supabase/auth-routing"
 
+/**
+ * The public Layer 0 header.
+ *
+ * One trigger ("Меню" / "Menü") holds every public destination, so the bar stays
+ * a brand, a search field and one menu instead of a row of links that is hard to
+ * scan and worse on a phone. The dropdown lists the same destinations the mobile
+ * sheet does, so the two widths cannot drift.
+ */
 export function GlobalHeader() {
   const pathname = usePathname() ?? "/"
   const locale = pathname.startsWith("/de") ? "de" : "bg"
@@ -109,32 +126,75 @@ export function GlobalHeader() {
           <span className="logo-mask h-6 w-auto text-foreground sm:h-8" />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
-          <Link
-            href={homeHref}
-            className={cn(
-              "px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
-              isActivePath("/") ? "text-foreground" : ""
-            )}
-          >
-            {labels.home}
-          </Link>
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={localizedPath(link.href, locale)}
-              className={cn(
-                "px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
-                isActivePath(link.href) ? "text-foreground" : ""
-              )}
+        <div className="hidden min-w-0 items-center gap-2 md:flex">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-4 text-sm font-bold text-foreground transition-colors hover:bg-secondary"
+                />
+              }
             >
-              {labels[link.labelKey]}
-            </Link>
-          ))}
-        </nav>
+              <Menu className="size-4" aria-hidden="true" />
+              {labels.menu}
+              <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-60">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{labels.menu}</DropdownMenuLabel>
+                <DropdownMenuItem
+                  render={
+                    <Link
+                      href={homeHref}
+                      className={cn("flex w-full items-center gap-2", isActivePath("/") ? "font-semibold" : "")}
+                    />
+                  }
+                >
+                  {labels.home}
+                </DropdownMenuItem>
+                {navLinks.map((link) => (
+                  <DropdownMenuItem
+                    key={link.href}
+                    render={
+                      <Link
+                        href={localizedPath(link.href, locale)}
+                        className={cn("flex w-full items-center gap-2", isActivePath(link.href) ? "font-semibold" : "")}
+                      />
+                    }
+                  >
+                    {labels[link.labelKey]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              {sessionReady && sessionActive ? (
+                <DropdownMenuItem
+                  render={<Link href={localizedPath("/dashboard", locale)} className="flex w-full items-center gap-2" />}
+                >
+                  {labels.dashboard}
+                  <ArrowRight className="ml-auto size-4" aria-hidden="true" />
+                </DropdownMenuItem>
+              ) : sessionReady ? (
+                <>
+                  <DropdownMenuItem
+                    render={<Link href={localizedPath("/auth/login", locale)} className="flex w-full items-center gap-2" />}
+                  >
+                    {labels.login}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    render={<Link href={localizedPath("/auth/sign-up", locale)} className="flex w-full items-center gap-2" />}
+                  >
+                    {labels.register}
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         <div className="flex min-w-0 items-center gap-2">
-          <ServiceSearch className="hidden lg:inline-flex" />
+          <AiSearch className="hidden sm:inline-flex" />
           {/* Both switchers drop into the mobile menu below `sm`: at 390px the
               brand, a switcher, the register CTA and the menu button already
               exceed the viewport and clip the menu button. */}
@@ -160,7 +220,7 @@ export function GlobalHeader() {
                 asChild
                 variant="ghost"
                 size="sm"
-                className="hidden rounded-md md:inline-flex"
+                className="hidden rounded-md lg:inline-flex"
               >
                 <Link href={localizedPath("/auth/login", locale)}>
                   {labels.login}
@@ -195,7 +255,7 @@ export function GlobalHeader() {
       {mobileOpen && (
         <div className="glass-chrome border-t backdrop-blur-xl backdrop-saturate-150 md:hidden">
           <nav className="flex flex-col gap-1 px-4 py-4">
-            <ServiceSearch className="mb-2 w-full justify-center" />
+            <AiSearch className="mb-2 w-full justify-center" />
             <Link
               href={homeHref}
               onClick={closeMobile}
