@@ -29,6 +29,12 @@ import {
   type KuendigungFacts,
   type KuendigungTiming,
 } from "./facts"
+import { formatGermanDate } from "@/lib/horizon/letters/format"
+
+// Re-exported from the shared module so the two letters cannot disagree about what
+// a German date is. The signature and behaviour are unchanged, so this module's
+// public surface — and every existing caller — is unaffected.
+export { formatGermanDate }
 
 export type KuendigungLetterInput = {
   facts: KuendigungFacts
@@ -46,14 +52,6 @@ export type KuendigungLetter = {
   recipient: string | null
   /** Facts that were available but are not confirmed, surfaced for the user. */
   omittedFactKeys: readonly string[]
-}
-
-/** `2026-03-31` → `31.03.2026`. Returns null for anything not a plain ISO date. */
-export function formatGermanDate(iso: string | null): string | null {
-  if (!iso) return null
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim())
-  if (!match) return null
-  return `${match[3]}.${match[2]}.${match[1]}`
 }
 
 /**

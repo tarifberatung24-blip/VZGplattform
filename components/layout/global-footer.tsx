@@ -19,6 +19,7 @@ export function GlobalFooter() {
 
   const links = [
     { href: "/ratgeber", label: isDe ? "Ratgeber" : "Наръчник" },
+    { href: "/vorlagen", label: isDe ? "Vorlagen" : "Готови писма" },
     { href: "/impressum", label: isDe ? "Impressum" : "Импресум" },
     {
       href: "/datenschutz",

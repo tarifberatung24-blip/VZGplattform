@@ -10,6 +10,7 @@ import { breadcrumbJsonLd, faqJsonLd, organizationJsonLd, webPageJsonLd } from "
 import { pageMetadata } from "@/lib/seo/metadata"
 import { canonicalUrl } from "@/lib/seo/site"
 import { findGuideTopic, guidePath, guideTopics } from "@/lib/ratgeber"
+import { vorlageForGuide, vorlagePath } from "@/lib/horizon/vorlagen"
 
 type Props = { params: Promise<{ locale: string; slug: string }> }
 
@@ -49,6 +50,7 @@ export default async function GuideTopicPage({ params }: Props) {
 
   const indexLabel = isBg ? "Наръчник" : "Ratgeber"
   const otherTopics = guideTopics.filter((item) => item.slug !== slug).slice(0, 4)
+  const letter = vorlageForGuide(slug)
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -190,6 +192,28 @@ export default async function GuideTopicPage({ params }: Props) {
             ))}
           </ul>
         </section>
+
+        {letter && (
+          <section className="paper mt-14 border-primary/30 p-6 md:p-8" aria-labelledby="letter-heading">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{letter.germanName}</p>
+            <h2 id="letter-heading" className="mt-3 text-xl font-bold">
+              {isBg ? "Подготви писмото за това" : "Den passenden Brief vorbereiten"}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              {isBg
+                ? `За тази тема има готово писмо: ${letter.content[locale].title}. Попълваш няколко полета и го виждаш готово на немски, с твоите данни.`
+                : `Zu diesem Thema gibt es einen fertigen Brief: ${letter.content[locale].title}. Wenige Felder ausfüllen und ihn fertig auf Deutsch sehen – mit deinen Daten.`}
+            </p>
+            <div className="mt-5">
+              <Button asChild>
+                <Link href={`/${locale}${vorlagePath(letter.slug)}`}>
+                  {isBg ? "Отвори писмото" : "Brief öffnen"}
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+          </section>
+        )}
 
         <section className="paper mt-14 p-6 md:p-8">
           <h2 className="text-xl font-bold">{isBg ? "Не искаш да го правиш сам" : "Nicht selbst erledigen wollen"}</h2>
