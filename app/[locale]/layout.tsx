@@ -3,6 +3,7 @@ import {NextIntlClientProvider} from "next-intl"
 import {getMessages, setRequestLocale} from "next-intl/server"
 import {notFound} from "next/navigation"
 import {routing, type Locale} from "@/i18n/routing"
+import {SITE_NAME, absoluteUrl} from "@/lib/seo/site"
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}))
@@ -42,9 +43,18 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
       },
     },
     openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
       title: content.title,
       description: content.description,
       locale: locale === "de" ? "de_DE" : "bg_BG",
+      images: [{ url: absoluteUrl("/logo-horizon.png"), width: 1217, height: 174, alt: SITE_NAME }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: content.title,
+      description: content.description,
+      images: [absoluteUrl("/logo-horizon.png")],
     },
   }
 }

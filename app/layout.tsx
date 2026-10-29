@@ -16,6 +16,10 @@ import { SmokeLayer } from "@/components/marketing/smoke-layer"
 import { LanguageProvider } from "@/lib/i18n/language-context"
 import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/language-context"
+import { SITE_URL } from "@/lib/seo/site"
+import { JsonLdScript } from "@/components/seo/json-ld-script"
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/json-ld"
+import { legalProfile } from "@/lib/legal-profile"
 import "./globals.css"
 
 const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" })
@@ -23,7 +27,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vzgplattform.onrender.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "HORIZON by VZG — VZG CONSULT",
     template: "%s · HORIZON by VZG",
@@ -92,6 +96,10 @@ export default async function RootLayout({
         {/* impact.com site verification: the same id as a meta tag and as the plain text segment. */}
         <meta name="Impact-Site-Verification" content={IMPACT_SITE_VERIFICATION_ID} />
         <script type="text/plain" data-impact-site-verification dangerouslySetInnerHTML={{ __html: IMPACT_SITE_VERIFICATION_TEXT }} />
+        {/* Publisher and site identity, on every page. Rendered here rather than per
+            page because a crawler may land on any URL first, and the site-level facts
+            (who publishes it, what it is) do not depend on which page that was. */}
+        <JsonLdScript data={[organizationJsonLd(legalProfile), webSiteJsonLd(initialLocale)]} />
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider>
