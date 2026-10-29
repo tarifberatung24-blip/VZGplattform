@@ -63,7 +63,7 @@ describe("hero envelope cases", () => {
   })
 
   it("uses the owner-approved Bulgarian explanation in the active demo", () => {
-    expect(envelopeCopy.bg.eyebrow).toBe("Кликни върху писмото и разбери как работи системата ни")
+    expect(envelopeCopy.bg.eyebrow).toBe("Кликни върху писмото - разбери как ти помага Horizon")
     expect(envelopeCopy.bg.before).toBe("Ти получаваш в този вид писмено известие")
     expect(envelopeCopy.bg.after).toBe("Ето какво ще покаже клиентското ти табло HORIZON")
     expect(envelopeCopy.bg.upload).toBe("Качи писмото в HORIZON")
