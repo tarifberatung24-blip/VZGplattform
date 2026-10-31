@@ -23,7 +23,7 @@ import { isLocale, defaultLocale, type Locale } from "@/lib/i18n/dictionaries"
 import { legalProfile } from "@/lib/legal-profile"
 import { breadcrumbJsonLd, itemListJsonLd, organizationJsonLd, webPageJsonLd } from "@/lib/seo/json-ld"
 import { pageMetadata } from "@/lib/seo/metadata"
-import { GUIDE_INDEX_PATH, guideCategories, guidePath, guideTopics, guideTopicsByCategory } from "@/lib/ratgeber"
+import { guideCategories, guidePath, guideTopics, guideTopicsByCategory } from "@/lib/ratgeber"
 import { vorlageCategories, vorlagePath, vorlagen, vorlagenByCategory } from "@/lib/horizon/vorlagen"
 import { LEARNING_CENTER_PATH, learningCenterCopy, type LearningPath, type LearningCenterCopy } from "@/lib/learning-center/copy"
 
@@ -193,7 +193,6 @@ export default async function LearningCenterPage({ params }: Props) {
             locale,
             title: copy.title,
             description: copy.intro,
-            relatedPaths: [GUIDE_INDEX_PATH],
           }),
           organizationJsonLd(legalProfile),
           itemListJsonLd({

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { learningCenterCopy, LEARNING_CENTER_PATH, LEARNING_PATH_ANCHORS } from "./copy"
 import { learningCenterRedirects, learningCenterRedirectTarget } from "@/lib/navigation/learning-center-redirects"
@@ -92,5 +92,22 @@ describe("learning center redirects", () => {
       expect(target.path).toBe(LEARNING_CENTER_PATH)
       expect(Object.values(LEARNING_PATH_ANCHORS)).toContain(target.hash)
     }
+  })
+
+  it("does not link the learning center back to a route that redirects to it", () => {
+    // A `relatedLink` or a hard-coded old index path would point a crawler at a URL
+    // that 308s to this very page. The page has its own canonical, so the reference is
+    // redundant at best and a self-referencing redirect at worst. Only quoted path
+    // literals are checked: the module specifiers `@/lib/ratgeber` and
+    // `@/lib/horizon/vorlagen` legitimately contain the same words.
+    const source = readFileSync(path.join(process.cwd(), "app/[locale]/learning-center/page.tsx"), "utf8")
+    for (const oldIndex of Object.keys(learningCenterRedirects)) {
+      expect(source, `${oldIndex} must not be linked from the learning center`).not.toContain(`"${oldIndex}"`)
+    }
+    // No detail page to relate to: the four paths are sections of this page, so
+    // `relatedLink` would only ever name a section or a redirect.
+    expect(source).not.toContain("relatedPaths")
+    expect(source).not.toContain("GUIDE_INDEX_PATH")
+    expect(source).not.toContain("VORLAGE_INDEX_PATH")
   })
 })
