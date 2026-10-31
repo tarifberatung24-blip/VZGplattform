@@ -75,6 +75,27 @@ run or is blocked, and the next step. This replaces the long report block mentio
   `./node_modules/.bin/next start -p 3999`. Locally `/bg/guide` returns `503` (Supabase not configured),
   which is correct here — production returns `307` to login.
 
+## Adding a public page
+
+A public page under `/{locale}/…` needs **five** touches, and a missed one fails silently:
+
+1. `app/[locale]/[[...slug]]/page.tsx` — add the slug to the `pages` map. The localized catch-all is
+   what makes `/{locale}/…` work; there are no per-locale route files.
+2. `proxy.ts` — add the bare path (`/my-page`) to the static allowlist. **This one is easy to forget and
+   fails as a `404` before the page ever renders**, so a page can build cleanly and still 404 in
+   production. It is the most common miss.
+3. `lib/seo/public-pages.ts` — the catch-all keys this table by the slug **joined with `/`, without a
+   leading slash** (`"my-page"`, not `"/my-page"`). Give it BG and DE title/description.
+4. `app/sitemap.ts` — add the path so both locales are listed.
+5. `components/layout/global-header.tsx` — one `navLinks` entry drives both the desktop dropdown and the
+   mobile sheet; add the matching label to both locale maps.
+
+The catch-all renders `<Page />` with **no props**, so a page resolves its own locale via
+`requestLocale()` from `lib/i18n/server-locale` rather than receiving it.
+
+Keep visible copy in a `lib/…` module (not the component): the `i18n:hardcoded` scanner walks `app/` and
+`lib/`, so copy living only in `components/` is not checked and can ship untranslated.
+
 ## Case lifecycle (important when touching cases)
 
 `cases.horizon_status` is the canonical status and is advanced **only** through
