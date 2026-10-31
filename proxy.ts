@@ -4,6 +4,7 @@ import { defaultLocale, isLocale, LOCALE_COOKIE_KEY, stripLocale } from "./lib/i
 import { legacyRedirectTarget } from "./lib/navigation/legacy-redirects"
 import { isAffiliateOfferId } from "./lib/affiliate-offers"
 import { pathAliasTarget } from "./lib/navigation/path-aliases"
+import { learningCenterRedirectTarget } from "./lib/navigation/learning-center-redirects"
 import { isGuideSlug } from "./lib/ratgeber/slugs"
 import { isVorlageSlug } from "./lib/horizon/vorlagen/slugs"
 
@@ -12,10 +13,10 @@ const localizedStaticPaths = new Set([
   "/auth/sign-up", "/auth/sign-up-success", "/auth/error", "/auth/forgot-password",
   "/auth/update-password", "/auth/mfa-verify", "/finanzamt", "/profil", "/dashboard",
   "/protected", "/assistant", "/konto/sicherheit", "/steuer", "/steuer/providers", "/steuer/review",
-  "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/how-it-works",
+  "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/learning-center",
   "/affiliate-hinweis", "/widerruf", "/app", "/functions", "/anfrage", "/zayavka",
   "/email-generator", "/pruefung", "/security", "/versicherungen", "/admin/editor", "/admin/users",
-  "/admin/forum", "/kosten-senken", "/forum", "/ratgeber", "/vorlagen", "/schufa",
+  "/admin/forum", "/kosten-senken", "/forum", "/schufa",
 ])
 
 function isKnownLocalizedPath(pathname: string) {
@@ -31,15 +32,30 @@ function isKnownLocalizedPath(pathname: string) {
   // A guide topic is checked against the slug list rather than the corpus, so an
   // unknown slug is rejected here. The page's own `notFound()` cannot do it: the root
   // layout reads cookies, so every response is already streaming by then and the
-  // status is committed to 200 — the unknown slug would answer as a soft 404.
-  if (segments[0] === "ratgeber" && segments.length === 1) return true
+  // status is committed to 200 — the unknown slug would answer as a soft 404. The
+  // bare `/ratgeber` index is redirected to the Learning Center before this runs.
   if (segments[0] === "ratgeber" && segments.length === 2 && isGuideSlug(segments[1])) return true
   // Same reason as the guide slugs: the template page cannot set the status once the
   // layout has begun streaming, so an unknown letter is rejected here and answered 404.
-  if (segments[0] === "vorlagen" && segments.length === 1) return true
   if (segments[0] === "vorlagen" && segments.length === 2 && isVorlageSlug(segments[1])) return true
   if (segments[0] === "onboarding" && ["profile", "tour", "finish"].includes(segments[1] ?? "")) return true
   return false
+}
+
+/**
+ * Redirect to a localized path, carrying an optional section hash.
+ *
+ * The Learning Center paths are deep-linked by anchor, so a redirect into one has
+ * to keep the fragment; setting it on the pathname would produce a literal `#` in
+ * the URL path instead of a fragment.
+ */
+function localizedRedirect(request: NextRequest, target: string, hash: string, status: number) {
+  const segment = request.nextUrl.pathname.split("/")[1]
+  const url = request.nextUrl.clone()
+  url.pathname = isLocale(segment) ? `/${segment}${target}` : target
+  url.search = ""
+  url.hash = hash
+  return NextResponse.redirect(url, status)
 }
 
 function localizedNotFound(locale: string) {
@@ -87,13 +103,20 @@ export async function proxy(request: NextRequest) {
 
   // German synonyms for routes that exist under an English or Bulgarian name. A German-speaking
   // reader types `Bürgeramt`, not `contact`; before this map the most likely guess was a 404.
+  // A target may carry a section hash (a synonym for a Learning Center path), so it is split
+  // out and set as the fragment rather than left inside the pathname.
   const aliasTarget = pathAliasTarget(stripLocale(pathname))
   if (aliasTarget) {
-    const url = request.nextUrl.clone()
-    url.pathname = isLocale(segment) ? `/${segment}${aliasTarget}` : aliasTarget
-    url.search = ""
-    return NextResponse.redirect(url, 308)
+    const [aliasPath, aliasHash] = aliasTarget.split("#")
+    return localizedRedirect(request, aliasPath, aliasHash ?? "", 308)
   }
+
+  // The three public index routes the Learning Center replaces. Applied for both
+  // locales, so `/{locale}/how-it-works`, `/{locale}/ratgeber` and
+  // `/{locale}/vorlagen` land on the numbered path that answers them. Individual
+  // guide and letter detail routes are untouched and stay reachable.
+  const learningTarget = learningCenterRedirectTarget(pathname)
+  if (learningTarget) return localizedRedirect(request, learningTarget.path, learningTarget.hash, 308)
 
   if (isLocale(segment)) {
     if (!isKnownLocalizedPath(pathname)) return localizedNotFound(segment)

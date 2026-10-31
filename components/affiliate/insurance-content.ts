@@ -173,7 +173,7 @@ export const kfzLandingCopy: Record<
       fallbackCta: "Отвори сравнението в нов прозорец",
     },
     cta: "Започни сравнението",
-    processHref: "/how-it-works",
+    processHref: "/learning-center",
   },
   de: {
     meta: {
@@ -286,7 +286,7 @@ export const kfzLandingCopy: Record<
       fallbackCta: "Vergleich in neuem Fenster öffnen",
     },
     cta: "Vergleich starten",
-    processHref: "/how-it-works",
+    processHref: "/learning-center",
   },
 }
 

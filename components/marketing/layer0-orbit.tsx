@@ -59,7 +59,7 @@ const reviewedCopy: Record<"bg" | "de", Record<string, Pick<OrbitItem, "label" |
     kindergeld: { label: "Kindergeld", description: "Подготви предварителна проверка на формулярите и нужните документи.", href: "/kindergeld" },
     jobcenter: { label: "Разбери ситуацията", description: "Избери дали да разбереш документ, да отговориш на институция или да подготвиш формуляр.", href: "/guide" },
     energy: { label: "Финансово обучение", description: "Научи повече за решенията, договорите и разходите си.", href: "/finanzbildung" },
-    security: { label: "Как работи", description: "Виж как HORIZON подготвя документи, срокове и следващи стъпки.", href: "/how-it-works" },
+    security: { label: "Как работи", description: "Виж как HORIZON подготвя документи, срокове и следващи стъпки.", href: "/learning-center" },
     inkasso: { label: "Inkasso писмо", description: "Постави писмото и провери разбивката, таксите и следващите стъпки.", href: "/pruefung" },
   },
   de: {
@@ -70,7 +70,7 @@ const reviewedCopy: Record<"bg" | "de", Record<string, Pick<OrbitItem, "label" |
     kindergeld: { label: "Kindergeld", description: "Formulare und benötigte Unterlagen für die Vorprüfung vorbereiten.", href: "/kindergeld" },
     jobcenter: { label: "Situation verstehen", description: "Dokument verstehen, Behörde antworten oder Formular vorbereiten.", href: "/guide" },
     energy: { label: "Finanzbildung", description: "Mehr über Entscheidungen, Verträge und laufende Kosten lernen.", href: "/finanzbildung" },
-    security: { label: "So funktioniert es", description: "Sehen, wie HORIZON Dokumente, Fristen und nächste Schritte vorbereitet.", href: "/how-it-works" },
+    security: { label: "So funktioniert es", description: "Sehen, wie HORIZON Dokumente, Fristen und nächste Schritte vorbereitet.", href: "/learning-center" },
     inkasso: { label: "Inkassoschreiben", description: "Schreiben einfügen und Aufschlüsselung, Gebühren und nächste Schritte prüfen.", href: "/pruefung" },
   },
 }

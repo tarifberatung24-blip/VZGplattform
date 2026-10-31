@@ -34,8 +34,8 @@ describe("service catalog", () => {
   })
 
   it("matches on title, detail and hidden terms", () => {
-    const byTitle = filterServiceCatalog("Готови писма", "bg").map((entry) => entry.id)
-    expect(byTitle).toContain("vorlagen")
+    const byTitle = filterServiceCatalog("Учебен център", "bg").map((entry) => entry.id)
+    expect(byTitle).toContain("learning-center")
 
     const byTerm = filterServiceCatalog("mahnbescheid", "bg").map((entry) => entry.id)
     expect(byTerm).toContain("inkasso")
@@ -51,7 +51,7 @@ describe("service catalog", () => {
 
   it("exposes the new services the dashboard and search rely on", () => {
     const ids = new Set(serviceCatalog.map((entry) => entry.id))
-    for (const id of ["vorlagen", "ratgeber", "schufa"]) {
+    for (const id of ["learning-center", "schufa"]) {
       expect(ids.has(id), `${id} must be in the catalog`).toBe(true)
     }
   })

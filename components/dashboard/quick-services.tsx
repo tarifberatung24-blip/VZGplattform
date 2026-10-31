@@ -26,18 +26,18 @@ type QuickEntry = {
  */
 const quickEntries: readonly QuickEntry[] = [
   {
-    id: "vorlagen",
-    href: "/vorlagen",
+    id: "learning-center",
+    href: "/learning-center",
+    Icon: BookOpen,
+    title: { bg: "Учебен център", de: "Lernzentrum" },
+    detail: { bg: "Функции, наръчник и готови писма по пътеки", de: "Funktionen, Ratgeber und Briefe in Lernpfaden" },
+  },
+  {
+    id: "letters",
+    href: "/learning-center#letters",
     Icon: FileSignature,
     title: { bg: "Готови писма", de: "Fertige Briefe" },
     detail: { bg: "Попълни и изтегли готово немско писмо", de: "Fertigen deutschen Brief ausfüllen und laden" },
-  },
-  {
-    id: "ratgeber",
-    href: "/ratgeber",
-    Icon: BookOpen,
-    title: { bg: "Наръчник", de: "Ratgeber" },
-    detail: { bg: "Служби, стъпки и документи накратко", de: "Behörden, Schritte und Unterlagen kurz erklärt" },
   },
   {
     id: "schufa",

@@ -11,6 +11,7 @@ import { pageMetadata } from "@/lib/seo/metadata"
 import { canonicalUrl } from "@/lib/seo/site"
 import { findGuideTopic, guidePath, guideTopics } from "@/lib/ratgeber"
 import { vorlageForGuide, vorlagePath } from "@/lib/horizon/vorlagen"
+import { LEARNING_CENTER_PATH } from "@/lib/learning-center/copy"
 
 type Props = { params: Promise<{ locale: string; slug: string }> }
 
@@ -70,7 +71,7 @@ export default async function GuideTopicPage({ params }: Props) {
           breadcrumbJsonLd(
             [
               { name: isBg ? "Начало" : "Startseite", path: "/" },
-              { name: indexLabel, path: "/ratgeber" },
+              { name: indexLabel, path: `${LEARNING_CENTER_PATH}#guides` },
               { name: content.title, path: guidePath(slug) },
             ],
             locale,
@@ -80,7 +81,7 @@ export default async function GuideTopicPage({ params }: Props) {
 
       <article className="mx-auto max-w-3xl px-5 py-16 md:py-24">
         <nav aria-label={isBg ? "Навигация" : "Navigation"} className="text-sm">
-          <Link href={`/${locale}/ratgeber`} className="inline-flex items-center gap-1.5 font-medium text-muted-foreground hover:text-foreground">
+          <Link href={`/${locale}${LEARNING_CENTER_PATH}#guides`} className="inline-flex items-center gap-1.5 font-medium text-muted-foreground hover:text-foreground">
             <ArrowLeft className="size-3.5" aria-hidden="true" />
             {indexLabel}
           </Link>

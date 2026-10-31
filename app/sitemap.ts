@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next"
 import { guidePath, guideTopics } from "@/lib/ratgeber"
-import { VORLAGE_INDEX_PATH, vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
+import { vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
+import { LEARNING_CENTER_PATH } from "@/lib/learning-center/copy"
 import { absoluteUrl } from "@/lib/seo/site"
 
 /**
@@ -13,7 +14,7 @@ import { absoluteUrl } from "@/lib/seo/site"
  */
 const publicPaths = [
   "",
-  "/how-it-works",
+  LEARNING_CENTER_PATH,
   "/contact",
   "/anfrage",
   "/zayavka",
@@ -27,8 +28,6 @@ const publicPaths = [
   "/impressum",
   "/widerruf",
   "/affiliate-hinweis",
-  "/ratgeber",
-  VORLAGE_INDEX_PATH,
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {

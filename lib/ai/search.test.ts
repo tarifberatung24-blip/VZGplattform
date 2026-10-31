@@ -101,11 +101,11 @@ describe("platform routing", () => {
   })
 
   it("localizes a resolved match", () => {
-    const bg = resolvePlatformMatch("vorlagen", "bg")
-    const de = resolvePlatformMatch("vorlagen", "de")
-    expect(bg?.title).toBe("Готови писма")
-    expect(de?.title).toBe("Fertige Briefe")
-    expect(bg?.href).toBe("/vorlagen")
+    const bg = resolvePlatformMatch("learning-center", "bg")
+    const de = resolvePlatformMatch("learning-center", "de")
+    expect(bg?.title).toBe("Учебен център")
+    expect(de?.title).toBe("Lernzentrum")
+    expect(bg?.href).toBe("/learning-center")
     expect(resolvePlatformMatch("nope", "bg")).toBeNull()
   })
 })

@@ -52,7 +52,7 @@ export function AnimatedHero() {
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <Link
-              href={localizedPath("/how-it-works", locale)}
+              href={localizedPath("/learning-center", locale)}
               className="glass-surface inline-flex items-center gap-2 rounded-lg px-6 py-3 backdrop-blur-md text-sm font-semibold text-foreground transition-transform duration-300 hover:-translate-y-0.5"
             >
               <BrandText text={t.home.hero.howCta} />

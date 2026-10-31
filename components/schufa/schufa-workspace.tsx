@@ -422,7 +422,7 @@ export function SchufaWorkspace() {
           </p>
 
           <Link
-            href={localizedPath("/ratgeber", locale)}
+            href={localizedPath("/learning-center", locale)}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary underline-offset-4 hover:underline"
           >
             {c.openGuide}

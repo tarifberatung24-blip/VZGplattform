@@ -77,10 +77,10 @@ describe("guide corpus", () => {
       "/documents",
       "/finanzbildung",
       "/kindergeld",
-      "/ratgeber",
+      "/learning-center#guides",
+      "/learning-center#letters",
       "/steuer",
       "/versicherungen",
-      "/vorlagen",
     ])
     for (const [from, to] of Object.entries(pathAliases)) {
       const isGuide = to.startsWith("/ratgeber/") && findGuideTopic(to.slice("/ratgeber/".length)) !== undefined
