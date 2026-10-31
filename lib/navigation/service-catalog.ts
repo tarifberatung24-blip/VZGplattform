@@ -42,18 +42,14 @@ export const serviceCatalog: readonly ServiceCatalogEntry[] = [
     terms: { bg: "инкассо inkasso писмо mahnung mahnbescheid вземане", de: "inkasso mahnung mahnbescheid forderung gläubiger" },
   },
   {
-    id: "vorlagen",
-    href: "/vorlagen",
-    title: { bg: "Готови писма", de: "Fertige Briefe" },
-    detail: { bg: "Mängelanzeige, Widerspruch, Urlaubsantrag", de: "Mängelanzeige, Widerspruch, Urlaubsantrag" },
-    terms: { bg: "готови писма vorlagen шаблон mängelanzeige widerspruch urlaubsantrag", de: "vorlagen briefe mängelanzeige widerspruch urlaubsantrag" },
-  },
-  {
-    id: "ratgeber",
-    href: "/ratgeber",
-    title: { bg: "Наръчник", de: "Ratgeber" },
-    detail: { bg: "Обяснения за служби и процедури", de: "Erklärungen zu Behörden und Verfahren" },
-    terms: { bg: "наръчник ratgeber ръководство служби jobcenter finanzamt", de: "ratgeber anleitung behörden jobcenter finanzamt" },
+    id: "learning-center",
+    href: "/learning-center",
+    title: { bg: "Учебен център", de: "Lernzentrum" },
+    detail: { bg: "Функции, наръчник и готови писма по пътеки", de: "Funktionen, Ratgeber und Briefe in Lernpfaden" },
+    terms: {
+      bg: "учебен център обучение наръчник ratgeber готови писма vorlagen служби jobcenter finanzamt mängelanzeige widerspruch",
+      de: "lernzentrum lernen ratgeber behörden vorlagen briefe jobcenter finanzamt mängelanzeige widerspruch",
+    },
   },
   {
     id: "schufa",

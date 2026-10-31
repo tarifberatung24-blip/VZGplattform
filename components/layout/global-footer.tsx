@@ -18,8 +18,7 @@ export function GlobalFooter() {
   const isDe = locale === "de"
 
   const links = [
-    { href: "/ratgeber", label: isDe ? "Ratgeber" : "Наръчник" },
-    { href: "/vorlagen", label: isDe ? "Vorlagen" : "Готови писма" },
+    { href: "/learning-center", label: isDe ? "Lernzentrum" : "Учебен център" },
     { href: "/impressum", label: isDe ? "Impressum" : "Импресум" },
     {
       href: "/datenschutz",

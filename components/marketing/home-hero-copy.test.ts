@@ -16,10 +16,10 @@ describe("home hero", () => {
     expect(messages("bg").trialBadge).toBeUndefined()
   })
 
-  it("puts login first and how-it-works second, directly under the headline", () => {
+  it("puts login first and the learning center second, directly under the headline", () => {
     const h1End = source.indexOf("</h1>")
     const login = source.indexOf('localizedPath("/auth/login", locale)')
-    const how = source.indexOf('localizedPath("/how-it-works", locale)')
+    const how = source.indexOf('localizedPath("/learning-center", locale)')
     expect(login).toBeGreaterThan(h1End)
     expect(how).toBeGreaterThan(login)
     expect(messages("bg").loginCta).toBe("Вход")

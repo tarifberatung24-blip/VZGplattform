@@ -16,14 +16,17 @@ describe("path aliases", () => {
   it("sends every synonym to a real route, never to another synonym", () => {
     for (const [from, to] of Object.entries(pathAliases)) {
       // A chain would resolve in one extra hop and hide a typo in the target, so the
-      // target must be a canonical path. Every target here is a real route.
-      expect(pathAliases[to], `${from} -> ${to} is itself an alias`).toBeUndefined()
+      // target must be a canonical path. Every target here is a real route, possibly
+      // with a section hash for the Learning Center paths.
+      const [path] = to.split("#")
+      expect(pathAliases[path], `${from} -> ${to} is itself an alias`).toBeUndefined()
     }
   })
 
   it("resolves a known synonym and leaves an unknown path alone", () => {
     expect(pathAliasTarget("/buergeramt")).toBe("/contact")
     expect(pathAliasTarget("/anmeldung")).toBe("/ratgeber/anmeldung")
+    expect(pathAliasTarget("/briefe")).toBe("/learning-center#letters")
     expect(pathAliasTarget("/not-a-real-path")).toBeNull()
     expect(pathAliasTarget("/")).toBeNull()
   })

@@ -23,17 +23,19 @@ export const pathAliases: Readonly<Record<string, string>> = {
   // Documents and uploads.
   "/dokumente": "/documents",
   "/unterlagen": "/documents",
-  // The guide, under its German name.
-  "/behoerden": "/ratgeber",
-  "/aemter": "/ratgeber",
-  "/hilfe": "/ratgeber",
+  // The guide, under its German name. It lives inside the Learning Center now, so
+  // the synonym lands on that numbered path rather than the old index.
+  "/behoerden": "/learning-center#guides",
+  "/aemter": "/learning-center#guides",
+  "/hilfe": "/learning-center#guides",
   // The letters, under the names a German speaker types. Someone who needs a
   // Mängelanzeige searches for "Mängelanzeige", not "vorlagen", so the letter's own
-  // German name has to be a reachable URL rather than a 404.
-  "/briefe": "/vorlagen",
-  "/briefvorlagen": "/vorlagen",
-  "/musterschreiben": "/vorlagen",
-  "/vorlage": "/vorlagen",
+  // German name has to be a reachable URL rather than a 404. The index synonyms point
+  // at the Learning Center path; the letter's own name still reaches its detail page.
+  "/briefe": "/learning-center#letters",
+  "/briefvorlagen": "/learning-center#letters",
+  "/musterschreiben": "/learning-center#letters",
+  "/vorlage": "/learning-center#letters",
   "/mangelanzeige": "/vorlagen/mangelanzeige",
   "/maengelanzeige": "/vorlagen/mangelanzeige",
   "/widerspruch": "/vorlagen/widerspruch",

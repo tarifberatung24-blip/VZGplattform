@@ -37,17 +37,6 @@ export const publicPageMeta: Readonly<Record<string, PublicPageMeta>> = {
       de: ["Behördenbrief verstehen", "Hilfe Deutschland", "Finanzassistent", "Steuererklärung", "Kindergeld"],
     },
   },
-  "how-it-works": {
-    title: { bg: "Как работи HORIZON", de: "So funktioniert HORIZON" },
-    description: {
-      bg: "От качен документ до готов отговор: как HORIZON обяснява, подготвя и проследява — стъпка по стъпка, с твоето одобрение.",
-      de: "Vom hochgeladenen Dokument zur fertigen Antwort: wie HORIZON erklärt, vorbereitet und nachhält – Schritt für Schritt, mit deiner Bestätigung.",
-    },
-    keywords: {
-      bg: ["как работи", "обработка на документи", "превод на писма"],
-      de: ["Ablauf", "Dokumentenprüfung", "Briefübersetzung"],
-    },
-  },
   contact: {
     title: { bg: "Контакт", de: "Kontakt" },
     description: {

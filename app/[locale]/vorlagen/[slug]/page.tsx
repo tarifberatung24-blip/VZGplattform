@@ -9,7 +9,8 @@ import { breadcrumbJsonLd, faqJsonLd, organizationJsonLd, serviceJsonLd, webPage
 import { pageMetadata } from "@/lib/seo/metadata"
 import { canonicalUrl } from "@/lib/seo/site"
 import { findGuideTopic, guidePath } from "@/lib/ratgeber"
-import { VORLAGE_INDEX_PATH, findVorlage, guideForVorlage, vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
+import { findVorlage, guideForVorlage, vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
+import { LEARNING_CENTER_PATH } from "@/lib/learning-center/copy"
 import { VorlageForm } from "./vorlage-form"
 
 type Props = { params: Promise<{ locale: string; slug: string }> }
@@ -76,7 +77,7 @@ export default async function VorlagePage({ params }: Props) {
           breadcrumbJsonLd(
             [
               { name: isBg ? "Начало" : "Startseite", path: "/" },
-              { name: indexLabel, path: VORLAGE_INDEX_PATH },
+              { name: indexLabel, path: `${LEARNING_CENTER_PATH}#letters` },
               { name: content.title, path: vorlagePath(slug) },
             ],
             locale,
@@ -87,7 +88,7 @@ export default async function VorlagePage({ params }: Props) {
       <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
         <nav aria-label={isBg ? "Навигация" : "Navigation"} className="text-sm">
           <Link
-            href={`/${locale}${VORLAGE_INDEX_PATH}`}
+            href={`/${locale}${LEARNING_CENTER_PATH}#letters`}
             className="inline-flex items-center gap-1.5 font-medium text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" aria-hidden="true" />

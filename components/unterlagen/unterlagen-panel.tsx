@@ -45,7 +45,7 @@ function DocumentAnalysisInfoDialog({ locale, heading, description }: { locale: 
             <DialogDescription className="pt-2 leading-6">{description}</DialogDescription>
           </DialogHeader>
           <Link
-            href={`/${locale}/how-it-works`}
+            href={`/${locale}/learning-center`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
