@@ -130,6 +130,17 @@ export const publicPageMeta: Readonly<Record<string, PublicPageMeta>> = {
       de: "Wir benennen klar, wo eine Partnerbeziehung besteht und wie sie Empfehlungen beeinflusst – oder nicht.",
     },
   },
+  "service-center": {
+    title: { bg: "Услуги на HORIZON", de: "Leistungen von HORIZON" },
+    description: {
+      bg: "Всички услуги на HORIZON на едно място: какво работи веднага, какво иска вход, какво зависи от партньор и какво тепърва предстои. Филтрирай по категория или търси по име.",
+      de: "Alle Leistungen von HORIZON an einem Ort: was sofort funktioniert, was eine Anmeldung braucht, was von einem Partner abhängt und was erst geplant ist. Filtere nach Kategorie oder suche nach Namen.",
+    },
+    keywords: {
+      bg: ["услуги HORIZON", "какво може HORIZON", "функции", "документи", "данъци", "договори"],
+      de: ["HORIZON Leistungen", "was HORIZON kann", "Funktionen", "Dokumente", "Steuern", "Verträge"],
+    },
+  },
 }
 
 export function publicPageMetaFor(path: string): PublicPageMeta | undefined {

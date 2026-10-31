@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next"
 import { guidePath, guideTopics } from "@/lib/ratgeber"
 import { vorlagePath, vorlagen } from "@/lib/horizon/vorlagen"
 import { LEARNING_CENTER_PATH } from "@/lib/learning-center/copy"
+import { SERVICE_CENTER_PATH } from "@/lib/service-center/catalog"
 import { absoluteUrl } from "@/lib/seo/site"
 
 /**
@@ -15,6 +16,7 @@ import { absoluteUrl } from "@/lib/seo/site"
 const publicPaths = [
   "",
   LEARNING_CENTER_PATH,
+  SERVICE_CENTER_PATH,
   "/contact",
   "/anfrage",
   "/zayavka",
