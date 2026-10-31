@@ -21,18 +21,14 @@ type Step = "apply" | "upload" | "plan"
 
 const copy = {
   bg: {
-    eyebrow: "Шуфа помощ",
-    title: "Провери и подобри своята SCHUFA",
-    intro:
-      "Вземи безплатната си справка, качи я тук и получи план как да възстановиш платежоспособността си. Нищо не се изпраща и не се записва без твоето действие.",
-    stepApply: "1. Вземи безплатната справка",
-    stepUpload: "2. Качи справката",
-    stepPlan: "3. Твоят план",
-    applyBody:
-      "По чл. 15 DSGVO (Datenkopie) имаш право на безплатно копие от данните, които SCHUFA пази за теб. Това е същата справка, която ти трябва за плана — не плащай за „проверка на оценка“.",
-    applyCta: "Отвори безплатната заявка",
-    applyNote: "Отваря се официалната страница на SCHUFA в нов таб.",
-    continue: "Вече имам справката",
+    title: "SCHUFA справка и план",
+    intro: "Качи безплатната си SCHUFA справка и получи следващите стъпки.",
+    stepApply: "Справка",
+    stepUpload: "Качване",
+    stepPlan: "План",
+    applyBody: "По чл. 15 DSGVO можеш да поискаш безплатна Datenkopie. Не плащай за Score-Check.",
+    applyCta: "Заяви безплатна справка",
+    continue: "Имам справката",
     uploadTitle: "Качи справката (PDF)",
     uploadHint: "Текстът се извлича в паметта и не се записва. Ако е сканирано копие, постави текста по-долу.",
     choose: "Избери PDF",
@@ -63,18 +59,14 @@ const copy = {
     openGuide: "Виж наръчника",
   },
   de: {
-    eyebrow: "SCHUFA-Hilfe",
-    title: "Prüfe und verbessere deine SCHUFA",
-    intro:
-      "Hol dir deine kostenlose Auskunft, lade sie hier hoch und erhalte einen Plan, wie du deine Bonität wiederherstellst. Nichts wird gesendet oder gespeichert ohne deine Handlung.",
-    stepApply: "1. Kostenlose Auskunft holen",
-    stepUpload: "2. Auskunft hochladen",
-    stepPlan: "3. Dein Plan",
-    applyBody:
-      "Nach Art. 15 DSGVO (Datenkopie) hast du ein Recht auf eine kostenlose Kopie der Daten, die SCHUFA über dich speichert. Das ist dieselbe Auskunft, die du für den Plan brauchst – zahle nicht für einen „Score-Check“.",
-    applyCta: "Kostenlosen Antrag öffnen",
-    applyNote: "Öffnet die offizielle SCHUFA-Seite in einem neuen Tab.",
-    continue: "Ich habe die Auskunft schon",
+    title: "SCHUFA-Auskunft & Plan",
+    intro: "Lade deine kostenlose SCHUFA-Datenkopie hoch und erhalte die nächsten Schritte.",
+    stepApply: "Auskunft",
+    stepUpload: "Upload",
+    stepPlan: "Plan",
+    applyBody: "Nach Art. 15 DSGVO kannst du eine kostenlose Datenkopie anfordern. Zahle nicht für einen Score-Check.",
+    applyCta: "Kostenlose Datenkopie anfordern",
+    continue: "Ich habe die Auskunft",
     uploadTitle: "Auskunft hochladen (PDF)",
     uploadHint: "Der Text wird im Speicher ausgelesen und nicht gespeichert. Bei einem Scan den Text unten einfügen.",
     choose: "PDF wählen",
@@ -221,12 +213,8 @@ export function SchufaWorkspace() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 md:py-12">
       <header className="max-w-2xl">
-        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          <Sparkles className="size-4" aria-hidden="true" />
-          {c.eyebrow}
-        </p>
-        <h1 className="mt-4 text-balance text-3xl font-black tracking-[-0.03em] md:text-4xl">{c.title}</h1>
-        <p className="mt-4 text-pretty text-base leading-7 text-muted-foreground">{c.intro}</p>
+        <h1 className="text-balance text-3xl font-black tracking-[-0.03em] md:text-4xl">{c.title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{c.intro}</p>
       </header>
 
       <ol className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
@@ -270,7 +258,6 @@ export function SchufaWorkspace() {
               {c.continue}
             </button>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">{c.applyNote}</p>
         </section>
       ) : null}
 
