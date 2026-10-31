@@ -70,6 +70,7 @@ export function GlobalHeader() {
     locale === "de"
       ? {
           home: "Startseite",
+          serviceCenter: "Leistungen",
           learningCenter: "Lernzentrum",
           forum: "HORIZON Forum",
           security: "Sicherheit",
@@ -82,6 +83,7 @@ export function GlobalHeader() {
         }
       : {
           home: "Начало",
+          serviceCenter: "Услуги",
           learningCenter: "Учебен център",
           forum: "HORIZON Forum",
           security: "Сигурност",
@@ -105,6 +107,7 @@ export function GlobalHeader() {
       : localizedPath("/", locale)
 
   const navLinks: { href: string; labelKey: keyof typeof labels }[] = [
+    { href: "/service-center", labelKey: "serviceCenter" },
     { href: "/learning-center", labelKey: "learningCenter" },
     { href: "/forum", labelKey: "forum" },
     { href: "/security", labelKey: "security" },

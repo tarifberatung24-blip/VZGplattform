@@ -25,6 +25,7 @@ import DatenschutzPage from "@/app/datenschutz/page"
 import AgbPage from "@/app/agb/page"
 import ImpressumPage from "@/app/impressum/page"
 import ContactPage from "@/app/[locale]/contact/page"
+import ServiceCenterPage from "@/app/service-center/page"
 import AffiliateNoticePage from "@/app/affiliate-hinweis/page"
 import WithdrawalPage from "@/app/widerruf/page"
 import AppInstallPage from "@/app/app/page"
@@ -53,7 +54,7 @@ const pages: Record<string, React.ComponentType> = {
   "auth/login": LoginPage, "auth/sign-up": SignUpPage, "auth/sign-up-success": SignUpSuccessPage, "auth/error": AuthErrorPage,
   "auth/forgot-password": ForgotPasswordPage, "auth/update-password": UpdatePasswordPage, "auth/mfa-verify": MfaVerifyPage,
   finanzamt: FinanzamtPage, profil: ProfilPage, dashboard: ProtectedPage, protected: ProtectedPage, assistant: AssistantPage, "konto/sicherheit": AccountSecurityPage,
-  steuer: SteuerPage, "steuer/providers": ProvidersPage, "steuer/review": ReviewPage, finanzbildung: FinanzbildungPage, datenschutz: DatenschutzPage, agb: AgbPage, impressum: ImpressumPage, contact: ContactPage, "affiliate-hinweis": AffiliateNoticePage, widerruf: WithdrawalPage, app: AppInstallPage,
+  steuer: SteuerPage, "steuer/providers": ProvidersPage, "steuer/review": ReviewPage, finanzbildung: FinanzbildungPage, datenschutz: DatenschutzPage, agb: AgbPage, impressum: ImpressumPage, contact: ContactPage, "service-center": ServiceCenterPage, "affiliate-hinweis": AffiliateNoticePage, widerruf: WithdrawalPage, app: AppInstallPage,
 }
 
 export const dynamicParams = false
