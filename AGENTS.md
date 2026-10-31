@@ -48,6 +48,19 @@ short, result first. Code, commands and paths stay exact.
   Use the existing pnpm lockfile.
 - One writer per module at a time.
 
+## Compact interface copy
+
+- Treat HORIZON as an operational product, not a newspaper or technical manual.
+- Remove at least 50% of unnecessary user-facing prose when revising a screen; keep labels, primary actions and essential next steps.
+- One concept appears once. Never stack multiple explanations of the same feature, integration, limitation or failure.
+- Do not expose internal implementation details, AI/provider names, environment/configuration jargon, commit/build/deploy details or developer diagnostics to end users.
+- A failed request gets one short status message. Hide related empty states while an error is present; never tell users both that a request failed and that it returned no results.
+- Empty states appear only after a successful search with zero matches. Keep them to one short line.
+- Cards use a title, at most one short sentence, and the relevant action. Move optional detail behind an explicit expand/details action.
+- Keep only information needed to decide or complete the next action. Put diagnostics in logs, not in the interface.
+- Preserve meaningful consent, privacy, security, legal, financial, deadline and approval information. Shorten wording without changing its legal or operational meaning.
+- Apply the same standard independently in Bulgarian and German. Verify both locales and check that labels, errors and empty states do not duplicate one another.
+
 ## Human-facing prose
 
 Website copy, labels, empty states, errors, e-mails and documentation prose in German, Bulgarian and
