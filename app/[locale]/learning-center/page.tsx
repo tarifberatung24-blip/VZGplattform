@@ -344,7 +344,6 @@ export default async function LearningCenterPage({ params }: Props) {
               </span>
             </div>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{copy.dashboardIntro}</p>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{copy.dashboardPending}</p>
 
             <ul className="mt-6 grid gap-4 md:grid-cols-2">
               {copy.dashboardLessons.map((lesson, index) => {
@@ -357,9 +356,6 @@ export default async function LearningCenterPage({ params }: Props) {
                     <span className="min-w-0">
                       <span className="block text-base font-semibold leading-snug">{lesson.title}</span>
                       <span className="mt-1 block text-sm leading-6 text-muted-foreground">{lesson.body}</span>
-                      <span className="mt-3 inline-block text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                        {copy.comingSoonLabel}
-                      </span>
                     </span>
                   </li>
                 )
