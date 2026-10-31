@@ -8,7 +8,6 @@ import { ArrowRight, ExternalLink, Loader2, Search, Sparkles } from "lucide-reac
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -29,7 +28,6 @@ type Answer = { answer: string; sources: Source[]; platform: PlatformMatch | nul
 type Copy = {
   trigger: string
   title: string
-  hint: string
   placeholder: string
   services: string
   askAi: string
@@ -46,33 +44,31 @@ type Copy = {
 const copies: Record<"bg" | "de", Copy> = {
   bg: {
     trigger: "Търси",
-    title: "Какво търсиш?",
-    hint: "Намери услуга или задай въпрос. AI търси и в интернет и посочва източниците.",
-    placeholder: "Например: каква е Frist за Widerspruch?",
-    services: "Услуги в HORIZON",
+    title: "Търсене",
+    placeholder: "Напиши услуга или въпрос…",
+    services: "Подходящи услуги",
     askAi: "Питай AI",
-    asking: "Търся отговор…",
-    empty: "Няма намерена подходяща услуга.",
-    failed: "Търсенето временно не е достъпно. Опитай отново.",
-    notConfigured: "AI търсенето още не е активирано в тази среда.",
-    rateLimited: "Твърде много заявки. Изчакай малко и опитай отново.",
-    authRequired: "Влез в профила си, за да използваш AI търсенето.",
+    asking: "Търся…",
+    empty: "Няма съвпадения.",
+    failed: "Временно недостъпно.",
+    notConfigured: "Временно недостъпно.",
+    rateLimited: "Опитай след малко.",
+    authRequired: "Влез, за да продължиш.",
     sources: "Източници",
     openInPlatform: "Отвори в HORIZON",
   },
   de: {
     trigger: "Suchen",
-    title: "Was suchst du?",
-    hint: "Finde einen Dienst oder stelle eine Frage. Die KI sucht auch im Web und nennt die Quellen.",
-    placeholder: "Zum Beispiel: Wie lang ist die Widerspruchsfrist?",
-    services: "Dienste in HORIZON",
+    title: "Suche",
+    placeholder: "Dienst oder Frage eingeben…",
+    services: "Passende Dienste",
     askAi: "KI fragen",
-    asking: "Suche Antwort …",
-    empty: "Kein passender Dienst gefunden.",
-    failed: "Die Suche ist gerade nicht erreichbar. Bitte erneut versuchen.",
-    notConfigured: "Die KI-Suche ist in dieser Umgebung noch nicht aktiviert.",
-    rateLimited: "Zu viele Anfragen. Bitte kurz warten und erneut versuchen.",
-    authRequired: "Bitte anmelden, um die KI-Suche zu nutzen.",
+    asking: "Suche…",
+    empty: "Keine Treffer.",
+    failed: "Vorübergehend nicht verfügbar.",
+    notConfigured: "Vorübergehend nicht verfügbar.",
+    rateLimited: "Bitte später erneut versuchen.",
+    authRequired: "Bitte anmelden, um fortzufahren.",
     sources: "Quellen",
     openInPlatform: "In HORIZON öffnen",
   },
@@ -185,7 +181,6 @@ export function AiSearch({ className, compact = false }: AiSearchProps) {
       <DialogContent className="max-h-[min(46rem,calc(100svh-2rem))] overflow-y-auto p-5 sm:max-w-xl">
         <DialogHeader className="pr-8">
           <DialogTitle className="text-lg">{copy.title}</DialogTitle>
-          <DialogDescription>{copy.hint}</DialogDescription>
         </DialogHeader>
 
         <label className="relative block">
@@ -264,7 +259,7 @@ export function AiSearch({ className, compact = false }: AiSearchProps) {
           </section>
         ) : null}
 
-        <section aria-label={copy.services}>
+        {!error ? <section aria-label={copy.services}>
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{copy.services}</h3>
           <div className="mt-2 space-y-2">
             {services.length ? (
@@ -286,7 +281,7 @@ export function AiSearch({ className, compact = false }: AiSearchProps) {
               <p className="py-4 text-center text-sm text-muted-foreground">{copy.empty}</p>
             )}
           </div>
-        </section>
+        </section> : null}
       </DialogContent>
     </Dialog>
   )
