@@ -37,8 +37,11 @@ Alpha Team използва тези повърхности, вместо да �
 Добавени са:
 
 - `lib/horizon/agent/team.ts` — registry, autonomy ladder, deterministic routing и task plan;
+- `lib/horizon/agent/skills.ts` — статичен registry на versioned SOP/skill contracts;
 - `lib/horizon/agent/team.test.ts` — тестове за routing и safety invariants;
+- `lib/horizon/agent/skills.test.ts` — проверка, че всеки registry skill има реален markdown contract;
 - `app/api/horizon/alpha-team/route.ts` — защитен `GET` manifest и `POST` plan endpoint;
+- `skills/*/*.md` — седем реални SOP/skill файла с input, procedure, refusal conditions и output;
 - `docs/HORIZON_ALPHA_TEAM_BLUEPRINT_BG.md` — тази архитектурна спецификация.
 
 API:
@@ -59,7 +62,9 @@ POST /api/horizon/alpha-team
 }
 ```
 
-Резултатът е plan, не външно действие. Той съдържа trace ID, lead agent, supporting agents, SOP, steps, blockers и флагове за approval/external action. Без `caseId` или `documentIds` системата връща blocker, вместо да измисля контекст.
+Резултатът е plan, не външно действие. Той съдържа уникален run ID, trace ID, lead agent, supporting agents, SOP/skill metadata, steps, blockers и флагове за approval/external action. Заявка без case context може да изпълнява само context-free операции; case-dependent задача получава blocker, докато route-ът не валидира owner-scoped case и documents.
+
+Всеки план има explicit execution handoff към `/api/horizon/cases/{id}/assistant`. Това е metadata contract към вече съществуващия P7 Case Assistant, а не втори AI pipeline. Alpha Team класифицира и валидира; Case Assistant обяснява/подготвя; approval/release/safety механизмите остават канонични.
 
 ## Реален execution loop
 
@@ -100,7 +105,7 @@ Alpha Team не заменя `/api/horizon/cases/{id}/assistant`. P7 остав�
 
 ### D. Event-driven loop
 
-Връзка към съществуващите document/case/deadline events. Постоянно работещият агент трябва да обработва опашка от bounded events, а не да извършва неконтролирано безкрайно самообучение.
+Връзка към съществуващите document/case/deadline events. Постоянно работещият агент трябва да обработва опашка от bounded events, а не да извършва неконтролирано безкрайно самообучение. Тази автоматизация още не е включена в production и трябва да мине през отделен review на event idempotency и notifications.
 
 ### E. Operator console
 
