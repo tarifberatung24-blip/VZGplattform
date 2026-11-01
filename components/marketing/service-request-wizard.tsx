@@ -13,6 +13,7 @@ import {
   serviceRequestKinds,
   type ServiceRequestKind,
 } from "@/lib/service-request"
+import { horizonServiceRequests } from "@/lib/horizon/service-requests/catalog"
 import { BrandText } from "@/components/brand/horizon-wordmark"
 
 type Field = {
@@ -48,7 +49,7 @@ const contactStep: Step = {
   ],
 }
 
-const serviceSteps: Record<ServiceRequestKind, Step[]> = {
+const serviceSteps: Partial<Record<ServiceRequestKind, Step[]>> = {
   energy: [
     {
       id: "energy-basics",
@@ -161,6 +162,25 @@ const serviceSteps: Record<ServiceRequestKind, Step[]> = {
   ],
 }
 
+const alphaServiceSteps: Partial<Record<ServiceRequestKind, Step[]>> = Object.fromEntries(
+  horizonServiceRequests.map((service) => [service.kind, [{
+    id: "service-details",
+    questionBg: serviceRequestMeta[service.kind].labelBg,
+    questionDe: serviceRequestMeta[service.kind].labelDe,
+    helpBg: "Опиши какво искаш да подготвим. След изпращане Alpha Team ще поиска документите през защитения HORIZON case.",
+    helpDe: "Beschreibe, was vorbereitet werden soll. Alpha Team fordert die Unterlagen anschließend über den geschützten HORIZON-Fall an.",
+    fields: [{
+      id: "serviceDetails",
+      type: "textarea" as const,
+      required: true,
+      labelBg: "Какво трябва да направим?",
+      labelDe: "Was soll vorbereitet werden?",
+      placeholderBg: "Например: премествам се на нов адрес от ...",
+      placeholderDe: "Zum Beispiel: Ich ziehe ab ... an eine neue Adresse ...",
+    }],
+  }]]),
+) as Partial<Record<ServiceRequestKind, Step[]>>
+
 const notesStep: Step = {
   id: "notes",
   questionBg: "Има ли нещо важно, което да знаем?",
@@ -213,7 +233,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
       fields: [],
     },
     contactStep,
-    ...serviceSteps[kind],
+    ...(serviceSteps[kind] ?? alphaServiceSteps[kind] ?? []),
     notesStep,
     consentStep,
   ], [kind])
