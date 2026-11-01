@@ -16,6 +16,9 @@ describe("Horizon Alpha Team", () => {
       "quality-safety",
     ])
     expect(listAlphaAgents().every((item) => item.sopId && item.skillFile)).toBe(true)
+    expect(manifest.skills).toHaveLength(7)
+    expect(manifest.skills.every((skill) => skill.version !== "unknown")).toBe(true)
+    expect(manifest.skills.every((skill) => skill.refusalConditions.length > 0)).toBe(true)
   })
 
   it("routes German tax work to the finance specialist", () => {
@@ -24,6 +27,11 @@ describe("Horizon Alpha Team", () => {
     expect(plan.leadAgent.id).toBe("finance-tax")
     expect(plan.approvalRequired).toBe(true)
     expect(plan.externalActionBlocked).toBe(true)
+    expect(plan.execution).toEqual({
+      mode: "existing-case-assistant",
+      route: "/api/horizon/cases/case-1/assistant",
+      externalActions: "blocked",
+    })
     expect(plan.blockers).toEqual([])
   })
 

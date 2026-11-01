@@ -75,6 +75,11 @@ describe("POST /api/horizon/alpha-team", () => {
     expect(body.context).toEqual({ caseId: CASE, documentIds: [DOC_A, DOC_B] })
     expect(body.plan.department).toBe("finance")
     expect(body.plan.runId).toMatch(/^[0-9a-f-]{36}$/)
+    expect(body.plan.execution).toEqual({
+      mode: "existing-case-assistant",
+      route: `/api/horizon/cases/${CASE}/assistant`,
+      externalActions: "blocked",
+    })
     expect(state.contextLoads).toBe(1)
   })
 

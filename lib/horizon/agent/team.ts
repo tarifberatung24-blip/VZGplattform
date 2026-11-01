@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto"
+import { assertAlphaSkillContracts, getAlphaSkillContracts } from "./skills"
 
 export const ALPHA_TEAM_VERSION = "alpha-team-v1"
 
@@ -49,6 +50,11 @@ export type AlphaTaskPlan = {
   approvalRequired: boolean
   externalActionBlocked: boolean
   blockers: string[]
+  execution: {
+    mode: "existing-case-assistant"
+    route: string | null
+    externalActions: "blocked"
+  }
 }
 
 const AGENTS: AlphaAgent[] = [
@@ -143,12 +149,15 @@ export function listAlphaAgents(): AlphaAgent[] {
 }
 
 export function getAlphaTeamManifest() {
+  const agents = listAlphaAgents()
+  assertAlphaSkillContracts(agents)
   return {
     version: ALPHA_TEAM_VERSION,
     model: "Operator → Conductor → Specialist agents → Quality gate → Human approval",
     departments: ALPHA_DEPARTMENTS,
     autonomyLevels: AUTONOMY_LEVELS,
-    agents: listAlphaAgents(),
+    agents,
+    skills: getAlphaSkillContracts(agents),
     invariants: [
       "AI outputs are drafts or proposals with provenance.",
       "The Conductor cannot approve, sign, send or access an authenticated third-party account.",
@@ -205,5 +214,10 @@ export function planAlphaTask(request: AlphaTaskRequest): AlphaTaskPlan {
     blockers: needsEvidence && !request.contextValidated
       ? ["CASE_OR_DOCUMENT_CONTEXT_REQUIRED_BEFORE_EXECUTION"]
       : [],
+    execution: {
+      mode: "existing-case-assistant",
+      route: request.caseId ? `/api/horizon/cases/${request.caseId}/assistant` : null,
+      externalActions: "blocked",
+    },
   }
 }
