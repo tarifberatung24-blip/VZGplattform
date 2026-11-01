@@ -40,6 +40,8 @@ export type CaseContext = {
   unconfirmedCriticalFactKeys: string[]
   draftSummaries: { version: number; subject: string; reviewStatus: string; approved: boolean }[]
   documentCount: number
+  /** Owner-scoped document IDs loaded with the case context for request validation. */
+  documentIds: string[]
   /** True when the case has no usable input yet, so the assistant must ask. */
   empty: boolean
 }
@@ -68,6 +70,7 @@ export function buildCaseContext(input: {
   drafts: readonly CaseDraft[]
   approvedDraftIds: readonly string[]
   documentCount: number
+  documentIds?: readonly string[]
 }): CaseContext {
   const confirmedFacts: CaseContextFact[] = []
   const unconfirmedFacts: CaseContextFact[] = []
@@ -101,6 +104,7 @@ export function buildCaseContext(input: {
     unconfirmedCriticalFactKeys: input.missing?.unconfirmedCriticalFactKeys ?? [],
     draftSummaries,
     documentCount: input.documentCount,
+    documentIds: [...(input.documentIds ?? [])],
     empty: confirmedFacts.length === 0 && unconfirmedFacts.length === 0 && input.documentCount === 0,
   }
 }
@@ -130,5 +134,6 @@ export function serializeCaseContext(context: CaseContext): string {
     unconfirmed_critical_fact_keys: context.unconfirmedCriticalFactKeys,
     drafts: context.draftSummaries,
     document_count: context.documentCount,
+    document_ids: context.documentIds,
   })
 }

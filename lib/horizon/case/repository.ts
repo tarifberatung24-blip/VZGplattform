@@ -859,6 +859,7 @@ export class CaseEngineRepository {
         missing: missing.data ?? null,
         approvedDraftIds: approvalChecks.filter((id): id is string => id !== null),
         documentCount: (documents.data ?? []).length,
+        documentIds: (documents.data ?? []).map((document) => document.id),
       }),
     )
   }

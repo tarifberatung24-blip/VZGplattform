@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto"
+import { randomUUID } from "node:crypto"
 
 export const ALPHA_TEAM_VERSION = "alpha-team-v1"
 
@@ -32,10 +32,13 @@ export type AlphaTaskRequest = {
   caseId?: string
   documentIds?: string[]
   locale?: "bg" | "de"
+  /** Internal route signal; never accepted directly from the client. */
+  contextValidated?: boolean
 }
 
 export type AlphaTaskPlan = {
   version: string
+  runId: string
   traceId: string
   objective: string
   department: AlphaDepartment
@@ -135,13 +138,6 @@ function agent(id: string): AlphaAgent {
   return result
 }
 
-function traceId(request: AlphaTaskRequest): string {
-  return createHash("sha256")
-    .update(`${ALPHA_TEAM_VERSION}:${request.objective}:${request.caseId ?? ""}:${(request.documentIds ?? []).join(",")}`)
-    .digest("hex")
-    .slice(0, 16)
-}
-
 export function listAlphaAgents(): AlphaAgent[] {
   return AGENTS.map((item) => ({ ...item, operations: [...item.operations] }))
 }
@@ -177,16 +173,27 @@ export function planAlphaTask(request: AlphaTaskRequest): AlphaTaskPlan {
     department === "operations" ? "deadline-monitor" : "document-intake",
   )
   const supportingAgents = [agent("quality-safety")]
-  const needsEvidence = Boolean(request.caseId || request.documentIds?.length)
-  const steps = [
-    "Conductor класифицира задачата и зарежда само разрешения case/document контекст.",
-    `${leadAgent.name} изпълнява ${leadAgent.sopId} и връща структурирани предложения, не окончателни решения.`,
-    "Quality & Safety Agent проверява provenance, липсващи факти и границите за външно действие.",
-    "Horizon показва резултата за преглед и изисква одобрение преди подготовка на външен handoff.",
-  ]
+  const locale = request.locale ?? "bg"
+  const contextFree = /^(покажи|изброй|list|show|help|помощ|какво можеш|what can you do)/i.test(objective)
+  const needsEvidence = !contextFree
+  const steps = locale === "de"
+    ? [
+        "Der Conductor klassifiziert die Aufgabe und lädt nur den autorisierten Fall-/Dokumentkontext.",
+        `${leadAgent.name} führt ${leadAgent.sopId} aus und gibt Vorschläge, keine endgültigen Entscheidungen, zurück.`,
+        "Der Quality-&-Safety-Agent prüft Herkunft, fehlende Fakten und Grenzen externer Aktionen.",
+        "Horizon zeigt das Ergebnis zur Prüfung und verlangt eine Freigabe vor einem externen Handoff.",
+      ]
+    : [
+        "Conductor класифицира задачата и зарежда само разрешения case/document контекст.",
+        `${leadAgent.name} изпълнява ${leadAgent.sopId} и връща структурирани предложения, не окончателни решения.`,
+        "Quality & Safety Agent проверява provenance, липсващи факти и границите за външно действие.",
+        "Horizon показва резултата за преглед и изисква одобрение преди подготовка на външен handoff.",
+      ]
+  const runId = randomUUID()
   return {
     version: ALPHA_TEAM_VERSION,
-    traceId: traceId(request),
+    runId,
+    traceId: runId,
     objective,
     department,
     leadAgent,
@@ -195,6 +202,8 @@ export function planAlphaTask(request: AlphaTaskRequest): AlphaTaskPlan {
     autonomy: leadAgent.autonomy,
     approvalRequired: true,
     externalActionBlocked: true,
-    blockers: needsEvidence ? [] : ["CASE_OR_DOCUMENT_CONTEXT_REQUIRED_BEFORE_EXECUTION"],
+    blockers: needsEvidence && !request.contextValidated
+      ? ["CASE_OR_DOCUMENT_CONTEXT_REQUIRED_BEFORE_EXECUTION"]
+      : [],
   }
 }
