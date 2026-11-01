@@ -33,3 +33,9 @@ skills-lock.json
 .env*.local
 supabase/.branches/
 .openhands/runtime/
+.openhands/steward-reports/
+
+# System Steward output. Generated reports are uploaded as a workflow artifact,
+# not committed; the workflow's "no repository change" check depends on this
+# being ignored.
+steward-reports/
