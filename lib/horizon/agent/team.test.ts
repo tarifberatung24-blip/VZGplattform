@@ -19,7 +19,7 @@ describe("Horizon Alpha Team", () => {
   })
 
   it("routes German tax work to the finance specialist", () => {
-    const plan = planAlphaTask({ objective: "Обясни писмото от Finanzamt", caseId: "case-1" })
+    const plan = planAlphaTask({ objective: "Обясни писмото от Finanzamt", caseId: "case-1", contextValidated: true })
     expect(plan.department).toBe("finance")
     expect(plan.leadAgent.id).toBe("finance-tax")
     expect(plan.approvalRequired).toBe(true)
