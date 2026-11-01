@@ -119,4 +119,38 @@ describe("service request automation webhook", () => {
     expect(persistServiceRequest).toHaveBeenCalledOnce()
     expect(markServiceRequestForward).toHaveBeenCalledWith(expect.anything(), expect.stringMatching(/^hz_/), "failed", "HTTP 500")
   })
+
+  it("routes Tarifberater24 services to the free Alpha Team workflow", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+    vi.stubGlobal("fetch", fetchMock)
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "steuererklaerung",
+      answers: {
+        fullName: "Ivan Petrov",
+        email: "ivan@example.com",
+        serviceDetails: "Steuerjahr 2025, angestellt",
+        privacyConsent: "yes",
+      },
+    }))
+
+    expect(response.status).toBe(202)
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    const payload = JSON.parse(String(init.body))
+    expect(payload.workflow).toMatchObject({
+      name: "horizon_alpha_service_v1",
+      mode: "alpha_team_intake_and_execution",
+      freeForHorizon: true,
+      externalActions: "human_approval_required",
+    })
+    expect(payload.alphaTeam).toMatchObject({
+      serviceKind: "steuererklaerung",
+      leadAgent: "finance-tax",
+      externalActions: "blocked_until_human_approval",
+    })
+    expect(payload.compliance.externalActionsHumanApprovalRequired).toBe(true)
+  })
 })
