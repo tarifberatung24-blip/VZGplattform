@@ -1,0 +1,130 @@
+name: HORIZON System Steward
+
+# Manually triggered operational report for the HORIZON platform.
+#
+# Deliberately manual-only in V1: the task requires that automatic scheduling is
+# not activated until a manual execution has been reviewed. There is no `schedule`
+# trigger here on purpose — adding one is a separate, explicit decision.
+#
+# The run is read-only. It calls the public health endpoint, reads the GitHub API
+# with the workflow's own token, and reads public German legal feeds. It cannot
+# write to the repository, the database or the deployment.
+
+on:
+  workflow_dispatch:
+    inputs:
+      legal_limit:
+        description: "Maximum items read per legal source (1-100)"
+        required: false
+        default: "25"
+      skip_github:
+        description: "Skip the GitHub sections (health history and technology search)"
+        required: false
+        type: boolean
+        default: false
+
+# Read-only by default. `contents: read` is what the checkout needs; nothing here
+# asks for a write scope, so the token cannot be used to change the repository.
+permissions:
+  contents: read
+
+# One run at a time. `cancel-in-progress: false` means a second manual trigger
+# waits rather than killing a run that is already producing a report, which keeps
+# overlapping executions from racing on the same artifact name.
+concurrency:
+  group: horizon-system-steward
+  cancel-in-progress: false
+
+jobs:
+  steward:
+    name: Run System Steward
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # The Steward uses only Node built-ins (fetch, AbortSignal.timeout,
+          # node:test), so it needs no dependency install. 22 matches the
+          # repository floor and the CI workflow.
+          node-version: "22"
+
+      - name: Validate inputs
+        id: inputs
+        env:
+          LEGAL_LIMIT: ${{ github.event.inputs.legal_limit || '25' }}
+          SKIP_GITHUB: ${{ github.event.inputs.skip_github || 'false' }}
+        run: |
+          # Clamp to an integer in range rather than trusting the dispatch form.
+          case "$LEGAL_LIMIT" in
+            ''|*[!0-9]*) LEGAL_LIMIT=25 ;;
+          esac
+          if [ "$LEGAL_LIMIT" -lt 1 ]; then LEGAL_LIMIT=1; fi
+          if [ "$LEGAL_LIMIT" -gt 100 ]; then LEGAL_LIMIT=100; fi
+          echo "legal_limit=$LEGAL_LIMIT" >> "$GITHUB_OUTPUT"
+          echo "skip_github=$SKIP_GITHUB" >> "$GITHUB_OUTPUT"
+          echo "Reading up to $LEGAL_LIMIT items per legal source; skip_github=$SKIP_GITHUB"
+
+      - name: Run Steward
+        id: run
+        env:
+          # The workflow's own token. Read-only because the job declares
+          # `permissions: contents: read`. Never echoed.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STEWARD_ENVIRONMENT: github-actions
+        run: |
+          ARGS="--out steward-reports --mode manual --trigger workflow_dispatch --legal-limit ${{ steps.inputs.outputs.legal_limit }}"
+          if [ "${{ steps.inputs.outputs.skip_github }}" = "true" ]; then
+            ARGS="$ARGS --no-github"
+          fi
+          # `set -o pipefail` is not used: the Steward exits 0 even when a source
+          # is down, because a partial report is still a report. A non-zero exit
+          # here means the run itself failed to produce an artifact.
+          node scripts/steward/run.mjs $ARGS
+
+      - name: Summarize report in the run page
+        if: always()
+        run: |
+          REPORT=$(ls -1 steward-reports/*.md 2>/dev/null | head -n 1 || true)
+          if [ -z "$REPORT" ]; then
+            echo "## HORIZON System Steward" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No report was produced. Check the run log above." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo "## HORIZON System Steward"
+            echo ""
+            echo "Report: \`$REPORT\`"
+            echo ""
+            # The first sections are the summary a reviewer needs on the run page.
+            sed -n '1,40p' "$REPORT"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: horizon-steward-report-${{ github.run_id }}
+          path: steward-reports/
+          # The report is a snapshot; keeping it beyond the retention window has
+          # no value and the artifacts are not a system of record.
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Confirm no repository change was made
+        if: always()
+        run: |
+          # The Steward is read-only. If the working tree is dirty after a run,
+          # something wrote where it should not have, and the job should fail
+          # loudly rather than pass with an unexplained change.
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::The Steward modified the working tree. It must be read-only."
+            git status --porcelain
+            exit 1
+          fi
+          echo "Working tree is clean; no write operation was performed."
