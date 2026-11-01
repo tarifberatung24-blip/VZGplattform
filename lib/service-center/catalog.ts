@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n/dictionaries"
+import { horizonServiceCenterEntries } from "./horizon-services"
 
 /**
  * The HORIZON Service Center catalogue.
@@ -448,6 +449,7 @@ export const serviceCenterEntries: readonly ServiceEntry[] = [
       de: "integration stelle anbieter geplant",
     },
   },
+  ...horizonServiceCenterEntries,
 ]
 
 export type ServiceCenterCopy = {

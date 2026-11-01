@@ -66,7 +66,12 @@ describe("service center catalogue", () => {
     ])
     for (const entry of serviceCenterEntries) {
       if (!entry.href) continue
-      expect(knownRoutes.has(entry.href), `${entry.id} -> ${entry.href}`).toBe(true)
+      const baseRoute = entry.href.split("?")[0]
+      if (baseRoute === "/zayavka") {
+        expect(entry.href, `${entry.id} must select a service`).toMatch(/^\/zayavka\?service=[a-z_]+$/)
+      } else {
+        expect(knownRoutes.has(entry.href), `${entry.id} -> ${entry.href}`).toBe(true)
+      }
     }
   })
 
@@ -74,6 +79,14 @@ describe("service center catalogue", () => {
     const assistant = serviceCenterEntries.find((entry) => entry.id === "ai-assistant")
     expect(assistant?.status).toBe("roadmap")
     expect(assistant?.href).toBeUndefined()
+  })
+
+  it("publishes all eight free Tarifberater24 services as login-gated requests", () => {
+    const entries = serviceCenterEntries.filter((entry) => entry.id.startsWith("tarifberater24-"))
+    expect(entries).toHaveLength(8)
+    expect(entries.every((entry) => entry.status === "login")).toBe(true)
+    expect(entries.every((entry) => entry.href?.startsWith("/zayavka?service=") === true)).toBe(true)
+    expect(entries.every((entry) => /Безплат(на|ен)/.test(entry.summary.bg))).toBe(true)
   })
 
   it("uses only declared audiences, categories and statuses", () => {

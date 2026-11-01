@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { serviceRequestKinds } from "../../../lib/service-request"
+import { getHorizonServiceRequest, isHorizonServiceRequestKind } from "../../../lib/horizon/service-requests/catalog"
 import { checkRateLimit, getRequestKey } from "../../../lib/rate-limit"
 import { markServiceRequestForward, persistServiceRequest } from "../../../lib/affiliate/analytics"
 import { createAffiliateAnalyticsClient } from "../../../lib/affiliate/analytics-client"
@@ -55,6 +56,9 @@ export async function POST(request: Request) {
   const receivedAt = new Date()
   const requestId = `hz_${crypto.randomUUID()}`
   const promisedResponseBy = addMinutes(receivedAt, 120).toISOString()
+  const horizonService = isHorizonServiceRequestKind(parsed.data.kind)
+    ? getHorizonServiceRequest(parsed.data.kind)
+    : null
 
   // Persist first: the customer request is the business-critical artefact and
   // must survive an orchestrator outage. The write is best-effort (returns null
@@ -82,11 +86,23 @@ export async function POST(request: Request) {
   const payload = {
     requestId,
     workflow: {
-      name: "horizon_offer_request_v1",
-      mode: "manual_offer_preparation",
+      name: horizonService ? "horizon_alpha_service_v1" : "horizon_offer_request_v1",
+      mode: horizonService ? "alpha_team_intake_and_execution" : "manual_offer_preparation",
       slaMinutes: 120,
       promisedResponseBy,
+      freeForHorizon: Boolean(horizonService),
+      externalActions: "human_approval_required",
     },
+    alphaTeam: horizonService
+      ? {
+          serviceKind: horizonService.kind,
+          leadAgent: horizonService.alphaAgent,
+          objective: parsed.data.locale === "de" ? horizonService.objectiveDe : horizonService.objectiveBg,
+          requiredEvidence: horizonService.requiredEvidence,
+          execution: "prepare_draft_and_request_missing_evidence",
+          externalActions: "blocked_until_human_approval",
+        }
+      : null,
     request: {
       kind: parsed.data.kind,
       locale: parsed.data.locale,
@@ -106,6 +122,7 @@ export async function POST(request: Request) {
       customerConsent: parsed.data.consent,
       noAutomatedDecision: true,
       noGuaranteedPriceOrApproval: true,
+      externalActionsHumanApprovalRequired: true,
     },
   }
 
