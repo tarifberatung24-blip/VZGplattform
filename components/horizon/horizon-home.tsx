@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useFormStatus } from "react-dom"
 import Link from "next/link"
 import {
@@ -11,6 +11,7 @@ import {
   FileWarning,
   FileX2,
   Info,
+  MessageCircle,
   Receipt,
   type LucideIcon,
 } from "lucide-react"
@@ -139,13 +140,37 @@ function InkassoCard({ locale }: { locale: "bg" | "de" }) {
 export function HorizonHome({
   errorCode,
   caseCounts,
+  horizonCases,
+  claimRequestId,
 }: {
   errorCode: string | null
   caseCounts: Record<string, number>
+  horizonCases: Array<{ id: string; title: string; status: string; createdAt: string }>
+  claimRequestId: string | null
 }) {
   const { locale } = useLanguage()
   const de = locale === "de"
   const copy = getGuideCopy(locale)
+  const [claimMessage, setClaimMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!claimRequestId) return
+    let active = true
+    void fetch("/api/service-requests/claim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId: claimRequestId }),
+    }).then(async (response) => {
+      if (!active) return
+      setClaimMessage(response.ok
+        ? (de ? "Der Gast-Fall wurde mit deinem Profil verbunden." : "Guest заявката е свързана с профила ти.")
+        : (de ? "Die Anfrage konnte nicht automatisch verbunden werden." : "Заявката не можа да се свърже автоматично."))
+      if (response.ok) window.history.replaceState({}, "", window.location.pathname)
+    }).catch(() => {
+      if (active) setClaimMessage(de ? "Verbindung fehlgeschlagen." : "Връзката неуспешна.")
+    })
+    return () => { active = false }
+  }, [claimRequestId, de])
 
   return (
     <section className="mt-2" aria-labelledby="horizon-modules">
@@ -164,6 +189,43 @@ export function HorizonHome({
             ? "Der Vorgang konnte nicht geöffnet werden. Bitte erneut versuchen."
             : "Случаят не можа да бъде отворен. Опитай отново."}
         </p>
+      ) : null}
+
+      {claimMessage ? <p role="status" className="paper paper-note mt-4 px-4 py-3 text-sm">{claimMessage}</p> : null}
+
+      {horizonCases.length > 0 ? (
+        <section className="mt-5" aria-labelledby="active-horizon-cases">
+          <div className="flex items-center justify-between gap-3">
+            <h3 id="active-horizon-cases" className="text-sm font-semibold">
+              {de ? "Deine laufenden HORIZON-Fälle" : "Твоите активни HORIZON cases"}
+            </h3>
+            <span className="text-xs text-muted-foreground">{de ? "Alpha Team arbeitet hier" : "Alpha Team работи тук"}</span>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {horizonCases.map((item) => (
+              <Link
+                key={item.id}
+                href={localizedPath(`/guide/${item.id}`, locale)}
+                className="paper paper-link flex items-center justify-between gap-4 p-4"
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                    <MessageCircle className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold">{item.title}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {item.status === "waiting_for_user"
+                        ? (de ? "Warten auf deine Angaben" : "Чака твоите данни")
+                        : (de ? "Alpha Team bearbeitet" : "Alpha Team обработва")}
+                    </span>
+                  </span>
+                </span>
+                <ArrowRight className="size-4 shrink-0 text-primary" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
       ) : null}
 
       {/* Two columns on a phone, so the five modules fit on about one screen instead of a long list. */}

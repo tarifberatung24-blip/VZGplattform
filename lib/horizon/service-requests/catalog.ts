@@ -87,7 +87,7 @@ export const horizonServiceRequests: readonly HorizonServiceRequest[] = [
 
 export type HorizonServiceKind = HorizonServiceRequest["kind"]
 
-export function isHorizonServiceRequestKind(value: ServiceRequestKind): value is HorizonServiceKind {
+export function isHorizonServiceRequestKind(value: unknown): value is HorizonServiceKind {
   return horizonServiceRequests.some((entry) => entry.kind === value)
 }
 

@@ -44,3 +44,11 @@ HORIZON не обещава одобрение, възстановяване, и
 ## Deployment requirement
 
 За реален unattended handoff трябва да е конфигуриран подписан `AUTOMATION_WEBHOOK_URL` и `AUTOMATION_WEBHOOK_SECRET`. При липсващ webhook заявката се запазва, но се връща контролируем `AUTOMATION_WEBHOOK_NOT_CONFIGURED`, за да не бъде загубена.
+
+## Case и профилна комуникация
+
+При authenticated потребител HORIZON създава case още при изпращане на заявката. Case-ът получава `service_request_type`, `alpha_team_lead`, `service_request_id` и intake facts, след което се поставя в `waiting_for_user`. В case-а се записва Alpha Team kickoff message и audit trail за `alpha_team_run_created` и `quality_safety_blocked`.
+
+При guest заявка се създава pending `affiliate_requests` ред. След login потребителят използва reference-а си; `/api/service-requests/claim` проверява дали authenticated email съвпада с request email, създава owner-scoped case и свързва `user_id` и `case_id`. Dashboard автоматично показва case-а и води към `/guide/{caseId}`.
+
+Това е единният комуникационен surface: Case Assistant route-ът е `/api/horizon/cases/{caseId}/assistant`, а документите, facts, drafts, tasks, approvals и audit събитията са в същия HORIZON case. Няма втори несвързан chatbot.

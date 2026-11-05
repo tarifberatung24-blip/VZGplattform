@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { serviceRequestKinds } from "../../../lib/service-request"
 import { getHorizonServiceRequest, isHorizonServiceRequestKind } from "../../../lib/horizon/service-requests/catalog"
+import { createCaseEngine } from "../../../lib/horizon/case"
+import { provisionHorizonServiceCase } from "../../../lib/horizon/service-requests/case-provisioning"
 import { checkRateLimit, getRequestKey } from "../../../lib/rate-limit"
 import { markServiceRequestForward, persistServiceRequest } from "../../../lib/affiliate/analytics"
 import { createAffiliateAnalyticsClient } from "../../../lib/affiliate/analytics-client"
@@ -59,6 +61,23 @@ export async function POST(request: Request) {
   const horizonService = isHorizonServiceRequestKind(parsed.data.kind)
     ? getHorizonServiceRequest(parsed.data.kind)
     : null
+  const caseEngine = horizonService ? await createCaseEngine() : null
+  let caseId: string | null = null
+
+  if (horizonService && caseEngine?.repository && caseEngine.userId) {
+    const provisioned = await provisionHorizonServiceCase(caseEngine.repository, {
+      kind: horizonService.kind,
+      locale: parsed.data.locale,
+      requestId,
+      customerName: parsed.data.customer.name,
+      customerEmail: parsed.data.customer.email,
+      answers: parsed.data.answers,
+    })
+    if (provisioned.error || !provisioned.data) {
+      return NextResponse.json({ code: "HORIZON_CASE_PROVISIONING_FAILED", detail: provisioned.error }, { status: 500 })
+    }
+    caseId = provisioned.data.id
+  }
 
   // Persist first: the customer request is the business-critical artefact and
   // must survive an orchestrator outage. The write is best-effort (returns null
@@ -81,6 +100,8 @@ export async function POST(request: Request) {
     consent: parsed.data.consent,
     slaMinutes: 120,
     promisedResponseBy,
+    userId: caseEngine?.userId ?? null,
+    caseId,
   })
 
   const payload = {
@@ -111,6 +132,8 @@ export async function POST(request: Request) {
       referrer: request.headers.get("referer"),
       userAgent: request.headers.get("user-agent"),
       receivedAt: receivedAt.toISOString(),
+      caseId,
+      profileLinked: Boolean(caseId),
     },
     customer: {
       name: parsed.data.customer.name,
@@ -118,6 +141,17 @@ export async function POST(request: Request) {
       phone: parsed.data.customer.phone || null,
     },
     answers: parsed.data.answers,
+    case: caseId
+      ? {
+          id: caseId,
+          assistantRoute: `/api/horizon/cases/${caseId}/assistant`,
+          dashboardRoute: "/dashboard",
+          status: "waiting_for_user",
+        }
+      : {
+          id: null,
+          claimRequiredAfterLogin: Boolean(horizonService),
+        },
     compliance: {
       customerConsent: parsed.data.consent,
       noAutomatedDecision: true,
@@ -131,6 +165,9 @@ export async function POST(request: Request) {
   if (!webhookUrl || !secret) {
     // The request is safely stored; only the hand-off is missing.
     await markServiceRequestForward(analytics, requestId, "not_configured")
+    if (horizonService) {
+      return NextResponse.json({ status: "queued", requestId, caseId, case: caseId ? { id: caseId, status: "waiting_for_user", dashboardRoute: "/dashboard" } : null }, { status: 202 })
+    }
     return NextResponse.json({ code: "AUTOMATION_WEBHOOK_NOT_CONFIGURED", requestId }, { status: 503 })
   }
 
@@ -145,12 +182,18 @@ export async function POST(request: Request) {
     const response = await fetch(webhookUrl, { method: "POST", headers, body: JSON.stringify(payload), signal: AbortSignal.timeout(10_000) })
     if (!response.ok) {
       await markServiceRequestForward(analytics, requestId, "failed", `HTTP ${response.status}`)
+      if (horizonService) {
+        return NextResponse.json({ status: "queued", requestId, caseId, case: caseId ? { id: caseId, status: "waiting_for_user", dashboardRoute: "/dashboard" } : null }, { status: 202 })
+      }
       return NextResponse.json({ code: "AUTOMATION_WEBHOOK_FAILED", requestId }, { status: 502 })
     }
     await markServiceRequestForward(analytics, requestId, "forwarded")
     return NextResponse.json({ status: "queued", requestId }, { status: 202 })
   } catch (error) {
     await markServiceRequestForward(analytics, requestId, "failed", error instanceof Error ? error.message : "unknown")
+    if (horizonService) {
+      return NextResponse.json({ status: "queued", requestId, caseId, case: caseId ? { id: caseId, status: "waiting_for_user", dashboardRoute: "/dashboard" } : null }, { status: 202 })
+    }
     return NextResponse.json({ code: "AUTOMATION_WEBHOOK_FAILED", requestId }, { status: 502 })
   }
 }
