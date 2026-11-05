@@ -24,6 +24,8 @@ export type PersistableServiceRequest = {
   consent: boolean
   slaMinutes: number
   promisedResponseBy: string | null
+  userId?: string | null
+  caseId?: string | null
 }
 
 function isMissingTable(error: { code?: string } | null | undefined) {
@@ -42,31 +44,114 @@ export async function persistServiceRequest(
 ): Promise<string | null> {
   if (!client) return null
   try {
+    const base = {
+      request_id: input.requestId,
+      kind: input.kind,
+      locale: input.locale,
+      source: input.source ?? null,
+      landing_url: input.landingUrl ?? null,
+      referrer: input.referrer ?? null,
+      user_agent: input.userAgent ?? null,
+      customer_name: input.customer.name,
+      customer_email: input.customer.email,
+      customer_phone: input.customer.phone ?? null,
+      answers: input.answers,
+      consent: input.consent,
+      sla_minutes: input.slaMinutes,
+      promised_response_by: input.promisedResponseBy,
+      forward_status: "pending",
+    }
     const { data, error } = await client
       .from("affiliate_requests")
-      .insert({
-        request_id: input.requestId,
-        kind: input.kind,
-        locale: input.locale,
-        source: input.source ?? null,
-        landing_url: input.landingUrl ?? null,
-        referrer: input.referrer ?? null,
-        user_agent: input.userAgent ?? null,
-        customer_name: input.customer.name,
-        customer_email: input.customer.email,
-        customer_phone: input.customer.phone ?? null,
-        answers: input.answers,
-        consent: input.consent,
-        sla_minutes: input.slaMinutes,
-        promised_response_by: input.promisedResponseBy,
-        forward_status: "pending",
-      })
+      .insert({ ...base, user_id: input.userId ?? null, case_id: input.caseId ?? null })
       .select("id")
       .single()
+    if (error && (error.code === "42703" || error.code === "PGRST204")) {
+      const fallback = await client.from("affiliate_requests").insert(base).select("id").single()
+      if (fallback.error) return null
+      return (fallback.data as { id: string }).id
+    }
     if (error) return null
     return (data as { id: string }).id
   } catch {
     return null
+  }
+}
+
+export type ClaimableServiceRequest = {
+  requestId: string
+  kind: string
+  locale: "bg" | "de"
+  customerName: string
+  customerEmail: string
+  answers: Record<string, string>
+  caseId: string | null
+}
+
+export async function getClaimableServiceRequest(
+  client: SupabaseClient | null,
+  input: { requestId: string; email: string },
+): Promise<{ data: ClaimableServiceRequest | null; error: string | null }> {
+  if (!client) return { data: null, error: "ANALYTICS_NOT_CONFIGURED" }
+  try {
+    const { data, error } = await client
+      .from("affiliate_requests")
+      .select("request_id,kind,locale,customer_name,customer_email,answers,case_id")
+      .eq("request_id", input.requestId)
+      .is("user_id", null)
+      .maybeSingle()
+    if (error) return { data: null, error: error.message }
+    if (!data || String(data.customer_email).toLowerCase() !== input.email.toLowerCase()) {
+      return { data: null, error: "SERVICE_REQUEST_NOT_FOUND" }
+    }
+    return {
+      data: {
+        requestId: data.request_id,
+        kind: data.kind,
+        locale: data.locale,
+        customerName: data.customer_name,
+        customerEmail: data.customer_email,
+        answers: (data.answers ?? {}) as Record<string, string>,
+        caseId: data.case_id,
+      },
+      error: null,
+    }
+  } catch {
+    return { data: null, error: "SERVICE_REQUEST_CLAIM_FAILED" }
+  }
+}
+
+/** Claim a guest request after authentication without exposing the service-role table. */
+export async function claimServiceRequest(
+  client: SupabaseClient | null,
+  input: { requestId: string; userId: string; email: string; caseId: string },
+): Promise<{ data: ClaimableServiceRequest | null; error: string | null }> {
+  if (!client) return { data: null, error: "ANALYTICS_NOT_CONFIGURED" }
+  try {
+    const candidate = await getClaimableServiceRequest(client, { requestId: input.requestId, email: input.email })
+    if (candidate.error || !candidate.data) return candidate
+    const updated = await client
+      .from("affiliate_requests")
+      .update({ user_id: input.userId, case_id: input.caseId })
+      .eq("request_id", input.requestId)
+      .is("user_id", null)
+      .select("request_id,kind,locale,customer_name,customer_email,answers,case_id")
+      .maybeSingle()
+    if (updated.error || !updated.data) return { data: null, error: updated.error?.message ?? "CLAIM_RACE" }
+    return {
+      data: {
+        requestId: updated.data.request_id,
+        kind: updated.data.kind,
+        locale: updated.data.locale,
+        customerName: candidate.data.customerName,
+        customerEmail: candidate.data.customerEmail,
+        answers: candidate.data.answers,
+        caseId: updated.data.case_id,
+      },
+      error: null,
+    }
+  } catch {
+    return { data: null, error: "SERVICE_REQUEST_CLAIM_FAILED" }
   }
 }
 

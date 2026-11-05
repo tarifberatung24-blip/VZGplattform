@@ -15,7 +15,7 @@ import { findGrundversorgung, type GrundversorgungInput } from "@/lib/value/grun
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string }>
+  searchParams?: Promise<{ error?: string; claim?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -44,7 +44,7 @@ export default async function DashboardPage({
     supabase.from("documents").select("id", { count: "exact", head: true }).eq("household_id", householdId).eq("processing_status", "needs_review"),
     supabase.from("deadlines").select("id,title,due_at,status,created_at").eq("user_id", user.id).order("due_at", { ascending: true, nullsFirst: false }).limit(5),
     engine.repository ? engine.repository.listMine(100) : Promise.resolve({ data: [], error: null }),
-    searchParams ? searchParams : Promise.resolve({} as { error?: string }),
+    searchParams ? searchParams : Promise.resolve({} as { error?: string; claim?: string }),
     supabase.from("contracts").select("id,title,category,provider_name,notes,extracted_facts").eq("household_id", householdId).in("category", ["electricity", "gas", "energy", "strom"]).limit(50),
     // Before the revenue-attribution migration this table is absent; the error is treated as "no savings yet".
     supabase.from("household_savings").select("status,annual_saving_cents").eq("user_id", user.id),
@@ -69,7 +69,9 @@ export default async function DashboardPage({
     reviewCount={reviewDocumentsResult.count ?? 0}
     reminders={deadlinesResult.data ?? []}
     caseCounts={caseCounts}
+    horizonCases={(casesResult.data ?? []).slice(0, 6)}
     moduleError={errorParam.error ?? null}
+    claimRequestId={errorParam.claim ?? null}
     yourValue={yourValue}
     grundversorgung={grundversorgung}
   />
