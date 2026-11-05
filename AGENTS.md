@@ -107,6 +107,33 @@ regress a case. `complete` and `reopen` are the only user-driven moves and live 
 to `CASE_ADVANCE_TARGETS` in `lib/horizon/case/lifecycle.ts` — a test in `advance.test.ts` proves every
 target is reachable from a fresh case.
 
+## System Steward (read-only monitoring)
+
+`scripts/steward/` is a standalone Node tool (no npm deps, Node built-ins only) that monitors the
+platform and writes a report artifact. It runs from `.github/workflows/horizon-steward.yml`, which is
+**manual-trigger only** — there is no `schedule`, and adding one is a deliberate decision, not a default.
+
+Three rules apply when changing it:
+
+1. **Read-only is structural, not a promise.** Only `GET` is reachable: `stewardFetch` is the sole
+   outbound call and the host allowlist (`STEWARD_ALLOWED_HOSTS`) is checked before every request.
+   `guard.test.mjs` scans the sources for `POST`/`PUT`/`PATCH`/`DELETE`, for banned imports
+   (`child_process`, mailers, DB clients), and asserts the forbidden-action list. Do not add a write path
+   "temporarily"; add it to the forbidden list first and let the test fail.
+2. **Legal status comes from the source, never the title.** Each entry in `LEGAL_SOURCES` declares what
+   publishing there *means* (`enacted_and_promulgated`, `parliamentary_process`, …). A Bundestag item
+   titled "Gesetz" is still not law. Changing a source's status is a legal claim — justify it.
+3. **A missing source is reported, not hidden.** An unreachable source appears in
+   `unavailableSources` and in the report's "unavailable" list, so the report never implies coverage it
+   did not have. Same for a section with no data (product intelligence): it states the limitation instead
+   of emitting an empty list or an invented number.
+
+Reports are written to `steward-reports/` (gitignored) and uploaded as a workflow artifact. The workflow
+fails if `git status --porcelain` is non-empty, which would prove a write occurred.
+
+`node --test scripts/steward/*.test.mjs` runs the suite; network-dependent tests skip themselves when a
+source is unreachable, so a restricted environment reports what it could not verify.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "vitest run --exclude 'scripts/**' && node --test scripts/*.test.mjs",
+    "test": "vitest run --exclude 'scripts/**' && node --test scripts/*.test.mjs scripts/steward/*.test.mjs",
     "supabase:check": "node scripts/supabase-check.mjs",
     "i18n:check": "node scripts/i18n-check.mjs",
     "i18n:unused": "node scripts/i18n-unused.mjs",
@@ -23,7 +23,9 @@
     "ai:ui-qa": "node scripts/ai-ui-qa.mjs",
     "ai:ui-qa:test": "node --test scripts/ai-ui-qa.test.mjs",
     "security:zap": "node scripts/security-zap.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "steward:run": "node scripts/steward/run.mjs",
+    "steward:test": "node --test scripts/steward/*.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/groq": "^4.0.37",
