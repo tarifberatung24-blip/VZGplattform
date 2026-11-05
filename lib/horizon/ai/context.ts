@@ -134,6 +134,5 @@ export function serializeCaseContext(context: CaseContext): string {
     unconfirmed_critical_fact_keys: context.unconfirmedCriticalFactKeys,
     drafts: context.draftSummaries,
     document_count: context.documentCount,
-    document_ids: context.documentIds,
   })
 }

@@ -91,7 +91,6 @@ describe("capability vocabulary", () => {
   })
 
   it("is disjoint from the forbidden decisions", () => {
-    // If anyone adds an "approve"/"send"/"authorize" capability this fails.
     expect(capabilitiesInvokeForbiddenDecision()).toEqual([])
     for (const decision of HORIZON_AI_FORBIDDEN_DECISIONS) {
       expect(isHorizonAiCapability(decision)).toBe(false)
@@ -120,7 +119,6 @@ describe("screenRequest", () => {
   })
 
   it("rejects a capability the module does not offer", () => {
-    // Steuererklärung has no `draft`: tax output must not come from free text.
     const result = screenRequest({ capability: "draft", module: "steuererklaerung" })
     expect(result.ok).toBe(false)
     if (result.ok) return
@@ -261,6 +259,23 @@ describe("serializeCaseContext", () => {
     expect(payload.case.module).toBe("agentur_fuer_arbeit")
     expect(payload.confirmed_facts).toHaveLength(1)
     expect(payload.unconfirmed_facts).toHaveLength(0)
+  })
+
+  it("does not send internal document identifiers to the model", () => {
+    const context = buildCaseContext({
+      case: baseCase,
+      facts: [],
+      missing: null,
+      drafts: [],
+      approvedDraftIds: [],
+      documentCount: 2,
+      documentIds: ["internal-doc-1", "internal-doc-2"],
+    })
+    const payload = JSON.parse(serializeCaseContext(context))
+    expect(payload.document_count).toBe(2)
+    expect(payload).not.toHaveProperty("document_ids")
+    expect(serializeCaseContext(context)).not.toContain("internal-doc-1")
+    expect(serializeCaseContext(context)).not.toContain("internal-doc-2")
   })
 
   it("carries no owner identifier into the model payload", () => {
