@@ -221,6 +221,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [requestId, setRequestId] = useState<string | null>(null)
+  const [caseId, setCaseId] = useState<string | null>(null)
   const de = locale === "de"
 
   const steps = useMemo<Step[]>(() => [
@@ -273,6 +274,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
     setSubmitting(true)
     setMessage(null)
     setRequestId(null)
+    setCaseId(null)
     try {
       const response = await fetch("/api/service-requests", {
         method: "POST",
@@ -291,9 +293,10 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
           consent: answers.privacyConsent === "yes",
         }),
       })
-      const payload = await response.json().catch(() => ({})) as { requestId?: string; code?: string }
+      const payload = await response.json().catch(() => ({})) as { requestId?: string; caseId?: string | null; case?: { id?: string | null }; code?: string }
       if (!response.ok) throw new Error(payload.code ?? "REQUEST_FAILED")
       setRequestId(payload.requestId ?? null)
+      setCaseId(payload.caseId ?? payload.case?.id ?? null)
       setMessage(de ? "Anfrage ist eingegangen. Wir melden uns mit Angebot oder klarer Rueckfrage." : "Заявката е приета. Ще получиш оферта или ясен уточняващ въпрос.")
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "REQUEST_FAILED"
@@ -430,7 +433,18 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
             </p>
           )}
 
-          {requestId && <p className="paper paper-note paper-note-success mt-5 p-3 text-sm text-foreground">{de ? "Referenz" : "Референция"}: {requestId}</p>}
+          {requestId && <div className="paper paper-note paper-note-success mt-5 space-y-3 p-3 text-sm text-foreground">
+            <p>{de ? "Referenz" : "Референция"}: {requestId}</p>
+            {caseId ? (
+              <Link className="inline-flex font-semibold text-primary underline-offset-4 hover:underline" href={`/${locale}/guide/${caseId}`}>
+                {de ? "HORIZON-Fall öffnen" : "Отвори HORIZON case"}<ArrowRight className="ml-1 size-4" />
+              </Link>
+            ) : (
+              <Link className="inline-flex font-semibold text-primary underline-offset-4 hover:underline" href={`/auth/login?next=${encodeURIComponent(`/dashboard?claim=${requestId}`)}`}>
+                {de ? "Anmelden und Anfrage mit deinem Profil verbinden" : "Влез, за да свържеш заявката с профила си"}<ArrowRight className="ml-1 size-4" />
+              </Link>
+            )}
+          </div>}
           {message && <p className="paper paper-inset mt-5 p-3 text-sm text-muted-foreground" role="status">{message}</p>}
 
           <div className="mt-7 flex flex-wrap justify-between gap-3">

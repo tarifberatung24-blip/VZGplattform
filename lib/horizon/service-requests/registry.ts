@@ -3,9 +3,12 @@
  * an append-only case fact so new commercial services can be added without
  * widening the protected `cases` database vocabulary for every launch.
  */
+import { serviceRequestKinds } from "@/lib/service-request"
+
 export const SERVICE_REQUEST_TYPES = [
   "energy_cost_check",
   "kfz_insurance",
+  ...serviceRequestKinds,
 ] as const
 
 export type ServiceRequestType = (typeof SERVICE_REQUEST_TYPES)[number]

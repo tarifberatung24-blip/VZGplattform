@@ -13,7 +13,9 @@ export type VzgDashboardProps = {
   reviewCount: number
   reminders: Array<{ id: string; title: string; due_at: string | null; status: string | null }>
   caseCounts?: Record<string, number>
+  horizonCases?: Array<{ id: string; title: string; status: string; createdAt: string }>
   moduleError?: string | null
+  claimRequestId?: string | null
   yourValue?: YourValue | null
   grundversorgung?: GrundversorgungMatch[]
 }
@@ -22,11 +24,11 @@ export type VzgDashboardProps = {
  * The dashboard is a simple service launcher. Detailed figures, warnings and
  * history stay inside their service, where a person asks for them deliberately.
  */
-export function VzgDashboard({ caseCounts, moduleError }: VzgDashboardProps) {
+export function VzgDashboard({ caseCounts, horizonCases, moduleError, claimRequestId }: VzgDashboardProps) {
   return (
     <div className="mobile-client-dashboard horizon-dashboard relative min-h-[calc(100svh-4.5rem)] min-w-0 overflow-x-hidden bg-background px-4 pb-28 pt-5 text-foreground sm:px-6 sm:pt-6 md:min-h-[calc(100svh-3.5rem)] md:pb-8 lg:px-8">
       <div className="relative z-10 mx-auto min-w-0 max-w-[1100px]">
-        <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} />
+        <HorizonHome errorCode={moduleError ?? null} caseCounts={caseCounts ?? {}} horizonCases={horizonCases ?? []} claimRequestId={claimRequestId ?? null} />
       </div>
     </div>
   )
