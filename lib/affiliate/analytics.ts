@@ -173,6 +173,40 @@ export async function markServiceRequestForward(
   }
 }
 
+/**
+ * Link a stored request row to the case and owner it was provisioned for.
+ *
+ * The row is inserted before the case exists, so the request stays durable even
+ * when case provisioning is slow or fails; this backfills `case_id` and
+ * `user_id` once it succeeds. Without it the row keeps the null values from
+ * insert and the case has no traceable request, which breaks reconciliation.
+ *
+ * Best-effort like the other column updates: a missing attribution migration
+ * (`42703`/`PGRST204`) or an unavailable client leaves the request row intact.
+ * Returns true only when a row was actually updated.
+ */
+export async function linkServiceRequestCase(
+  client: SupabaseClient | null,
+  input: { requestId: string; caseId: string; userId: string | null },
+): Promise<boolean> {
+  if (!client) return false
+  try {
+    const { data, error } = await client
+      .from("affiliate_requests")
+      .update({ case_id: input.caseId, user_id: input.userId })
+      .eq("request_id", input.requestId)
+      .select("id")
+      .maybeSingle()
+    if (error && isMissingColumn(error)) {
+      // The case-link migration is not applied yet; keep the request, skip the link.
+      return false
+    }
+    return !error && Boolean(data)
+  } catch {
+    return false
+  }
+}
+
 export type AffiliateClickInput = {
   offerId: string
   locale?: string | null

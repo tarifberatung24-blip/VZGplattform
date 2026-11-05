@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { markServiceRequestForward, persistServiceRequest, recordAffiliateClick } from "./analytics"
+import { linkServiceRequestCase, markServiceRequestForward, persistServiceRequest, recordAffiliateClick } from "./analytics"
 
 /** Minimal chainable fake of the two call shapes the helpers use: `insert().select().single()` for persist and an awaited `insert()` for click events. */
 function fakeClient(result: { data?: unknown; error?: unknown }) {
@@ -9,8 +9,20 @@ function fakeClient(result: { data?: unknown; error?: unknown }) {
   // persistServiceRequest uses insert().select().single().
   const insertResult = Object.assign(Promise.resolve(result), { select })
   const insert = vi.fn().mockReturnValue(insertResult)
-  const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue(result) })
-  return { from: vi.fn().mockReturnValue({ insert, update }), __insert: insert, __update: update }
+  // `update().eq()` is awaited by markServiceRequestForward, while
+  // linkServiceRequestCase chains `update().eq().select().maybeSingle()`, so the
+  // eq() result is both awaitable and chainable.
+  const updateMaybeSingle = vi.fn().mockResolvedValue(result)
+  const updateSelect = vi.fn().mockReturnValue({ maybeSingle: updateMaybeSingle })
+  const eqResult = Object.assign(Promise.resolve(result), { select: updateSelect })
+  const update = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue(eqResult) })
+  return {
+    from: vi.fn().mockReturnValue({ insert, update }),
+    __insert: insert,
+    __update: update,
+    __updateSelect: updateSelect,
+    __updateMaybeSingle: updateMaybeSingle,
+  }
 }
 
 const REQUEST = {
@@ -78,5 +90,46 @@ describe("affiliate analytics durability", () => {
     await markServiceRequestForward(client as never, "hz_test-1", "failed", "HTTP 502")
     const patch = client.__update.mock.calls[0][0]
     expect(patch).toMatchObject({ forward_status: "failed", forward_error: "HTTP 502" })
+  })
+})
+
+describe("service request case linkage", () => {
+  it("backfills case_id and user_id on the stored request", async () => {
+    const client = fakeClient({ data: { id: "row-1" }, error: null })
+    await expect(
+      linkServiceRequestCase(client as never, { requestId: "hz_test-1", caseId: "case-9", userId: "user-7" }),
+    ).resolves.toBe(true)
+    const patch = client.__update.mock.calls[0][0]
+    expect(patch).toMatchObject({ case_id: "case-9", user_id: "user-7" })
+    // The update is scoped to the request id, never a bulk update.
+    expect(client.__updateSelect).toHaveBeenCalledOnce()
+  })
+
+  it("accepts a null user for a request persisted without a session", async () => {
+    const client = fakeClient({ data: { id: "row-1" }, error: null })
+    await expect(
+      linkServiceRequestCase(client as never, { requestId: "hz_test-1", caseId: "case-9", userId: null }),
+    ).resolves.toBe(true)
+    expect(client.__update.mock.calls[0][0]).toMatchObject({ case_id: "case-9", user_id: null })
+  })
+
+  it("returns false when no client is configured instead of throwing", async () => {
+    await expect(
+      linkServiceRequestCase(null, { requestId: "hz_test-1", caseId: "case-9", userId: "user-7" }),
+    ).resolves.toBe(false)
+  })
+
+  it("does not fail when the case-link migration is not applied yet", async () => {
+    const client = fakeClient({ data: null, error: { code: "42703" } })
+    await expect(
+      linkServiceRequestCase(client as never, { requestId: "hz_test-1", caseId: "case-9", userId: "user-7" }),
+    ).resolves.toBe(false)
+  })
+
+  it("returns false when the request row is missing", async () => {
+    const client = fakeClient({ data: null, error: null })
+    await expect(
+      linkServiceRequestCase(client as never, { requestId: "hz_missing", caseId: "case-9", userId: "user-7" }),
+    ).resolves.toBe(false)
   })
 })

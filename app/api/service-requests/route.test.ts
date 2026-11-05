@@ -6,13 +6,27 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 const persistServiceRequest = vi.fn().mockResolvedValue("row-1")
 const markServiceRequestForward = vi.fn().mockResolvedValue(undefined)
 const recordAffiliateClick = vi.fn().mockResolvedValue(true)
+const linkServiceRequestCase = vi.fn().mockResolvedValue(true)
 vi.mock("../../../lib/affiliate/analytics", () => ({
   persistServiceRequest: (...args: unknown[]) => persistServiceRequest(...args),
   markServiceRequestForward: (...args: unknown[]) => markServiceRequestForward(...args),
   recordAffiliateClick: (...args: unknown[]) => recordAffiliateClick(...args),
+  linkServiceRequestCase: (...args: unknown[]) => linkServiceRequestCase(...args),
 }))
 vi.mock("../../../lib/affiliate/analytics-client", () => ({
   createAffiliateAnalyticsClient: () => ({ __fake: true }),
+}))
+
+// Case provisioning is mocked so the ordering between persistence, case creation
+// and the linkage backfill can be asserted. The default engine is unconfigured,
+// which is what the non-HORIZON kinds already see.
+const createCaseEngine = vi.fn()
+vi.mock("../../../lib/horizon/case", () => ({
+  createCaseEngine: (...args: unknown[]) => createCaseEngine(...args),
+}))
+const provisionHorizonServiceCase = vi.fn()
+vi.mock("../../../lib/horizon/service-requests/case-provisioning", () => ({
+  provisionHorizonServiceCase: (...args: unknown[]) => provisionHorizonServiceCase(...args),
 }))
 
 import { POST } from "./route"
@@ -38,12 +52,18 @@ const validBody = {
   consent: true,
 }
 
+let requestCounter = 0
+
 function request(body: unknown) {
+  // A unique client IP per call keeps the in-memory rate limiter (5 / 10 min,
+  // keyed by IP) from coupling the tests to one another.
+  requestCounter += 1
   return new Request("http://localhost/api/service-requests", {
     method: "POST",
     headers: {
       referer: "https://www.finanzberaterbg.de/bg/produkte",
       "user-agent": "vitest",
+      "x-forwarded-for": `10.0.0.${requestCounter}`,
     },
     body: JSON.stringify(body),
   })
@@ -54,6 +74,9 @@ afterEach(() => {
   vi.unstubAllGlobals()
   persistServiceRequest.mockClear()
   markServiceRequestForward.mockClear()
+  linkServiceRequestCase.mockClear()
+  createCaseEngine.mockReset()
+  provisionHorizonServiceCase.mockReset()
 })
 
 describe("service request automation webhook", () => {
@@ -152,5 +175,59 @@ describe("service request automation webhook", () => {
       externalActions: "blocked_until_human_approval",
     })
     expect(payload.compliance.externalActionsHumanApprovalRequired).toBe(true)
+  })
+
+  it("persists the request before provisioning the case, then backfills the case link", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+    vi.stubGlobal("fetch", fetchMock)
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    provisionHorizonServiceCase.mockResolvedValue({ data: { id: "case-9", status: "waiting_for_user" }, error: null })
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "steuererklaerung",
+      answers: { fullName: "Ivan", email: "ivan@example.com", serviceDetails: "Steuerjahr 2025", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(202)
+    const json = await response.json()
+    expect(json.caseId).toBe("case-9")
+    // The durable write happens first; the case is created only afterwards.
+    expect(persistServiceRequest.mock.invocationCallOrder[0]).toBeLessThan(
+      provisionHorizonServiceCase.mock.invocationCallOrder[0],
+    )
+    // The request row is linked to the case only after the case exists.
+    expect(linkServiceRequestCase.mock.invocationCallOrder[0]).toBeGreaterThan(
+      provisionHorizonServiceCase.mock.invocationCallOrder[0],
+    )
+    expect(linkServiceRequestCase).toHaveBeenCalledWith(expect.anything(), {
+      requestId: json.requestId,
+      caseId: "case-9",
+      userId: "user-7",
+    })
+    // The row is inserted without the case columns; they are set by the backfill.
+    expect(persistServiceRequest.mock.calls[0][1]).not.toHaveProperty("caseId")
+  })
+
+  it("keeps the persisted request even when case provisioning fails", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    vi.stubGlobal("fetch", vi.fn())
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    provisionHorizonServiceCase.mockResolvedValue({ data: null, error: "CASE_CREATE_FAILED" })
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "wohnungsanmeldung",
+      answers: { fullName: "Ivan", email: "ivan@example.com", address: "Berlin", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(500)
+    expect((await response.json()).code).toBe("HORIZON_CASE_PROVISIONING_FAILED")
+    // Persist ran first, so the customer request survives the provisioning failure.
+    expect(persistServiceRequest).toHaveBeenCalledOnce()
+    expect(linkServiceRequestCase).not.toHaveBeenCalled()
   })
 })

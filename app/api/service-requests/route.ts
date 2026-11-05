@@ -5,7 +5,7 @@ import { getHorizonServiceRequest, isHorizonServiceRequestKind } from "../../../
 import { createCaseEngine } from "../../../lib/horizon/case"
 import { provisionHorizonServiceCase } from "../../../lib/horizon/service-requests/case-provisioning"
 import { checkRateLimit, getRequestKey } from "../../../lib/rate-limit"
-import { markServiceRequestForward, persistServiceRequest } from "../../../lib/affiliate/analytics"
+import { linkServiceRequestCase, markServiceRequestForward, persistServiceRequest } from "../../../lib/affiliate/analytics"
 import { createAffiliateAnalyticsClient } from "../../../lib/affiliate/analytics-client"
 
 const requestSchema = z.object({
@@ -62,26 +62,12 @@ export async function POST(request: Request) {
     ? getHorizonServiceRequest(parsed.data.kind)
     : null
   const caseEngine = horizonService ? await createCaseEngine() : null
-  let caseId: string | null = null
-
-  if (horizonService && caseEngine?.repository && caseEngine.userId) {
-    const provisioned = await provisionHorizonServiceCase(caseEngine.repository, {
-      kind: horizonService.kind,
-      locale: parsed.data.locale,
-      requestId,
-      customerName: parsed.data.customer.name,
-      customerEmail: parsed.data.customer.email,
-      answers: parsed.data.answers,
-    })
-    if (provisioned.error || !provisioned.data) {
-      return NextResponse.json({ code: "HORIZON_CASE_PROVISIONING_FAILED", detail: provisioned.error }, { status: 500 })
-    }
-    caseId = provisioned.data.id
-  }
 
   // Persist first: the customer request is the business-critical artefact and
-  // must survive an orchestrator outage. The write is best-effort (returns null
-  // when analytics is unconfigured) and never blocks the webhook hand-off.
+  // must survive an orchestrator outage or a slow case provisioning step. The
+  // write is best-effort (returns null when analytics is unconfigured) and never
+  // blocks the webhook hand-off. `case_id` and `user_id` are backfilled below
+  // once the case exists, so the request is durable before the case is created.
   const analytics = createAffiliateAnalyticsClient()
   await persistServiceRequest(analytics, {
     requestId,
@@ -100,9 +86,27 @@ export async function POST(request: Request) {
     consent: parsed.data.consent,
     slaMinutes: 120,
     promisedResponseBy,
-    userId: caseEngine?.userId ?? null,
-    caseId,
   })
+
+  let caseId: string | null = null
+
+  if (horizonService && caseEngine?.repository && caseEngine.userId) {
+    const provisioned = await provisionHorizonServiceCase(caseEngine.repository, {
+      kind: horizonService.kind,
+      locale: parsed.data.locale,
+      requestId,
+      customerName: parsed.data.customer.name,
+      customerEmail: parsed.data.customer.email,
+      answers: parsed.data.answers,
+    })
+    if (provisioned.error || !provisioned.data) {
+      return NextResponse.json({ code: "HORIZON_CASE_PROVISIONING_FAILED", detail: provisioned.error }, { status: 500 })
+    }
+    caseId = provisioned.data.id
+    // The row already exists; backfill the link so the case and the request
+    // point at each other. Best-effort: the request stays durable either way.
+    await linkServiceRequestCase(analytics, { requestId, caseId, userId: caseEngine.userId })
+  }
 
   const payload = {
     requestId,
@@ -188,6 +192,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ code: "AUTOMATION_WEBHOOK_FAILED", requestId }, { status: 502 })
     }
     await markServiceRequestForward(analytics, requestId, "forwarded")
+    if (horizonService) {
+      // Same shape as the other HORIZON branches so the wizard always receives
+      // the case link, whether or not the hand-off succeeded.
+      return NextResponse.json({ status: "queued", requestId, caseId, case: caseId ? { id: caseId, status: "waiting_for_user", dashboardRoute: "/dashboard" } : null }, { status: 202 })
+    }
     return NextResponse.json({ status: "queued", requestId }, { status: 202 })
   } catch (error) {
     await markServiceRequestForward(analytics, requestId, "failed", error instanceof Error ? error.message : "unknown")
