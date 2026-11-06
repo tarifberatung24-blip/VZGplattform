@@ -56,7 +56,6 @@ export type LearningCenterCopy = {
   /** The dashboard training path, which is explicitly not finished yet. */
   dashboardIntro: string
   dashboardLessons: ComingSoonLesson[]
-  dashboardPending: string
   noticeTitle: string
   notice: string
   primaryCta: string
@@ -69,15 +68,14 @@ export const learningCenterCopy: Record<Locale, LearningCenterCopy> = {
   bg: {
     back: "Към началото",
     eyebrow: "HORIZON Learning Center",
-    title: "Научи HORIZON по пътеки",
-    intro:
-      "Едно място за всичко: какво можеш да свършиш, как минават процедурите в Германия и кои писма са готови. Започни от първа пътека и върви по номерата.",
+    title: "Функции, наръчници и писма",
+    intro: "Услуги, процедури и готови писма — на едно място.",
     howToUse: [
-      "Избери пътеката, която ти трябва сега.",
-      "Отвори темата и прочети кратките стъпки.",
-      "Стигни до точната услуга, наръчника или писмото.",
+      "Избери раздел.",
+      "Виж нужните стъпки.",
+      "Отвори услугата или писмото.",
     ],
-    pathsTitle: "Четири пътеки",
+    pathsTitle: "Раздели",
     openLabel: "Отвори",
     topicsLabel: "теми",
     lettersLabel: "писма",
@@ -86,26 +84,19 @@ export const learningCenterCopy: Record<Locale, LearningCenterCopy> = {
     detailsLabel: "Как работи",
     categoriesLabel: "Категории",
     comingSoonLabel: "Очаквайте скоро",
-    comingSoonNote:
-      "Тази пътека е в подготовка. Ще я допълним, след като таблото е готово. Дотогава не обещаваме функции, които още ги няма.",
-    functionsIntro:
-      "Шестнайсет услуги, групирани по това какво ти е нужно в момента. Всяка показва проблема, трите стъпки и какво получаваш.",
-    guidesIntro:
-      "Дванайсет теми за немските институции и процедури. Всяка обяснява какво прави службата, какво да носиш и къде се сбърква най-често.",
-    lettersIntro:
-      "Четири готови немски писма. Попълваш няколко полета и виждаш готовия текст с твоите данни, преди да го изпратиш.",
-    dashboardIntro:
-      "Обучение за работата с таблото на HORIZON. Структурата е подготвена, но уроците идват, след като таблото е завършено.",
+    comingSoonNote: "Уроците за таблото предстоят.",
+    functionsIntro: "16 услуги. Отвори карта за стъпките и резултата.",
+    guidesIntro: "12 теми за германските институции и процедури.",
+    lettersIntro: "4 готови немски писма за попълване и преглед.",
+    dashboardIntro: "Уроците за таблото още не са публикувани.",
     dashboardLessons: [
-      { title: "Навигация в таблото", body: "Как да стигнеш до най-важното и да се връщаш бързо към текущите си задачи." },
-      { title: "Личен профил", body: "Къде живеят данните ти и как да ги поддържаш актуални и верни." },
-      { title: "Домакинство и финанси", body: "Как да опишеш домакинството, доходите и разходите, за да са полезни проверките." },
-      { title: "Договори и срокове", body: "Как да следиш какво плащаш и кога изтичат сроковете." },
-      { title: "Документи и случаи", body: "Как документите и случаите се подреждат заедно на едно място." },
-      { title: "Известия и препоръки", body: "Как да получаваш навременни напомняния и какво да проверяваш след това." },
+      { title: "Навигация", body: "Основни раздели и текущи задачи." },
+      { title: "Личен профил", body: "Лични данни и настройки." },
+      { title: "Домакинство и финанси", body: "Доходи, разходи и домакинство." },
+      { title: "Договори и срокове", body: "Плащания и крайни срокове." },
+      { title: "Документи и случаи", body: "Файлове и текущи случаи." },
+      { title: "Известия", body: "Напомняния и следващи действия." },
     ],
-    dashboardPending:
-      "Уроците в тази пътека са обявени като предстоящи. Няма да намериш тук незавършени функции.",
     noticeTitle: "Важно",
     notice:
       "HORIZON подрежда, обяснява и подготвя. Не взема автоматични решения. Не заменя данъчна, правна или социална консултация. HORIZON не е застраховател и не обещава цена, спестяване или одобрение. Партньорските връзки са означени.",
@@ -117,47 +108,46 @@ export const learningCenterCopy: Record<Locale, LearningCenterCopy> = {
         number: "01",
         anchor: "functions",
         title: "Функции на HORIZON",
-        tagline: "Какво можеш да свършиш",
-        start: "Започни тук, ако не знаеш коя услуга ти трябва.",
+        tagline: "Услуги",
+        start: "Избери услуга.",
       },
       {
         id: "guides",
         number: "02",
         anchor: "guides",
         title: "Наръчник за Германия",
-        tagline: "Институции, пари и ежедневие",
-        start: "Продължи тук, за да разбереш процедурата, преди да действаш.",
+        tagline: "Германия",
+        start: "Прочети за процедурата.",
       },
       {
         id: "letters",
         number: "03",
         anchor: "letters",
         title: "Готови писма",
-        tagline: "Попълнени с твоите данни",
-        start: "Продължи тук, когато трябва да изпратиш немско писмо.",
+        tagline: "Писма",
+        start: "Подготви немско писмо.",
       },
       {
         id: "dashboard",
         number: "04",
         anchor: "dashboard",
         title: "Обучение за таблото",
-        tagline: "Очаквайте скоро",
-        start: "Ще се появи, след като таблото е готово.",
+        tagline: "Обучение",
+        start: "Уроците предстоят.",
       },
     ],
   },
   de: {
     back: "Zur Startseite",
     eyebrow: "HORIZON Learning Center",
-    title: "Lerne HORIZON in Lernpfaden",
-    intro:
-      "Ein Ort für alles: was du erledigen kannst, wie die Verfahren in Deutschland ablaufen und welche Briefe fertig sind. Starte beim ersten Pfad und folge den Nummern.",
+    title: "Funktionen, Ratgeber und Briefe",
+    intro: "Dienste, Verfahren und fertige Briefe — an einem Ort.",
     howToUse: [
-      "Wähle den Pfad, den du jetzt brauchst.",
-      "Öffne das Thema und lies die kurzen Schritte.",
-      "Lande beim passenden Dienst, Ratgeber oder Brief.",
+      "Bereich wählen.",
+      "Schritte ansehen.",
+      "Dienst oder Brief öffnen.",
     ],
-    pathsTitle: "Vier Lernpfade",
+    pathsTitle: "Bereiche",
     openLabel: "Öffnen",
     topicsLabel: "Themen",
     lettersLabel: "Briefe",
@@ -166,26 +156,19 @@ export const learningCenterCopy: Record<Locale, LearningCenterCopy> = {
     detailsLabel: "So funktioniert es",
     categoriesLabel: "Kategorien",
     comingSoonLabel: "Demnächst",
-    comingSoonNote:
-      "Dieser Pfad ist in Vorbereitung. Wir ergänzen ihn, sobald das Dashboard fertig ist. Bis dahin versprechen wir keine Funktionen, die es noch nicht gibt.",
-    functionsIntro:
-      "Sechzehn Dienste, gruppiert danach, was du gerade brauchst. Jeder zeigt das Problem, die drei Schritte und dein Ergebnis.",
-    guidesIntro:
-      "Zwölf Themen zu deutschen Behörden und Verfahren. Jedes erklärt, was die Stelle tut, was mitzubringen ist und was am häufigsten schiefgeht.",
-    lettersIntro:
-      "Vier fertige deutsche Briefe. Wenige Felder ausfüllen und den fertigen Text mit deinen Daten sehen, bevor du ihn sendest.",
-    dashboardIntro:
-      "Lernen, wie das HORIZON-Dashboard funktioniert. Die Struktur steht, die Lektionen folgen, sobald das Dashboard fertig ist.",
+    comingSoonNote: "Die Dashboard-Lektionen folgen.",
+    functionsIntro: "16 Dienste. Öffne eine Karte für Schritte und Ergebnis.",
+    guidesIntro: "12 Themen zu deutschen Behörden und Verfahren.",
+    lettersIntro: "4 deutsche Briefe zum Ausfüllen und Prüfen.",
+    dashboardIntro: "Die Dashboard-Lektionen sind noch nicht veröffentlicht.",
     dashboardLessons: [
-      { title: "Navigation im Dashboard", body: "Wie du zum Wichtigsten kommst und schnell zu deinen laufenden Vorgängen zurückfindest." },
-      { title: "Persönliches Profil", body: "Wo deine Angaben liegen und wie du sie aktuell und richtig hältst." },
-      { title: "Haushalt und Finanzen", body: "Wie du Haushalt, Einkommen und Ausgaben beschreibst, damit die Prüfungen nützlich sind." },
-      { title: "Verträge und Fristen", body: "Wie du im Blick behältst, was du zahlst und wann Fristen enden." },
-      { title: "Dokumente und Vorgänge", body: "Wie Dokumente und Vorgänge an einem Ort zusammen geordnet werden." },
-      { title: "Hinweise und Empfehlungen", body: "Wie du rechtzeitige Erinnerungen bekommst und was du danach prüfst." },
+      { title: "Navigation", body: "Bereiche und laufende Aufgaben." },
+      { title: "Persönliches Profil", body: "Persönliche Daten und Einstellungen." },
+      { title: "Haushalt und Finanzen", body: "Haushalt, Einkommen und Ausgaben." },
+      { title: "Verträge und Fristen", body: "Zahlungen und Fristen." },
+      { title: "Dokumente und Vorgänge", body: "Dateien und laufende Vorgänge." },
+      { title: "Benachrichtigungen", body: "Erinnerungen und nächste Schritte." },
     ],
-    dashboardPending:
-      "Die Lektionen dieses Pfads sind als kommend gekennzeichnet. Unfertige Funktionen findest du hier nicht.",
     noticeTitle: "Wichtig",
     notice:
       "HORIZON ordnet, erklärt und bereitet vor. Es trifft keine automatischen Entscheidungen und ersetzt keine Steuer-, Rechts- oder Sozialberatung. HORIZON ist kein Versicherer und verspricht keinen Preis, keine Ersparnis und keine Genehmigung. Partnerlinks sind gekennzeichnet.",
@@ -197,32 +180,32 @@ export const learningCenterCopy: Record<Locale, LearningCenterCopy> = {
         number: "01",
         anchor: "functions",
         title: "HORIZON Funktionen",
-        tagline: "Was du erledigen kannst",
-        start: "Starte hier, wenn du nicht weißt, welcher Dienst passt.",
+        tagline: "Dienste",
+        start: "Dienst auswählen.",
       },
       {
         id: "guides",
         number: "02",
         anchor: "guides",
         title: "Deutschland-Ratgeber",
-        tagline: "Behörden, Geld und Alltag",
-        start: "Weiter hier, um das Verfahren zu verstehen, bevor du handelst.",
+        tagline: "Deutschland",
+        start: "Verfahren nachlesen.",
       },
       {
         id: "letters",
         number: "03",
         anchor: "letters",
         title: "Fertige Briefe",
-        tagline: "Mit deinen Daten ausgefüllt",
-        start: "Weiter hier, wenn du einen deutschen Brief senden musst.",
+        tagline: "Briefe",
+        start: "Deutschen Brief vorbereiten.",
       },
       {
         id: "dashboard",
         number: "04",
         anchor: "dashboard",
         title: "Dashboard-Training",
-        tagline: "Demnächst",
-        start: "Erscheint, sobald das Dashboard fertig ist.",
+        tagline: "Training",
+        start: "Lektionen folgen.",
       },
     ],
   },
