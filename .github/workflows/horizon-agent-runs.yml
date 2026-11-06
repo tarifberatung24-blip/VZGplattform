@@ -1,0 +1,48 @@
+name: horizon-agent-runs
+
+# HORIZON Agent Runs Engine dispatcher. One bounded pass: recover crashed claims,
+# drain a small batch of due events, execute a small batch of due runs. The engine
+# never loops on its own; a trigger is the only thing that starts work.
+#
+# MANUAL TRIGGER ONLY. There is deliberately no `schedule:` here. Adding one is a
+# deliberate owner decision (the same rule the steward workflow follows), because a
+# schedule starts consuming the engine the moment it is merged. Until then, an
+# operator runs this workflow by hand, or calls the route directly.
+#
+# Needs two repository secrets:
+#   HORIZON_BASE_URL           e.g. https://vzgplattform.onrender.com
+#   AGENT_RUNS_WORKER_SECRET   the same value as the Render environment variable
+# Without them the job does nothing. The worker is disabled (503) when the secret
+# is unset in Render, never open.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: horizon-agent-runs
+  # Never cancel a pass mid-flight: a cancelled pass is exactly the crash the
+  # visibility-timeout recovery exists for, but there is no reason to create one.
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call /api/horizon/agent-runs/dispatch
+        env:
+          BASE_URL: ${{ secrets.HORIZON_BASE_URL }}
+          WORKER_SECRET: ${{ secrets.AGENT_RUNS_WORKER_SECRET }}
+        run: |
+          if [ -z "$BASE_URL" ] || [ -z "$WORKER_SECRET" ]; then
+            echo "::notice::HORIZON_BASE_URL or AGENT_RUNS_WORKER_SECRET not set; skipping."
+            exit 0
+          fi
+          # Render's free plan sleeps; the first request can take about a minute.
+          curl --fail-with-body --silent --show-error --retry 3 --retry-delay 20 --retry-all-errors \
+            --max-time 120 -X POST "${BASE_URL%/}/api/horizon/agent-runs/dispatch" \
+            -H "x-horizon-worker-secret: ${WORKER_SECRET}"
+          echo
