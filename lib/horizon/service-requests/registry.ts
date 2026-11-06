@@ -15,6 +15,13 @@ export type ServiceRequestType = (typeof SERVICE_REQUEST_TYPES)[number]
 
 export const SERVICE_REQUEST_TYPE_FACT = "service_request_type"
 
+/**
+ * The request id is stored as a case fact too, so a repeated submission can find
+ * the case an earlier attempt already created instead of provisioning a second
+ * one. The value is the `hz_<uuid>` the site returns to the customer.
+ */
+export const SERVICE_REQUEST_ID_FACT = "service_request_id"
+
 export function isServiceRequestType(value: unknown): value is ServiceRequestType {
   return typeof value === "string" && (SERVICE_REQUEST_TYPES as readonly string[]).includes(value)
 }

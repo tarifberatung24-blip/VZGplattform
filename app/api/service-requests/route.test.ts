@@ -6,13 +6,31 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 const persistServiceRequest = vi.fn().mockResolvedValue("row-1")
 const markServiceRequestForward = vi.fn().mockResolvedValue(undefined)
 const recordAffiliateClick = vi.fn().mockResolvedValue(true)
+const linkServiceRequestCase = vi.fn().mockResolvedValue(true)
+const findServiceRequestLink = vi.fn().mockResolvedValue(null)
 vi.mock("../../../lib/affiliate/analytics", () => ({
   persistServiceRequest: (...args: unknown[]) => persistServiceRequest(...args),
   markServiceRequestForward: (...args: unknown[]) => markServiceRequestForward(...args),
   recordAffiliateClick: (...args: unknown[]) => recordAffiliateClick(...args),
+  linkServiceRequestCase: (...args: unknown[]) => linkServiceRequestCase(...args),
+  findServiceRequestLink: (...args: unknown[]) => findServiceRequestLink(...args),
 }))
+// Configurable so a test can simulate a deployment without an analytics client.
+let analyticsClient: { __fake: true } | null = { __fake: true }
 vi.mock("../../../lib/affiliate/analytics-client", () => ({
-  createAffiliateAnalyticsClient: () => ({ __fake: true }),
+  createAffiliateAnalyticsClient: () => analyticsClient,
+}))
+
+// Case provisioning is mocked so the ordering between persistence, case creation
+// and the linkage backfill can be asserted. The default engine is unconfigured,
+// which is what the non-HORIZON kinds already see.
+const createCaseEngine = vi.fn()
+vi.mock("../../../lib/horizon/case", () => ({
+  createCaseEngine: (...args: unknown[]) => createCaseEngine(...args),
+}))
+const provisionHorizonServiceCase = vi.fn()
+vi.mock("../../../lib/horizon/service-requests/case-provisioning", () => ({
+  provisionHorizonServiceCase: (...args: unknown[]) => provisionHorizonServiceCase(...args),
 }))
 
 import { POST } from "./route"
@@ -38,12 +56,18 @@ const validBody = {
   consent: true,
 }
 
+let requestCounter = 0
+
 function request(body: unknown) {
+  // A unique client IP per call keeps the in-memory rate limiter (5 / 10 min,
+  // keyed by IP) from coupling the tests to one another.
+  requestCounter += 1
   return new Request("http://localhost/api/service-requests", {
     method: "POST",
     headers: {
       referer: "https://www.finanzberaterbg.de/bg/produkte",
       "user-agent": "vitest",
+      "x-forwarded-for": `10.0.0.${requestCounter}`,
     },
     body: JSON.stringify(body),
   })
@@ -53,7 +77,15 @@ afterEach(() => {
   vi.unstubAllEnvs()
   vi.unstubAllGlobals()
   persistServiceRequest.mockClear()
+  persistServiceRequest.mockResolvedValue("row-1")
   markServiceRequestForward.mockClear()
+  linkServiceRequestCase.mockClear()
+  linkServiceRequestCase.mockResolvedValue(true)
+  findServiceRequestLink.mockClear()
+  findServiceRequestLink.mockResolvedValue(null)
+  createCaseEngine.mockReset()
+  provisionHorizonServiceCase.mockReset()
+  analyticsClient = { __fake: true }
 })
 
 describe("service request automation webhook", () => {
@@ -152,5 +184,165 @@ describe("service request automation webhook", () => {
       externalActions: "blocked_until_human_approval",
     })
     expect(payload.compliance.externalActionsHumanApprovalRequired).toBe(true)
+  })
+
+  it("persists the request before provisioning the case, then backfills the case link", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+    vi.stubGlobal("fetch", fetchMock)
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    provisionHorizonServiceCase.mockResolvedValue({ data: { id: "case-9", status: "waiting_for_user" }, error: null })
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "steuererklaerung",
+      answers: { fullName: "Ivan", email: "ivan@example.com", serviceDetails: "Steuerjahr 2025", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(202)
+    const json = await response.json()
+    expect(json.caseId).toBe("case-9")
+    // The durable write happens first; the case is created only afterwards.
+    expect(persistServiceRequest.mock.invocationCallOrder[0]).toBeLessThan(
+      provisionHorizonServiceCase.mock.invocationCallOrder[0],
+    )
+    // The request row is linked to the case only after the case exists.
+    expect(linkServiceRequestCase.mock.invocationCallOrder[0]).toBeGreaterThan(
+      provisionHorizonServiceCase.mock.invocationCallOrder[0],
+    )
+    expect(linkServiceRequestCase).toHaveBeenCalledWith(expect.anything(), {
+      requestId: json.requestId,
+      caseId: "case-9",
+      userId: "user-7",
+    })
+    // The row is inserted without the case columns; they are set by the backfill.
+    expect(persistServiceRequest.mock.calls[0][1]).not.toHaveProperty("caseId")
+  })
+
+  it("keeps the persisted request even when case provisioning fails", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    vi.stubGlobal("fetch", vi.fn())
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    provisionHorizonServiceCase.mockResolvedValue({ data: null, error: "CASE_CREATE_FAILED" })
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "wohnungsanmeldung",
+      answers: { fullName: "Ivan", email: "ivan@example.com", address: "Berlin", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(500)
+    expect((await response.json()).code).toBe("HORIZON_CASE_PROVISIONING_FAILED")
+    // Persist ran first, so the customer request survives the provisioning failure.
+    expect(persistServiceRequest).toHaveBeenCalledOnce()
+    expect(linkServiceRequestCase).not.toHaveBeenCalled()
+  })
+
+  it("does not create a case or call the webhook when the durable write is not confirmed", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    const fetchMock = vi.fn()
+    vi.stubGlobal("fetch", fetchMock)
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    // A configured client that returns no row id means the insert failed.
+    persistServiceRequest.mockResolvedValue(null)
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "steuererklaerung",
+      answers: { fullName: "Ivan", email: "ivan@example.com", serviceDetails: "Steuerjahr 2025", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(503)
+    expect((await response.json()).code).toBe("SERVICE_REQUEST_NOT_PERSISTED")
+    expect(provisionHorizonServiceCase).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(consoleError).toHaveBeenCalled()
+    consoleError.mockRestore()
+  })
+
+  it("keeps serving a request when no analytics client is configured", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 })))
+    // No Supabase admin client: persistence is skipped, not fatal, and the
+    // request is still handled exactly as before the durable write existed.
+    analyticsClient = null
+    persistServiceRequest.mockResolvedValue(null)
+
+    const response = await POST(request(validBody))
+
+    expect(response.status).toBe(202)
+    expect(markServiceRequestForward).toHaveBeenCalledWith(null, expect.stringMatching(/^hz_/), "forwarded")
+  })
+
+  it("logs a failed case link but still returns the case to the customer", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 })))
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    provisionHorizonServiceCase.mockResolvedValue({ data: { id: "case-9", status: "waiting_for_user" }, error: null })
+    linkServiceRequestCase.mockResolvedValue(false)
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "steuererklaerung",
+      answers: { fullName: "Ivan", email: "ivan@example.com", serviceDetails: "Steuerjahr 2025", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(202)
+    expect((await response.json()).caseId).toBe("case-9")
+    expect(consoleError).toHaveBeenCalledWith(
+      "[service-requests] case link failed",
+      expect.objectContaining({ caseId: "case-9", userId: "user-7" }),
+    )
+    consoleError.mockRestore()
+  })
+
+  it("reuses the linked case on a retry instead of provisioning a second one", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 })))
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    // The row already points at a case from the first attempt.
+    findServiceRequestLink.mockResolvedValue({ id: "row-1", caseId: "case-9", userId: "user-7" })
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "steuererklaerung",
+      clientRequestId: "11111111-1111-4111-8111-111111111111",
+      answers: { fullName: "Ivan", email: "ivan@example.com", serviceDetails: "Steuerjahr 2025", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(202)
+    expect((await response.json()).caseId).toBe("case-9")
+    // No duplicate case was provisioned; the link is simply re-asserted.
+    expect(provisionHorizonServiceCase).not.toHaveBeenCalled()
+    expect(linkServiceRequestCase).toHaveBeenCalledWith(expect.anything(), {
+      requestId: "hz_11111111-1111-4111-8111-111111111111",
+      caseId: "case-9",
+      userId: "user-7",
+    })
+  })
+
+  it("derives the request id from the caller-supplied idempotency key", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-offer-request")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 })))
+
+    const response = await POST(request({
+      ...validBody,
+      clientRequestId: "22222222-2222-4222-8222-222222222222",
+    }))
+
+    expect(response.status).toBe(202)
+    expect((await response.json()).requestId).toBe("hz_22222222-2222-4222-8222-222222222222")
+    expect(persistServiceRequest).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      requestId: "hz_22222222-2222-4222-8222-222222222222",
+    }))
   })
 })

@@ -35,8 +35,41 @@ function isMissingTable(error: { code?: string } | null | undefined) {
 }
 
 /**
+ * Read the durable row for a request id: its primary key plus the case/owner it
+ * is linked to. Returns null when the row (or the case link) does not exist.
+ *
+ * Two callers depend on this being cheap and safe: the route uses it to detect a
+ * retry of an already-provisioned request, and `persistServiceRequest` uses it to
+ * recover the id when an idempotent insert hits the unique `request_id`.
+ */
+export type ServiceRequestLink = { id: string; caseId: string | null; userId: string | null }
+
+export async function findServiceRequestLink(
+  client: SupabaseClient | null,
+  requestId: string,
+): Promise<ServiceRequestLink | null> {
+  if (!client) return null
+  try {
+    const { data, error } = await client
+      .from("affiliate_requests")
+      .select("id, case_id, user_id")
+      .eq("request_id", requestId)
+      .maybeSingle()
+    if (error || !data) return null
+    const row = data as { id: string; case_id?: string | null; user_id?: string | null }
+    return { id: row.id, caseId: row.case_id ?? null, userId: row.user_id ?? null }
+  } catch {
+    return null
+  }
+}
+
+/**
  * Insert the request before contacting the orchestrator. Returns the persisted
  * row id, or null when no admin client is configured / the insert failed.
+ *
+ * Idempotent on `request_id` (the column is UNIQUE): a retry that hits `23505`
+ * returns the existing row id rather than reporting a failure for a row that is
+ * in fact already durable.
  */
 export async function persistServiceRequest(
   client: SupabaseClient | null,
@@ -68,10 +101,17 @@ export async function persistServiceRequest(
       .single()
     if (error && (error.code === "42703" || error.code === "PGRST204")) {
       const fallback = await client.from("affiliate_requests").insert(base).select("id").single()
-      if (fallback.error) return null
-      return (fallback.data as { id: string }).id
+      if (!fallback.error) return (fallback.data as { id: string }).id
+      if (fallback.error.code === "23505") return (await findServiceRequestLink(client, input.requestId))?.id ?? null
+      return null
     }
-    if (error) return null
+    if (error) {
+      // 23505 = unique_violation on request_id. The request is already stored
+      // (a retry), so return the existing id and stay idempotent instead of
+      // reporting a failure for a row that is in fact durable.
+      if (error.code === "23505") return (await findServiceRequestLink(client, input.requestId))?.id ?? null
+      return null
+    }
     return (data as { id: string }).id
   } catch {
     return null
@@ -170,6 +210,40 @@ export async function markServiceRequestForward(
       .eq("request_id", requestId)
   } catch {
     // best-effort
+  }
+}
+
+/**
+ * Link a stored request row to the case and owner it was provisioned for.
+ *
+ * The row is inserted before the case exists, so the request stays durable even
+ * when case provisioning is slow or fails; this backfills `case_id` and
+ * `user_id` once it succeeds. Without it the row keeps the null values from
+ * insert and the case has no traceable request, which breaks reconciliation.
+ *
+ * Best-effort like the other column updates: a missing attribution migration
+ * (`42703`/`PGRST204`) or an unavailable client leaves the request row intact.
+ * Returns true only when a row was actually updated.
+ */
+export async function linkServiceRequestCase(
+  client: SupabaseClient | null,
+  input: { requestId: string; caseId: string; userId: string | null },
+): Promise<boolean> {
+  if (!client) return false
+  try {
+    const { data, error } = await client
+      .from("affiliate_requests")
+      .update({ case_id: input.caseId, user_id: input.userId })
+      .eq("request_id", input.requestId)
+      .select("id")
+      .maybeSingle()
+    if (error && isMissingColumn(error)) {
+      // The case-link migration is not applied yet; keep the request, skip the link.
+      return false
+    }
+    return !error && Boolean(data)
+  } catch {
+    return false
   }
 }
 

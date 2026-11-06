@@ -1,7 +1,7 @@
 import type { CaseEngineRepository } from "@/lib/horizon/case/repository"
 import type { Case } from "@/lib/horizon/case/contract"
 import { getHorizonServiceRequest, isHorizonServiceRequestKind, type HorizonServiceKind } from "./catalog"
-import { SERVICE_REQUEST_TYPE_FACT } from "./registry"
+import { SERVICE_REQUEST_ID_FACT, SERVICE_REQUEST_TYPE_FACT } from "./registry"
 
 export type ProvisionHorizonServiceCaseInput = {
   kind: HorizonServiceKind
@@ -12,15 +12,45 @@ export type ProvisionHorizonServiceCaseInput = {
   answers: Record<string, string>
 }
 
+export type ProvisionHorizonServiceCaseResult = {
+  data: Case | null
+  error: string | null
+  /** True when the case already existed for this request id; nothing new was created. */
+  reused: boolean
+}
+
+/**
+ * Idempotent: a repeated submission with the same `requestId` reuses the case an
+ * earlier attempt created instead of provisioning a second one.
+ *
+ * A partial failure after `createCase` (a later `addFacts`/`addMessage`/`advanceTo`
+ * error) would otherwise leave the request unlinked, so a retry would create a
+ * duplicate. The link fact is therefore written with the first batch of facts,
+ * and every later attempt looks it up before creating anything. The lookup scans
+ * the owner's most recent cases (the default `listMine` window), which is where a
+ * just-created case for a retried request always sits. Matching is scoped to the
+ * acting owner, so a request id cannot reach another user's case.
+ */
 export async function provisionHorizonServiceCase(
   repository: CaseEngineRepository,
   input: ProvisionHorizonServiceCaseInput,
-): Promise<{ data: Case | null; error: string | null }> {
-  if (!isHorizonServiceRequestKind(input.kind)) return { data: null, error: "UNKNOWN_HORIZON_SERVICE" }
+): Promise<ProvisionHorizonServiceCaseResult> {
+  if (!isHorizonServiceRequestKind(input.kind)) return { data: null, error: "UNKNOWN_HORIZON_SERVICE", reused: false }
   const service = getHorizonServiceRequest(input.kind)
   const title = input.locale === "de"
     ? `${service.kind} — Alpha Team Fall`
     : `${service.kind} — Alpha Team case`
+
+  // Idempotency guard: reuse the case a previous attempt already linked.
+  const existing = await repository.listMine()
+  if (existing.error) return { data: null, error: existing.error, reused: false }
+  for (const candidate of existing.data ?? []) {
+    const candidateFacts = await repository.listFacts(candidate.id)
+    if (candidateFacts.error) return { data: null, error: candidateFacts.error, reused: false }
+    if (candidateFacts.data?.some((fact) => fact.key === SERVICE_REQUEST_ID_FACT && fact.value === input.requestId)) {
+      return { data: candidate, error: null, reused: true }
+    }
+  }
 
   const created = await repository.createCase({
     title,
@@ -29,7 +59,7 @@ export async function provisionHorizonServiceCase(
     uiLocale: input.locale,
     conversationLocale: input.locale,
   })
-  if (created.error || !created.data) return { data: null, error: created.error ?? "CASE_CREATE_FAILED" }
+  if (created.error || !created.data) return { data: null, error: created.error ?? "CASE_CREATE_FAILED", reused: false }
   const caseId = created.data.id
 
   const answerFacts = Object.entries(input.answers).map(([key, value]) => ({
@@ -39,17 +69,17 @@ export async function provisionHorizonServiceCase(
   }))
   const facts = await repository.addFacts(caseId, [
     { key: SERVICE_REQUEST_TYPE_FACT, value: input.kind, critical: true },
+    { key: SERVICE_REQUEST_ID_FACT, value: input.requestId, critical: true },
     { key: "alpha_team_lead", value: service.alphaAgent },
-    { key: "service_request_id", value: input.requestId },
     ...answerFacts,
   ])
-  if (facts.error) return { data: null, error: facts.error }
+  if (facts.error) return { data: null, error: facts.error, reused: false }
 
   const initial = input.locale === "de"
     ? `Ich habe deine Anfrage für ${service.kind} als HORIZON-Fall angelegt. Das Alpha Team (${service.alphaAgent}) prüft jetzt die Angaben. Bitte kommuniziere weiter in diesem Fall; fehlende Unterlagen werden hier angefordert. Keine externe Aktion erfolgt ohne deine Freigabe.`
     : `Създадох HORIZON case за ${service.kind}. Alpha Team (${service.alphaAgent}) ще провери данните и ще поиска липсващите документи тук. Комуникацията продължава в този case; външно действие няма да се извърши без твоето одобрение.`
   const message = await repository.addMessage(caseId, { role: "assistant", locale: input.locale, content: initial })
-  if (message.error) return { data: null, error: message.error }
+  if (message.error) return { data: null, error: message.error, reused: false }
 
   await repository.appendAudit(caseId, "alpha_team_run_created", {
     requestId: input.requestId,
@@ -65,8 +95,8 @@ export async function provisionHorizonServiceCase(
   })
 
   const collecting = await repository.advanceTo(caseId, "collecting_data")
-  if (collecting.error) return { data: null, error: collecting.error }
+  if (collecting.error) return { data: null, error: collecting.error, reused: false }
   const waiting = await repository.advanceTo(caseId, "waiting_for_user")
-  if (waiting.error) return { data: null, error: waiting.error }
-  return { data: waiting.data ?? collecting.data ?? created.data, error: null }
+  if (waiting.error) return { data: null, error: waiting.error, reused: false }
+  return { data: waiting.data ?? collecting.data ?? created.data, error: null, reused: false }
 }

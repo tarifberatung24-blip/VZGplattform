@@ -1,6 +1,6 @@
 "use client"
 
-import { FormEvent, useMemo, useState } from "react"
+import { FormEvent, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, Send, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -222,6 +222,9 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
   const [message, setMessage] = useState<string | null>(null)
   const [requestId, setRequestId] = useState<string | null>(null)
   const [caseId, setCaseId] = useState<string | null>(null)
+  // A stable idempotency key for the current submission. Generated once and
+  // reused on every retry, so a transient failure cannot create a second case.
+  const clientRequestId = useRef<string | null>(null)
   const de = locale === "de"
 
   const steps = useMemo<Step[]>(() => [
@@ -275,6 +278,11 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
     setMessage(null)
     setRequestId(null)
     setCaseId(null)
+    if (!clientRequestId.current) {
+      clientRequestId.current = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : null
+    }
     try {
       const response = await fetch("/api/service-requests", {
         method: "POST",
@@ -284,6 +292,7 @@ export function ServiceRequestWizard({ initialKind }: { initialKind?: ServiceReq
           locale,
           landingUrl: window.location.href,
           source: "service_request_wizard",
+          clientRequestId: clientRequestId.current ?? undefined,
           customer: {
             name: answers.fullName,
             email: answers.email,
