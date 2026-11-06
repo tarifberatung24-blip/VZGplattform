@@ -648,9 +648,12 @@ export class CaseEngineRepository {
       locale: input.locale as MessageRow["locale"],
       content: trimmed,
     }
+    const messageInsert: Db["Tables"]["case_messages"]["Insert"] = input.idempotencyKey
+      ? { ...values, idempotency_key: input.idempotencyKey }
+      : values
     const { data, error } = await this.client
       .from("case_messages")
-      .insert(input.idempotencyKey ? { ...values, idempotency_key: input.idempotencyKey } : values)
+      .insert(messageInsert)
       .select("*")
       .single()
 
@@ -982,9 +985,12 @@ export class CaseEngineRepository {
     options?: { idempotencyKey?: string | null },
   ): Promise<RepoResult<CaseAuditEvent>> {
     const values = { actor_id: this.userId, case_id: caseId, action, metadata }
+    const auditInsert: Db["Tables"]["audit_events"]["Insert"] = options?.idempotencyKey
+      ? { ...values, idempotency_key: options.idempotencyKey }
+      : values
     const { data, error } = await this.client
       .from("audit_events")
-      .insert(options?.idempotencyKey ? { ...values, idempotency_key: options.idempotencyKey } : values)
+      .insert(auditInsert)
       .select("*")
       .single()
 
