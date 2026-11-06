@@ -196,6 +196,8 @@ export type NewFactInput = {
   pageNo?: number | null
   evidence?: string | null
   confidence?: number | null
+  /** Stable key used only for immutable, system-owned provisioning facts. */
+  idempotencyKey?: string | null
 }
 
 export type NewDraftInput = {
@@ -518,32 +520,94 @@ export class CaseEngineRepository {
     )
   }
 
-  async addFacts(caseId: string, facts: readonly NewFactInput[]): Promise<RepoResult<ExtractedFact[]>> {
+  async addFacts(
+    caseId: string,
+    facts: readonly NewFactInput[],
+    options: { auditIdempotencyKey?: string } = {},
+  ): Promise<RepoResult<ExtractedFact[]>> {
     if (facts.length === 0) return ok([])
     const owned = await this.getMine(caseId)
     if (owned.error || !owned.data) return fail(owned.error ?? "Case not found")
 
-    const { data, error } = await this.client
-      .from("extracted_facts")
-      .insert(
-        facts.map((fact) => ({
-          owner_id: this.userId,
-          case_id: caseId,
-          document_id: fact.documentId ?? null,
-          page_no: fact.pageNo ?? null,
-          key: fact.key,
-          value: fact.value,
-          evidence: fact.evidence ?? null,
-          confidence: fact.confidence ?? null,
-          critical: fact.critical ?? false,
-          // Document-derived facts must carry evidence; user-supplied facts need none.
-          source_type: (fact.documentId ? "document" : "user") as FactRow["source_type"],
-        })),
-      )
-      .select("*")
-    if (error) return fail(error.message)
-    await this.appendAudit(caseId, "facts_added", { count: facts.length })
-    return ok((data ?? []).map(mapFact))
+    const toRow = (fact: NewFactInput) => ({
+      owner_id: this.userId,
+      case_id: caseId,
+      document_id: fact.documentId ?? null,
+      page_no: fact.pageNo ?? null,
+      key: fact.key,
+      value: fact.value,
+      evidence: fact.evidence ?? null,
+      confidence: fact.confidence ?? null,
+      critical: fact.critical ?? false,
+      source_type: (fact.documentId ? "document" : "user") as FactRow["source_type"],
+    })
+
+    let rows: FactRow[] = []
+    if (!facts.some((fact) => fact.idempotencyKey)) {
+      const { data, error } = await this.client
+        .from("extracted_facts")
+        .insert(facts.map(toRow))
+        .select("*")
+      if (error) return fail(error.message, error.code)
+      rows = data ?? []
+    } else {
+      // Provisioning-owned facts are inserted individually. The unique
+      // (owner_id, idempotency_key) index makes each insert atomic, while
+      // existing user-edited facts remain untouched because callers only pass
+      // facts that were absent at the start of this repair.
+      let migrationMissing = false
+      for (const fact of facts) {
+        const idempotencyKey = fact.idempotencyKey ?? null
+        const { data, error } = await this.client
+          .from("extracted_facts")
+          .insert({ ...toRow(fact), idempotency_key: idempotencyKey })
+          .select("*")
+          .single()
+
+        if (error && idempotencyKey && isMissingIdempotencyColumn(error)) {
+          // The additive migration is not live yet. Preserve compatibility by
+          // falling back to the pre-migration insert path.
+          migrationMissing = true
+          break
+        }
+        if (error && idempotencyKey && error.code === "23505") {
+          const existing = await this.client
+            .from("extracted_facts")
+            .select("*")
+            .eq("owner_id", this.userId)
+            .eq("case_id", caseId)
+            .eq("idempotency_key", idempotencyKey)
+            .maybeSingle()
+          if (existing.error || !existing.data) {
+            return fail(existing.error?.message ?? "FACT_IDEMPOTENCY_RECOVERY_FAILED", existing.error?.code)
+          }
+          rows.push(existing.data)
+          continue
+        }
+        if (error) return fail(error.message, error.code)
+        rows.push(data)
+      }
+
+      if (migrationMissing) {
+        const fallback = await this.client
+          .from("extracted_facts")
+          .insert(facts.map(toRow))
+          .select("*")
+        if (fallback.error) return fail(fallback.error.message, fallback.error.code)
+        rows = fallback.data ?? []
+      }
+    }
+
+    // Audit failure is a real write failure. A retry will find the facts already
+    // present and repair this event independently, rather than losing the audit.
+    const audited = await this.appendAudit(
+      caseId,
+      "facts_added",
+      { count: facts.length },
+      options.auditIdempotencyKey ? { idempotencyKey: options.auditIdempotencyKey } : undefined,
+    )
+    if (audited.error) return fail(audited.error, audited.code)
+    return ok(rows.map(mapFact))
   }
 
   async listFacts(caseId: string): Promise<RepoResult<ExtractedFact[]>> {
@@ -573,23 +637,43 @@ export class CaseEngineRepository {
 
   async addMessage(
     caseId: string,
-    input: { role: "user" | "assistant"; locale: string; content: string },
+    input: { role: "user" | "assistant"; locale: string; content: string; idempotencyKey?: string | null },
   ): Promise<RepoResult<CaseMessage>> {
     const trimmed = input.content.trim()
     if (trimmed.length < 1 || trimmed.length > 30000) return fail("Invalid message length")
 
+    const values = {
+      owner_id: this.userId,
+      case_id: caseId,
+      role: input.role,
+      locale: input.locale as MessageRow["locale"],
+      content: trimmed,
+    }
     const { data, error } = await this.client
       .from("case_messages")
-      .insert({
-        owner_id: this.userId,
-        case_id: caseId,
-        role: input.role,
-        locale: input.locale as MessageRow["locale"],
-        content: trimmed,
-      })
+      .insert(input.idempotencyKey ? { ...values, idempotency_key: input.idempotencyKey } : values)
       .select("*")
       .single()
-    if (error) return fail(error.message)
+
+    if (error && input.idempotencyKey && isMissingIdempotencyColumn(error)) {
+      const fallback = await this.client.from("case_messages").insert(values).select("*").single()
+      if (fallback.error) return fail(fallback.error.message, fallback.error.code)
+      return ok(mapMessage(fallback.data))
+    }
+    if (error && input.idempotencyKey && error.code === "23505") {
+      const existing = await this.client
+        .from("case_messages")
+        .select("*")
+        .eq("owner_id", this.userId)
+        .eq("case_id", caseId)
+        .eq("idempotency_key", input.idempotencyKey)
+        .maybeSingle()
+      if (existing.error || !existing.data) {
+        return fail(existing.error?.message ?? "MESSAGE_IDEMPOTENCY_RECOVERY_FAILED", existing.error?.code)
+      }
+      return ok(mapMessage(existing.data))
+    }
+    if (error) return fail(error.message, error.code)
     return ok(mapMessage(data))
   }
 
@@ -896,13 +980,36 @@ export class CaseEngineRepository {
     caseId: string | null,
     action: string,
     metadata: Record<string, unknown> = {},
+    options?: { idempotencyKey?: string | null },
   ): Promise<RepoResult<CaseAuditEvent>> {
+    const values = { actor_id: this.userId, case_id: caseId, action, metadata }
     const { data, error } = await this.client
       .from("audit_events")
-      .insert({ actor_id: this.userId, case_id: caseId, action, metadata })
+      .insert(options?.idempotencyKey ? { ...values, idempotency_key: options.idempotencyKey } : values)
       .select("*")
       .single()
-    if (error) return fail(error.message)
+
+    if (error && options?.idempotencyKey && isMissingIdempotencyColumn(error)) {
+      const fallback = await this.client.from("audit_events").insert(values).select("*").single()
+      if (fallback.error) return fail(fallback.error.message, fallback.error.code)
+      return ok(mapAudit(fallback.data))
+    }
+    if (error && options?.idempotencyKey && error.code === "23505") {
+      let existingQuery = this.client
+        .from("audit_events")
+        .select("*")
+        .eq("actor_id", this.userId)
+        .eq("idempotency_key", options.idempotencyKey)
+      existingQuery = caseId
+        ? existingQuery.eq("case_id", caseId)
+        : existingQuery.is("case_id", null)
+      const existing = await existingQuery.maybeSingle()
+      if (existing.error || !existing.data) {
+        return fail(existing.error?.message ?? "AUDIT_IDEMPOTENCY_RECOVERY_FAILED", existing.error?.code)
+      }
+      return ok(mapAudit(existing.data))
+    }
+    if (error) return fail(error.message, error.code)
     return ok(mapAudit(data))
   }
 
