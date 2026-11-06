@@ -89,18 +89,45 @@ const INPUT = {
  * then runs on the retry. This is what lets the repair tests assert "no duplicate
  * facts/messages on a repeated attempt" rather than just counting calls.
  */
-function statefulRepository() {
+function makePairBarrier() {
+  let arrived = 0
+  let release: (() => void) | null = null
+  const gate = new Promise<void>((resolve) => { release = resolve })
+  return async () => {
+    arrived += 1
+    if (arrived === 2) release?.()
+    await gate
+  }
+}
+
+function statefulRepository(options: { barrierReads?: boolean } = {}) {
   const byRequestId = new Map<string, { id: string; status: string }>()
   const factsByCase = new Map<string, Array<{ key: string; value: string }>>()
   const messagesByCase = new Map<string, Array<{ id: string; role: string; content: string }>>()
   const auditByCase = new Map<string, Array<{ action: string }>>()
   let seq = 0
+  let failNextAuditAction: string | null = null
+  const factsBarrier = options.barrierReads ? makePairBarrier() : null
+  const messagesBarrier = options.barrierReads ? makePairBarrier() : null
+  const auditBarrier = options.barrierReads ? makePairBarrier() : null
 
   const repo = {
     listMine: vi.fn().mockResolvedValue({ data: [], error: null }),
-    listFacts: vi.fn().mockImplementation(async (caseId: string) => ({ data: factsByCase.get(caseId) ?? [], error: null })),
-    listMessages: vi.fn().mockImplementation(async (caseId: string) => ({ data: messagesByCase.get(caseId) ?? [], error: null })),
-    listAudit: vi.fn().mockImplementation(async (caseId: string) => ({ data: auditByCase.get(caseId) ?? [], error: null })),
+    listFacts: vi.fn().mockImplementation(async (caseId: string) => {
+      const snapshot = [...(factsByCase.get(caseId) ?? [])]
+      if (factsBarrier) await factsBarrier()
+      return { data: snapshot, error: null }
+    }),
+    listMessages: vi.fn().mockImplementation(async (caseId: string) => {
+      const snapshot = [...(messagesByCase.get(caseId) ?? [])]
+      if (messagesBarrier) await messagesBarrier()
+      return { data: snapshot, error: null }
+    }),
+    listAudit: vi.fn().mockImplementation(async (caseId: string) => {
+      const snapshot = [...(auditByCase.get(caseId) ?? [])]
+      if (auditBarrier) await auditBarrier()
+      return { data: snapshot, error: null }
+    }),
     findCaseByServiceRequestId: vi.fn().mockImplementation(async (requestId: string) => ({
       data: byRequestId.get(requestId) ?? null,
       error: null,
@@ -122,17 +149,35 @@ function statefulRepository() {
       auditByCase.set(id, [])
       return { data: { id, status: "draft" }, error: null, code: null }
     }),
-    addFacts: vi.fn().mockImplementation(async (caseId: string, facts: Array<{ key: string; value: string }>) => {
-      factsByCase.set(caseId, [...(factsByCase.get(caseId) ?? []), ...facts])
+    addFacts: vi.fn().mockImplementation(async (caseId: string, facts: Array<{ key: string; value: string; idempotencyKey?: string }>) => {
+      const current = factsByCase.get(caseId) ?? []
+      const next = [...current]
+      for (const fact of facts) {
+        if (fact.idempotencyKey && next.some((item) => item.idempotencyKey === fact.idempotencyKey)) continue
+        next.push(fact)
+      }
+      factsByCase.set(caseId, next)
       return { data: [], error: null }
     }),
-    addMessage: vi.fn().mockImplementation(async (caseId: string, message: { role: string; content: string }) => {
-      messagesByCase.set(caseId, [...(messagesByCase.get(caseId) ?? []), { id: `m-${++seq}`, ...message }])
-      return { data: { id: `m-${seq}` }, error: null }
+    addMessage: vi.fn().mockImplementation(async (caseId: string, message: { role: string; content: string; idempotencyKey?: string }) => {
+      const current = messagesByCase.get(caseId) ?? []
+      const existing = message.idempotencyKey && current.find((item) => item.idempotencyKey === message.idempotencyKey)
+      if (existing) return { data: existing, error: null }
+      const created = { id: `m-${++seq}`, ...message }
+      messagesByCase.set(caseId, [...current, created])
+      return { data: created, error: null }
     }),
-    appendAudit: vi.fn().mockImplementation(async (caseId: string, action: string) => {
-      auditByCase.set(caseId, [...(auditByCase.get(caseId) ?? []), { action }])
-      return { data: {}, error: null }
+    appendAudit: vi.fn().mockImplementation(async (caseId: string, action: string, _metadata?: unknown, options?: { idempotencyKey?: string }) => {
+      if (failNextAuditAction === action) {
+        failNextAuditAction = null
+        return { data: null, error: "AUDIT_WRITE_FAILED" }
+      }
+      const current = auditByCase.get(caseId) ?? []
+      const existing = options?.idempotencyKey && current.find((item) => item.idempotencyKey === options.idempotencyKey)
+      if (existing) return { data: existing, error: null }
+      const created = { action, idempotencyKey: options?.idempotencyKey }
+      auditByCase.set(caseId, [...current, created])
+      return { data: created, error: null }
     }),
     advanceTo: vi.fn().mockImplementation(async (id: string, status: string) => {
       if (byRequestId.has("hz_request")) byRequestId.set("hz_request", { id, status })
@@ -140,7 +185,14 @@ function statefulRepository() {
     }),
   }
 
-  return { repo, byRequestId, factsByCase, messagesByCase, auditByCase }
+  return {
+    repo,
+    byRequestId,
+    factsByCase,
+    messagesByCase,
+    auditByCase,
+    failAuditOnce: (action: string) => { failNextAuditAction = action },
+  }
 }
 
 describe("Horizon service case provisioning", () => {
@@ -159,10 +211,11 @@ describe("Horizon service case provisioning", () => {
       expect.objectContaining({ key: "service_request_type", value: "steuererklaerung", critical: true }),
       expect.objectContaining({ key: SERVICE_REQUEST_ID_FACT, value: "hz_request", critical: true }),
       expect.objectContaining({ key: "alpha_team_lead", value: "finance-tax" }),
-    ]))
-    expect(repo.addMessage).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ role: "assistant" }))
-    expect(repo.appendAudit).toHaveBeenCalledWith(expect.any(String), "alpha_team_run_created", expect.objectContaining({ serviceKind: "steuererklaerung" }))
-    expect(repo.appendAudit).toHaveBeenCalledWith(expect.any(String), "quality_safety_blocked", expect.objectContaining({ externalActions: "blocked_until_human_approval" }))
+    ]), expect.objectContaining({ auditIdempotencyKey: expect.stringContaining("audit:facts_added") }))
+    expect(repo.addMessage).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ role: "assistant", idempotencyKey: expect.stringContaining(":message:opening") }))
+    expect(repo.appendAudit).toHaveBeenCalledWith(expect.any(String), "facts_added", expect.any(Object), expect.objectContaining({ idempotencyKey: expect.stringContaining(":audit:facts_added") }))
+    expect(repo.appendAudit).toHaveBeenCalledWith(expect.any(String), "alpha_team_run_created", expect.objectContaining({ serviceKind: "steuererklaerung" }), expect.objectContaining({ idempotencyKey: expect.stringContaining(":audit:alpha_team_run_created") }))
+    expect(repo.appendAudit).toHaveBeenCalledWith(expect.any(String), "quality_safety_blocked", expect.objectContaining({ externalActions: "blocked_until_human_approval" }), expect.objectContaining({ idempotencyKey: expect.stringContaining(":audit:quality_safety_blocked") }))
     expect(repo.advanceTo).toHaveBeenNthCalledWith(1, expect.any(String), "collecting_data")
     expect(repo.advanceTo).toHaveBeenNthCalledWith(2, expect.any(String), "waiting_for_user")
   })
@@ -181,7 +234,7 @@ describe("Horizon service case provisioning", () => {
         ],
       },
       messages: { [CASE_ID]: [{ id: "m1", role: "assistant", content: "Създадох HORIZON case за steuererklaerung." }] },
-      audit: { [CASE_ID]: [{ action: "alpha_team_run_created" }, { action: "quality_safety_blocked" }] },
+      audit: { [CASE_ID]: [{ action: "facts_added" }, { action: "alpha_team_run_created" }, { action: "quality_safety_blocked" }] },
     })
 
     const result = await provisionHorizonServiceCase(repo as never, INPUT)
@@ -467,7 +520,7 @@ describe("Horizon service case provisioning repairs an incomplete case on retry"
       "service_request_type",
     ].sort())
     expect(messagesByCase.get(caseId)).toHaveLength(1)
-    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "quality_safety_blocked"])
+    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "facts_added", "quality_safety_blocked"])
   })
 
   it("repairs the opening message after a failure during the message write", async () => {
@@ -555,18 +608,34 @@ describe("Horizon service case provisioning repairs an incomplete case on retry"
     const keys = keysOf(factsByCase.get(caseId))
     expect(keys).toEqual(["alpha_team_lead", "intake_serviceDetails", SERVICE_REQUEST_ID_FACT, "service_request_type"].sort())
     expect(messagesByCase.get(caseId)).toHaveLength(1)
-    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "quality_safety_blocked"])
+    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "facts_added", "quality_safety_blocked"])
+  })
+
+  it("fails closed on a required audit write and repairs it on retry without duplicating artifacts", async () => {
+    const { repo, byRequestId, factsByCase, messagesByCase, auditByCase, failAuditOnce } = statefulRepository()
+    failAuditOnce("alpha_team_run_created")
+
+    const first = await provisionHorizonServiceCase(repo as never, INPUT)
+    expect(first.error).toBe("AUDIT_WRITE_FAILED")
+    const caseId = [...byRequestId.values()][0].id
+    expect(factsByCase.get(caseId)).toHaveLength(4)
+    expect(messagesByCase.get(caseId)).toHaveLength(1)
+    expect(actionsOf(auditByCase.get(caseId))).toEqual(["facts_added"])
+
+    const retry = await provisionHorizonServiceCase(repo as never, INPUT)
+    expect(retry.error).toBeNull()
+    expect(retry.reused).toBe(true)
+    expect(factsByCase.get(caseId)).toHaveLength(4)
+    expect(messagesByCase.get(caseId)).toHaveLength(1)
+    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "facts_added", "quality_safety_blocked"].sort())
   })
 
   it("keeps exactly one case and fully provisions it when two retries run concurrently", async () => {
-    // LIMITATION: the artifact repair is a read-then-write, so two retries that
-    // interleave inside the repair can each write the same fact key (the spine is
-    // append-only, so a `unique(case_id, key)` index would break the "latest fact
-    // wins" model). What IS guaranteed under concurrency is the case identity —
-    // the partial unique index admits one case — and that the case ends fully
-    // provisioned. Artifact de-duplication holds for sequential retries, which is
-    // the retry path the application takes.
-    const { repo, byRequestId, factsByCase, messagesByCase } = statefulRepository()
+    // Both calls are forced to pass the same empty read snapshots before either
+    // can write. The fake applies the same per-artifact uniqueness contract as
+    // the database migration, so this proves the repair path never double-writes
+    // a provisioning-owned artifact under an interleaving.
+    const { repo, byRequestId, factsByCase, messagesByCase, auditByCase } = statefulRepository({ barrierReads: true })
     const caseId = "case-incomplete"
     byRequestId.set(INPUT.requestId, { id: caseId, status: "draft" })
     factsByCase.set(caseId, [])
@@ -580,15 +649,16 @@ describe("Horizon service case provisioning repairs an incomplete case on retry"
     expect(a.error).toBeNull()
     expect(b.error).toBeNull()
     expect(byRequestId.size).toBe(1)
-    // Every required fact is present (no missing artifact) and there is an opening
-    // message, even though each may have been written by either retry.
-    const distinctKeys = new Set(keysOf(factsByCase.get(caseId)))
-    expect([...distinctKeys].sort()).toEqual([
+    const facts = factsByCase.get(caseId) ?? []
+    expect(keysOf(facts)).toEqual([
       "alpha_team_lead",
       "intake_serviceDetails",
       SERVICE_REQUEST_ID_FACT,
       "service_request_type",
     ].sort())
-    expect((messagesByCase.get(caseId) ?? []).length).toBeGreaterThanOrEqual(1)
+    expect(new Set(facts.map((fact) => fact.idempotencyKey)).size).toBe(4)
+    expect(messagesByCase.get(caseId)).toHaveLength(1)
+    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "facts_added", "quality_safety_blocked"].sort())
+    expect(new Set((auditByCase.get(caseId) ?? []).map((event) => event.idempotencyKey)).size).toBe(3)
   })
 })
