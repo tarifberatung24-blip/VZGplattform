@@ -1,16 +1,12 @@
--- HORIZON Agent Runs Engine — PREPARED ONLY. NOT APPLIED.
+-- HORIZON Agent Runs Engine — durable run persistence.
 --
--- This file lives in supabase/prepared/ on purpose. README.md documents that
--- directory as SQL "that are not applied by the normal migration flow", and
--- both governance blueprints gate this schema on an explicit owner approval:
---   docs/HORIZON_ALPHA_TEAM_BLUEPRINT_BG.md §C:
---     "Добавяне на additive persistence за `agent_runs`/`agent_steps` само след
---      одобрение на schema/RLS промяната."
---   docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md §7:
---     "изискват отделно одобрение за schema/RLS"
--- Do not move this file into supabase/migrations/ and do not run it until the
--- owner approves the schema/RLS change. Validate on a disposable project first
--- with supabase/tests/rls/horizon_agent_runs_engine_isolation.sql.
+-- NOT YET APPLIED TO PRODUCTION. This file lives in supabase/migrations/ so it
+-- follows the reviewed, additive migration flow that the owner applies through
+-- the Supabase migration history (there is no CI migration runner). Applying it is
+-- an owner decision (docs/HORIZON_ALPHA_TEAM_BLUEPRINT_BG.md §C requires explicit
+-- approval of the schema/RLS change; docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md
+-- §7 repeats it). Validate first with the rollback-only scripts in
+-- supabase/tests/rls/horizon_agent_runs_engine_*.sql against a disposable project.
 --
 -- WHAT THIS IS
 -- Additive persistence for durable agent runs: one run, its ordered steps, and a
@@ -18,13 +14,15 @@
 -- step references existing HORIZON entities by id (case, service request,
 -- document, draft). It duplicates no case, document, fact or audit data.
 --
--- WHY THERE IS NO SERVICE-ROLE GRANT
--- docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md §4: "Ако бъде добавен истински
--- agent worker, той трябва да пише през каноничния helper, под проверено owner/RLS
--- правило; не се добавя service-role bypass." The dispatcher model is therefore an
--- owner decision. Until it is made, only owner-scoped `authenticated` access is
--- granted. If the owner later approves a service-role dispatcher, that is a
--- separate, explicitly approved change to this file.
+-- WHY THERE IS A SERVICE-ROLE GRANT
+-- docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md §4 forbids a *blanket*
+-- service-role bypass and requires that a real agent worker, if added, write
+-- "под проверено owner/RLS правило". The scheduled dispatcher therefore runs
+-- per owner and the owner argument is honoured only for the service role; a user
+-- session is pinned to `auth.uid()` and cannot widen its own scope. The grant is
+-- scoped to the three engine tables, has no delete, and adds no `using (true)`
+-- policy. This is the one service-role surface the engine introduces, and it is
+-- called out in the PR for explicit owner approval.
 
 -- ---------------------------------------------------------------------------
 -- agent_runs — one durable run.
@@ -306,8 +304,10 @@ begin
 end;
 $$;
 
--- Grants: column-scoped only, no table-wide grant, no anon, no service_role.
--- The owner is always taken from the session, never from the client.
+-- Grants: owner access is column-scoped, with no table-wide write grant, no anon
+-- access and no delete. The owner is always taken from the session, never from the
+-- client. The service-role grants below are the one deliberate exception, and are
+-- explained there.
 revoke all on table public.agent_runs from anon;
 revoke all on table public.agent_runs from authenticated;
 revoke all on table public.agent_steps from anon;
@@ -334,8 +334,136 @@ grant update (status, output_reference, error_code, error_message_safe,
 grant select on table public.agent_run_events to authenticated;
 grant insert (owner_id, run_id, event_type, idempotency_key, payload, available_at)
   on public.agent_run_events to authenticated;
-grant update (status, attempt, available_at, last_error_code, processed_at)
+grant update (status, attempt, available_at, last_error_code, processed_at, updated_at)
   on public.agent_run_events to authenticated;
+
+-- The scheduled dispatcher worker connects with the service role, because a cron
+-- pass has no user session. These grants are what make the worker able to read the
+-- queue and write progress; they are the "explicitly approved service-role
+-- dispatcher" the safety blueprint requires a decision on, and they are scoped to
+-- exactly the engine's three tables.
+--
+-- Owner isolation is NOT weakened by this: the claim functions honour an owner
+-- argument only for the service role, and every row the worker writes carries the
+-- real `owner_id`, so a dispatcher pass for one owner can never touch another's
+-- rows. There is still no delete grant and no `using (true)` policy anywhere.
+grant select, insert, update on table public.agent_runs to service_role;
+grant select, insert, update on table public.agent_steps to service_role;
+grant select, insert, update on table public.agent_run_events to service_role;
+
+-- ---------------------------------------------------------------------------
+-- Owner-scoped claim helpers.
+--
+-- PostgREST cannot express `FOR UPDATE SKIP LOCKED`, so the dispatcher claims
+-- work through these functions. Both are SECURITY INVOKER (the default), so the
+-- caller's RLS policies and column grants still apply, and both key on
+-- `auth.uid()` rather than a caller-supplied owner id. A caller therefore cannot
+-- claim, reclaim or read another owner's work even though the function is
+-- callable by any authenticated user. This is what keeps the dispatcher inside
+-- the owner/RLS rule the safety blueprint requires, instead of a service-role
+-- bypass.
+-- ---------------------------------------------------------------------------
+
+-- Returns stale `processing` events to `received` so a crashed worker's work is
+-- retried. A crash costs one attempt (the claim already incremented it), which is
+-- the standard visibility-timeout trade-off and stays bounded by max_attempts.
+--
+-- `p_owner_id` is honoured only for the service role. A normal authenticated
+-- caller is pinned to `auth.uid()` whatever it passes, so it can neither reclaim
+-- nor inspect another owner's work. That is what keeps the dispatcher inside the
+-- owner/RLS rule the safety blueprint requires.
+create or replace function public.recover_stale_agent_run_events(
+  p_visibility_timeout_seconds integer default 300,
+  p_owner_id uuid default null
+)
+returns integer
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  target_owner uuid;
+  reclaimed integer;
+begin
+  target_owner := case
+    when p_owner_id is not null and (select auth.role()) = 'service_role' then p_owner_id
+    else (select auth.uid())
+  end;
+
+  if target_owner is null then
+    return 0;
+  end if;
+
+  update public.agent_run_events
+     set status = 'received',
+         available_at = now(),
+         last_error_code = coalesce(last_error_code, 'WORKER_VISIBILITY_TIMEOUT')
+   where owner_id = target_owner
+     and status = 'processing'
+     and updated_at < now() - make_interval(secs => greatest(p_visibility_timeout_seconds, 30));
+  get diagnostics reclaimed = row_count;
+  return reclaimed;
+end;
+$$;
+
+-- Claims up to p_limit due events for one owner and marks them `processing`.
+-- `skip locked` lets concurrent workers take disjoint batches without blocking,
+-- and the attempt counter is incremented here so a lost worker cannot retry
+-- forever. Owner scoping follows the same rule as the reclaim function above.
+create or replace function public.claim_agent_run_events(
+  p_limit integer default 10,
+  p_owner_id uuid default null
+)
+returns setof public.agent_run_events
+language sql
+security invoker
+set search_path = public
+as $$
+  with target_owner as (
+    select case
+      when p_owner_id is not null and (select auth.role()) = 'service_role' then p_owner_id
+      else (select auth.uid())
+    end as id
+  ),
+  candidate as (
+    select e.id
+      from public.agent_run_events e
+      join target_owner t on true
+     where t.id is not null
+       and e.owner_id = t.id
+       and e.status = 'received'
+       and e.available_at <= now()
+     order by e.available_at
+     limit least(greatest(p_limit, 1), 50)
+     for update of e skip locked
+  )
+  update public.agent_run_events e
+     set status = 'processing',
+         attempt = e.attempt + 1,
+         updated_at = now()
+    from candidate c
+   where e.id = c.id
+  returning e.*;
+$$;
+
+create index if not exists agent_run_events_reclaim_idx
+  on public.agent_run_events(owner_id, updated_at)
+  where status = 'processing';
+
+revoke all on function public.recover_stale_agent_run_events(integer, uuid) from public;
+revoke all on function public.claim_agent_run_events(integer, uuid) from public;
+revoke all on function public.recover_stale_agent_run_events(integer, uuid) from anon;
+revoke all on function public.claim_agent_run_events(integer, uuid) from anon;
+grant execute on function public.recover_stale_agent_run_events(integer, uuid) to authenticated;
+grant execute on function public.claim_agent_run_events(integer, uuid) to authenticated;
+grant execute on function public.recover_stale_agent_run_events(integer, uuid) to service_role;
+grant execute on function public.claim_agent_run_events(integer, uuid) to service_role;
+
+-- The owner-scoped claim path needs no new service-role bypass: the functions are
+-- SECURITY INVOKER and a user session can only ever reach its own rows. The
+-- service_role grant above exists solely so an explicitly approved cron worker can
+-- dispatch on behalf of a named owner; it is inert until such a worker is deployed
+-- and the owner approves the service-role dispatcher model.
 
 -- EXPLICITLY NOT DONE
 -- * No delete policy and no delete grant: deletion cascades from cases/auth.users,

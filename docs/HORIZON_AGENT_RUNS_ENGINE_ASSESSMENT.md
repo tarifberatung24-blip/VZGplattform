@@ -1,17 +1,55 @@
 # HORIZON Agent Runs Engine — compatibility and architecture assessment
 
-Status: **ASSESSMENT (documentation + prepared, unapplied SQL). No runtime code, no dependency, no migration applied.**
+Status: **IMPLEMENTED, NOT APPLIED.** The engine (adapter, API routes, dispatcher worker,
+tests) is implemented on branch `feature/horizon-agent-runs-engine`. The additive migration is
+present in `supabase/migrations/` but **has not been applied to any Supabase project**; applying
+it is an owner decision. No workflow-engine dependency was added.
 Base: `main` @ `e1afa23` (Phase 2.1 — Atomic Service Request provisioning artifacts, PR #167).
-Companion: `supabase/prepared/20261107000000_horizon_agent_runs_engine.sql` (prepared),
-`supabase/tests/rls/horizon_agent_runs_engine_isolation.sql` (prepared),
-`lib/horizon/agent-runs/migration-contract.test.ts` (runnable contract test).
+Companion: `supabase/migrations/20261107000000_horizon_agent_runs_engine.sql` (additive, unapplied),
+`supabase/tests/rls/horizon_agent_runs_engine_isolation.sql` (rollback-only),
+`supabase/tests/rls/horizon_agent_runs_engine_claim_scope.sql` (rollback-only),
+`supabase/tests/rls/horizon_agent_runs_engine_worker_recovery.sql` (rollback-only),
+`lib/supabase/agent-runs-migration-contract.test.ts` (static contract test),
+`lib/horizon/agent-runs/*` (the engine), `app/api/horizon/agent-runs/*` (the API surface).
 
-This document does not authorize implementation. It records measured facts, a decision and the
-blockers that stop implementation under the current governance.
+## 0. Implementation status (supersedes the "assessment only" framing below)
+
+Sections 1–10 below were written while the engine was gated on an owner decision. That decision is
+recorded in the task that authorised this branch, and the engine is now implemented. Read those
+sections as the *design rationale and engine evaluation*; read this section for *what exists*.
+
+| Layer | Status | Where |
+| --- | --- | --- |
+| Run/step/event persistence (additive, RLS, composite FKs, idempotency keys) | Implemented — **not applied** | `supabase/migrations/20261107000000_horizon_agent_runs_engine.sql` |
+| Owner-scoped repository (every query filters `owner_id`) | Implemented + unit-tested | `lib/horizon/agent-runs/repository.ts` |
+| Lifecycle table, backoff, retry budget | Implemented + unit-tested | `lib/horizon/agent-runs/lifecycle.ts` |
+| Bounded executor (deadlines, abort points, step cap) | Implemented + unit-tested | `lib/horizon/agent-runs/executor.ts` |
+| Registry seam onto Alpha Team Conductor + safety policy | Implemented + unit-tested | `lib/horizon/agent-runs/registry.ts` |
+| Case Assistant step runner (references only, never content) | Implemented + unit-tested | `lib/horizon/agent-runs/assistant.ts` |
+| Service facade (ownership before write, approval boundary) | Implemented + unit-tested | `lib/horizon/agent-runs/service.ts` |
+| Dispatcher (recover → claim → execute, all bounded) | Implemented + unit-tested | `lib/horizon/agent-runs/dispatcher.ts` |
+| API routes (create/list/detail/cancel/retry/events/dispatch) | Implemented + unit-tested | `app/api/horizon/agent-runs/**` |
+| Cron worker workflow | Implemented — **manual trigger only, no schedule** | `.github/workflows/horizon-agent-runs.yml` |
+| Real-database validation of the schema and the claim helpers | Passed on disposable local Postgres | `supabase/tests/rls/horizon_agent_runs_engine_*.sql` |
+| Applied to production Supabase | **NOT DONE** — owner decision | — |
+| Operator console UI | **NOT IMPLEMENTED** — the API contract exists, the UI does not | — |
+
+**Engine selected: none.** The measured recommendation in §3 stands: the smallest footprint that
+meets every stated requirement is a native PostgreSQL implementation on the existing case spine,
+and that is what was built. No Hatchet, DBOS or Trigger.dev dependency was added, so there is no
+second workflow engine, no new service and no bundler constraint.
 
 ---
 
 ## 1. Scope declaration (PROJECT_RULES / AI_WORKFLOW)
+
+> Note: the declarations below describe the *assessment* change. The implementation change on
+> branch `feature/horizon-agent-runs-engine` additionally adds `lib/horizon/agent-runs/*`,
+> `app/api/horizon/agent-runs/*`, `.github/workflows/horizon-agent-runs.yml` and the two claim-helper
+> SQL tests. It still modifies no frozen surface: `public.cases`, `audit_events`, `extracted_facts`,
+> `case_messages` and the `platform_*` family are untouched, and Alpha Team routing, the specialist
+> SOPs, the Case Assistant, the document/OCR pipeline, approvals and the action engines are all
+> consumed unchanged.
 
 ```text
 ACTIVE_PHASE:
@@ -22,7 +60,7 @@ ACTIVE_PHASE:
 
 ALLOWED_FILES:
   docs/HORIZON_AGENT_RUNS_ENGINE_ASSESSMENT.md        (new, documentation)
-  supabase/prepared/20261107000000_horizon_agent_runs_engine.sql   (new, PREPARED)
+  supabase/migrations/20261107000000_horizon_agent_runs_engine.sql   (new, PREPARED)
   supabase/tests/rls/horizon_agent_runs_engine_isolation.sql       (new, PREPARED)
   lib/horizon/agent-runs/migration-contract.test.ts   (new, contract test only)
 
@@ -193,7 +231,7 @@ truth: every run and step references existing HORIZON entities by id.
 
 ## 5. Prepared persistence model
 
-The prepared migration (`supabase/prepared/20261107000000_horizon_agent_runs_engine.sql`) is
+The prepared migration (`supabase/migrations/20261107000000_horizon_agent_runs_engine.sql`) is
 **additive and unapplied**. It creates three tables and touches no existing object.
 
 ### `agent_runs`

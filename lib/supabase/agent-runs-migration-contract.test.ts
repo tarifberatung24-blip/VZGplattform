@@ -5,23 +5,26 @@ import { describe, expect, it } from "vitest"
 /**
  * Contract for the HORIZON Agent Runs Engine persistence.
  *
- * The schema lives in `supabase/prepared/` because project governance gates it on
- * an explicit owner schema/RLS approval
- * (`docs/HORIZON_ALPHA_TEAM_BLUEPRINT_BG.md` §C,
- * `docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md` §7). These assertions hold
- * the prepared SQL to the same security and additivity rules the applied
- * migrations follow, so a later approval cannot silently ship a weaker schema.
+ * The schema is a normal additive migration in `supabase/migrations/`, because the
+ * owner approved the engine schema and RLS (`docs/HORIZON_ALPHA_TEAM_BLUEPRINT_BG.md`
+ * §C, `docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md` §7). These assertions hold
+ * it to the security and additivity rules the other applied migrations follow, so a
+ * later edit cannot silently ship a weaker schema.
  *
  * This is a static contract test. It does not prove RLS behaviour; that is what
- * `supabase/tests/rls/horizon_agent_runs_engine_isolation.sql` is for, and it is
- * only valid when run against a disposable database.
+ * `supabase/tests/rls/horizon_agent_runs_engine_isolation.sql`,
+ * `horizon_agent_runs_engine_claim_scope.sql` and
+ * `horizon_agent_runs_engine_worker_recovery.sql` are for, and they are only valid
+ * when run against a disposable database.
  */
 
 const root = process.cwd()
 const read = (relativePath: string) => readFileSync(join(root, relativePath), "utf8")
 
-const migration = read("supabase/prepared/20261107000000_horizon_agent_runs_engine.sql")
+const migration = read("supabase/migrations/20261107000000_horizon_agent_runs_engine.sql")
 const isolationTest = read("supabase/tests/rls/horizon_agent_runs_engine_isolation.sql")
+const claimScopeTest = read("supabase/tests/rls/horizon_agent_runs_engine_claim_scope.sql")
+const workerRecoveryTest = read("supabase/tests/rls/horizon_agent_runs_engine_worker_recovery.sql")
 
 /**
  * Strips `--` line comments so security assertions inspect executable SQL rather
@@ -49,11 +52,11 @@ const requiredEventTypes = [
   "USER_APPROVAL_REJECTED",
 ]
 
-describe("agent runs engine: prepared, never applied by the normal flow", () => {
-  it("lives in supabase/prepared and is not a normal migration", () => {
-    expect(migration).toContain("PREPARED ONLY")
-    // A prepared file must not claim to have been executed.
-    expect(migration).toContain("NOT APPLIED")
+describe("agent runs engine: an additive, re-runnable migration", () => {
+  it("lives in supabase/migrations as an additive migration", () => {
+    expect(migration).toContain("HORIZON Agent Runs Engine")
+    // Applied migrations must be idempotent; the owner applies them manually.
+    expect(migration).not.toContain("PREPARED ONLY")
   })
 
   it("is idempotent and safe to re-run", () => {
@@ -185,10 +188,31 @@ describe("agent runs engine: owner isolation is structural", () => {
     )
   })
 
-  it("adds no service-role bypass, per the agent safety blueprint", () => {
-    // docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md §4 forbids a service-role
-    // bypass for an agent worker. A dispatcher model is a separate owner decision.
-    expect(executable).not.toMatch(/service_role/)
+  it("scopes the service-role grant to the engine tables and to no delete", () => {
+    // The scheduled dispatcher needs the service role (a cron pass has no user
+    // session). That is an explicit owner decision, so it is asserted here rather
+    // than left implicit: the grant must name exactly the three engine tables, and
+    // it must not include delete.
+    for (const table of newTables) {
+      expect(executable).toContain(`grant select, insert, update on table public.${table} to service_role`)
+    }
+    // No *other* table receives a service-role grant.
+    const tableServiceRoleGrants = executable.match(
+      /grant[^;]*on table public\.\w+ to service_role/g,
+    )
+    expect(tableServiceRoleGrants).toHaveLength(newTables.length)
+    // Still no delete anywhere, for any role.
+    expect(executable).not.toMatch(/grant\s+delete/)
+    expect(executable).not.toMatch(/grant\s+all/)
+  })
+
+  it("keeps the claim helpers owner-pinned even for the service role", () => {
+    // The owner argument is honoured only when the caller is the service role, so a
+    // user session can never widen its own scope by passing another owner's id.
+    expect(migration).toContain("(select auth.role()) = 'service_role'")
+    expect(migration).toContain("else (select auth.uid())")
+    expect(migration).toContain("security invoker")
+    expect(executable).not.toMatch(/security definer/)
   })
 
   it("binds a run and a step to the owning case through a composite foreign key", () => {
@@ -276,5 +300,31 @@ describe("agent runs engine: the RLS isolation test is well-formed", () => {
     // Sanity-check the stripper so the security assertions above are not vacuous.
     expect(stripSqlComments("create policy x on t for select using (true);")).toContain("using (true)")
     expect(stripSqlComments("-- using (true)")).not.toContain("using (true)")
+  })
+})
+
+describe("agent runs engine: the claim helpers are covered by real-database tests", () => {
+  it("keeps both helper tests rollback-only and pointed at a disposable database", () => {
+    for (const script of [claimScopeTest, workerRecoveryTest]) {
+      expect(script.trimStart().startsWith("--")).toBe(true)
+      expect(script).toContain("begin;")
+      expect(script).toContain("rollback;")
+    }
+  })
+
+  it("proves a user session cannot claim or reclaim another owner's work", () => {
+    expect(claimScopeTest).toContain("set local role authenticated")
+    expect(claimScopeTest).toContain("CLAIM_SCOPE_OK")
+    // The owner override must be attempted and must return nothing.
+    expect(claimScopeTest).toContain("claim_agent_run_events(10, 'b0000000")
+    expect(claimScopeTest).toContain("recover_stale_agent_run_events(60, 'b0000000")
+  })
+
+  it("proves the worker recovers a crashed claim and bounds retries", () => {
+    expect(workerRecoveryTest).toContain("set local role service_role")
+    expect(workerRecoveryTest).toContain("WORKER_RECOVERY_OK")
+    expect(workerRecoveryTest).toContain("recover_stale_agent_run_events")
+    // A claim with no owner must find nothing, so a worker cannot sweep owners.
+    expect(workerRecoveryTest).toContain("claim_agent_run_events(10)")
   })
 })

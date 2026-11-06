@@ -1,10 +1,10 @@
 -- HORIZON Agent Runs Engine: ownership isolation and idempotency.
 --
--- PREPARED ONLY. Run only against a disposable local/staging database after
+-- Runs only against a disposable local/staging database after
 -- applying:
 --   1. supabase/migrations/20260909112037_kintex_assistant_baseline.sql
 --   2. supabase/migrations/20260919150000_horizon_case_engine.sql
---   3. supabase/prepared/20261107000000_horizon_agent_runs_engine.sql
+--   3. supabase/migrations/20261107000000_horizon_agent_runs_engine.sql
 -- Never run against the production project. The transaction always rolls back
 -- its synthetic fixtures, so it leaves no rows behind.
 --
