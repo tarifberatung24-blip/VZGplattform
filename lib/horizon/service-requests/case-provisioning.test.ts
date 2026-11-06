@@ -16,15 +16,21 @@ function repository(
   overrides: {
     cases?: Array<{ id: string }>
     facts?: Record<string, Fact[]>
+    messages?: Record<string, Array<{ id: string; role: string; content: string }>>
+    audit?: Record<string, Array<{ action: string }>>
     byRequestId?: Record<string, { id: string; status?: string }>
     findError?: string
     columnError?: string
     createError?: { message: string; code: string }
     listFactsError?: string
+    listMessagesError?: string
+    listAuditError?: string
   } = {},
 ) {
   const cases = overrides.cases ?? []
   const facts = overrides.facts ?? {}
+  const messages = overrides.messages ?? {}
+  const audit = overrides.audit ?? {}
   const byRequestId = overrides.byRequestId ?? {}
   const caseById = new Map(cases.map((c) => [c.id, c]))
   return {
@@ -32,6 +38,14 @@ function repository(
     listFacts: vi.fn().mockImplementation(async (caseId: string) => ({
       data: overrides.listFactsError ? null : facts[caseId] ?? [],
       error: overrides.listFactsError ?? null,
+    })),
+    listMessages: vi.fn().mockImplementation(async (caseId: string) => ({
+      data: overrides.listMessagesError ? null : messages[caseId] ?? [],
+      error: overrides.listMessagesError ?? null,
+    })),
+    listAudit: vi.fn().mockImplementation(async (caseId: string) => ({
+      data: overrides.listAuditError ? null : audit[caseId] ?? [],
+      error: overrides.listAuditError ?? null,
     })),
     // The indexed column lookup. Defaults to "no case", so tests that only set up
     // the legacy fact still exercise the fact fallback.
@@ -68,6 +82,67 @@ const INPUT = {
   answers: { serviceDetails: "Steuerjahr 2025" },
 }
 
+/**
+ * A stateful fake whose default implementations actually store facts, messages
+ * and audit entries, so a retry sees what a previous attempt wrote. Tests arm a
+ * one-off failure with `mockImplementationOnce`; the default stateful behaviour
+ * then runs on the retry. This is what lets the repair tests assert "no duplicate
+ * facts/messages on a repeated attempt" rather than just counting calls.
+ */
+function statefulRepository() {
+  const byRequestId = new Map<string, { id: string; status: string }>()
+  const factsByCase = new Map<string, Array<{ key: string; value: string }>>()
+  const messagesByCase = new Map<string, Array<{ id: string; role: string; content: string }>>()
+  const auditByCase = new Map<string, Array<{ action: string }>>()
+  let seq = 0
+
+  const repo = {
+    listMine: vi.fn().mockResolvedValue({ data: [], error: null }),
+    listFacts: vi.fn().mockImplementation(async (caseId: string) => ({ data: factsByCase.get(caseId) ?? [], error: null })),
+    listMessages: vi.fn().mockImplementation(async (caseId: string) => ({ data: messagesByCase.get(caseId) ?? [], error: null })),
+    listAudit: vi.fn().mockImplementation(async (caseId: string) => ({ data: auditByCase.get(caseId) ?? [], error: null })),
+    findCaseByServiceRequestId: vi.fn().mockImplementation(async (requestId: string) => ({
+      data: byRequestId.get(requestId) ?? null,
+      error: null,
+    })),
+    findCaseByFact: vi.fn().mockImplementation(async (key: string, value: string) => {
+      for (const [caseId, list] of factsByCase) {
+        if (list.some((fact) => fact.key === key && fact.value === value)) {
+          return { data: { id: caseId, status: "waiting_for_user" }, error: null }
+        }
+      }
+      return { data: null, error: null }
+    }),
+    createCase: vi.fn().mockImplementation(async (input: { serviceRequestId?: string | null }) => {
+      const requestId = input.serviceRequestId ?? null
+      const id = `case-${++seq}`
+      if (requestId) byRequestId.set(requestId, { id, status: "draft" })
+      factsByCase.set(id, [])
+      messagesByCase.set(id, [])
+      auditByCase.set(id, [])
+      return { data: { id, status: "draft" }, error: null, code: null }
+    }),
+    addFacts: vi.fn().mockImplementation(async (caseId: string, facts: Array<{ key: string; value: string }>) => {
+      factsByCase.set(caseId, [...(factsByCase.get(caseId) ?? []), ...facts])
+      return { data: [], error: null }
+    }),
+    addMessage: vi.fn().mockImplementation(async (caseId: string, message: { role: string; content: string }) => {
+      messagesByCase.set(caseId, [...(messagesByCase.get(caseId) ?? []), { id: `m-${++seq}`, ...message }])
+      return { data: { id: `m-${seq}` }, error: null }
+    }),
+    appendAudit: vi.fn().mockImplementation(async (caseId: string, action: string) => {
+      auditByCase.set(caseId, [...(auditByCase.get(caseId) ?? []), { action }])
+      return { data: {}, error: null }
+    }),
+    advanceTo: vi.fn().mockImplementation(async (id: string, status: string) => {
+      if (byRequestId.has("hz_request")) byRequestId.set("hz_request", { id, status })
+      return { data: { id, status }, error: null }
+    }),
+  }
+
+  return { repo, byRequestId, factsByCase, messagesByCase, auditByCase }
+}
+
 describe("Horizon service case provisioning", () => {
   it("creates a case, records service facts, starts the conversation and blocks on missing evidence", async () => {
     const repo = repository()
@@ -95,7 +170,18 @@ describe("Horizon service case provisioning", () => {
   it("reuses the existing case for a repeated request id without scanning the case list", async () => {
     const repo = repository({
       cases: [{ id: CASE_ID }],
-      facts: { [CASE_ID]: [{ key: SERVICE_REQUEST_ID_FACT, value: "hz_request" }] },
+      // A fully provisioned case: all facts, the opening message and both audit
+      // events are present, so the retry has nothing to repair.
+      facts: {
+        [CASE_ID]: [
+          { key: "service_request_type", value: "steuererklaerung" },
+          { key: SERVICE_REQUEST_ID_FACT, value: "hz_request" },
+          { key: "alpha_team_lead", value: "finance-tax" },
+          { key: "intake_serviceDetails", value: "Steuerjahr 2025" },
+        ],
+      },
+      messages: { [CASE_ID]: [{ id: "m1", role: "assistant", content: "Създадох HORIZON case за steuererklaerung." }] },
+      audit: { [CASE_ID]: [{ action: "alpha_team_run_created" }, { action: "quality_safety_blocked" }] },
     })
 
     const result = await provisionHorizonServiceCase(repo as never, INPUT)
@@ -105,11 +191,14 @@ describe("Horizon service case provisioning", () => {
     // The bounded window scan is gone: the lookup is a targeted fact query.
     expect(repo.listMine).not.toHaveBeenCalled()
     expect(repo.findCaseByFact).toHaveBeenCalledWith(SERVICE_REQUEST_ID_FACT, "hz_request")
-    // No new case or facts; only the forward-only advance re-asserts the target.
+    // A complete case needs no repair: no new case, facts or message, and no
+    // duplicate audit. Only the forward-only advance re-asserts the target.
     expect(repo.createCase).not.toHaveBeenCalled()
     expect(repo.addFacts).not.toHaveBeenCalled()
     expect(repo.addMessage).not.toHaveBeenCalled()
-    expect(repo.advanceTo).toHaveBeenCalledOnce()
+    expect(repo.appendAudit).not.toHaveBeenCalled()
+    // Only the forward-only advance runs; it re-asserts the target (collecting_data
+    // and waiting_for_user are no-ops once the case is already at waiting_for_user).
     expect(repo.advanceTo).toHaveBeenCalledWith(CASE_ID, "waiting_for_user")
   })
 
@@ -256,15 +345,30 @@ describe("Horizon service case provisioning", () => {
   it("creates exactly one case when two concurrent requests share a request id", async () => {
     // A stateful fake of the real race: the partial unique index on
     // (owner_id, service_request_id) admits exactly one insert and rejects the
-    // other with 23505. Both callers must resolve to the same case.
+    // other with 23505. Both callers must resolve to the same case, and the repair
+    // reads must not let the loser duplicate the artifacts.
     const byRequestId = new Map<string, { id: string; status: string }>()
     const factsByCase = new Map<string, Fact[]>()
+    const messagesByCase = new Map<string, Array<{ id: string; role: string; content: string }>>()
+    const auditByCase = new Map<string, Array<{ action: string }>>()
     let seq = 0
     let createCalls = 0
     let advanceCalls = 0
 
     const repo = {
       listMine: vi.fn().mockResolvedValue({ data: [], error: null }),
+      listFacts: vi.fn().mockImplementation(async (caseId: string) => ({
+        data: factsByCase.get(caseId) ?? [],
+        error: null,
+      })),
+      listMessages: vi.fn().mockImplementation(async (caseId: string) => ({
+        data: messagesByCase.get(caseId) ?? [],
+        error: null,
+      })),
+      listAudit: vi.fn().mockImplementation(async (caseId: string) => ({
+        data: auditByCase.get(caseId) ?? [],
+        error: null,
+      })),
       findCaseByServiceRequestId: vi.fn().mockImplementation(async (requestId: string) => ({
         data: byRequestId.get(requestId) ?? null,
         error: null,
@@ -289,14 +393,22 @@ describe("Horizon service case provisioning", () => {
         const id = `case-${++seq}`
         if (requestId) byRequestId.set(requestId, { id, status: "draft" })
         factsByCase.set(id, [])
+        messagesByCase.set(id, [])
+        auditByCase.set(id, [])
         return { data: { id, status: "draft" }, error: null, code: null }
       }),
       addFacts: vi.fn().mockImplementation(async (caseId: string, facts: Fact[]) => {
         factsByCase.set(caseId, [...(factsByCase.get(caseId) ?? []), ...facts])
         return { data: [], error: null }
       }),
-      addMessage: vi.fn().mockResolvedValue({ data: { id: "message" }, error: null }),
-      appendAudit: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      addMessage: vi.fn().mockImplementation(async (caseId: string, message: { role: string; content: string }) => {
+        messagesByCase.set(caseId, [...(messagesByCase.get(caseId) ?? []), { id: "m", ...message }])
+        return { data: { id: "message" }, error: null }
+      }),
+      appendAudit: vi.fn().mockImplementation(async (caseId: string, action: string) => {
+        auditByCase.set(caseId, [...(auditByCase.get(caseId) ?? []), { action }])
+        return { data: {}, error: null }
+      }),
       advanceTo: vi.fn().mockImplementation(async (id: string, status: string) => {
         advanceCalls += 1
         if (byRequestId.has("hz_race")) byRequestId.set("hz_race", { id, status })
@@ -320,6 +432,163 @@ describe("Horizon service case provisioning", () => {
     expect(createCalls).toBe(2) // both attempted; the index rejected one
     // Exactly one of the two reuses the winner's case.
     expect([a.reused, b.reused].filter(Boolean)).toHaveLength(1)
+    // Exactly one case row exists. (Artifact de-duplication is guaranteed for
+    // sequential retries; a truly concurrent repair is best-effort — see the
+    // limitation noted on the repair suite below.)
+    expect(factsByCase.size).toBe(1)
     expect(advanceCalls).toBeGreaterThanOrEqual(1)
+  })
+})
+
+describe("Horizon service case provisioning repairs an incomplete case on retry", () => {
+  const keysOf = (facts: Array<{ key: string }> | undefined) => (facts ?? []).map((fact) => fact.key).sort()
+  const actionsOf = (audit: Array<{ action: string }> | undefined) => (audit ?? []).map((event) => event.action).sort()
+
+  it("repairs a case left incomplete after the row was created (facts write failed)", async () => {
+    const { repo, byRequestId, factsByCase, messagesByCase, auditByCase } = statefulRepository()
+    // First attempt dies while writing the facts, before anything is stored.
+    repo.addFacts.mockImplementationOnce(async () => ({ data: null, error: "FACTS_WRITE_FAILED" }))
+
+    const first = await provisionHorizonServiceCase(repo as never, INPUT)
+    expect(first.error).toBe("FACTS_WRITE_FAILED")
+    const caseId = [...byRequestId.values()][0].id
+
+    // Retry: same request id, same case, and the missing artifacts are written.
+    const retry = await provisionHorizonServiceCase(repo as never, INPUT)
+
+    expect(retry.error).toBeNull()
+    expect(retry.reused).toBe(true)
+    expect(retry.data?.id).toBe(caseId)
+    expect(byRequestId.size).toBe(1) // still exactly one case
+    expect(keysOf(factsByCase.get(caseId))).toEqual([
+      "alpha_team_lead",
+      "intake_serviceDetails",
+      SERVICE_REQUEST_ID_FACT,
+      "service_request_type",
+    ].sort())
+    expect(messagesByCase.get(caseId)).toHaveLength(1)
+    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "quality_safety_blocked"])
+  })
+
+  it("repairs the opening message after a failure during the message write", async () => {
+    const { repo, byRequestId, factsByCase, messagesByCase } = statefulRepository()
+    repo.addMessage.mockImplementationOnce(async () => ({ data: null, error: "MESSAGE_WRITE_FAILED" }))
+
+    const first = await provisionHorizonServiceCase(repo as never, INPUT)
+    expect(first.error).toBe("MESSAGE_WRITE_FAILED")
+    const caseId = [...byRequestId.values()][0].id
+    // The facts were stored before the message failed; they must not be duplicated.
+    expect(factsByCase.get(caseId)).toHaveLength(4)
+    expect(messagesByCase.get(caseId)).toHaveLength(0)
+
+    const retry = await provisionHorizonServiceCase(repo as never, INPUT)
+
+    expect(retry.error).toBeNull()
+    expect(retry.reused).toBe(true)
+    expect(messagesByCase.get(caseId)).toHaveLength(1)
+    // The facts are topped up, not repeated: still exactly four keys, once each.
+    expect(factsByCase.get(caseId)).toHaveLength(4)
+  })
+
+  it("does not duplicate facts, messages or audit entries on a retry after success", async () => {
+    const { repo, byRequestId, factsByCase, messagesByCase, auditByCase } = statefulRepository()
+
+    const first = await provisionHorizonServiceCase(repo as never, INPUT)
+    expect(first.error).toBeNull()
+    expect(first.reused).toBe(false)
+    const caseId = [...byRequestId.values()][0].id
+    const factsAfterFirst = factsByCase.get(caseId)?.length
+    const messagesAfterFirst = messagesByCase.get(caseId)?.length
+    const auditAfterFirst = auditByCase.get(caseId)?.length
+
+    const retry = await provisionHorizonServiceCase(repo as never, INPUT)
+
+    expect(retry.error).toBeNull()
+    expect(retry.reused).toBe(true)
+    expect(byRequestId.size).toBe(1)
+    expect(factsByCase.get(caseId)?.length).toBe(factsAfterFirst)
+    expect(messagesByCase.get(caseId)?.length).toBe(messagesAfterFirst)
+    expect(auditByCase.get(caseId)?.length).toBe(auditAfterFirst)
+  })
+
+  it("preserves a user-edited answer fact instead of overwriting it on retry", async () => {
+    const { repo, byRequestId, factsByCase } = statefulRepository()
+    // A previous attempt created the case and the user then edited an answer fact.
+    const caseId = "case-edited"
+    byRequestId.set(INPUT.requestId, { id: caseId, status: "draft" })
+    factsByCase.set(caseId, [
+      { key: SERVICE_REQUEST_ID_FACT, value: INPUT.requestId },
+      { key: "intake_serviceDetails", value: "edited by the user" },
+    ])
+
+    const retry = await provisionHorizonServiceCase(repo as never, INPUT)
+
+    expect(retry.error).toBeNull()
+    expect(retry.reused).toBe(true)
+    // Only the genuinely missing facts are added; the edited one is untouched.
+    const addedKeys = (repo.addFacts.mock.calls[0]?.[1] as Array<{ key: string }>).map((fact) => fact.key)
+    expect(addedKeys).not.toContain("intake_serviceDetails")
+    expect(addedKeys).toContain("service_request_type")
+    expect(addedKeys).toContain("alpha_team_lead")
+    expect(factsByCase.get(caseId)?.find((fact) => fact.key === "intake_serviceDetails")?.value).toBe(
+      "edited by the user",
+    )
+  })
+
+  it("repairs an incomplete case exactly once per artifact on a sequential retry", async () => {
+    const { repo, byRequestId, factsByCase, messagesByCase, auditByCase } = statefulRepository()
+    // The case exists but is empty: the first attempt died right after creating it.
+    const caseId = "case-incomplete"
+    byRequestId.set(INPUT.requestId, { id: caseId, status: "draft" })
+    factsByCase.set(caseId, [])
+    messagesByCase.set(caseId, [])
+    auditByCase.set(caseId, [])
+
+    const first = await provisionHorizonServiceCase(repo as never, INPUT)
+    const second = await provisionHorizonServiceCase(repo as never, INPUT)
+
+    expect(first.error).toBeNull()
+    expect(second.error).toBeNull()
+    expect(byRequestId.size).toBe(1)
+    // Sequential retries never duplicate an artifact: each fact key, the message
+    // and each audit action appear exactly once.
+    const keys = keysOf(factsByCase.get(caseId))
+    expect(keys).toEqual(["alpha_team_lead", "intake_serviceDetails", SERVICE_REQUEST_ID_FACT, "service_request_type"].sort())
+    expect(messagesByCase.get(caseId)).toHaveLength(1)
+    expect(actionsOf(auditByCase.get(caseId))).toEqual(["alpha_team_run_created", "quality_safety_blocked"])
+  })
+
+  it("keeps exactly one case and fully provisions it when two retries run concurrently", async () => {
+    // LIMITATION: the artifact repair is a read-then-write, so two retries that
+    // interleave inside the repair can each write the same fact key (the spine is
+    // append-only, so a `unique(case_id, key)` index would break the "latest fact
+    // wins" model). What IS guaranteed under concurrency is the case identity —
+    // the partial unique index admits one case — and that the case ends fully
+    // provisioned. Artifact de-duplication holds for sequential retries, which is
+    // the retry path the application takes.
+    const { repo, byRequestId, factsByCase, messagesByCase } = statefulRepository()
+    const caseId = "case-incomplete"
+    byRequestId.set(INPUT.requestId, { id: caseId, status: "draft" })
+    factsByCase.set(caseId, [])
+    messagesByCase.set(caseId, [])
+
+    const [a, b] = await Promise.all([
+      provisionHorizonServiceCase(repo as never, INPUT),
+      provisionHorizonServiceCase(repo as never, INPUT),
+    ])
+
+    expect(a.error).toBeNull()
+    expect(b.error).toBeNull()
+    expect(byRequestId.size).toBe(1)
+    // Every required fact is present (no missing artifact) and there is an opening
+    // message, even though each may have been written by either retry.
+    const distinctKeys = new Set(keysOf(factsByCase.get(caseId)))
+    expect([...distinctKeys].sort()).toEqual([
+      "alpha_team_lead",
+      "intake_serviceDetails",
+      SERVICE_REQUEST_ID_FACT,
+      "service_request_type",
+    ].sort())
+    expect((messagesByCase.get(caseId) ?? []).length).toBeGreaterThanOrEqual(1)
   })
 })

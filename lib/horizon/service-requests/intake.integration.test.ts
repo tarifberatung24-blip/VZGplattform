@@ -159,6 +159,80 @@ describe.skipIf(!enabled)(`Service Request → Case integration (${skipReason ||
     expect(await countCasesForRequest(requestId)).toBe(1)
   })
 
+  it("repairs a repeated request without duplicating facts, messages or audit", async () => {
+    const requestId = `hz_it_${crypto.randomUUID()}`
+    createdRequestIds.push(requestId)
+    const input = {
+      kind: "steuererklaerung" as const,
+      locale: "bg" as const,
+      requestId,
+      customerName: "Integration Probe",
+      customerEmail: "probe@example.invalid",
+      answers: { serviceDetails: "Steuerjahr 2025" },
+    }
+
+    const first = await provisionHorizonServiceCase(repo, input)
+    expect(first.error).toBeNull()
+    const caseId = first.data?.id as string
+
+    // Snapshot the artifacts through the same owner-scoped reads the repair uses.
+    const factsBefore = (await repo.listFacts(caseId)).data ?? []
+    const messagesBefore = (await repo.listMessages(caseId)).data ?? []
+    const auditBefore = (await repo.listAudit(caseId)).data ?? []
+    expect(factsBefore.length).toBeGreaterThan(0)
+    expect(messagesBefore.length).toBeGreaterThan(0)
+
+    // A retry of a complete case must write nothing new.
+    const retry = await provisionHorizonServiceCase(repo, input)
+    expect(retry.error).toBeNull()
+    expect(retry.reused).toBe(true)
+    expect(retry.data?.id).toBe(caseId)
+
+    const factsAfter = (await repo.listFacts(caseId)).data ?? []
+    const messagesAfter = (await repo.listMessages(caseId)).data ?? []
+    const auditAfter = (await repo.listAudit(caseId)).data ?? []
+    expect(factsAfter.length).toBe(factsBefore.length)
+    expect(messagesAfter.length).toBe(messagesBefore.length)
+    expect(auditAfter.length).toBe(auditBefore.length)
+    expect(await countCasesForRequest(requestId)).toBe(1)
+  })
+
+  it("repairs a case whose provisioning artifacts are missing", async () => {
+    const requestId = `hz_it_${crypto.randomUUID()}`
+    createdRequestIds.push(requestId)
+    const input = {
+      kind: "steuererklaerung" as const,
+      locale: "bg" as const,
+      requestId,
+      customerName: "Integration Probe",
+      customerEmail: "probe@example.invalid",
+      answers: { serviceDetails: "Steuerjahr 2025" },
+    }
+
+    const first = await provisionHorizonServiceCase(repo, input)
+    const caseId = first.data?.id as string
+    expect(caseId).toBeTruthy()
+
+    // Simulate the partial failure: remove the artifacts a crash between the case
+    // insert and the artifact writes would have left absent. Only THIS test's own
+    // synthetic case is touched; no pre-existing row is read or written.
+    await admin.from("extracted_facts").delete().eq("case_id", caseId)
+    await admin.from("case_messages").delete().eq("case_id", caseId)
+
+    const retry = await provisionHorizonServiceCase(repo, input)
+
+    expect(retry.error).toBeNull()
+    expect(retry.reused).toBe(true)
+    expect(retry.data?.id).toBe(caseId)
+    // The retry repaired the missing facts and the opening message.
+    const facts = (await repo.listFacts(caseId)).data ?? []
+    const messages = (await repo.listMessages(caseId)).data ?? []
+    expect(facts.some((fact) => fact.key === SERVICE_REQUEST_ID_FACT)).toBe(true)
+    expect(facts.some((fact) => fact.key === "intake_serviceDetails")).toBe(true)
+    expect(messages.some((message) => message.role === "assistant")).toBe(true)
+    expect(await countCasesForRequest(requestId)).toBe(1)
+  })
+
   it("creates exactly one case for two concurrent requests with the same id", async () => {
     const requestId = `hz_it_${crypto.randomUUID()}`
     createdRequestIds.push(requestId)

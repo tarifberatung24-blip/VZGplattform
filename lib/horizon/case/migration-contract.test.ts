@@ -368,6 +368,34 @@ describe("Service Request → Case idempotency is enforced in the database", () 
     expect(idempotencyMigration).not.toMatch(/update\s+public\.cases/i)
   })
 
+  it("adds the column before the pre-flight reads it, so a first run does not fail", () => {
+    // Regression guard: the duplicate pre-flight reads `service_request_id`. On a
+    // first run the column does not exist yet, so the ALTER TABLE must come first.
+    // Asserted on executable SQL (comments stripped), because the ordering is a
+    // property of the statements, not of the prose around them.
+    const executable = stripSqlComments(idempotencyMigration)
+
+    const addColumnAt = executable.indexOf("add column if not exists service_request_id")
+    expect(addColumnAt).toBeGreaterThan(-1)
+
+    // The pre-flight is the only `do $$` block; find the first read of the column
+    // inside it.
+    const preflightAt = executable.indexOf("do $$")
+    expect(preflightAt).toBeGreaterThan(-1)
+    const firstReferenceInPreflight = executable.indexOf("service_request_id", preflightAt)
+    expect(firstReferenceInPreflight).toBeGreaterThan(preflightAt)
+
+    expect(addColumnAt).toBeLessThan(firstReferenceInPreflight)
+  })
+
+  it("still raises rather than silently proceeding when duplicate pairs exist", () => {
+    const executable = stripSqlComments(idempotencyMigration)
+    // The guard is a real `raise exception` inside the `do $$` block, not a notice.
+    expect(executable).toContain("if dup_pairs > 0 then")
+    expect(executable).toContain("raise exception")
+    expect(executable).not.toMatch(/raise\s+notice/i)
+  })
+
   it("is idempotent so it is safe to re-run", () => {
     const executable = stripSqlComments(idempotencyMigration)
     expect(idempotencyMigration).toContain("if not exists")

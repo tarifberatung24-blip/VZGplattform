@@ -27,10 +27,24 @@
 -- (`where service_request_id is not null`) because the column is null for every
 -- case that did not come from a service request.
 
--- 0. Pre-flight: refuse to create the index when duplicates already exist, with a
+-- 1. The idempotency key on the case itself. Nullable: only service-request cases
+--    carry it. Idempotent: `if not exists`. This MUST run before the pre-flight
+--    below, which reads the column: on a first run the column does not exist yet,
+--    and the pre-flight would otherwise fail with `column does not exist` instead
+--    of doing its job. `if not exists` makes the whole migration safe to re-run.
+alter table public.cases
+  add column if not exists service_request_id text;
+
+comment on column public.cases.service_request_id is
+  'Service Request → Case idempotency key. Set once on the case created for an intake request; the partial unique index below makes that insert the atomic dedup step.';
+
+-- 2. Pre-flight: refuse to create the index when duplicates already exist, with a
 --    readable report instead of a raw "could not create unique index". This step
 --    is READ-ONLY: it never deletes, rewrites or merges a row. If it raises, the
---    duplicate owner/request pairs must be resolved by the owner first.
+--    duplicate owner/request pairs must be resolved by the owner first. It runs
+--    after the column is added, so a first run reads a real (empty) column and
+--    proceeds; a re-run re-checks and refuses to silently continue if a duplicate
+--    pair has appeared since.
 do $$
 declare
   dup_pairs integer;
@@ -50,19 +64,11 @@ begin
   end if;
 end $$;
 
--- 1. The idempotency key on the case itself. Nullable: only service-request cases
---    carry it. Idempotent: `if not exists`.
-alter table public.cases
-  add column if not exists service_request_id text;
-
-comment on column public.cases.service_request_id is
-  'Service Request → Case idempotency key. Set once on the case created for an intake request; the partial unique index below makes that insert the atomic dedup step.';
-
 -- The session client (RLS-enforced) creates the case, so it needs the column
 -- grant. Column-scoped, matching the existing cases grants; no table-wide grant.
 grant insert (service_request_id) on public.cases to authenticated;
 
--- 2. The atomic guarantee. Idempotent.
+-- 3. The atomic guarantee. Idempotent.
 create unique index if not exists cases_owner_service_request_id_uniq
   on public.cases (owner_id, service_request_id)
   where service_request_id is not null;
