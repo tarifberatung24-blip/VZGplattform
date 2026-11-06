@@ -23,14 +23,26 @@ export type ProvisionHorizonServiceCaseResult = {
  * Idempotent: a repeated submission with the same `requestId` reuses the case an
  * earlier attempt created instead of provisioning a second one.
  *
- * A partial failure after `createCase` (a later `addFacts`/`addMessage`/`advanceTo`
- * error) would otherwise leave the request unlinked, so a retry would create a
- * duplicate. The link fact is therefore written with the first batch of facts,
- * and every later attempt looks it up before creating anything. The lookup is a
- * targeted query on `extracted_facts` (owner-scoped, `limit 1`), so a retry that
- * arrives long after the first attempt still reuses the same case rather than
- * scanning a bounded list of recent cases. Matching is scoped to the acting owner,
- * so a request id cannot reach another user's case.
+ * Two layers close the duplicate window:
+ *
+ *  1. **Atomic (DB).** The request id is written to `cases.service_request_id` in
+ *     the same insert that creates the case, and a partial UNIQUE index on
+ *     (owner_id, service_request_id) makes that insert the atomic dedup step. If
+ *     two concurrent requests pass the read guard together, exactly one insert
+ *     wins and the other fails with `23505`; the loser then recovers the winner's
+ *     case with an owner-scoped lookup instead of failing. This is what makes the
+ *     guarantee hold under concurrency — a read-then-write guard cannot.
+ *
+ *  2. **Fact fallback (legacy).** Cases provisioned before the column existed
+ *     carry the request id only as the `service_request_id` fact. They are found
+ *     through `findCaseByFact`, so a retry that arrives long after the first
+ *     attempt still reuses the same case rather than scanning a bounded list of
+ *     recent cases.
+ *
+ * Both lookups are owner-scoped, so a request id can never reach another user's
+ * case. A partial failure after the insert (a later `addFacts`/`addMessage`/
+ * `advanceTo` error) leaves the case bound to the request id, so the next attempt
+ * reuses it.
  */
 export async function provisionHorizonServiceCase(
   repository: CaseEngineRepository,
@@ -42,19 +54,10 @@ export async function provisionHorizonServiceCase(
     ? `${service.kind} — Alpha Team Fall`
     : `${service.kind} — Alpha Team case`
 
-  // Idempotency guard: reuse the case a previous attempt already linked. The fact
-  // key is the same string older attempts wrote, so a legacy request is found too.
-  const existing = await repository.findCaseByFact(SERVICE_REQUEST_ID_FACT, input.requestId)
+  // Fast path: reuse the case a previous attempt already bound to this request id.
+  const existing = await findExistingCase(repository, input.requestId)
   if (existing.error) return { data: null, error: existing.error, reused: false }
-  if (existing.data) {
-    // A previous attempt may have stopped after the facts were written but before
-    // the case reached `waiting_for_user`. Advancement is forward-only, so this is
-    // a no-op once the case is already at or past the target and never regresses
-    // a case a user has since moved on.
-    const completed = await repository.advanceTo(existing.data.id, "waiting_for_user")
-    if (completed.error) return { data: null, error: completed.error, reused: false }
-    return { data: completed.data ?? existing.data, error: null, reused: true }
-  }
+  if (existing.data) return completeReuse(repository, existing.data)
 
   const created = await repository.createCase({
     title,
@@ -62,7 +65,18 @@ export async function provisionHorizonServiceCase(
     intent: "application",
     uiLocale: input.locale,
     conversationLocale: input.locale,
+    serviceRequestId: input.requestId,
   })
+  if (created.code === "23505") {
+    // Another request won the race between our lookup and our insert. The unique
+    // index is the guarantee; recover the winner's case instead of failing.
+    const raced = await repository.findCaseByServiceRequestId(input.requestId)
+    if (raced.error) return { data: null, error: raced.error, reused: false }
+    if (raced.data) return completeReuse(repository, raced.data)
+    // The index rejected the insert but no case is visible: the winner's row is not
+    // readable here. Surface the original error rather than looping.
+    return { data: null, error: created.error ?? "CASE_CREATE_FAILED", reused: false }
+  }
   if (created.error || !created.data) return { data: null, error: created.error ?? "CASE_CREATE_FAILED", reused: false }
   const caseId = created.data.id
 
@@ -103,4 +117,34 @@ export async function provisionHorizonServiceCase(
   const waiting = await repository.advanceTo(caseId, "waiting_for_user")
   if (waiting.error) return { data: null, error: waiting.error, reused: false }
   return { data: waiting.data ?? collecting.data ?? created.data, error: null, reused: false }
+}
+
+/**
+ * Resolve an existing case for the request id: the indexed column first, then the
+ * legacy fact. Column-first keeps the common path on the unique index; the fact
+ * fallback keeps cases provisioned before the column reachable.
+ */
+async function findExistingCase(
+  repository: CaseEngineRepository,
+  requestId: string,
+): Promise<{ data: Case | null; error: string | null }> {
+  const byColumn = await repository.findCaseByServiceRequestId(requestId)
+  if (byColumn.error) return byColumn
+  if (byColumn.data) return byColumn
+  return repository.findCaseByFact(SERVICE_REQUEST_ID_FACT, requestId)
+}
+
+/**
+ * Finish a reused case: a previous attempt may have stopped after the case was
+ * bound but before it reached `waiting_for_user`. Advancement is forward-only, so
+ * this is a no-op once the case is already at or past the target and never
+ * regresses a case a user has since moved on.
+ */
+async function completeReuse(
+  repository: CaseEngineRepository,
+  existing: Case,
+): Promise<ProvisionHorizonServiceCaseResult> {
+  const completed = await repository.advanceTo(existing.id, "waiting_for_user")
+  if (completed.error) return { data: null, error: completed.error, reused: false }
+  return { data: completed.data ?? existing, error: null, reused: true }
 }
