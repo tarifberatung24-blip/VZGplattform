@@ -130,6 +130,17 @@ export const publicPageMeta: Readonly<Record<string, PublicPageMeta>> = {
       de: "Wir benennen klar, wo eine Partnerbeziehung besteht und wie sie Empfehlungen beeinflusst – oder nicht.",
     },
   },
+  business: {
+    title: { bg: "Фирмен профил на HORIZON", de: "Unternehmensprofil von HORIZON" },
+    description: {
+      bg: "Създай защитен фирмен профил за дейността си в Германия. Подготви основата за бизнес анализи, административни процеси и E-Rechnung.",
+      de: "Erstelle ein geschütztes Unternehmensprofil für deinen Betrieb in Deutschland. Die Grundlage für Betriebsanalysen, Verwaltungsprozesse und E-Rechnung.",
+    },
+    keywords: {
+      bg: ["фирмен профил Германия", "самонает Германия", "бизнес администрация"],
+      de: ["Unternehmensprofil Deutschland", "Selbstständige", "Betriebsverwaltung"],
+    },
+  },
   "service-center": {
     title: { bg: "Услуги на HORIZON", de: "Leistungen von HORIZON" },
     description: {
