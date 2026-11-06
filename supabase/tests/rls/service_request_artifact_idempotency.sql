@@ -4,6 +4,7 @@
 --   supabase/migrations/20260909112037_kintex_assistant_baseline.sql
 --   supabase/migrations/20260919150000_horizon_case_engine.sql
 --   supabase/migrations/20260920090100_horizon_case_engine_rls_policies.sql
+--   supabase/migrations/20261105120000_service_request_id_idempotency.sql
 --   supabase/migrations/20261106160000_service_request_artifact_idempotency.sql
 -- The transaction always rolls back its synthetic fixtures.
 
