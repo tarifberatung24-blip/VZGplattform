@@ -149,7 +149,11 @@ function statefulRepository(options: { barrierReads?: boolean } = {}) {
       auditByCase.set(id, [])
       return { data: { id, status: "draft" }, error: null, code: null }
     }),
-    addFacts: vi.fn().mockImplementation(async (caseId: string, facts: Array<{ key: string; value: string; idempotencyKey?: string }>) => {
+    addFacts: vi.fn().mockImplementation(async (
+      caseId: string,
+      facts: Array<{ key: string; value: string; idempotencyKey?: string }>,
+      options?: { auditIdempotencyKey?: string },
+    ) => {
       const current = factsByCase.get(caseId) ?? []
       const next = [...current]
       for (const fact of facts) {
@@ -157,6 +161,10 @@ function statefulRepository(options: { barrierReads?: boolean } = {}) {
         next.push(fact)
       }
       factsByCase.set(caseId, next)
+      const audit = await repo.appendAudit(caseId, "facts_added", { count: facts.length }, {
+        idempotencyKey: options?.auditIdempotencyKey,
+      })
+      if (audit.error) return { data: null, error: audit.error }
       return { data: [], error: null }
     }),
     addMessage: vi.fn().mockImplementation(async (caseId: string, message: { role: string; content: string; idempotencyKey?: string }) => {
