@@ -15,6 +15,7 @@ const input: DraftInput = {
     status: "DRAFTING",
     horizon_status: null,
     horizon_module: null,
+    service_request_id: null,
     institution: "Behörde",
     deadline: null,
     created_at: "2026-10-20T00:00:00.000Z",

@@ -329,6 +329,33 @@ describe("service request automation webhook", () => {
     })
   })
 
+  it("reuses a case found by fact when the row was never linked", async () => {
+    vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-alpha-service")
+    vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 })))
+    createCaseEngine.mockResolvedValue({ repository: { __repo: true }, userId: "user-7", configured: true })
+    // The row exists but its link write failed on a previous attempt, so the
+    // route falls through to provisioning, which finds the case by request-id
+    // fact and returns it with `reused: true` instead of creating a duplicate.
+    findServiceRequestLink.mockResolvedValue({ id: "row-1", caseId: null, userId: "user-7" })
+    provisionHorizonServiceCase.mockResolvedValue({ data: { id: "case-9", status: "waiting_for_user" }, error: null, reused: true })
+
+    const response = await POST(request({
+      ...validBody,
+      kind: "steuererklaerung",
+      answers: { fullName: "Ivan", email: "ivan@example.com", serviceDetails: "Steuerjahr 2025", privacyConsent: "yes" },
+    }))
+
+    expect(response.status).toBe(202)
+    expect((await response.json()).caseId).toBe("case-9")
+    expect(provisionHorizonServiceCase).toHaveBeenCalledOnce()
+    expect(linkServiceRequestCase).toHaveBeenCalledWith(expect.anything(), {
+      requestId: expect.stringMatching(/^hz_/),
+      caseId: "case-9",
+      userId: "user-7",
+    })
+  })
+
   it("derives the request id from the caller-supplied idempotency key", async () => {
     vi.stubEnv("AUTOMATION_WEBHOOK_URL", "https://automation.example/webhook/horizon-offer-request")
     vi.stubEnv("AUTOMATION_WEBHOOK_SECRET", "test-secret")

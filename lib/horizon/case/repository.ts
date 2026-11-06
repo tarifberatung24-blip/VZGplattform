@@ -44,10 +44,21 @@ type ApprovalRow = Db["Tables"]["approvals"]["Row"]
 type TaskRow = Db["Tables"]["tasks"]["Row"]
 type AuditRow = Db["Tables"]["audit_events"]["Row"]
 
-export type RepoResult<T> = { data: T | null; error: string | null }
+export type RepoResult<T> = { data: T | null; error: string | null; code?: string | null }
 
-const ok = <T>(data: T): RepoResult<T> => ({ data, error: null })
-const fail = <T>(error: string): RepoResult<T> => ({ data: null, error })
+const ok = <T>(data: T): RepoResult<T> => ({ data, error: null, code: null })
+const fail = <T>(error: string, code?: string | null): RepoResult<T> => ({ data: null, error, code: code ?? null })
+
+/**
+ * True when an error means the `service_request_id` column is not present yet —
+ * i.e. the idempotency migration has not been applied to this database. Both the
+ * Postgres code (`42703`, undefined_column) and the PostgREST schema-cache code
+ * (`PGRST204`) are treated the same, so the application degrades to fact-only
+ * idempotency instead of failing every intake while the migration is pending.
+ */
+function isMissingIdempotencyColumn(error: { code?: string | null } | null): boolean {
+  return error?.code === "42703" || error?.code === "PGRST204"
+}
 
 function mapCase(row: CaseRow): Case {
   return {
@@ -168,6 +179,13 @@ export type NewCaseInput = {
   conversationLocale: string
   institution?: string | null
   deadline?: string | null
+  /**
+   * When set, the case is bound to a service request id and the insert carries it
+   * into the `service_request_id` column. The column has a partial UNIQUE index
+   * per owner, so a concurrent duplicate insert fails with `23505` instead of
+   * creating a second case. See `findCaseByServiceRequestId` for the recovery.
+   */
+  serviceRequestId?: string | null
 }
 
 export type NewFactInput = {
@@ -214,14 +232,72 @@ export class CaseEngineRepository {
         deadline: input.deadline ?? null,
         horizon_status: "draft" satisfies HorizonCaseStatus,
         horizon_module: input.module,
+        // Written in the same insert as the row, so the partial unique index on
+        // (owner_id, service_request_id) makes this the atomic dedup step. A
+        // concurrent duplicate surfaces as `23505`, which the caller recovers
+        // from with `findCaseByServiceRequestId`.
+        service_request_id: input.serviceRequestId ?? null,
         // `status` is left to its column default ('NEW'), which is the legacy
         // value `draft` maps to. Writing it would require an extra column grant
         // for no behavioural gain on the create path.
       })
       .select("*")
       .single()
-    if (error) return fail(error.message)
+    if (error && isMissingIdempotencyColumn(error) && input.serviceRequestId) {
+      // The idempotency migration is not applied yet. Create the case without the
+      // column so intake keeps working; the caller's fact-based guard still
+      // prevents the ordinary duplicate. The atomic guarantee arrives with the
+      // migration.
+      const fallback = await this.client
+        .from("cases")
+        .insert({
+          owner_id: this.userId,
+          title: input.title,
+          intent: input.intent as CaseRow["intent"],
+          ui_locale: input.uiLocale as CaseRow["ui_locale"],
+          conversation_locale: input.conversationLocale as CaseRow["conversation_locale"],
+          institution: input.institution ?? null,
+          deadline: input.deadline ?? null,
+          horizon_status: "draft" satisfies HorizonCaseStatus,
+          horizon_module: input.module,
+        })
+        .select("*")
+        .single()
+      if (fallback.error) return fail(fallback.error.message, fallback.error.code)
+      await this.appendAudit(fallback.data.id, "case_created", { module: input.module })
+      return ok(mapCase(fallback.data))
+    }
+    if (error) return fail(error.message, error.code)
     await this.appendAudit(data.id, "case_created", { module: input.module })
+    return ok(mapCase(data))
+  }
+
+  /**
+   * Find the owner's case bound to a service request id, if any.
+   *
+   * This is the recovery path for the `23505` raised when two concurrent requests
+   * race to create the case for the same `service_request_id`: the loser of the
+   * race reads the winner's case here instead of failing. It is a targeted,
+   * owner-scoped, indexed lookup (`cases_owner_service_request_id_uniq`), and the
+   * owner filter is enforced twice (the query predicate and `getMine`), so a
+   * request id can never reach another user's case.
+   *
+   * Returns `data: null` (not an error) when no case matches. When the idempotency
+   * migration is not applied yet, the column is absent and this returns `data:
+   * null` too, so the caller falls back to the fact lookup.
+   */
+  async findCaseByServiceRequestId(serviceRequestId: string): Promise<RepoResult<Case | null>> {
+    const { data, error } = await this.client
+      .from("cases")
+      .select("*")
+      .eq("owner_id", this.userId)
+      .eq("service_request_id", serviceRequestId)
+      .maybeSingle()
+    if (error) {
+      if (isMissingIdempotencyColumn(error)) return ok(null)
+      return fail(error.message, error.code)
+    }
+    if (!data) return ok(null)
     return ok(mapCase(data))
   }
 
@@ -246,6 +322,36 @@ export class CaseEngineRepository {
     if (error) return fail(error.message)
     if (!data) return fail("Case not found")
     return ok(mapCase(data))
+  }
+
+  /**
+   * Find the owner's case that carries a given fact `key = value`, if any.
+   *
+   * This is the durable idempotency lookup: it is a targeted, indexed query
+   * (`extracted_facts.owner_id`) with `limit 1`, not a bounded scan of the most
+   * recent cases. A case created by a much older attempt is still found, so a
+   * retry that arrives long after the first attempt reuses the same case instead
+   * of provisioning a duplicate.
+   *
+   * Returns `data: null` (not an error) when no fact matches. The loaded case is
+   * re-read through `getMine`, so the owner filter is enforced twice and the
+   * caller only ever receives a case it owns.
+   */
+  async findCaseByFact(key: string, value: string): Promise<RepoResult<Case | null>> {
+    const { data, error } = await this.client
+      .from("extracted_facts")
+      .select("case_id")
+      .eq("owner_id", this.userId)
+      .eq("key", key)
+      .eq("value", value)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) return fail(error.message)
+    if (!data) return ok(null)
+    const found = await this.getMine(data.case_id)
+    if (found.error || !found.data) return fail(found.error ?? "Case not found")
+    return ok(found.data)
   }
 
   /**

@@ -14,6 +14,8 @@ const draftFix = read("supabase/migrations/20260920090200_horizon_draft_review_s
 const spineMigration = read("supabase/migrations/20260909112037_kintex_assistant_baseline.sql")
 const isolationTest = read("supabase/tests/rls/horizon_case_engine_isolation.sql")
 const repository = read("lib/horizon/case/repository.ts")
+const idempotencyMigration = read("supabase/migrations/20261105120000_service_request_id_idempotency.sql")
+const idempotencyTest = read("supabase/tests/rls/service_request_id_idempotency.sql")
 
 const reconciliationMigrations = [auditReconcile, rlsReconcile, draftFix]
 const horizonMigrations = [engineMigration, ...reconciliationMigrations]
@@ -337,5 +339,79 @@ describe("P6 text intake stays non-destructive", () => {
     const intakeMethod = repositorySource.split("async addTextIntake(")[1].split("async listMessages(")[0]
     expect(intakeMethod).toContain("getMine(caseId)")
     expect(intakeMethod).not.toContain("createAdminClient")
+  })
+})
+
+describe("Service Request → Case idempotency is enforced in the database", () => {
+  it("adds a partial unique index on (owner_id, service_request_id)", () => {
+    expect(idempotencyMigration).toContain("create unique index if not exists cases_owner_service_request_id_uniq")
+    expect(idempotencyMigration).toContain("on public.cases (owner_id, service_request_id)")
+    // Partial: null request ids (every non-intake case) are outside the index.
+    expect(idempotencyMigration).toContain("where service_request_id is not null")
+    expect(idempotencyMigration).toContain("add column if not exists service_request_id text")
+  })
+
+  it("grants only the idempotency column, never a table-wide grant", () => {
+    expect(idempotencyMigration).toContain("grant insert (service_request_id) on public.cases to authenticated")
+    expect(idempotencyMigration).not.toMatch(/grant\s+all/i)
+    expect(idempotencyMigration).not.toMatch(/grant\s+delete/i)
+    expect(idempotencyMigration).not.toMatch(/to anon/)
+  })
+
+  it("checks for existing duplicates before creating the index and mutates nothing", () => {
+    // The pre-flight must be present and read-only: it raises, it never deletes.
+    expect(idempotencyMigration).toContain("having count(*) > 1")
+    expect(idempotencyMigration).toContain("raise exception")
+    expect(idempotencyMigration).not.toMatch(/delete\s+from/i)
+    expect(idempotencyMigration).not.toMatch(/truncate/i)
+    expect(idempotencyMigration).not.toMatch(/drop\s+(table|column|constraint|index)/i)
+    expect(idempotencyMigration).not.toMatch(/update\s+public\.cases/i)
+  })
+
+  it("adds the column before the pre-flight reads it, so a first run does not fail", () => {
+    // Regression guard: the duplicate pre-flight reads `service_request_id`. On a
+    // first run the column does not exist yet, so the ALTER TABLE must come first.
+    // Asserted on executable SQL (comments stripped), because the ordering is a
+    // property of the statements, not of the prose around them.
+    const executable = stripSqlComments(idempotencyMigration)
+
+    const addColumnAt = executable.indexOf("add column if not exists service_request_id")
+    expect(addColumnAt).toBeGreaterThan(-1)
+
+    // The pre-flight is the only `do $$` block; find the first read of the column
+    // inside it.
+    const preflightAt = executable.indexOf("do $$")
+    expect(preflightAt).toBeGreaterThan(-1)
+    const firstReferenceInPreflight = executable.indexOf("service_request_id", preflightAt)
+    expect(firstReferenceInPreflight).toBeGreaterThan(preflightAt)
+
+    expect(addColumnAt).toBeLessThan(firstReferenceInPreflight)
+  })
+
+  it("still raises rather than silently proceeding when duplicate pairs exist", () => {
+    const executable = stripSqlComments(idempotencyMigration)
+    // The guard is a real `raise exception` inside the `do $$` block, not a notice.
+    expect(executable).toContain("if dup_pairs > 0 then")
+    expect(executable).toContain("raise exception")
+    expect(executable).not.toMatch(/raise\s+notice/i)
+  })
+
+  it("is idempotent so it is safe to re-run", () => {
+    const executable = stripSqlComments(idempotencyMigration)
+    expect(idempotencyMigration).toContain("if not exists")
+    expect(executable).not.toMatch(/create unique index(?!\s+if not exists)/)
+    expect(executable).toContain("create unique index if not exists cases_owner_service_request_id_uniq")
+  })
+
+  it("leaves the platform compatibility family untouched", () => {
+    expect(idempotencyMigration).not.toContain("platform_cases")
+  })
+
+  it("ships an SQL test that proves exactly one case per owner and request id", () => {
+    expect(idempotencyTest).toContain("begin;")
+    expect(idempotencyTest.trimEnd().endsWith("rollback;")).toBe(true)
+    expect(idempotencyTest).toContain("unique_violation")
+    expect(idempotencyTest).toContain("set local role authenticated")
+    expect(idempotencyTest).toContain("service_request_id is null")
   })
 })
