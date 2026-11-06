@@ -50,11 +50,10 @@ const ok = <T>(data: T): RepoResult<T> => ({ data, error: null, code: null })
 const fail = <T>(error: string, code?: string | null): RepoResult<T> => ({ data: null, error, code: code ?? null })
 
 /**
- * True when an error means the `service_request_id` column is not present yet —
- * i.e. the idempotency migration has not been applied to this database. Both the
- * Postgres code (`42703`, undefined_column) and the PostgREST schema-cache code
- * (`PGRST204`) are treated the same, so the application degrades to fact-only
- * idempotency instead of failing every intake while the migration is pending.
+ * True when an error means an additive idempotency column is not present yet.
+ * Both the Postgres code (`42703`, undefined_column) and the PostgREST schema-cache
+ * code (`PGRST204`) are treated the same, so the application can preserve its
+ * pre-migration write path while the relevant migration is pending.
  */
 function isMissingIdempotencyColumn(error: { code?: string | null } | null): boolean {
   return error?.code === "42703" || error?.code === "PGRST204"
