@@ -35,6 +35,7 @@ test("collectSections returns every section even when a source is unavailable", 
   // the real production deployment.
   const collected = await collectSections({
     baseUrl: "https://not-allowlisted.example",
+    sources: [],
     token: null,
     attempts: 1,
     timeoutMs: 2_000,
@@ -52,6 +53,7 @@ test("collectSections returns every section even when a source is unavailable", 
 test("an unreachable health endpoint never produces an ok finding", async () => {
   const collected = await collectSections({
     baseUrl: "https://not-allowlisted.example",
+    sources: [],
     token: null,
     attempts: 1,
     timeoutMs: 2_000,
@@ -64,7 +66,7 @@ test("an unreachable health endpoint never produces an ok finding", async () => 
 })
 
 test("without a token the run still completes and records the limitation", async () => {
-  const collected = await collectSections({ token: null, attempts: 1, timeoutMs: 2_000, limitPerSource: 1 })
+  const collected = await collectSections({ baseUrl: "https://not-allowlisted.example", sources: [], token: null, attempts: 1, timeoutMs: 2_000, limitPerSource: 1 })
 
   assert.equal(collected.sections.technology.available, false)
   assert.match(collected.sections.technology.reason, /GITHUB_TOKEN/)
@@ -72,7 +74,7 @@ test("without a token the run still completes and records the limitation", async
 })
 
 test("assumptions always separate what was not verified", async () => {
-  const collected = await collectSections({ token: null, attempts: 1, timeoutMs: 2_000, limitPerSource: 1 })
+  const collected = await collectSections({ baseUrl: "https://not-allowlisted.example", sources: [], token: null, attempts: 1, timeoutMs: 2_000, limitPerSource: 1 })
 
   assert.ok(collected.assumptions.length > 0, "a run must state its assumptions")
   assert.ok(collected.assumptions.some((assumption) => /not verified against the Render dashboard/.test(assumption)))
@@ -83,6 +85,7 @@ test("runSteward writes both a JSON and a Markdown report", async () => {
   const result = await runSteward({
     outDir,
     baseUrl: "https://not-allowlisted.example",
+    sources: [],
     token: null,
     attempts: 1,
     timeoutMs: 2_000,
@@ -111,6 +114,7 @@ test("a report is still produced when the platform section failed", async () => 
   const result = await runSteward({
     outDir,
     baseUrl: "https://not-allowlisted.example",
+    sources: [],
     token: null,
     attempts: 1,
     timeoutMs: 2_000,
@@ -130,7 +134,7 @@ test("the CLI runs as a process, exits 0, and writes a report", () => {
   const outDir = tempDir()
   const result = spawnSync(
     process.execPath,
-    [RUNNER, "--out", outDir, "--mode", "manual", "--trigger", "cli-test", "--no-github", "--legal-limit", "1"],
+    [RUNNER, "--out", outDir, "--mode", "manual", "--trigger", "cli-test", "--offline", "--legal-limit", "1"],
     { encoding: "utf8", timeout: 180_000, env: { ...process.env, GITHUB_TOKEN: "" } },
   )
 
@@ -139,6 +143,7 @@ test("the CLI runs as a process, exits 0, and writes a report", () => {
   const parsed = JSON.parse(result.stdout)
   assert.equal(parsed.ok, true)
   assert.equal(parsed.schemaVersion, "horizon-steward-report-v1")
+  assert.equal(parsed.overallHealth, "critical", "offline mode must report unavailable production health, not fabricate a healthy result")
   assert.ok(fs.existsSync(parsed.report))
   assert.ok(fs.existsSync(parsed.json))
   assert.deepEqual(parsed.sectionFailures, [])
@@ -151,7 +156,7 @@ test("the CLI does not print a secret that is present in the environment", () =>
   const fakeSecret = "ghp_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE1234"
   const result = spawnSync(
     process.execPath,
-    [RUNNER, "--out", outDir, "--no-github", "--legal-limit", "1"],
+    [RUNNER, "--out", outDir, "--offline", "--legal-limit", "1"],
     {
       encoding: "utf8",
       timeout: 180_000,

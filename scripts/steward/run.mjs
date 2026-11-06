@@ -15,7 +15,7 @@
  *    remote state (see guard.mjs).
  *
  * Usage:
- *   node scripts/steward/run.mjs --out <dir> [--mode manual] [--legal-limit N]
+ *   node scripts/steward/run.mjs --out <dir> [--mode manual] [--legal-limit N] [--offline]
  */
 
 import fs from "node:fs/promises"
@@ -197,7 +197,7 @@ export async function runSteward(options = {}) {
 }
 
 function parseArgs(argv) {
-  const args = { outDir: undefined, executionMode: "manual", trigger: "cli", legalLimit: undefined, token: undefined }
+  const args = { outDir: undefined, executionMode: "manual", trigger: "cli", legalLimit: undefined, token: undefined, offline: false }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
     if (arg === "--out") args.outDir = argv[++i]
@@ -205,6 +205,7 @@ function parseArgs(argv) {
     else if (arg === "--trigger") args.trigger = argv[++i]
     else if (arg === "--legal-limit") args.legalLimit = Number(argv[++i])
     else if (arg === "--no-github") args.token = ""
+    else if (arg === "--offline") args.offline = true
   }
   return args
 }
@@ -217,7 +218,11 @@ async function main() {
     executionMode: args.executionMode,
     trigger: args.trigger,
     ...(args.legalLimit ? { limitPerSource: args.legalLimit } : {}),
-    ...(args.token === "" ? { token: null } : {}),
+    ...(args.offline
+      ? { baseUrl: "https://offline.invalid", sources: [], token: null }
+      : args.token === ""
+        ? { token: null }
+        : {}),
   }
 
   const result = await runSteward(options)
