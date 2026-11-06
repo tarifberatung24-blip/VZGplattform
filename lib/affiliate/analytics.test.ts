@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { linkServiceRequestCase, markServiceRequestForward, persistServiceRequest, recordAffiliateClick } from "./analytics"
+import { findServiceRequestLink, linkServiceRequestCase, markServiceRequestForward, persistServiceRequest, recordAffiliateClick } from "./analytics"
 
 /** Minimal chainable fake of the two call shapes the helpers use: `insert().select().single()` for persist and an awaited `insert()` for click events. */
-function fakeClient(result: { data?: unknown; error?: unknown }) {
+function fakeClient(result: { data?: unknown; error?: unknown }, read?: { data?: unknown; error?: unknown }) {
   const single = vi.fn().mockResolvedValue(result)
   const select = vi.fn().mockReturnValue({ single })
   // Awaitable AND chainable: recordAffiliateClick awaits insert() directly while
@@ -16,12 +16,18 @@ function fakeClient(result: { data?: unknown; error?: unknown }) {
   const updateSelect = vi.fn().mockReturnValue({ maybeSingle: updateMaybeSingle })
   const eqResult = Object.assign(Promise.resolve(result), { select: updateSelect })
   const update = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue(eqResult) })
+  // `select().eq().maybeSingle()` is the read shape used by findServiceRequestLink.
+  const readMaybeSingle = vi.fn().mockResolvedValue(read ?? { data: null, error: null })
+  const readEq = vi.fn().mockReturnValue({ maybeSingle: readMaybeSingle })
+  const readSelect = vi.fn().mockReturnValue({ eq: readEq })
   return {
-    from: vi.fn().mockReturnValue({ insert, update }),
+    from: vi.fn().mockReturnValue({ insert, update, select: readSelect }),
     __insert: insert,
     __update: update,
     __updateSelect: updateSelect,
     __updateMaybeSingle: updateMaybeSingle,
+    __readSelect: readSelect,
+    __readMaybeSingle: readMaybeSingle,
   }
 }
 
@@ -68,6 +74,21 @@ describe("affiliate analytics durability", () => {
 
   it("returns null when the insert fails instead of throwing", async () => {
     const client = fakeClient({ data: null, error: { code: "42P01" } })
+    await expect(persistServiceRequest(client as never, REQUEST)).resolves.toBeNull()
+  })
+
+  it("returns the existing row id when a retry hits the unique request_id", async () => {
+    // 23505 = unique_violation. The request is already durable, so the retry must
+    // report success with the existing id rather than a failure.
+    const client = fakeClient(
+      { data: null, error: { code: "23505" } },
+      { data: { id: "row-9", case_id: null, user_id: null }, error: null },
+    )
+    await expect(persistServiceRequest(client as never, REQUEST)).resolves.toBe("row-9")
+  })
+
+  it("stays null when the insert fails and no existing row can be read back", async () => {
+    const client = fakeClient({ data: null, error: { code: "23505" } }, { data: null, error: null })
     await expect(persistServiceRequest(client as never, REQUEST)).resolves.toBeNull()
   })
 
@@ -131,5 +152,35 @@ describe("service request case linkage", () => {
     await expect(
       linkServiceRequestCase(client as never, { requestId: "hz_missing", caseId: "case-9", userId: "user-7" }),
     ).resolves.toBe(false)
+  })
+})
+
+describe("findServiceRequestLink", () => {
+  it("returns the row id, case id and owner for a stored request", async () => {
+    const client = fakeClient({ error: null }, { data: { id: "row-1", case_id: "case-9", user_id: "user-7" }, error: null })
+    await expect(findServiceRequestLink(client as never, "hz_test-1")).resolves.toEqual({
+      id: "row-1",
+      caseId: "case-9",
+      userId: "user-7",
+    })
+    expect(client.__readSelect).toHaveBeenCalledOnce()
+  })
+
+  it("returns nulls for a stored but unlinked request", async () => {
+    const client = fakeClient({ error: null }, { data: { id: "row-1", case_id: null, user_id: null }, error: null })
+    await expect(findServiceRequestLink(client as never, "hz_test-1")).resolves.toEqual({
+      id: "row-1",
+      caseId: null,
+      userId: null,
+    })
+  })
+
+  it("returns null when the row does not exist", async () => {
+    const client = fakeClient({ error: null }, { data: null, error: null })
+    await expect(findServiceRequestLink(client as never, "hz_missing")).resolves.toBeNull()
+  })
+
+  it("returns null when no client is configured", async () => {
+    await expect(findServiceRequestLink(null, "hz_test-1")).resolves.toBeNull()
   })
 })
