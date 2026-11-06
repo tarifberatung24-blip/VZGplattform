@@ -249,6 +249,36 @@ export class CaseEngineRepository {
   }
 
   /**
+   * Find the owner's case that carries a given fact `key = value`, if any.
+   *
+   * This is the durable idempotency lookup: it is a targeted, indexed query
+   * (`extracted_facts.owner_id`) with `limit 1`, not a bounded scan of the most
+   * recent cases. A case created by a much older attempt is still found, so a
+   * retry that arrives long after the first attempt reuses the same case instead
+   * of provisioning a duplicate.
+   *
+   * Returns `data: null` (not an error) when no fact matches. The loaded case is
+   * re-read through `getMine`, so the owner filter is enforced twice and the
+   * caller only ever receives a case it owns.
+   */
+  async findCaseByFact(key: string, value: string): Promise<RepoResult<Case | null>> {
+    const { data, error } = await this.client
+      .from("extracted_facts")
+      .select("case_id")
+      .eq("owner_id", this.userId)
+      .eq("key", key)
+      .eq("value", value)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) return fail(error.message)
+    if (!data) return ok(null)
+    const found = await this.getMine(data.case_id)
+    if (found.error || !found.data) return fail(found.error ?? "Case not found")
+    return ok(found.data)
+  }
+
+  /**
    * Applies a lifecycle action. The transition table decides the outcome, so an
    * invalid action is rejected here rather than relying on the caller.
    */
