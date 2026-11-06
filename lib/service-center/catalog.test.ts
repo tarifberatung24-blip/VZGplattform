@@ -63,6 +63,7 @@ describe("service center catalogue", () => {
       "/dashboard",
       "/steuer",
       "/vertraege",
+      "/business",
     ])
     for (const entry of serviceCenterEntries) {
       if (!entry.href) continue
