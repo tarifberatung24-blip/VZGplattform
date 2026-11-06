@@ -16,6 +16,8 @@ const isolationTest = read("supabase/tests/rls/horizon_case_engine_isolation.sql
 const repository = read("lib/horizon/case/repository.ts")
 const idempotencyMigration = read("supabase/migrations/20261105120000_service_request_id_idempotency.sql")
 const idempotencyTest = read("supabase/tests/rls/service_request_id_idempotency.sql")
+const artifactIdempotencyMigration = read("supabase/migrations/20261106160000_service_request_artifact_idempotency.sql")
+const artifactIdempotencyTest = read("supabase/tests/rls/service_request_artifact_idempotency.sql")
 
 const reconciliationMigrations = [auditReconcile, rlsReconcile, draftFix]
 const horizonMigrations = [engineMigration, ...reconciliationMigrations]
@@ -413,5 +415,37 @@ describe("Service Request → Case idempotency is enforced in the database", () 
     expect(idempotencyTest).toContain("unique_violation")
     expect(idempotencyTest).toContain("set local role authenticated")
     expect(idempotencyTest).toContain("service_request_id is null")
+  })
+})
+
+
+describe("Service Request artifacts are protected by per-artifact idempotency keys", () => {
+  it("adds nullable keys and unique owner-scoped indexes for facts, messages and audit events", () => {
+    for (const table of ["extracted_facts", "case_messages", "audit_events"]) {
+      expect(artifactIdempotencyMigration).toContain(`alter table public.${table}`)
+      expect(artifactIdempotencyMigration).toContain("add column if not exists idempotency_key text")
+    }
+    expect(artifactIdempotencyMigration).toContain("on public.extracted_facts (owner_id, idempotency_key)")
+    expect(artifactIdempotencyMigration).toContain("on public.case_messages (owner_id, idempotency_key)")
+    expect(artifactIdempotencyMigration).toContain("on public.audit_events (actor_id, idempotency_key)")
+  })
+
+  it("grants only the new insert column and never constrains fact business keys", () => {
+    expect(artifactIdempotencyMigration).toContain("grant insert (idempotency_key) on public.extracted_facts to authenticated")
+    expect(artifactIdempotencyMigration).toContain("grant insert (idempotency_key) on public.case_messages to authenticated")
+    expect(artifactIdempotencyMigration).toContain("grant insert (idempotency_key) on public.audit_events to authenticated")
+    expect(artifactIdempotencyMigration).not.toMatch(/unique\s*\([^)]*case_id\s*,\s*key\s*\)/i)
+    expect(artifactIdempotencyMigration).not.toMatch(/grant\s+all/i)
+    expect(artifactIdempotencyMigration).not.toMatch(/grant\s+delete/i)
+    expect(artifactIdempotencyMigration).not.toMatch(/to anon/)
+  })
+
+  it("is additive and ships a rollback-only SQL test for uniqueness and authenticated grants", () => {
+    expect(artifactIdempotencyMigration).not.toMatch(/drop\s+(table|column|policy|index)/i)
+    expect(artifactIdempotencyMigration).not.toMatch(/delete\s+from/i)
+    expect(artifactIdempotencyTest).toContain("begin;")
+    expect(artifactIdempotencyTest.trimEnd().endsWith("rollback;")).toBe(true)
+    expect(artifactIdempotencyTest).toContain("unique_violation")
+    expect(artifactIdempotencyTest).toContain("set local role authenticated")
   })
 })

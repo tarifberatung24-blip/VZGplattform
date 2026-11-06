@@ -20,9 +20,9 @@ export type ProvisionHorizonServiceCaseResult = {
 }
 
 /**
- * First line of the assistant's opening message. It is a stable, unique marker:
- * a retry looks for it to tell "the opening message was already written" from
- * "it is still missing", so the message is never duplicated.
+ * Legacy/read-path marker for an opening assistant message. The database
+ * idempotency key below is the concurrency guarantee; this marker also lets the
+ * application recognize messages created before the additive column existed.
  */
 const OPENING_MESSAGE_MARKER = "HORIZON case за"
 const OPENING_MESSAGE_MARKER_DE = "HORIZON-Fall angelegt"
@@ -73,14 +73,14 @@ function provisioningFacts(
  *    that insert the atomic dedup step. Two concurrent requests cannot both
  *    create a case; the loser gets `23505` and recovers the winner's case.
  *
- *  - **Every artifact is repaired on retry, without duplication.** A retry of an
- *    existing case re-reads what is stored and writes only what is missing:
- *    facts are topped up by key, the opening message is written only when no
- *    assistant message with the marker exists, audit entries are appended only
- *    when their action is absent, and the lifecycle advance is forward-only.
- *
- *  - **User data is never overwritten.** Answer facts the case already carries
- *    are left as they are, and no existing fact or message is updated or deleted.
+ *  - **Every provisioning artifact has a stable identity.** Facts, the opening
+ *    message and audit events carry deterministic request-scoped idempotency
+ *    keys backed by owner-scoped unique indexes. Read checks repair legacy rows;
+ *    database uniqueness closes the race when retries read the same empty state.
+ *  - **User data is never overwritten.** Answer facts already on the case stay
+ *    untouched, and no existing fact or message is updated or deleted.
+ *  - **Lifecycle is forward-only.** A retry cannot regress a case a user moved
+ *    on from.
  *
  *  - **Legacy cases are still found.** A case provisioned before the column
  *    existed carries the request id only as a fact; the lookup falls back to it.
@@ -168,9 +168,14 @@ async function finishProvisioning(
   const existingFacts = await repository.listFacts(caseId)
   if (existingFacts.error) return { data: null, error: existingFacts.error, reused }
   const presentKeys = new Set((existingFacts.data ?? []).map((fact) => fact.key))
-  const missingFacts = provisioningFacts(input, service.alphaAgent).filter((fact) => !presentKeys.has(fact.key))
+  const idempotencyPrefix = `horizon-service-request:${input.requestId}`
+  const missingFacts = provisioningFacts(input, service.alphaAgent)
+    .filter((fact) => !presentKeys.has(fact.key))
+    .map((fact) => ({ ...fact, idempotencyKey: `${idempotencyPrefix}:fact:${fact.key}` }))
   if (missingFacts.length > 0) {
-    const facts = await repository.addFacts(caseId, missingFacts)
+    const facts = await repository.addFacts(caseId, missingFacts, {
+      auditIdempotencyKey: `${idempotencyPrefix}:audit:facts_added`,
+    })
     if (facts.error) return { data: null, error: facts.error, reused }
   }
 
@@ -185,30 +190,40 @@ async function finishProvisioning(
       role: "assistant",
       locale: input.locale,
       content: openingMessage(input, service.kind, service.alphaAgent),
+      idempotencyKey: `${idempotencyPrefix}:message:opening`,
     })
     if (message.error) return { data: null, error: message.error, reused }
   }
 
-  // 3. Audit trail. Append-only, so a retry must not append a second copy of an
-  //    event that is already recorded. Missing events are added.
+  // 3. Audit trail. The action check handles pre-migration rows; request-scoped
+  //    unique keys make simultaneous writes converge on the same event. Required
+  //    audit failures stop provisioning and are repaired on the next retry.
   const existingAudit = await repository.listAudit(caseId)
   if (existingAudit.error) return { data: null, error: existingAudit.error, reused }
   const recordedActions = new Set((existingAudit.data ?? []).map((event) => event.action))
+  if (!recordedActions.has("facts_added")) {
+    const audit = await repository.appendAudit(caseId, "facts_added", { requestId: input.requestId }, {
+      idempotencyKey: `${idempotencyPrefix}:audit:facts_added`,
+    })
+    if (audit.error) return { data: null, error: audit.error, reused }
+  }
   if (!recordedActions.has("alpha_team_run_created")) {
-    await repository.appendAudit(caseId, "alpha_team_run_created", {
+    const audit = await repository.appendAudit(caseId, "alpha_team_run_created", {
       requestId: input.requestId,
       serviceKind: input.kind,
       leadAgent: service.alphaAgent,
       execution: "prepare_draft_and_request_missing_evidence",
       assistantRoute: `/api/horizon/cases/${caseId}/assistant`,
-    })
+    }, { idempotencyKey: `${idempotencyPrefix}:audit:alpha_team_run_created` })
+    if (audit.error) return { data: null, error: audit.error, reused }
   }
   if (!recordedActions.has("quality_safety_blocked")) {
-    await repository.appendAudit(caseId, "quality_safety_blocked", {
+    const audit = await repository.appendAudit(caseId, "quality_safety_blocked", {
       reason: "required_evidence_and_user_confirmation_pending",
       requiredEvidence: service.requiredEvidence,
       externalActions: "blocked_until_human_approval",
-    })
+    }, { idempotencyKey: `${idempotencyPrefix}:audit:quality_safety_blocked` })
+    if (audit.error) return { data: null, error: audit.error, reused }
   }
 
   // 4. Lifecycle. Forward-only, so a retry never regresses a case a user has since
