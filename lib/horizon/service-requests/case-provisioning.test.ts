@@ -102,9 +102,9 @@ function makePairBarrier() {
 
 function statefulRepository(options: { barrierReads?: boolean } = {}) {
   const byRequestId = new Map<string, { id: string; status: string }>()
-  const factsByCase = new Map<string, Array<{ key: string; value: string }>>()
-  const messagesByCase = new Map<string, Array<{ id: string; role: string; content: string }>>()
-  const auditByCase = new Map<string, Array<{ action: string }>>()
+  const factsByCase = new Map<string, Array<{ key: string; value: string; idempotencyKey?: string }>>()
+  const messagesByCase = new Map<string, Array<{ id: string; role: string; content: string; idempotencyKey?: string }>>()
+  const auditByCase = new Map<string, Array<{ action: string; idempotencyKey?: string }>>()
   let seq = 0
   let failNextAuditAction: string | null = null
   const factsBarrier = options.barrierReads ? makePairBarrier() : null
