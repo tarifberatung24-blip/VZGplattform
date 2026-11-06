@@ -395,16 +395,17 @@ export const serviceCenterEntries: readonly ServiceEntry[] = [
   {
     id: "business-consultant",
     audience: ["business"],
-    category: "roadmap",
-    status: "roadmap",
-    name: { bg: "HORIZON бизнес консултант", de: "HORIZON Unternehmensberater" },
+    category: "documents",
+    status: "login",
+    href: "/business",
+    name: { bg: "HORIZON бизнес профил", de: "HORIZON Unternehmensprofil" },
     summary: {
-      bg: "Планиран модул за фирмени въпроси. Още не е издаден и не може да се използва.",
-      de: "Geplantes Modul für betriebliche Fragen. Noch nicht veröffentlicht und nicht nutzbar.",
+      bg: "Създай защитен фирмен профил. Данните ще бъдат основа за бъдеща AI диагностика и план 30/60/90 дни.",
+      de: "Erstelle ein geschütztes Unternehmensprofil. Die Daten bilden die Grundlage für eine spätere KI-Diagnose und einen 30/60/90-Tage-Plan.",
     },
     includes: {
-      bg: ["Фирмени въпроси", "Планиран, още не е издаден"],
-      de: ["Betriebliche Fragen", "Geplant, noch nicht veröffentlicht"],
+      bg: ["Основни фирмени данни", "Правна форма и регистрационни номера", "Оперативни данни и E-Rechnung", "Бизнес цели и затруднения"],
+      de: ["Unternehmensstammdaten", "Rechtsform und Registrierungsnummern", "Betriebsdaten und E-Rechnung", "Unternehmensziele und Herausforderungen"],
     },
     terms: {
       bg: "фирма бизнес консултант планиран",

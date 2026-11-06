@@ -14,7 +14,7 @@ const localizedStaticPaths = new Set([
   "/auth/update-password", "/auth/mfa-verify", "/finanzamt", "/profil", "/dashboard",
   "/protected", "/assistant", "/konto/sicherheit", "/steuer", "/steuer/providers", "/steuer/review",
   "/finanzbildung", "/datenschutz", "/agb", "/impressum", "/contact", "/learning-center",
-  "/service-center",
+  "/service-center", "/business",
   "/affiliate-hinweis", "/widerruf", "/app", "/functions", "/anfrage", "/zayavka",
   "/email-generator", "/pruefung", "/security", "/versicherungen", "/admin/editor", "/admin/users",
   "/admin/forum", "/kosten-senken", "/forum", "/schufa",
