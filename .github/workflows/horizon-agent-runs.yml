@@ -4,10 +4,13 @@ name: horizon-agent-runs
 # drain a small batch of due events, execute a small batch of due runs. The engine
 # never loops on its own; a trigger is the only thing that starts work.
 #
-# MANUAL TRIGGER ONLY. There is deliberately no `schedule:` here. Adding one is a
-# deliberate owner decision (the same rule the steward workflow follows), because a
-# schedule starts consuming the engine the moment it is merged. Until then, an
-# operator runs this workflow by hand, or calls the route directly.
+# SCHEDULED. Owner directive (2026-11-07): the platform runs without staging, so
+# the dispatcher is triggered on a fixed cadence to keep approved runs moving. The
+# cadence is bounded and the pass is bounded, so a schedule cannot turn into an
+# unbounded loop. A pass only spends when a run is `queued` — and a run only
+# reaches `queued` after a human approval (every plan starts `awaiting_approval`),
+# so the schedule consumes nothing that was not already approved. Remove the
+# `schedule:` block to return to manual-only operation.
 #
 # Needs two repository secrets:
 #   HORIZON_BASE_URL           e.g. https://vzgplattform.onrender.com
@@ -17,6 +20,10 @@ name: horizon-agent-runs
 
 on:
   workflow_dispatch:
+  schedule:
+    # Every 15 minutes. The route is bounded per pass, so a slower cadence is a
+    # tuning choice, not a safety requirement.
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: read
