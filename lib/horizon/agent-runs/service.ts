@@ -12,6 +12,7 @@ import {
   type AgentRunEventType,
   type EngineResult,
   type RunReference,
+  AWAITING_DECISION_STATUSES,
   fail,
   ok,
 } from "./contract"
@@ -130,6 +131,63 @@ export class AgentRunService {
     }
 
     return ok({ run: created.data.run, duplicate: created.data.duplicate })
+  }
+
+  /**
+   * The human decision on a run that is waiting for one.
+   *
+   * This is the missing link in the create → approve → execute chain: a run whose
+   * plan requires approval is persisted as `awaiting_approval` and only the
+   * `USER_APPROVAL_GRANTED` / `USER_APPROVAL_REJECTED` events move it on. The
+   * event is written to the same owner-scoped outbox as every other lifecycle
+   * event, then applied through the same transition table the dispatcher uses, so
+   * there is one place that decides what a decision means.
+   *
+   * The decision is refused unless the run is actually waiting (`awaiting_approval`
+   * or `paused`), which is what stops an approve from being replayed onto a
+   * finished run, and stops a reject from silently cancelling a run that already
+   * started. Approving does not execute the run here: it returns the run to
+   * `running`, and the bounded dispatcher performs the work.
+   */
+  async decideRun(input: {
+    runId: string
+    decision: "approve" | "reject"
+  }): Promise<EngineResult<{ run: AgentRun; event: unknown; duplicate: boolean }>> {
+    const current = await this.runs.getRun(input.runId)
+    if (current.error || !current.data) return fail("RUN_NOT_FOUND", "RUN_NOT_FOUND")
+
+    if (!(AWAITING_DECISION_STATUSES as readonly string[]).includes(current.data.status)) {
+      return fail("RUN_NOT_AWAITING_DECISION", "RUN_NOT_AWAITING_DECISION")
+    }
+
+    const eventType: AgentRunEventType =
+      input.decision === "approve" ? "USER_APPROVAL_GRANTED" : "USER_APPROVAL_REJECTED"
+
+    // A stable, per-run key: the same decision on the same run collapses to one
+    // event, so a double click is idempotent rather than a second decision.
+    const idempotencyKey = deriveEventIdempotencyKey({
+      ownerId: this.userId,
+      eventType,
+      subjectId: input.runId,
+      discriminator: null,
+    })
+
+    const recorded = await this.runs.recordEvent({
+      eventType,
+      idempotencyKey,
+      runId: input.runId,
+      payload: { decision: input.decision },
+    })
+    if (recorded.error || !recorded.data) {
+      return fail(recorded.error ?? "DECISION_NOT_RECORDED", recorded.code ?? "DECISION_NOT_RECORDED")
+    }
+
+    const applied = await this.runs.applyEventToRun(recorded.data.event)
+    if (applied.error || !applied.data) {
+      return fail(applied.error ?? "DECISION_NOT_APPLIED", applied.code ?? "DECISION_NOT_APPLIED")
+    }
+
+    return ok({ run: applied.data, event: recorded.data.event, duplicate: recorded.data.duplicate })
   }
 
   /** Records a validated lifecycle event for this owner. */

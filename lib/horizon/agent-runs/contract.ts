@@ -58,6 +58,13 @@ export const TERMINAL_RUN_STATUSES = ["completed", "cancelled", "dead_letter"] a
 export const TERMINAL_STEP_STATUSES = ["completed", "skipped", "dead_letter"] as const
 
 /**
+ * The statuses a run waits in for a human decision. A run is only ever moved out
+ * of one of these by an explicit approve/reject, so a decision can never be
+ * replayed onto a run that is already executing or finished.
+ */
+export const AWAITING_DECISION_STATUSES = ["awaiting_approval", "paused"] as const
+
+/**
  * `failed` is deliberately NOT terminal: it is the retryable state. A run reaches
  * `dead_letter` only when its bounded attempts are exhausted, so a terminal
  * failure is always visible and never silent.

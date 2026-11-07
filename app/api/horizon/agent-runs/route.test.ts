@@ -18,6 +18,7 @@ const state = vi.hoisted(() => ({
     createRun: vi.fn(),
     getRunHistory: vi.fn(),
     recordEvent: vi.fn(),
+    decideRun: vi.fn(),
     runs: {
       listRuns: vi.fn(),
       summarizeRuns: vi.fn(),
@@ -41,6 +42,7 @@ import { GET as listRuns, POST as createRun } from "./route"
 import { GET as getRun } from "./[id]/route"
 import { POST as cancelRun } from "./[id]/cancel/route"
 import { POST as retryRun } from "./[id]/retry/route"
+import { POST as decideRun } from "./[id]/decision/route"
 import { POST as recordEvent } from "./events/route"
 
 const RUN_ID = "11111111-1111-4111-8111-111111111111"
@@ -69,6 +71,7 @@ beforeEach(() => {
   state.service.createRun.mockReset()
   state.service.getRunHistory.mockReset()
   state.service.recordEvent.mockReset()
+  state.service.decideRun.mockReset()
   state.service.runs.listRuns.mockReset()
   state.service.runs.summarizeRuns.mockReset()
   state.service.runs.getRun.mockReset()
@@ -224,6 +227,39 @@ describe("POST /api/horizon/agent-runs/[id]/retry", () => {
     state.service.runs.getRun.mockResolvedValue({ data: run, error: null })
     state.service.runs.retryRun.mockResolvedValue({ data: null, error: "RUN_NOT_RETRYABLE", code: "RUN_NOT_RETRYABLE" })
     expect((await retryRun(request(), params(RUN_ID))).status).toBe(409)
+  })
+})
+
+describe("POST /api/horizon/agent-runs/[id]/decision", () => {
+  it("approves a run the caller owns and returns the updated run", async () => {
+    state.service.decideRun.mockResolvedValue({
+      data: { run: { ...run, status: "running" }, event: { id: "e1" }, duplicate: false },
+      error: null,
+    })
+    const response = await decideRun(request({ decision: "approve" }), params(RUN_ID))
+    expect(response.status).toBe(200)
+    expect((await response.json()).run.status).toBe("running")
+    expect(state.service.decideRun).toHaveBeenCalledWith({ runId: RUN_ID, decision: "approve" })
+  })
+
+  it("rejects an unknown decision without calling the service", async () => {
+    const response = await decideRun(request({ decision: "maybe" }), params(RUN_ID))
+    expect(response.status).toBe(400)
+    expect(state.service.decideRun).not.toHaveBeenCalled()
+  })
+
+  it("reports a foreign run as 404", async () => {
+    state.service.decideRun.mockResolvedValue({ data: null, error: "RUN_NOT_FOUND", code: "RUN_NOT_FOUND" })
+    expect((await decideRun(request({ decision: "approve" }), params(RUN_ID))).status).toBe(404)
+  })
+
+  it("refuses a decision on a run that is not waiting for one", async () => {
+    state.service.decideRun.mockResolvedValue({
+      data: null,
+      error: "RUN_NOT_AWAITING_DECISION",
+      code: "RUN_NOT_AWAITING_DECISION",
+    })
+    expect((await decideRun(request({ decision: "approve" }), params(RUN_ID))).status).toBe(409)
   })
 })
 

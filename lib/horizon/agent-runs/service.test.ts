@@ -196,3 +196,50 @@ describe("agent runs service: event recording", () => {
     expect(db.tables.agent_run_events).toHaveLength(2)
   })
 })
+
+describe("agent runs service: the human decision", () => {
+  it("approves a run that is waiting and moves it to running", async () => {
+    const db = createFakeDb({ ownerId: OWNER_A })
+    const service = makeService(db, makeCaseRepository())
+    const created = await service.createRun({ objective: "подготви отговор", caseId: CASE_A })
+    expect(created.data?.run.status).toBe("awaiting_approval")
+
+    const decided = await service.decideRun({ runId: created.data!.run.id, decision: "approve" })
+    expect(decided.error).toBeNull()
+    expect(decided.data?.run.status).toBe("running")
+    // The decision is recorded as an owner-scoped event, not a silent status write.
+    expect(db.tables.agent_run_events).toHaveLength(1)
+    expect(db.tables.agent_run_events[0].event_type).toBe("USER_APPROVAL_GRANTED")
+  })
+
+  it("rejects a run that is waiting and cancels it", async () => {
+    const db = createFakeDb({ ownerId: OWNER_A })
+    const service = makeService(db, makeCaseRepository())
+    const created = await service.createRun({ objective: "подготви отговор", caseId: CASE_A })
+
+    const decided = await service.decideRun({ runId: created.data!.run.id, decision: "reject" })
+    expect(decided.data?.run.status).toBe("cancelled")
+    expect(db.tables.agent_run_events[0].event_type).toBe("USER_APPROVAL_REJECTED")
+  })
+
+  it("refuses a decision on a run that is not waiting for one", async () => {
+    const db = createFakeDb({ ownerId: OWNER_A })
+    const service = makeService(db, makeCaseRepository())
+    const created = await service.createRun({ objective: "подготви отговор", caseId: CASE_A })
+    await service.decideRun({ runId: created.data!.run.id, decision: "approve" })
+
+    // The run is now `running`; a second decision must not be replayable onto it.
+    const again = await service.decideRun({ runId: created.data!.run.id, decision: "reject" })
+    expect(again.code).toBe("RUN_NOT_AWAITING_DECISION")
+  })
+
+  it("reports a foreign run as not found", async () => {
+    const db = createFakeDb({ ownerId: OWNER_A })
+    const service = makeService(db, makeCaseRepository())
+    const created = await service.createRun({ objective: "подготви отговор", caseId: CASE_A })
+
+    const foreign = makeService(db, makeCaseRepository(), "b0000000-0000-4000-8000-00000000000b")
+    const decided = await foreign.decideRun({ runId: created.data!.run.id, decision: "approve" })
+    expect(decided.code).toBe("RUN_NOT_FOUND")
+  })
+})
