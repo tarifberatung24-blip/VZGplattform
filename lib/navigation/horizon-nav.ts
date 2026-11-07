@@ -19,6 +19,7 @@ export type NavDestinationId =
   | "documents"
   | "inkasso"
   | "schufa"
+  | "runs"
   | "contracts"
   | "taxes"
   | "education"
@@ -54,6 +55,7 @@ export const navGroups: readonly NavGroup[] = [
       { id: "documents", href: "/documents", labelKey: "documents" },
       { id: "inkasso", href: "/pruefung", labelKey: "inkasso" },
       { id: "schufa", href: "/schufa", labelKey: "schufa" },
+      { id: "runs", href: "/runs", labelKey: "runs" },
     ],
   },
   {

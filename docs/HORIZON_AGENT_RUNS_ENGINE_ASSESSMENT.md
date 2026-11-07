@@ -32,8 +32,8 @@ sections as the *design rationale and engine evaluation*; read this section for 
 | API routes (create/list/detail/cancel/retry/events/dispatch) | Implemented + unit-tested | `app/api/horizon/agent-runs/**` |
 | Cron worker workflow | Implemented — **manual trigger only, no schedule** | `.github/workflows/horizon-agent-runs.yml` |
 | Real-database validation of the schema and the claim helpers | Passed on disposable local Postgres | `supabase/tests/rls/horizon_agent_runs_engine_*.sql` |
-| Applied to production Supabase | **NOT DONE** — owner decision | — |
-| Operator console UI | **NOT IMPLEMENTED** — the API contract exists, the UI does not | — |
+| Applied to production Supabase | **DONE** — applied 2026-11-07 as version `20261107000000`, verified (8 tables, RLS on all, runtime isolation) | `supabase/migrations/20261107000000_horizon_agent_runs_engine.sql` |
+| Operator console UI | **IMPLEMENTED** — protected `/{locale}/runs` console reading the existing routes | `app/[locale]/runs/page.tsx`, `components/horizon/run-console.tsx`, `lib/horizon/agent-runs/ui-copy.ts` |
 
 **Engine selected: none.** The measured recommendation in §3 stands: the smallest footprint that
 meets every stated requirement is a native PostgreSQL implementation on the existing case spine,
@@ -130,7 +130,7 @@ blueprint.
 | **Persistent run/step state (`agent_runs`, `agent_steps`)** | **NO** | `grep -rn "agent_run" supabase/` → 0 matches; no such table in any migration |
 | **Event queue / worker / scheduler / outbox** | **NO** | No queue, worker, `setInterval`, `pg_cron`, `pg_net` or Realtime subscription in `lib/`, `app/`, `scripts/` or `supabase/migrations/` |
 | Background execution model today | Cron → authenticated HTTP route, synchronous | `.github/workflows/notifications.yml` → `app/api/notifications/run/route.ts`; `.github/workflows/affiliate-reconcile.yml` → `app/api/affiliate/reconcile/route.ts` |
-| Operator console for runs | NO | No route renders run state; `docs/HORIZON_ALPHA_TEAM_BLUEPRINT_BG.md` §E lists it as future |
+| Operator console for runs | YES (added 2026-11-07) | `app/[locale]/runs/page.tsx` renders run state through `components/horizon/run-console.tsx`; reads only the existing `/api/horizon/agent-runs` routes |
 
 **Conclusion:** the Conductor, the SOP/skill contracts, the safety policy, the ownership validation
 and the case spine all exist and are tested. The durable execution layer — persistent runs, queues,

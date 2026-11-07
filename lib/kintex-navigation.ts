@@ -20,7 +20,7 @@ export const kintexModules = [
 // is required; see lib/kintex-navigation.test.ts. `/anspruch` remains public and is excluded.
 export function isKintexWorkspacePath(pathname: string) {
   const path = stripLocale(pathname)
-  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/email-generator", "/forum", "/profil", "/konto", "/assistant", "/steuer", "/finanzamt", "/guide", "/pruefung", "/kosten-senken", "/schufa", "/admin"]
+  return ["/dashboard", "/protected", "/vertraege", "/documents", "/finanzbildung", "/email-generator", "/forum", "/profil", "/konto", "/assistant", "/steuer", "/finanzamt", "/guide", "/pruefung", "/kosten-senken", "/schufa", "/runs", "/admin"]
     .some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 

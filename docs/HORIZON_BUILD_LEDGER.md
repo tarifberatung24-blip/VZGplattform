@@ -1403,10 +1403,37 @@ after a module meets the full DONE definition.
     gate), `e-invoice` (structural only; no conformity claim), `finance` (deterministic).
   - `app/api/horizon/business-consultant/*` — profile, diagnosis, actions, documents, finance,
     specialists. `/api/horizon/business-profile` kept as a compatibility re-export.
-- **MISSING:** owner authorization to apply the migration (the blocker that keeps the surface
-  inert); owner review of BG/DE copy; live visual verification against a migrated database.
+- **MISSING:** owner review of BG/DE copy; live visual verification against a migrated database.
 - **OWNER DECISIONS RECORDED:** none beyond the Business Profile MVP; the Business Consultant
   scope is owner-directed and stays outside the P0–P17 sequence.
+- **FROZEN:** NO
+
+---
+
+## AGENT RUNS ENGINE — DURABLE EXECUTION + OPERATOR CONSOLE
+
+- **ID:** outside P0–P17; owner-directed extension (Agent Runs Engine, plan Phase 1 + Phase 2)
+- **SYSTEM:** agent runs engine (`lib/horizon/agent-runs`)
+- **CURRENT STATUS:** IMPLEMENTED AND APPLIED TO PRODUCTION (2026-11-07). Migration applied to the
+  canonical project `mteguzgbiuexmdcrqajj` under version `20261107000000`, verified: 3 tables
+  (`agent_runs`, `agent_steps`, `agent_run_events`), RLS on all, no anon access, no delete policy,
+  claim helpers owner-pinned even for service_role, crash recovery proven at runtime.
+- **CURRENT IMPLEMENTATION:** `main`:
+  - `supabase/migrations/20261107000000_horizon_agent_runs_engine.sql` — additive tables, composite
+    `(id, owner_id)` FKs, idempotency keys, bounded attempts, `claim_agent_run_events` /
+    `recover_stale_agent_run_events` helpers.
+  - `lib/horizon/agent-runs/*` — repository, lifecycle, executor, registry, assistant, service,
+    dispatcher (bounded: recover → claim → execute).
+  - `app/api/horizon/agent-runs/**` — create/list/detail/cancel/retry/events/dispatch.
+  - `app/[locale]/runs/page.tsx` + `components/horizon/run-console.tsx` +
+    `lib/horizon/agent-runs/ui-copy.ts` — the protected Operator Run Console (plan Phase 2):
+    status and timestamps, objective, case/service-request reference, lead agent and skill version,
+    steps/attempts/safe errors/dead-letter, source references, safety decision and approval,
+    action outcome, and safe cancel/retry. Reads only the existing routes; no second run store.
+- **MISSING:** a `schedule:` on `.github/workflows/horizon-agent-runs.yml` (deliberately absent —
+  an owner decision, because a schedule starts consuming the engine on merge); owner decision on the
+  worker authentication model; owner review of BG/DE console copy; live visual verification.
+- **OWNER DECISIONS RECORDED:** the schema/RLS migration was approved and applied 2026-11-07.
 - **FROZEN:** NO
 
 ---
