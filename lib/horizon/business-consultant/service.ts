@@ -19,6 +19,7 @@ import {
   type PlaybookHorizon,
   type PlaybookPriority,
   type PlaybookUserAction,
+  nextActionStatus,
 } from "./contract"
 import { buildPlaybook } from "./playbook"
 import { createBusinessDiagnosisRunner, type BusinessContextInput } from "./diagnosis"
@@ -498,21 +499,10 @@ export function missingProfileFieldsOf(row: BusinessProfileRow): string[] {
 }
 
 /**
- * The allowed status transitions. Forward-only where it matters: a completed
- * action is not silently re-openable by a stale request, and the consultant never
- * completes an action on the user's behalf.
+ * The transition table lives in `contract.ts` so the server and the UI read one
+ * definition. Re-exported here for existing importers.
  */
-export function nextActionStatus(
-  current: PlaybookActionStatus,
-  action: PlaybookUserAction,
-): PlaybookActionStatus | null {
-  if (action === "start" && current === "pending") return "in_progress"
-  if (action === "complete" && (current === "pending" || current === "in_progress")) return "completed"
-  if (action === "postpone" && (current === "pending" || current === "in_progress")) return "postponed"
-  if (action === "reject" && current !== "completed") return "rejected"
-  if (action === "reopen" && (current === "postponed" || current === "rejected")) return "pending"
-  return null
-}
+export { nextActionStatus }
 
 /**
  * Builds the service from the session. Mirrors `createAgentRunService`: no

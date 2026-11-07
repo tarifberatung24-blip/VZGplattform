@@ -112,6 +112,33 @@ export type PlaybookAction = {
 export const PLAYBOOK_USER_ACTIONS = ["start", "complete", "postpone", "reject", "reopen"] as const
 export type PlaybookUserAction = (typeof PLAYBOOK_USER_ACTIONS)[number]
 
+/**
+ * The allowed status transitions. Forward-only where it matters: a completed
+ * action is not silently re-openable by a stale request, and the consultant never
+ * completes an action on the user's behalf.
+ *
+ * This is the single definition. The server enforces it, and the UI reads it to
+ * decide which buttons to show, so the two cannot drift into offering a button the
+ * server refuses. Both the server and the database re-check, so hiding a button is
+ * a convenience, never the boundary.
+ */
+export function nextActionStatus(
+  current: PlaybookActionStatus,
+  action: PlaybookUserAction,
+): PlaybookActionStatus | null {
+  if (action === "start" && current === "pending") return "in_progress"
+  if (action === "complete" && (current === "pending" || current === "in_progress")) return "completed"
+  if (action === "postpone" && (current === "pending" || current === "in_progress")) return "postponed"
+  if (action === "reject" && current !== "completed") return "rejected"
+  if (action === "reopen" && (current === "postponed" || current === "rejected")) return "pending"
+  return null
+}
+
+/** Whether a user action is available for a status. Derived, never a second table. */
+export function isActionAvailable(current: PlaybookActionStatus, action: PlaybookUserAction): boolean {
+  return nextActionStatus(current, action) !== null
+}
+
 export const BUSINESS_DOCUMENT_CATEGORIES = [
   "gewerbeanmeldung",
   "tax",

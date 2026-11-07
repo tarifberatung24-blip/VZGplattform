@@ -1384,9 +1384,11 @@ after a module meets the full DONE definition.
 
 - **ID:** outside P0–P17; owner-directed extension of the Business Profile MVP (owner-approved 2026-11-08)
 - **SYSTEM:** business workspace (business-consultant)
-- **CURRENT STATUS:** IMPLEMENTED (migration + code + tests); migration NOT APPLIED to production,
-  owner authorization for the migration still pending
-- **CURRENT IMPLEMENTATION:** branch `feature/horizon-agent-runs-engine`:
+- **CURRENT STATUS:** IMPLEMENTED (migration + code + tests + UI); migration NOT APPLIED to
+  production, owner authorization for the migration still pending. Backend merged in PR #172,
+  workspace UI merged in PR #173.
+- **CURRENT IMPLEMENTATION:** `main` (`app/business`, `lib/horizon/business-consultant`,
+  `app/api/horizon/business-consultant`):
   - `supabase/migrations/20261108120000_horizon_business_consultant.sql` — additive tables
     `business_diagnoses`, `business_playbook_actions`, `business_documents`,
     `business_finance_entries`; Module A columns (`business_services`, `business_tools`) on
@@ -1399,8 +1401,8 @@ after a module meets the full DONE definition.
     gate), `e-invoice` (structural only; no conformity claim), `finance` (deterministic).
   - `app/api/horizon/business-consultant/*` — profile, diagnosis, actions, documents, finance,
     specialists. `/api/horizon/business-profile` kept as a compatibility re-export.
-- **MISSING:** owner authorization to apply the migration; owner review of BG/DE copy; UI wiring
-  for the diagnosis, playbook, documents and finance views; live visual verification.
+- **MISSING:** owner authorization to apply the migration (the blocker that keeps the surface
+  inert); owner review of BG/DE copy; live visual verification against a migrated database.
 - **OWNER DECISIONS RECORDED:** none beyond the Business Profile MVP; the Business Consultant
   scope is owner-directed and stays outside the P0–P17 sequence.
 - **FROZEN:** NO
