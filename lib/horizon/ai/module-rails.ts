@@ -20,6 +20,11 @@ export const MODULE_CAPABILITIES: Record<string, readonly HorizonAiCapability[]>
   jobcenter: ["explain", "draft", "ask_missing_questions"],
   steuererklaerung: ["explain", "summarize", "ask_missing_questions"],
   general: ["explain", "summarize", "ask_missing_questions"],
+  // Business Consultant: the diagnosis explains and summarizes the owner's own
+  // business data and asks for what is missing. It is deliberately NOT granted
+  // `draft`: its deliverable is a structured, evidence-classified analysis, not a
+  // German letter, and a free-text draft must never become a financial figure.
+  business_consultant: ["explain", "summarize", "ask_missing_questions"],
 }
 
 const EXPLAIN_ONLY: readonly HorizonAiCapability[] = ["explain"]
