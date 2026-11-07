@@ -24,4 +24,8 @@ export const businessProfileInputSchema = z.object({
   e_invoice_status: z.enum(BUSINESS_E_INVOICE_STATUSES).nullable().optional(),
   business_goals: z.array(z.string().trim().min(1).max(80)).max(6).default([]),
   business_challenges: z.array(z.string().trim().min(1).max(80)).max(6).default([]),
+  // Module A: what the business sells and which tools it already uses. Free-form
+  // labels, bounded. The diagnosis reads them; it never invents them.
+  business_services: z.array(z.string().trim().min(1).max(80)).max(12).default([]),
+  business_tools: z.array(z.string().trim().min(1).max(80)).max(12).default([]),
 }).strict()

@@ -1380,6 +1380,33 @@ after a module meets the full DONE definition.
 
 ---
 
+## BUSINESS CONSULTANT — BUSINESS WORKSPACE
+
+- **ID:** outside P0–P17; owner-directed extension of the Business Profile MVP (owner-approved 2026-11-08)
+- **SYSTEM:** business workspace (business-consultant)
+- **CURRENT STATUS:** IMPLEMENTED (migration + code + tests); migration NOT APPLIED to production,
+  owner authorization for the migration still pending
+- **CURRENT IMPLEMENTATION:** branch `feature/horizon-agent-runs-engine`:
+  - `supabase/migrations/20261108120000_horizon_business_consultant.sql` — additive tables
+    `business_diagnoses`, `business_playbook_actions`, `business_documents`,
+    `business_finance_entries`; Module A columns (`business_services`, `business_tools`) on
+    `business_profiles`. Owner-qualified unique keys and composite `(id, owner_id)` foreign keys,
+    so a foreign profile/document id can never attach and a unique index can never leak another
+    tenant's row existence. RLS: `auth` read/write own rows only; `anon` none; `service_role` all.
+  - `lib/horizon/business-consultant/` — `contract`, `diagnosis` (evidence downgrade: a model
+    statement can never be stored as `verified_fact` without a document reference), `playbook`
+    (deterministic 30/60/90), `specialists` (mapped onto the Alpha Team registry and the safety
+    gate), `e-invoice` (structural only; no conformity claim), `finance` (deterministic).
+  - `app/api/horizon/business-consultant/*` — profile, diagnosis, actions, documents, finance,
+    specialists. `/api/horizon/business-profile` kept as a compatibility re-export.
+- **MISSING:** owner authorization to apply the migration; owner review of BG/DE copy; UI wiring
+  for the diagnosis, playbook, documents and finance views; live visual verification.
+- **OWNER DECISIONS RECORDED:** none beyond the Business Profile MVP; the Business Consultant
+  scope is owner-directed and stays outside the P0–P17 sequence.
+- **FROZEN:** NO
+
+---
+
 ## Standing rules for this ledger
 
 1. Update the ledger in the same change that advances a phase's real status.

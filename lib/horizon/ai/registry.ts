@@ -23,6 +23,8 @@ export const HORIZON_PROMPT_VERSIONS = {
   languageRouter: "horizon-language-router-v1",
   /** Produces a German draft from confirmed facts. */
   draftGenerator: "horizon-draft-generator-v1",
+  /** Business Consultant: evidence-classified business diagnosis. */
+  businessDiagnosis: "horizon-business-diagnosis-v1",
 } as const
 
 export type HorizonPromptId = keyof typeof HORIZON_PROMPT_VERSIONS
