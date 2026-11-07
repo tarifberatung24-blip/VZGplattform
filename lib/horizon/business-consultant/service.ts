@@ -23,6 +23,12 @@ import {
 } from "./contract"
 import { buildPlaybook } from "./playbook"
 import { createBusinessDiagnosisRunner, type BusinessContextInput } from "./diagnosis"
+import {
+  computeBusinessHealthScore,
+  toHealthFinanceEntry,
+  type BusinessHealthScore,
+  type HealthEvidenceDocument,
+} from "./health-score"
 
 /**
  * HORIZON Business Consultant — service layer.
@@ -66,6 +72,12 @@ export type BusinessConsultantService = {
     category: BusinessDocumentCategory
   }): Promise<ConsultantResult<BusinessDocumentLink>>
   listFinance(): Promise<ConsultantResult<FinanceEntry[]>>
+  /**
+   * The deterministic Business Health Score for the owner's current evidence.
+   * Computed in code, never by a model, and returned even when the model path is
+   * unavailable. A thin evidence snapshot yields a blocked result, not a number.
+   */
+  computeHealth(): Promise<ConsultantResult<BusinessHealthScore>>
   addFinanceEntry(input: {
     kind: FinanceKind
     category: FinanceCategory
@@ -428,6 +440,80 @@ export function createBusinessConsultantService(
         .single()
       if (error || !data) return fail("DOCUMENT_LINK_FAILED", "DOCUMENT_LINK_FAILED")
       return ok(toDocumentLink(data))
+    },
+
+    async computeHealth() {
+      const profile = await ownProfile()
+      if (profile.error) return fail(profile.error, profile.code)
+      // No profile yet is a legitimate blocked score: the rubric simply has no
+      // evidence, and the caller should be told so rather than shown zero.
+      const row = profile.data
+      if (!row) {
+        return ok(
+          computeBusinessHealthScore({
+            profile: {
+              activityDescription: null,
+              employeeCount: null,
+              annualRevenueBand: null,
+              bookkeepingMethod: null,
+              eInvoiceStatus: null,
+              foundedOn: null,
+              businessGoals: [],
+              businessChallenges: [],
+              businessServices: [],
+              businessTools: [],
+            },
+            documents: [],
+            financeEntries: [],
+            asOf: now(),
+          }),
+        )
+      }
+
+      const [documentsResult, financeResult] = await Promise.all([
+        client
+          .from("business_documents")
+          .select("document_id, category, summary, expires_on")
+          .eq("owner_id", ownerId)
+          .eq("profile_id", row.id),
+        client
+          .from("business_finance_entries")
+          .select("id, kind, category, amount_cents, period_month, source, evidence_class")
+          .eq("owner_id", ownerId)
+          .eq("profile_id", row.id)
+          .order("period_month", { ascending: false })
+          .limit(MAX_FINANCE_ENTRIES),
+      ])
+      if (documentsResult.error || financeResult.error) {
+        return fail("HEALTH_EVIDENCE_READ_FAILED", "HEALTH_EVIDENCE_READ_FAILED")
+      }
+
+      const documents: HealthEvidenceDocument[] = (documentsResult.data ?? []).map((entry) => ({
+        id: entry.document_id,
+        category: entry.category,
+        summary: entry.summary,
+        expiresOn: entry.expires_on,
+      }))
+
+      return ok(
+        computeBusinessHealthScore({
+          profile: {
+            activityDescription: row.activity_description,
+            employeeCount: row.employee_count,
+            annualRevenueBand: row.annual_revenue_band,
+            bookkeepingMethod: row.bookkeeping_method,
+            eInvoiceStatus: row.e_invoice_status,
+            foundedOn: row.founded_on,
+            businessGoals: row.business_goals ?? [],
+            businessChallenges: row.business_challenges ?? [],
+            businessServices: row.business_services ?? [],
+            businessTools: row.business_tools ?? [],
+          },
+          documents,
+          financeEntries: (financeResult.data ?? []).map(toHealthFinanceEntry),
+          asOf: now(),
+        }),
+      )
     },
 
     async listFinance() {

@@ -46,6 +46,7 @@ import { GET as getDiagnosis, POST as postDiagnosis } from "./diagnosis/route"
 import { GET as getActions, PATCH as patchAction } from "./actions/route"
 import { GET as getDocuments, POST as postDocument } from "./documents/route"
 import { GET as getFinance, POST as postFinance } from "./finance/route"
+import { GET as getHealth } from "./health/route"
 
 const jsonRequest = (body: unknown, method = "POST") =>
   new Request("https://test.local/api/horizon/business-consultant", {
@@ -79,7 +80,7 @@ function fake() {
 describe("authentication", () => {
   it("refuses every endpoint without a session", async () => {
     state.signedIn = false
-    for (const handler of [getProfile, getDiagnosis, getActions, getDocuments, getFinance]) {
+    for (const handler of [getProfile, getDiagnosis, getActions, getDocuments, getFinance, getHealth]) {
       const response = await handler()
       expect(response.status).toBe(401)
     }
@@ -232,6 +233,59 @@ describe("finance route", () => {
       }),
     )
     expect(response.status).toBe(400)
+  })
+})
+
+describe("health route", () => {
+  it("returns a blocked, evidence-grounded score when there is no profile", async () => {
+    const response = await getHealth()
+    expect(response.status).toBe(200)
+    const body = await response.json()
+    expect(body.health.blocked).toBe(true)
+    expect(body.health.score).toBeNull()
+    expect(body.health.refusalCode).toBe("INSUFFICIENT_EVIDENCE")
+    expect(body.health.scoreVersion).toBe("business-health-v1")
+  })
+
+  it("computes a score from the owner's own evidence and is reproducible", async () => {
+    const profile = seedProfile(fake(), OWNER_A)
+    fake().tables.business_documents.push({
+      id: "b0000000-0000-4000-8000-0000000000d1",
+      owner_id: OWNER_A,
+      profile_id: profile.id,
+      document_id: "d0000000-0000-4000-8000-000000000001",
+      case_id: null,
+      category: "tax",
+      expires_on: null,
+      renewal_on: null,
+      summary: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    for (const month of ["2026-01-01", "2026-02-01", "2026-03-01"]) {
+      fake().tables.business_finance_entries.push({
+        id: `f0000000-0000-4000-8000-0000000000${month.slice(5, 7)}`,
+        owner_id: OWNER_A,
+        profile_id: profile.id,
+        document_id: null,
+        kind: "revenue",
+        category: "revenue_sales",
+        amount_cents: 300_000,
+        currency: "EUR",
+        period_month: month,
+        description: "",
+        recurring: false,
+        source: "manual",
+        evidence_class: "user_provided",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+    }
+    const first = await (await getHealth()).json()
+    const second = await (await getHealth()).json()
+    expect(first.health.blocked).toBe(false)
+    expect(first.health.score).toBe(second.health.score)
+    expect(first.health.evidenceSnapshotId).toBe(second.health.evidenceSnapshotId)
   })
 })
 

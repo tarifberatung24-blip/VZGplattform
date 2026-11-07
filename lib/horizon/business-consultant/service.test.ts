@@ -262,6 +262,45 @@ describe("action transitions", () => {
   })
 })
 
+describe("computeHealth", () => {
+  it("never reads another owner's evidence", async () => {
+    const fake = createBusinessFakeDb({ ownerId: OWNER_A })
+    const profileB = seedProfile(fake, OWNER_B, { bookkeeping_method: "euer", e_invoice_status: "ready" })
+    fake.tables.business_finance_entries.push({
+      id: "f0000000-0000-4000-8000-000000000001",
+      owner_id: OWNER_B,
+      profile_id: profileB.id,
+      document_id: null,
+      kind: "revenue",
+      category: "revenue_sales",
+      amount_cents: 900_000,
+      currency: "EUR",
+      period_month: "2026-05-01",
+      description: "",
+      recurring: false,
+      source: "manual",
+      evidence_class: "user_provided",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    // Owner A has a profile of their own but no finance history.
+    seedProfile(fake, OWNER_A)
+    const service = createBusinessConsultantService(fake.client, OWNER_A)
+    const result = await service.computeHealth()
+    expect(result.error).toBeNull()
+    expect(result.data?.blocked).toBe(true)
+    expect(result.data?.components.find((component) => component.key === "liquidity")?.reasonCode).toBe("NO_FINANCE_HISTORY")
+  })
+
+  it("returns a blocked score rather than a zero when the owner has no profile", async () => {
+    const fake = createBusinessFakeDb({ ownerId: OWNER_A })
+    const service = createBusinessConsultantService(fake.client, OWNER_A)
+    const result = await service.computeHealth()
+    expect(result.data?.blocked).toBe(true)
+    expect(result.data?.score).toBeNull()
+  })
+})
+
 describe("missingProfileFieldsOf", () => {
   it("names the fields the owner has not supplied", () => {
     const fake = createBusinessFakeDb({ ownerId: OWNER_A })
