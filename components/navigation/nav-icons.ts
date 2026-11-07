@@ -5,6 +5,7 @@ import {
   GraduationCap,
   MessagesSquare,
   LayoutDashboard,
+  BriefcaseBusiness,
   Receipt,
   ShieldCheck,
   TrendingUp,
@@ -18,6 +19,7 @@ import type { NavDestinationId } from "@/lib/navigation/horizon-nav"
 /** Presentation only. The destination list lives in lib/navigation/horizon-nav.ts. */
 export const navIcons: Record<NavDestinationId, LucideIcon> = {
   dashboard: LayoutDashboard,
+  business: BriefcaseBusiness,
   guide: Compass,
   documents: FileText,
   inkasso: FileWarning,

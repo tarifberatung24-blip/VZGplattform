@@ -488,6 +488,7 @@
   },
   "navItems": {
     "dashboard": "Übersicht",
+    "business": "Business Consultant",
     "guide": "Hilfe",
     "documents": "Dokumente",
     "inkasso": "Inkasso-Check",
