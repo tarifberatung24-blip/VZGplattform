@@ -488,6 +488,7 @@
   },
   "navItems": {
     "dashboard": "Начало",
+    "business": "Бизнес консултант",
     "guide": "Помощник",
     "documents": "Документи",
     "inkasso": "Inkasso Check",

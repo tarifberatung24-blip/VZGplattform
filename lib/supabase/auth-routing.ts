@@ -3,6 +3,7 @@ import type { Locale } from "../i18n/dictionaries"
 
 const protectedPrefixes = [
   "/dashboard",
+  "/business",
   "/assistant",
   "/protected",
   "/profil",

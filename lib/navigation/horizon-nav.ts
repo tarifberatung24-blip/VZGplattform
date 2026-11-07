@@ -14,6 +14,7 @@
  */
 export type NavDestinationId =
   | "dashboard"
+  | "business"
   | "guide"
   | "documents"
   | "inkasso"
@@ -48,6 +49,7 @@ export const navGroups: readonly NavGroup[] = [
     labelKey: "workspace",
     items: [
       { id: "dashboard", href: "/dashboard", labelKey: "dashboard" },
+      { id: "business", href: "/business", labelKey: "business" },
       { id: "guide", href: "/guide", labelKey: "guide" },
       { id: "documents", href: "/documents", labelKey: "documents" },
       { id: "inkasso", href: "/pruefung", labelKey: "inkasso" },
