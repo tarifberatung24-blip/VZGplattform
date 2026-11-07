@@ -1384,9 +1384,11 @@ after a module meets the full DONE definition.
 
 - **ID:** outside P0–P17; owner-directed extension of the Business Profile MVP (owner-approved 2026-11-08)
 - **SYSTEM:** business workspace (business-consultant)
-- **CURRENT STATUS:** IMPLEMENTED (migration + code + tests + UI); migration NOT APPLIED to
-  production, owner authorization for the migration still pending. Backend merged in PR #172,
-  workspace UI merged in PR #173.
+- **CURRENT STATUS:** IMPLEMENTED AND APPLIED TO PRODUCTION (2026-11-07). The migration was applied
+  to the canonical project `mteguzgbiuexmdcrqajj` under version `20261108120000` (plus
+  `20261107120000` for `business_profiles` and `20261107000000` for the agent runs engine) and verified:
+  8 new tables, RLS on all, cross-tenant isolation proven at runtime, live endpoint returns a real
+  score. Backend merged in PR #172, workspace UI merged in PR #173.
 - **CURRENT IMPLEMENTATION:** `main` (`app/business`, `lib/horizon/business-consultant`,
   `app/api/horizon/business-consultant`):
   - `supabase/migrations/20261108120000_horizon_business_consultant.sql` — additive tables

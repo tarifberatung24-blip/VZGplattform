@@ -1,11 +1,9 @@
 -- HORIZON Agent Runs Engine — durable run persistence.
 --
--- NOT YET APPLIED TO PRODUCTION. This file lives in supabase/migrations/ so it
--- follows the reviewed, additive migration flow that the owner applies through
--- the Supabase migration history (there is no CI migration runner). Applying it is
--- an owner decision (docs/HORIZON_ALPHA_TEAM_BLUEPRINT_BG.md §C requires explicit
--- approval of the schema/RLS change; docs/HORIZON_AGENT_SAFETY_KNOWLEDGE_BLUEPRINT.md
--- §7 repeats it). Validate first with the rollback-only scripts in
+-- APPLIED TO PRODUCTION 2026-11-07 (version 20261107000000). This file lives in
+-- supabase/migrations/ so it follows the reviewed, additive migration flow the owner
+-- approves through the Supabase migration history (there is no CI migration runner).
+-- Validated first with the rollback-only scripts in
 -- supabase/tests/rls/horizon_agent_runs_engine_*.sql against a disposable project.
 --
 -- WHAT THIS IS
@@ -185,6 +183,7 @@ create index if not exists agent_run_events_run_idx
 create or replace function public.agent_runs_touch_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();

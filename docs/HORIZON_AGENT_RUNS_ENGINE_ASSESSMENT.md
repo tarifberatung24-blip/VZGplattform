@@ -1,11 +1,12 @@
 # HORIZON Agent Runs Engine — compatibility and architecture assessment
 
-Status: **IMPLEMENTED, NOT APPLIED.** The engine (adapter, API routes, dispatcher worker,
-tests) is implemented on branch `feature/horizon-agent-runs-engine`. The additive migration is
-present in `supabase/migrations/` but **has not been applied to any Supabase project**; applying
-it is an owner decision. No workflow-engine dependency was added.
+Status: **IMPLEMENTED AND APPLIED TO PRODUCTION (2026-11-07).** The engine (adapter, API routes,
+dispatcher worker, tests) is implemented on `main`. The additive migration was applied to the canonical
+project `mteguzgbiuexmdcrqajj` on 2026-11-07 under version `20261107000000`; schema, RLS, triggers and
+functions were verified afterwards (8 new tables, RLS on all, cross-tenant isolation proven at runtime).
+No workflow-engine dependency was added.
 Base: `main` @ `e1afa23` (Phase 2.1 — Atomic Service Request provisioning artifacts, PR #167).
-Companion: `supabase/migrations/20261107000000_horizon_agent_runs_engine.sql` (additive, unapplied),
+Companion: `supabase/migrations/20261107000000_horizon_agent_runs_engine.sql` (additive, applied 2026-11-07),
 `supabase/tests/rls/horizon_agent_runs_engine_isolation.sql` (rollback-only),
 `supabase/tests/rls/horizon_agent_runs_engine_claim_scope.sql` (rollback-only),
 `supabase/tests/rls/horizon_agent_runs_engine_worker_recovery.sql` (rollback-only),

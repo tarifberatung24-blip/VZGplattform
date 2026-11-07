@@ -1,9 +1,9 @@
 -- HORIZON Business Consultant — additive persistence.
 --
--- NOT YET APPLIED TO PRODUCTION. This file lives in supabase/migrations/ so it
--- follows the reviewed, additive migration flow the owner applies through the
--- Supabase migration history (there is no CI migration runner). Applying it is an
--- owner decision. Validate first with the rollback-only script in
+-- APPLIED TO PRODUCTION 2026-11-07 (version 20261108120000). This file lives in
+-- supabase/migrations/ so it follows the reviewed, additive migration flow the owner
+-- approves through the Supabase migration history (there is no CI migration runner).
+-- Validated first with the rollback-only script in
 -- supabase/tests/rls/horizon_business_consultant_isolation.sql against a
 -- disposable project.
 --
