@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import {
   AlertCircle,
   BarChart3,
+  Check,
   Clock3,
   Loader2,
   RefreshCw,
@@ -151,12 +152,21 @@ export function RunConsole() {
     }
   }, [request, detailId])
 
-  const act = useCallback(async (runId: string, action: "cancel" | "retry") => {
+  const act = useCallback(async (runId: string, action: "cancel" | "retry" | "approve" | "reject") => {
     setBusy(runId)
     setNotice(null)
     try {
-      await request(`/api/horizon/agent-runs/${runId}/${action}`, { method: "POST" })
-      setNotice(action === "cancel" ? copy.cancelled : copy.retried)
+      if (action === "approve" || action === "reject") {
+        await request(`/api/horizon/agent-runs/${runId}/decision`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ decision: action }),
+        })
+        setNotice(action === "approve" ? copy.approved : copy.rejected)
+      } else {
+        await request(`/api/horizon/agent-runs/${runId}/${action}`, { method: "POST" })
+        setNotice(action === "cancel" ? copy.cancelled : copy.retried)
+      }
       await load()
       if (detailId === runId) {
         const refreshed = await request<RunDetail>(`/api/horizon/agent-runs/${runId}`)
@@ -271,6 +281,17 @@ export function RunConsole() {
                       <Button size="sm" variant="outline" onClick={() => void openDetail(run.id)}>
                         {detailId === run.id ? copy.close : copy.details}
                       </Button>
+                      {run.status === "awaiting_approval" || run.status === "paused" ? (
+                        <>
+                          <Button size="sm" disabled={busy === run.id} onClick={() => void act(run.id, "approve")}>
+                            {busy === run.id ? <Loader2 className="mr-1 size-3 animate-spin" /> : <Check className="mr-1 size-3" />}
+                            {copy.approve}
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={busy === run.id} onClick={() => void act(run.id, "reject")}>
+                            {copy.reject}
+                          </Button>
+                        </>
+                      ) : null}
                       {run.status === "failed" ? (
                         <Button size="sm" variant="outline" disabled={busy === run.id} onClick={() => void act(run.id, "retry")}>
                           {busy === run.id ? <Loader2 className="mr-1 size-3 animate-spin" /> : <RotateCcw className="mr-1 size-3" />}
