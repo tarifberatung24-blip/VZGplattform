@@ -24,9 +24,32 @@ create table if not exists public.business_profiles (
   constraint business_profiles_one_per_owner unique (owner_id)
 );
 alter table public.business_profiles enable row level security;
-create policy business_profiles_select_own on public.business_profiles for select to authenticated using ((select auth.uid()) = owner_id);
-create policy business_profiles_insert_own on public.business_profiles for insert to authenticated with check ((select auth.uid()) = owner_id);
-create policy business_profiles_update_own on public.business_profiles for update to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id);
+
+do $$
+declare
+  target record;
+begin
+  for target in
+    select * from (values
+      ('business_profiles_select_own', 'select', 'using ((select auth.uid()) = owner_id)'),
+      ('business_profiles_insert_own', 'insert', 'with check ((select auth.uid()) = owner_id)'),
+      ('business_profiles_update_own', 'update', 'using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id)')
+    ) as t(policy_name, command, clause)
+  loop
+    if not exists (
+      select 1 from pg_policies
+      where schemaname = 'public'
+        and tablename = 'business_profiles'
+        and policyname = target.policy_name
+    ) then
+      execute format(
+        'create policy %I on public.business_profiles for %s to authenticated %s',
+        target.policy_name, target.command, target.clause
+      );
+    end if;
+  end loop;
+end;
+$$;
 grant select on public.business_profiles to authenticated;
 grant insert (owner_id,business_name,legal_form,industry,activity_description,street_address,postal_code,city,vat_id,tax_number,trade_register_number,founded_on,employee_count,annual_revenue_band,bookkeeping_method,e_invoice_status,business_goals,business_challenges,updated_at) on public.business_profiles to authenticated;
 grant update (owner_id,business_name,legal_form,industry,activity_description,street_address,postal_code,city,vat_id,tax_number,trade_register_number,founded_on,employee_count,annual_revenue_band,bookkeeping_method,e_invoice_status,business_goals,business_challenges,updated_at) on public.business_profiles to authenticated;
